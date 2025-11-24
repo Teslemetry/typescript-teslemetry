@@ -1,0 +1,19 @@
+{
+  "name": "typescript-teslemetry-stream",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.18.1",
+  "devDependencies": {
+    "@types/eventsource": "^3.0.0",
+    "@types/node": "^24.10.1",
+    "eventsource": "^4.1.0",
+    "typescript": "^5.9.3"
+  }
+}
