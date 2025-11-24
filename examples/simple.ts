@@ -28,15 +28,17 @@ async function main() {
   const vehicle = stream.getVehicle(TESLEMTRY_VIN);
 
   // Listen for battery level updates
-  const removeBatteryLevelListener = vehicle.listenBatteryLevel(
-    (batteryLevel: number | null) => {
+  const removeBatteryLevelListener = vehicle.listenData(
+    "battery_level",
+    (batteryLevel) => {
       console.log(`Battery Level: ${batteryLevel}%`);
     },
   );
 
   // Listen for vehicle speed updates
-  const removeVehicleSpeedListener = vehicle.listenVehicleSpeed(
-    (speed: number | null) => {
+  const removeVehicleSpeedListener = vehicle.listenData(
+    "vehicle_speed",
+    (speed) => {
       console.log(`Vehicle Speed: ${speed} km/h`);
     },
   );

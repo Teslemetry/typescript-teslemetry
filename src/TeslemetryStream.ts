@@ -1,17 +1,14 @@
 import { TeslemetryStreamVehicle } from "./TeslemetryStreamVehicle";
 import { EventSource, EventSourceInit } from "eventsource";
 import { ValueError } from "./exceptions"; // Import custom exceptions
+import { ISseCredits } from "./const";
 
 type ListenerCallback = (event: any) => void;
 type ConnectionListenerCallback = (connected: boolean) => void;
 
-interface StreamConfig {
-  hostname?: string;
-}
-
 interface TeslemetryStreamOptions {
   access_token: string;
-  server?: string;
+  region?: "na" | "eu";
   vin?: string;
   parse_timestamp?: boolean;
   manual?: boolean;
@@ -19,7 +16,7 @@ interface TeslemetryStreamOptions {
 
 export class TeslemetryStream {
   public active: boolean = false;
-  private server: string;
+  public region: "na" | "eu" | null;
   private vin: string | undefined;
   private _listeners: Map<
     () => void,
@@ -27,7 +24,7 @@ export class TeslemetryStream {
   > = new Map();
   private _connectionListeners: Map<() => void, ConnectionListenerCallback> =
     new Map();
-  private _apiHeaders: { [key: string]: string };
+  private _headers: { [key: string]: string };
   private _accessToken: string;
   private parseTimestamp: boolean;
   private manual: boolean;
@@ -38,22 +35,19 @@ export class TeslemetryStream {
   constructor(options: TeslemetryStreamOptions) {
     const {
       access_token,
-      server = "api.teslemetry.com",
+      region,
       vin,
       parse_timestamp = false,
       manual = false,
     } = options;
 
-    if (server && !server.endsWith(".teslemetry.com")) {
-      throw new ValueError("Server must be on the teslemetry.com domain");
-    }
-
-    this.server = server;
+    this.region = region || null;
     this.vin = vin;
     this._accessToken = access_token;
-    this._apiHeaders = {
+    this._headers = {
       Authorization: `Bearer ${access_token}`,
       "X-Library": "typescript teslemetry-stream",
+      "Content-Type": "application/json",
     };
     this.parseTimestamp = parse_timestamp;
     this.manual = manual;
@@ -81,23 +75,26 @@ export class TeslemetryStream {
     vin ??= this.vin;
     if (!vin) throw new Error("VIN is required");
 
-    if (!this.server) {
-      await this.findServer();
+    if (!this.region) {
+      await this.findRegion();
     }
     if (this.vehicles.has(vin)) {
       await this.getVehicle(vin).getConfig();
     }
   }
 
-  public async findServer(): Promise<void> {
-    const response = await fetch("https://api.teslemetry.com/api/metadata", {
-      headers: this._apiHeaders,
+  public async findRegion(): Promise<void> {
+    const response = await fetch("https://api.teslemetry.com/api/test", {
+      headers: this._headers,
     });
     if (!response.ok) {
-      throw new Error(`Failed to fetch metadata: ${response.statusText}`);
+      throw new Error(`Failed to test API: ${response.statusText}`);
     }
-    const data = await response.json();
-    this.server = `${data.region.toLowerCase()}.teslemetry.com`;
+    const region = response.headers.get("X-Region") as "na" | "eu" | null;
+    if (!region) {
+      throw new Error("Region header not found");
+    }
+    this.region = region;
   }
 
   public async updateFields(fields: any, vin: string): Promise<any> {
@@ -105,7 +102,7 @@ export class TeslemetryStream {
       `https://api.teslemetry.com/api/config/${vin}`,
       {
         method: "PATCH",
-        headers: { ...this._apiHeaders, "Content-Type": "application/json" },
+        headers: this._headers,
         body: JSON.stringify({ fields }),
       },
     );
@@ -117,17 +114,11 @@ export class TeslemetryStream {
       `https://api.teslemetry.com/api/config/${vin}`,
       {
         method: "POST",
-        headers: { ...this._apiHeaders, "Content-Type": "application/json" },
+        headers: this._headers,
         body: JSON.stringify({ fields }),
       },
     );
     return await response.json();
-  }
-
-  public get config(): StreamConfig {
-    return {
-      hostname: this.server,
-    };
   }
 
   public addConnectionListener(
@@ -152,11 +143,11 @@ export class TeslemetryStream {
     }
 
     this.active = true;
-    if (!this.server) {
-      await this.findServer();
+    if (!this.region) {
+      await this.findRegion();
     }
 
-    const url = new URL(`https://${this.server}/sse`);
+    const url = new URL(`https://${this.region}.teslemetry.com/sse`);
     if (this.vin) {
       url.pathname += `/${this.vin}`;
     }
@@ -200,7 +191,7 @@ export class TeslemetryStream {
 
   public close(): void {
     if (this.eventSource) {
-      console.log(`Disconnecting from ${this.server}`);
+      console.log(`Disconnecting from ${this.region}.teslemetry.com`);
       this.eventSource.close();
       this.eventSource = null;
     }
@@ -244,17 +235,22 @@ export class TeslemetryStream {
   }
 
   public listenCredits(
-    callback: (credits: { [key: string]: string | number }) => void,
+    callback: (credits: ISseCredits["credits"]) => void,
   ): () => void {
-    return this.addListener((event: any) => callback(event.credits), {
+    return this.addListener((event: ISseCredits) => callback(event.credits), {
       credits: null,
     });
   }
 
-  public listenBalance(callback: (balance: number) => void): () => void {
-    return this.addListener((event: any) => callback(event.credits.balance), {
-      credits: { balance: null },
-    });
+  public listenBalance(
+    callback: (balance: ISseCredits["credits"]["balance"]) => void,
+  ): () => void {
+    return this.addListener(
+      (event: ISseCredits) => callback(event.credits.balance),
+      {
+        credits: { balance: null },
+      },
+    );
   }
 }
 

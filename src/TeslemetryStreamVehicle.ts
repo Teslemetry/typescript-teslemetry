@@ -1,47 +1,7 @@
 // src/TeslemetryStreamVehicle.ts
 
 import { TeslemetryStream } from "./TeslemetryStream";
-import {
-  Signal,
-  Key,
-  State,
-  NetworkInterface,
-  BMSState,
-  CableType,
-  CarType,
-  ChargePort,
-  ChargePortLatch,
-  ChargeState,
-  ClimateKeeperModeState,
-  ClimateOverheatProtectionTempLimit,
-  DefrostModeState,
-  DetailedChargeState,
-  DisplayState,
-  DriveInverterState,
-  FastCharger,
-  FollowDistance,
-  ForwardCollisionSensitivity,
-  GuestModeMobileAccess,
-  HvacAutoModeState,
-  HvacPowerState,
-  HvilStatus,
-  LaneAssistLevel,
-  MediaStatus,
-  PowershareState,
-  PowershareStopReasonStatus,
-  PowershareTypeStatus,
-  ScheduledChargingMode,
-  SentryModeState,
-  ShiftState,
-  SpeedAssistLevel,
-  Status,
-  SunroofInstalledState,
-  TonneauPositionState,
-  TonneauTentModeState,
-  TurnSignalState,
-  WindowState,
-  TeslaLocation,
-} from "./const";
+import type { ISseData, ISseEvent, ISseState } from "./const";
 
 type FieldConfig = { [key: string]: number | null };
 
@@ -69,9 +29,9 @@ export class TeslemetryStreamVehicle {
 
   public async getConfig(): Promise<void> {
     const response = await fetch(
-      `https://api.teslemetry.com/api/config/${this.vin}`,
+      `https://${this.stream.region}.teslemetry.com/api/config/${this.vin}`,
       {
-        headers: this.stream["_apiHeaders"],
+        headers: this.stream["_headers"],
       },
     );
 
@@ -109,13 +69,10 @@ export class TeslemetryStreamVehicle {
 
   public async patchConfig(config: any): Promise<any> {
     const response = await fetch(
-      `https://api.teslemetry.com/api/config/${this.vin}`,
+      `https://${this.stream.region}.teslemetry.com/api/config/${this.vin}`,
       {
         method: "PATCH",
-        headers: {
-          ...this.stream["_apiHeaders"],
-          "Content-Type": "application/json",
-        },
+        headers: this.stream["_headers"],
         body: JSON.stringify(config),
       },
     );
@@ -124,13 +81,10 @@ export class TeslemetryStreamVehicle {
 
   public async postConfig(config: any): Promise<any> {
     const response = await fetch(
-      `https://api.teslemetry.com/api/config/${this.vin}`,
+      `https://${this.stream.region}.teslemetry.com/api/config/${this.vin}`,
       {
         method: "POST",
-        headers: {
-          ...this.stream["_apiHeaders"],
-          "Content-Type": "application/json",
-        },
+        headers: this.stream["_headers"],
         body: JSON.stringify(config),
       },
     );
@@ -138,119 +92,51 @@ export class TeslemetryStreamVehicle {
   }
 
   public async addField(
-    field: Signal | string,
+    field: keyof ISseData["data"],
     interval?: number,
   ): Promise<void> {
-    const fieldName = field as string;
-
     if (
-      this.fields[fieldName] &&
+      this.fields[field] &&
       (interval === undefined ||
-        (this.fields[fieldName] as FieldConfig).interval_seconds === interval)
+        (this.fields[field] as FieldConfig).interval_seconds === interval)
     ) {
       console.debug(
-        `Streaming field ${fieldName} already enabled @ ${this.fields[fieldName]?.interval_seconds || "default"}s`,
+        `Streaming field ${field} already enabled @ ${this.fields[field]?.interval_seconds || "default"}s`,
       );
       return;
     }
 
     const value =
       interval !== undefined ? { interval_seconds: interval } : null;
-    await this.updateConfig({ fields: { [fieldName]: value } });
+    await this.updateConfig({ fields: { [field]: value } });
   }
 
-  private _enableField(field: Signal): void {
+  private _enableField(field: keyof ISseData["data"]): void {
     this.addField(field);
   }
 
   // Listen methods (a selection to demonstrate different types)
 
-  public listenState(callback: (state: boolean | null) => void): () => void {
-    return this.stream.addListener(
-      (event: any) => callback(event[Key.STATE] === State.ONLINE),
-      { [Key.VIN]: this.vin, [Key.STATE]: null },
-    );
-  }
-
-  public listenBatteryLevel(
-    callback: (batteryLevel: number | null) => void,
+  public listenState(
+    callback: (state: ISseState["state"]) => void,
   ): () => void {
-    this._enableField(Signal.BATTERY_LEVEL);
     return this.stream.addListener(
-      (event: any) =>
-        callback(event.data?.[Signal.BATTERY_LEVEL] as number | null),
-      { [Key.VIN]: this.vin, data: { [Signal.BATTERY_LEVEL]: null } },
-    );
-  }
-
-  public listenVehicleSpeed(
-    callback: (speed: number | null) => void,
-  ): () => void {
-    this._enableField(Signal.VEHICLE_SPEED);
-    return this.stream.addListener(
-      (event: any) =>
-        callback(event.data?.[Signal.VEHICLE_SPEED] as number | null),
-      { [Key.VIN]: this.vin, data: { [Signal.VEHICLE_SPEED]: null } },
-    );
-  }
-
-  public listenOdometer(
-    callback: (odometer: number | null) => void,
-  ): () => void {
-    this._enableField(Signal.ODOMETER);
-    return this.stream.addListener(
-      (event: any) => callback(event.data?.[Signal.ODOMETER] as number | null),
-      { [Key.VIN]: this.vin, data: { [Signal.ODOMETER]: null } },
-    );
-  }
-
-  public listenDoorState(
-    callback: (doorState: { [key: string]: boolean } | null) => void,
-  ): () => void {
-    this._enableField(Signal.DOOR_STATE);
-    return this.stream.addListener(
-      (event: any) =>
-        callback(
-          event.data?.[Signal.DOOR_STATE] as { [key: string]: boolean } | null,
-        ),
-      { [Key.VIN]: this.vin, data: { [Signal.DOOR_STATE]: null } },
-    );
-  }
-
-  public listenLocation(
-    callback: (location: TeslaLocation | null) => void,
-  ): () => void {
-    this._enableField(Signal.LOCATION);
-    return this.stream.addListener(
-      (event: any) =>
-        callback(event.data?.[Signal.LOCATION] as TeslaLocation | null),
-      { [Key.VIN]: this.vin, data: { [Signal.LOCATION]: null } },
-    );
-  }
-
-  public listenSentryMode(
-    callback: (sentryMode: SentryModeState | null) => void,
-  ): () => void {
-    this._enableField(Signal.SENTRY_MODE);
-    return this.stream.addListener(
-      (event: any) => {
-        const val = event.data?.[Signal.SENTRY_MODE];
-        callback(Object.values(SentryModeState).includes(val) ? val : null);
+      (event: ISseState) => callback(event["state"]),
+      {
+        vin: this.vin,
+        state: null,
       },
-      { [Key.VIN]: this.vin, data: { [Signal.SENTRY_MODE]: null } },
     );
   }
 
-  public listenShiftState(
-    callback: (shiftState: ShiftState | null) => void,
+  public listenData<T extends keyof ISseData["data"]>(
+    field: T,
+    callback: (value: Exclude<ISseData["data"][T], undefined>) => void,
   ): () => void {
-    this._enableField(Signal.GEAR); // Python uses Signal.GEAR for ShiftState
+    this._enableField(field);
     return this.stream.addListener(
-      (event: any) => {
-        const val = event.data?.[Signal.GEAR];
-        callback(Object.values(ShiftState).includes(val) ? val : null);
-      },
-      { [Key.VIN]: this.vin, data: { [Signal.GEAR]: null } },
+      (event: ISseData) => callback(event.data[field]),
+      { key: this.vin, data: { [field]: null } },
     );
   }
 }
