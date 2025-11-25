@@ -1,6 +1,6 @@
 // src/index.ts
 
 export { TeslemetryStream } from './TeslemetryStream';
-export { TeslemetryStreamVehicle } from './TeslemetryStreamVehicle';
+export { TeslemetryVehicleStream } from './TeslemetryVehicleStream';
 export * from './const';
 export * from './exceptions';
