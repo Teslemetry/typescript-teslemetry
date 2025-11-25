@@ -180,13 +180,14 @@ export class TeslemetryVehicleApi {
 
   /**
    * Data about the vehicle.
-   * @returns {Promise<GetApi1VehiclesByVinResponses>} A promise that resolves to an object containing the vehicle's state information.
+   * @return Promise to an object with response containing the vehicle's state information
    */
   public async state() {
-    return getApi1VehiclesByVin({
+    const { data } = await getApi1VehiclesByVin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
@@ -194,11 +195,10 @@ export class TeslemetryVehicleApi {
   // --------------------------------------------------------------------------------
 
   /**
-   *
-   * Returns the cached vehicle data for this vehicle. `location_data` will only be present if you have provided the `location_data` scope.
-   * @param {GetApi1VehiclesByVinVehicleDataData} [query] - Optional query parameters.
-   * @param {string} [query.endpoints] - A comma-separated list of endpoints to retrieve data for. Valid values are: `charge_state`, `climate_state`, `closures_state`, `drive_state`, `gui_settings`, `location_data`, `vehicle_config`, `vehicle_state`.
-   * @returns {Promise<GetApi1VehiclesByVinVehicleDataResponses>} A promise that resolves to the vehicle data.
+   * Returns the cached vehicle data for this vehicle. location_data will only be present if you have provided the location_data scope.
+   * @param endpoints A comma-separated list of endpoints to retrieve data for
+   * @param use_cache Whether to use cached data
+   * @return Promise to an object with response containing the cached vehicle data
    */
   public async vehicleData(
     endpoints?: NonNullable<
@@ -206,155 +206,172 @@ export class TeslemetryVehicleApi {
     >["endpoints"],
     use_cache: boolean = true,
   ) {
-    return getApi1VehiclesByVinVehicleData({
+    const { data } = await getApi1VehiclesByVinVehicleData({
       query: { endpoints, use_cache },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Refresh the cached vehicle data immediately. Consumes 2 command credits.
-   * @returns {Promise<GetApiRefreshByVinResponses>} A promise that resolves to an empty response on success.
+   * @return Promise to an object with response containing confirmation of refresh
    */
   public async refreshData() {
-    return getApiRefreshByVin({
+    const { data } = await getApiRefreshByVin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Redirect to the Tesla Design Studio image of a vehicle
-   * @returns {Promise<GetApiImageByVinResponses>} A promise that resolves to a redirect response.
+   * @return Promise to an object with response containing redirect information
    */
   public async getImage() {
-    return getApiImageByVin({
+    const { data } = await getApiImageByVin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Get the saved vehicle config.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing the vehicle configuration
    */
   public async getVehicleConfig() {
-    return getApiVehicleConfigByVin({
+    const { data } = await getApiVehicleConfigByVin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Get the streaming configuration for a specific vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing the streaming configuration
    */
   public async getConfig() {
-    return getApiConfigByVin({
+    const { data } = await getApiConfigByVin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Modify the streaming configuration for a specific vehicle.
-   * @param body The request body.
-   * @returns A promise that resolves to a data object containing the response.
+   * @param body The request body
+   * @return Promise to an object with response containing the updated configuration
    */
   public async patchConfig(body: PatchApiConfigByVinData) {
-    return patchApiConfigByVin({
+    const { data } = await patchApiConfigByVin({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Modify the streaming configuration for a specific vehicle.
-   * @param body The request body.
-   * @returns A promise that resolves to a data object containing the response.
+   * @param body The request body
+   * @return Promise to an object with response containing the updated configuration
    */
   public async postConfig(body: PostApiConfigByVinData) {
-    return postApiConfigByVin({
+    const { data } = await postApiConfigByVin({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Stop streaming data from a specific vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing confirmation of configuration deletion
    */
   public async deleteConfig() {
-    return deleteApiConfigByVin({
+    const { data } = await deleteApiConfigByVin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Returns whether or not mobile access is enabled for the vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing mobile access status
    */
   public async getMobileEnabled() {
-    return getApi1VehiclesByVinMobileEnabled({
+    const { data } = await getApi1VehiclesByVinMobileEnabled({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Returns the charging sites near the current location of the vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing nearby charging sites
    */
   public async getNearbyChargingSites() {
-    return getApi1VehiclesByVinNearbyChargingSites({
+    const { data } = await getApi1VehiclesByVinNearbyChargingSites({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * List of recent alerts
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing recent alerts
    */
   public async getRecentAlerts() {
-    return getApi1VehiclesByVinRecentAlerts({
+    const { data } = await getApi1VehiclesByVinRecentAlerts({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Returns firmware release notes.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing firmware release notes
    */
   public async getReleaseNotes() {
-    return getApi1VehiclesByVinReleaseNotes({
+    const { data } = await getApi1VehiclesByVinReleaseNotes({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Fetches information about the service status of the vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing service status information
    */
   public async getServiceData() {
-    return getApi1VehiclesByVinServiceData({
+    const { data } = await getApi1VehiclesByVinServiceData({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Wakes the vehicle from sleep. **This command costs 20 command credits**
-   * @returns A promise that resolves to a data object containing the response.
+   * Wakes the vehicle from sleep. This command costs 20 command credits
+   * @return Promise to an object with response containing wake up confirmation
    */
   public async wakeUp() {
-    return wakeUp({ path: { vin: this.vin }, client: this.root.client });
+    const { data } = await wakeUp({
+      path: { vin: this.vin },
+      client: this.root.client,
+    });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
@@ -362,39 +379,42 @@ export class TeslemetryVehicleApi {
   // --------------------------------------------------------------------------------
   /**
    * Fetches a vehicle's fleet telemetry config.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing fleet telemetry configuration
    */
   public async getFleetTelemetryConfig() {
-    return getApi1VehiclesByVinFleetTelemetryConfig({
+    const { data } = await getApi1VehiclesByVinFleetTelemetryConfig({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Stop Fleet Telemetry
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing confirmation of telemetry deletion
    */
   public async deleteFleetTelemetryConfig() {
-    return deleteApi1VehiclesByVinFleetTelemetryConfig({
+    const { data } = await deleteApi1VehiclesByVinFleetTelemetryConfig({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Returns recent fleet telemetry errors reported for the specified vehicle.
-   * @param query.type - The type of error to filter by.
-   * @returns A promise that resolves to a data object containing the response.
+   * @param query Optional query parameters including error type filter
+   * @return Promise to an object with response containing recent fleet telemetry errors
    */
   public async getFleetTelemetryErrors(
     query?: GetApi1VehiclesByVinFleetTelemetryErrorsData,
   ) {
-    return getApi1VehiclesByVinFleetTelemetryErrors({
+    const { data } = await getApi1VehiclesByVinFleetTelemetryErrors({
       ...query,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
@@ -402,1097 +422,1202 @@ export class TeslemetryVehicleApi {
   // --------------------------------------------------------------------------------
   /**
    * Controls the front or rear trunk.
-   * @param which_trunk The trunk to actuate.
-   * @returns A promise that resolves to a data object containing the response.
+   * @param which_trunk The trunk to actuate
+   * @return Promise to an object with response containing trunk actuation result
    */
   public async actuateTrunk(which_trunk: "front" | "rear") {
-    return postApi1VehiclesByVinCommandActuateTrunk({
+    const { data } = await postApi1VehiclesByVinCommandActuateTrunk({
       body: { which_trunk },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Adjusts vehicle media playback volume.
-   * @param volume The volume level.
-   * @returns A promise that resolves to a data object containing the response.
+   * @param volume The volume level
+   * @return Promise to an object with response containing volume adjustment result
    */
   public async adjustVolume(volume: number) {
-    return postApi1VehiclesByVinCommandAdjustVolume({
+    const { data } = await postApi1VehiclesByVinCommandAdjustVolume({
       body: { volume },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Starts climate preconditioning.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing auto conditioning start result
    */
   public async startAutoConditioning() {
-    return postApi1VehiclesByVinCommandAutoConditioningStart({
+    const { data } = await postApi1VehiclesByVinCommandAutoConditioningStart({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Stops climate preconditioning.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing auto conditioning stop result
    */
   public async stopAutoConditioning() {
-    return postApi1VehiclesByVinCommandAutoConditioningStop({
+    const { data } = await postApi1VehiclesByVinCommandAutoConditioningStop({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Locks the vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing door lock result
    */
   public async lockDoors() {
-    return postApi1VehiclesByVinCommandDoorLock({
+    const { data } = await postApi1VehiclesByVinCommandDoorLock({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Unlocks the vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing door unlock result
    */
   public async unlockDoors() {
-    return postApi1VehiclesByVinCommandDoorUnlock({
+    const { data } = await postApi1VehiclesByVinCommandDoorUnlock({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Erases user's data from the user interface.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing user data erase result
    */
   public async eraseUserData() {
-    return postApi1VehiclesByVinCommandEraseUserData({
+    const { data } = await postApi1VehiclesByVinCommandEraseUserData({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Briefly flashes the vehicle headlights.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing flash lights result
    */
   public async flashLights() {
-    return postApi1VehiclesByVinCommandFlashLights({
+    const { data } = await postApi1VehiclesByVinCommandFlashLights({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Honks the vehicle horn.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing honk horn result
    */
   public async honkHorn() {
-    return postApi1VehiclesByVinCommandHonkHorn({
+    const { data } = await postApi1VehiclesByVinCommandHonkHorn({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Advances media player to next favorite track.
-   * @returns A promise that resolves to a data object containing the response.
+   * Skips to the next favorite in media playback.
+   * @return Promise to an object with response containing media next favorite result
    */
   public async mediaNextFavorite() {
-    return postApi1VehiclesByVinCommandMediaNextFav({
+    const { data } = await postApi1VehiclesByVinCommandMediaNextFav({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Advances media player to next track.
-   * @returns A promise that resolves to a data object containing the response.
+   * Skips to the next track in media playback.
+   * @return Promise to an object with response containing media next track result
    */
   public async mediaNextTrack() {
-    return postApi1VehiclesByVinCommandMediaNextTrack({
+    const { data } = await postApi1VehiclesByVinCommandMediaNextTrack({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Advances media player to previous favorite track.
-   * @returns A promise that resolves to a data object containing the response.
+   * Skips to the previous favorite in media playback.
+   * @return Promise to an object with response containing media previous favorite result
    */
   public async mediaPreviousFavorite() {
-    return postApi1VehiclesByVinCommandMediaPrevFav({
+    const { data } = await postApi1VehiclesByVinCommandMediaPrevFav({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Advances media player to previous track.
-   * @returns A promise that resolves to a data object containing the response.
+   * Skips to the previous track in media playback.
+   * @return Promise to an object with response containing media previous track result
    */
   public async mediaPreviousTrack() {
-    return postApi1VehiclesByVinCommandMediaPrevTrack({
+    const { data } = await postApi1VehiclesByVinCommandMediaPrevTrack({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Toggles current play/pause state.
-   * @returns A promise that resolves to a data object containing the response.
+   * Toggles media playback on/off.
+   * @return Promise to an object with response containing media toggle playback result
    */
   public async mediaTogglePlayback() {
-    return postApi1VehiclesByVinCommandMediaTogglePlayback({
+    const { data } = await postApi1VehiclesByVinCommandMediaTogglePlayback({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Turns the volume down by one.
-   * @returns A promise that resolves to a data object containing the response.
+   * Turns down the media volume.
+   * @return Promise to an object with response containing media volume down result
    */
   public async mediaVolumeDown() {
-    return postApi1VehiclesByVinCommandMediaVolumeDown({
+    const { data } = await postApi1VehiclesByVinCommandMediaVolumeDown({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Starts the vehicle remotely.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing remote start result
    */
   public async remoteStart() {
-    return postApi1VehiclesByVinCommandRemoteStartDrive({
+    const { data } = await postApi1VehiclesByVinCommandRemoteStartDrive({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Removes PIN for Valet Mode.
-   * @returns A promise that resolves to a data object containing the response.
+   * Resets the valet PIN.
+   * @return Promise to an object with response containing valet pin reset result
    */
   public async resetValetPin() {
-    return postApi1VehiclesByVinCommandResetValetPin({
+    const { data } = await postApi1VehiclesByVinCommandResetValetPin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Changes the name of a vehicle.
-   * @param vehicle_name The new name for the vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets the vehicle name.
+   * @param vehicle_name The new vehicle name
+   * @return Promise to an object with response containing vehicle name set result
    */
   public async setVehicleName(vehicle_name: string) {
-    return postApi1VehiclesByVinCommandSetVehicleName({
+    const { data } = await postApi1VehiclesByVinCommandSetVehicleName({
       body: { vehicle_name },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Turns on HomeLink (used to open and close garage doors).
-   * @param lat The latitude of the location.
-   * @param lon The longitude of the location.
-   * @returns A promise that resolves to a data object containing the response.
+   * Triggers HomeLink (garage door opener or gate).
+   * @param lat Latitude
+   * @param lon Longitude
+   * @return Promise to an object with response containing homelink trigger result
    */
   public async triggerHomelink(lat: number, lon: number) {
-    return postApi1VehiclesByVinCommandTriggerHomelink({
+    const { data } = await postApi1VehiclesByVinCommandTriggerHomelink({
       body: { lat, lon },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Control the windows of a parked vehicle.
-   * @param command The command to send to the windows.
-   * @param lat The latitude of the location.
-   * @returns A promise that resolves to a data object containing the response.
+   * Controls vehicle windows.
+   * @param command The window control command
+   * @param lat Latitude
+   * @param lon Longitude
+   * @return Promise to an object with response containing window control result
    */
-  public async windowControl(command: "vent" | "close", lat?: number) {
-    return postApi1VehiclesByVinCommandWindowControl({
-      body: { command, lat },
+  public async windowControl(
+    command: "vent" | "close",
+    lat: number,
+    lon: number,
+  ) {
+    const { data } = await postApi1VehiclesByVinCommandWindowControl({
+      body: { command, lat, lon },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Climate Commands
   // --------------------------------------------------------------------------------
+
   /**
-   * Sets the driver and/or passenger-side cabin temperature.
-   * @param driver_temp The driver's side temperature.
-   * @param passenger_temp The passenger's side temperature.
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets the target temperature for the driver and passenger.
+   * @param driver_temp Driver temperature in Celsius
+   * @param passenger_temp Passenger temperature in Celsius
+   * @return Promise to an object with response containing temperature set result
    */
   public async setTemps(driver_temp: number, passenger_temp: number) {
-    return postApi1VehiclesByVinCommandSetTemps({
+    const { data } = await postApi1VehiclesByVinCommandSetTemps({
       body: { driver_temp, passenger_temp },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Enables climate keeper mode.
-   * @param climate_keeper_mode The climate keeper mode to set.
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets the climate keeper mode.
+   * @param climate_keeper_mode The climate keeper mode
+   * @return Promise to an object with response containing climate keeper mode set result
    */
   public async setClimateKeeperMode(climate_keeper_mode: 0 | 1 | 2 | 3) {
-    return postApi1VehiclesByVinCommandSetClimateKeeperMode({
+    const { data } = await postApi1VehiclesByVinCommandSetClimateKeeperMode({
       body: { climate_keeper_mode },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Turns Bioweapon Defense Mode on and off.
-   * @param on Whether to turn on Bioweapon Defense Mode.
-   * @returns A promise that resolves to a data object containing the response.
+   * Turns bioweapon defense mode on or off.
+   * @param on Whether to enable bioweapon defense mode
+   * @return Promise to an object with response containing bioweapon defense mode set result
    */
   public async setBioweaponDefenseMode(on: boolean, manual_override: boolean) {
-    return postApi1VehiclesByVinCommandSetBioweaponMode({
+    const { data } = await postApi1VehiclesByVinCommandSetBioweaponMode({
       body: { on, manual_override },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sets an override for preconditioning.
-   * @param on Whether to turn on preconditioning.
-   * @returns A promise that resolves to a data object containing the response.
+   * Starts or stops preconditioning at maximum power.
+   * @param on Whether to enable preconditioning max
+   * @param manual_override Whether to manually override
+   * @return Promise to an object with response containing preconditioning max set result
    */
-  public async setPreconditioningMax(
-    on: boolean,
-    manual_override: boolean = true,
-  ) {
-    return postApi1VehiclesByVinCommandSetPreconditioningMax({
+  public async setPreconditioningMax(on: boolean, manual_override: boolean) {
+    const { data } = await postApi1VehiclesByVinCommandSetPreconditioningMax({
       body: { on, manual_override },
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sets automatic seat heating and cooling.
-   * @param auto_seat_position The seat to control.
-   * @param on Whether to turn on auto seat climate.
-   * @returns A promise that resolves to a data object containing the response.
+   * Turns automatic seat heating/cooling on or off.
+   * @param auto_seat_position The seat position
+   * @param auto_climate_on Whether to enable auto climate
+   * @return Promise to an object with response containing auto seat climate set result
    */
   public async setAutoSeatClimate(
-    auto_seat_position: "front_left" | "front_right",
+    auto_seat_position: 1 | 2,
     auto_climate_on: boolean,
   ) {
-    return postApi1VehiclesByVinCommandRemoteAutoSeatClimateRequest({
-      body: {
-        auto_seat_position: SEATS[auto_seat_position],
-        auto_climate_on,
-      },
-      path: { vin: this.vin },
-      client: this.root.client,
-    });
+    const body = {
+      auto_seat_position,
+      auto_climate_on,
+    };
+    const { data } =
+      await postApi1VehiclesByVinCommandRemoteAutoSeatClimateRequest({
+        body,
+        path: { vin: this.vin },
+        client: this.root.client,
+      });
+    return data;
   }
 
   /**
-   * Sets automatic steering wheel heating on/off.
-   * @param on Whether to turn on auto steering wheel heat.
-   * @returns A promise that resolves to a data object containing the response.
+   * Turns automatic steering wheel heating on or off.
+   * @param auto_steering_wheel_heat_on Whether to enable auto steering wheel heat
+   * @return Promise to an object with response containing auto steering wheel heat set result
    */
   public async setAutoSteeringWheelHeat(on: boolean) {
-    return postApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateRequest(
-      { body: { on }, path: { vin: this.vin }, client: this.root.client },
-    );
+    const { data } =
+      await postApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateRequest(
+        {
+          body: { on },
+          path: { vin: this.vin },
+          client: this.root.client,
+        },
+      );
+    return data;
   }
 
   /**
-   * Sets seat cooling.
-   * @param seat_position The seat to control.
-   * @param level The cooling level.
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets seat cooler level.
+   * @param seat_position The seat position
+   * @param seat_cooler_level The cooler level
+   * @return Promise to an object with response containing seat cooler set result
    */
-  public async setSeatCooler(
-    seat_position: "front_left" | "front_right",
-    seat_cooler_level: 0 | 1 | 2 | 3,
-  ) {
-    return postApi1VehiclesByVinCommandRemoteSeatCoolerRequest({
-      body: { seat_position: SEATS[seat_position], seat_cooler_level },
+  public async setSeatCooler(seat_position: number, seat_cooler_level: number) {
+    const body = {
+      seat_position,
+      seat_cooler_level,
+    };
+    const { data } = await postApi1VehiclesByVinCommandRemoteSeatCoolerRequest({
+      body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sets seat heating.
-   * @param heater The heater to control.
-   * @param level The heating level.
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets seat heater level.
+   * @param heater The heater position
+   * @param level The heater level
+   * @return Promise to an object with response containing seat heater set result
    */
-  public async setSeatHeater(
-    heater: 0 | 1 | 2 | 3 | 4 | 5,
-    level: 0 | 1 | 2 | 3,
-  ) {
-    return postApi1VehiclesByVinCommandRemoteSeatHeaterRequest({
-      body: { heater, level },
+  public async setSeatHeater(heater: number, level: number) {
+    const body = {
+      heater,
+      level,
+    };
+    const { data } = await postApi1VehiclesByVinCommandRemoteSeatHeaterRequest({
+      body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sets steering wheel heating on/off.
-   * @param on Whether to turn on the steering wheel heater.
-   * @returns A promise that resolves to a data object containing the response.
+   * Turns steering wheel heater on or off.
+   * @param on Whether to turn on the steering wheel heater
+   * @return Promise to an object with response containing steering wheel heater set result
    */
   public async setSteeringWheelHeater(on: boolean) {
-    return postApi1VehiclesByVinCommandRemoteSteeringWheelHeaterRequest({
-      body: { on },
-      path: { vin: this.vin },
-      client: this.root.client,
-    });
+    const { data } =
+      await postApi1VehiclesByVinCommandRemoteSteeringWheelHeaterRequest({
+        body: { on },
+        path: { vin: this.vin },
+        client: this.root.client,
+      });
+    return data;
   }
 
   /**
-   * Sets steering wheel heat level.
-   * @param level The heating level.
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets steering wheel heater level.
+   * @param level The heater level
+   * @return Promise to an object with response containing steering wheel heat level set result
    */
   public async setSteeringWheelHeatLevel(level: 0 | 1 | 3) {
-    return postApi1VehiclesByVinCommandRemoteSteeringWheelHeatLevelRequest({
-      body: { level },
-      path: { vin: this.vin },
-      client: this.root.client,
-    });
+    const { data } =
+      await postApi1VehiclesByVinCommandRemoteSteeringWheelHeatLevelRequest({
+        body: { level },
+        path: { vin: this.vin },
+        client: this.root.client,
+      });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Charging Commands
   // --------------------------------------------------------------------------------
+
   /**
-   * Charges in max range mode.
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets the charge limit to max range.
+   * @return Promise to an object with response containing charge max range result
    */
   public async chargeMaxRange() {
-    return postApi1VehiclesByVinCommandChargeMaxRange({
+    const { data } = await postApi1VehiclesByVinCommandChargeMaxRange({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Closes the charge port door.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing charge port close result
    */
   public async closeChargePort() {
-    return postApi1VehiclesByVinCommandChargePortDoorClose({
+    const { data } = await postApi1VehiclesByVinCommandChargePortDoorClose({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Opens the charge port door.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing charge port open result
    */
   public async openChargePort() {
-    return postApi1VehiclesByVinCommandChargePortDoorOpen({
+    const { data } = await postApi1VehiclesByVinCommandChargePortDoorOpen({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Charges in Standard mode.
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets the charge limit to standard range.
+   * @return Promise to an object with response containing charge standard result
    */
   public async chargeStandard() {
-    return postApi1VehiclesByVinCommandChargeStandard({
+    const { data } = await postApi1VehiclesByVinCommandChargeStandard({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Starts charging the vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing charge start result
    */
   public async startCharging() {
-    return postApi1VehiclesByVinCommandChargeStart({
+    const { data } = await postApi1VehiclesByVinCommandChargeStart({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Stops charging the vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing charge stop result
    */
   public async stopCharging() {
-    return postApi1VehiclesByVinCommandChargeStop({
+    const { data } = await postApi1VehiclesByVinCommandChargeStop({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Sets the charge limit.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * @param body The charge limit configuration
+   * @return Promise to an object with response containing charge limit set result
    */
   public async setChargeLimit(
     body: PostApi1VehiclesByVinCommandSetChargeLimitData,
   ) {
-    return postApi1VehiclesByVinCommandSetChargeLimit({
+    const { data } = await postApi1VehiclesByVinCommandSetChargeLimit({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sets the vehicle charging amps.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets the charging amps.
+   * @param body The charging amps configuration
+   * @return Promise to an object with response containing charging amps set result
    */
   public async setChargingAmps(
     body: PostApi1VehiclesByVinCommandSetChargingAmpsData,
   ) {
-    return postApi1VehiclesByVinCommandSetChargingAmps({
+    const { data } = await postApi1VehiclesByVinCommandSetChargingAmps({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sets a time at which charging should be completed.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets scheduled charging.
+   * @param body The scheduled charging configuration
+   * @return Promise to an object with response containing scheduled charging set result
    */
   public async setScheduledCharging(
     body: PostApi1VehiclesByVinCommandSetScheduledChargingData,
   ) {
-    return postApi1VehiclesByVinCommandSetScheduledCharging({
+    const { data } = await postApi1VehiclesByVinCommandSetScheduledCharging({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sets a time at which departure should be completed.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets scheduled departure.
+   * @param body The scheduled departure configuration
+   * @return Promise to an object with response containing scheduled departure set result
    */
   public async setScheduledDeparture(
     body: PostApi1VehiclesByVinCommandSetScheduledDepartureData,
   ) {
-    return postApi1VehiclesByVinCommandSetScheduledDeparture({
+    const { data } = await postApi1VehiclesByVinCommandSetScheduledDeparture({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Add or modify a schedule for vehicle charging.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Adds a charge schedule.
+   * @param body The charge schedule configuration
+   * @return Promise to an object with response containing charge schedule add result
    */
   public async addChargeSchedule(
     body: PostApi1VehiclesByVinCommandAddChargeScheduleData,
   ) {
-    return postApi1VehiclesByVinCommandAddChargeSchedule({
+    const { data } = await postApi1VehiclesByVinCommandAddChargeSchedule({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Remove a charge schedule by ID.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Removes a charge schedule.
+   * @param body The charge schedule removal configuration
+   * @return Promise to an object with response containing charge schedule removal result
    */
   public async removeChargeSchedule(
     body: PostApi1VehiclesByVinCommandRemoveChargeScheduleData,
   ) {
-    return postApi1VehiclesByVinCommandRemoveChargeSchedule({
+    const { data } = await postApi1VehiclesByVinCommandRemoveChargeSchedule({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Schedules
   // --------------------------------------------------------------------------------
+
   /**
-   * Add or modify a preconditioning schedule.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Adds a preconditioning schedule.
+   * @param body The preconditioning schedule configuration
+   * @return Promise to an object with response containing precondition schedule add result
    */
   public async addPreconditionSchedule(
     body: PostApi1VehiclesByVinCommandAddPreconditionScheduleData,
   ) {
-    return postApi1VehiclesByVinCommandAddPreconditionSchedule({
+    const { data } = await postApi1VehiclesByVinCommandAddPreconditionSchedule({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Remove a precondition schedule by ID.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Removes a preconditioning schedule.
+   * @param body The preconditioning schedule removal configuration
+   * @return Promise to an object with response containing precondition schedule removal result
    */
   public async removePreconditionSchedule(
     body: PostApi1VehiclesByVinCommandRemovePreconditionScheduleData,
   ) {
-    return postApi1VehiclesByVinCommandRemovePreconditionSchedule({
-      ...body,
-      path: { vin: this.vin },
-      client: this.root.client,
-    });
+    const { data } =
+      await postApi1VehiclesByVinCommandRemovePreconditionSchedule({
+        ...body,
+        path: { vin: this.vin },
+        client: this.root.client,
+      });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Overheat Protection
   // --------------------------------------------------------------------------------
+
   /**
-   * Sets the vehicle overheat protection.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets cabin overheat protection.
+   * @param body The cabin overheat protection configuration
+   * @return Promise to an object with response containing cabin overheat protection set result
    */
   public async setCabinOverheatProtection(
     body: PostApi1VehiclesByVinCommandSetCabinOverheatProtectionData,
   ) {
-    return postApi1VehiclesByVinCommandSetCabinOverheatProtection({
-      ...body,
-      path: { vin: this.vin },
-      client: this.root.client,
-    });
+    const { data } =
+      await postApi1VehiclesByVinCommandSetCabinOverheatProtection({
+        ...body,
+        path: { vin: this.vin },
+        client: this.root.client,
+      });
+    return data;
   }
 
   /**
-   * Adjusts the Cabin Overheat Protection temperature (COP).
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets cabin overheat protection temperature.
+   * @param body The COP temperature configuration
+   * @return Promise to an object with response containing COP temperature set result
    */
   public async setCopTemp(body: PostApi1VehiclesByVinCommandSetCopTempData) {
-    return postApi1VehiclesByVinCommandSetCopTemp({
+    const { data } = await postApi1VehiclesByVinCommandSetCopTemp({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Sentry Mode
   // --------------------------------------------------------------------------------
+
   /**
-   * Enables and disables Sentry Mode.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Turns sentry mode on or off.
+   * @param body The sentry mode configuration
+   * @return Promise to an object with response containing sentry mode set result
    */
   public async setSentryMode(
     body: PostApi1VehiclesByVinCommandSetSentryModeData,
   ) {
-    return postApi1VehiclesByVinCommandSetSentryMode({
+    const { data } = await postApi1VehiclesByVinCommandSetSentryMode({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Valet Mode
   // --------------------------------------------------------------------------------
+
   /**
-   * Turns on Valet Mode.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Turns valet mode on or off.
+   * @param body The valet mode configuration
+   * @return Promise to an object with response containing valet mode set result
    */
   public async setValetMode(
     body: PostApi1VehiclesByVinCommandSetValetModeData,
   ) {
-    return postApi1VehiclesByVinCommandSetValetMode({
+    const { data } = await postApi1VehiclesByVinCommandSetValetMode({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // PIN to Drive
   // --------------------------------------------------------------------------------
+
   /**
-   * Sets a four-digit passcode for PIN to Drive.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets a PIN for PIN to Drive mode.
+   * @param body The PIN to Drive configuration
+   * @return Promise to an object with response containing PIN to Drive set result
    */
   public async setPinToDrive(
     body: PostApi1VehiclesByVinCommandSetPinToDriveData,
   ) {
-    return postApi1VehiclesByVinCommandSetPinToDrive({
+    const { data } = await postApi1VehiclesByVinCommandSetPinToDrive({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Deactivates PIN to Drive and resets the associated PIN.
-   * @returns A promise that resolves to a data object containing the response.
+   * Clears PIN to Drive admin mode.
+   * @return Promise to an object with response containing PIN to Drive admin clear result
    */
   public async clearPinToDriveAdmin() {
-    return postApi1VehiclesByVinCommandClearPinToDriveAdmin({
+    const { data } = await postApi1VehiclesByVinCommandClearPinToDriveAdmin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Removes the PIN from PIN to Drive mode.
-   * @returns A promise that resolves to a data object containing the response.
+   * Resets the PIN to Drive PIN.
+   * @return Promise to an object with response containing PIN to Drive reset result
    */
   public async resetPinToDrive() {
-    return postApi1VehiclesByVinCommandResetPinToDrivePin({
+    const { data } = await postApi1VehiclesByVinCommandResetPinToDrivePin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Speed Limit
   // --------------------------------------------------------------------------------
+
   /**
-   * Activates Speed Limit Mode with a four-digit PIN.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Activates speed limit mode.
+   * @param body The speed limit activation configuration
+   * @return Promise to an object with response containing speed limit activation result
    */
   public async speedLimitActivate(
     body: PostApi1VehiclesByVinCommandSpeedLimitActivateData,
   ) {
-    return postApi1VehiclesByVinCommandSpeedLimitActivate({
+    const { data } = await postApi1VehiclesByVinCommandSpeedLimitActivate({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Deactivates Speed Limit Mode.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Deactivates speed limit mode.
+   * @param body The speed limit deactivation configuration
+   * @return Promise to an object with response containing speed limit deactivation result
    */
   public async speedLimitDeactivate(
     body: PostApi1VehiclesByVinCommandSpeedLimitDeactivateData,
   ) {
-    return postApi1VehiclesByVinCommandSpeedLimitDeactivate({
+    const { data } = await postApi1VehiclesByVinCommandSpeedLimitDeactivate({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Deactivates Speed Limit Mode and resets the associated PIN.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Clears speed limit PIN.
+   * @param body The speed limit PIN clear configuration
+   * @return Promise to an object with response containing speed limit PIN clear result
    */
   public async speedLimitClearPin(
     body: PostApi1VehiclesByVinCommandSpeedLimitClearPinData,
   ) {
-    return postApi1VehiclesByVinCommandSpeedLimitClearPin({
+    const { data } = await postApi1VehiclesByVinCommandSpeedLimitClearPin({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Deactivates Speed Limit Mode and resets the associated PIN for vehicles running firmware versions 2023.38+.
-   * @returns A promise that resolves to a data object containing the response.
+   * Clears speed limit PIN admin mode.
+   * @return Promise to an object with response containing speed limit PIN admin clear result
    */
   public async speedLimitClearPinAdmin() {
-    return postApi1VehiclesByVinCommandSpeedLimitClearPinAdmin({
+    const { data } = await postApi1VehiclesByVinCommandSpeedLimitClearPinAdmin({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sets the maximum speed for Speed Limit Mode.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets the speed limit.
+   * @param body The speed limit configuration
+   * @return Promise to an object with response containing speed limit set result
    */
   public async speedLimitSetLimit(
     body: PostApi1VehiclesByVinCommandSpeedLimitSetLimitData,
   ) {
-    return postApi1VehiclesByVinCommandSpeedLimitSetLimit({
+    const { data } = await postApi1VehiclesByVinCommandSpeedLimitSetLimit({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Software Update
   // --------------------------------------------------------------------------------
+
   /**
-   * Schedules a vehicle software update.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Schedules a software update.
+   * @param body The software update schedule configuration
+   * @return Promise to an object with response containing software update schedule result
    */
   public async scheduleSoftwareUpdate(
     body: PostApi1VehiclesByVinCommandScheduleSoftwareUpdateData,
   ) {
-    return postApi1VehiclesByVinCommandScheduleSoftwareUpdate({
+    const { data } = await postApi1VehiclesByVinCommandScheduleSoftwareUpdate({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Cancels the countdown to install the vehicle software update.
-   * @returns A promise that resolves to a data object containing the response.
+   * Cancels a software update.
+   * @return Promise to an object with response containing software update cancel result
    */
   public async cancelSoftwareUpdate() {
-    return postApi1VehiclesByVinCommandCancelSoftwareUpdate({
+    const { data } = await postApi1VehiclesByVinCommandCancelSoftwareUpdate({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Navigation
   // --------------------------------------------------------------------------------
+
   /**
-   * Sends a location to the in-vehicle navigation system.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sends a navigation request.
+   * @param body The navigation request configuration
+   * @return Promise to an object with response containing navigation request result
    */
   public async navigationRequest(
     body: PostApi1VehiclesByVinCommandNavigationRequestData,
   ) {
-    return postApi1VehiclesByVinCommandNavigationRequest({
+    const { data } = await postApi1VehiclesByVinCommandNavigationRequest({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Start navigation to given coordinates.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sends a GPS navigation request.
+   * @param body The GPS navigation request configuration
+   * @return Promise to an object with response containing GPS navigation request result
    */
   public async navigationGpsRequest(
     body: PostApi1VehiclesByVinCommandNavigationGpsRequestData,
   ) {
-    return postApi1VehiclesByVinCommandNavigationGpsRequest({
+    const { data } = await postApi1VehiclesByVinCommandNavigationGpsRequest({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Start navigation to a supercharger.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sends a supercharger navigation request.
+   * @param body The supercharger navigation request configuration
+   * @return Promise to an object with response containing supercharger navigation request result
    */
   public async navigationSuperchargerRequest(
     body: PostApi1VehiclesByVinCommandNavigationScRequestData,
   ) {
-    return postApi1VehiclesByVinCommandNavigationScRequest({
+    const { data } = await postApi1VehiclesByVinCommandNavigationScRequest({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sends a list of waypoints to the vehicle's navigation system.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sends a waypoints navigation request.
+   * @param body The waypoints navigation request configuration
+   * @return Promise to an object with response containing waypoints navigation request result
    */
   public async navigationWaypointsRequest(
     body: PostApi1VehiclesByVinCommandNavigationWaypointsRequestData,
   ) {
-    return postApi1VehiclesByVinCommandNavigationWaypointsRequest({
-      ...body,
-      path: { vin: this.vin },
-      client: this.root.client,
-    });
+    const { data } =
+      await postApi1VehiclesByVinCommandNavigationWaypointsRequest({
+        ...body,
+        path: { vin: this.vin },
+        client: this.root.client,
+      });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Sharing & Drivers
   // --------------------------------------------------------------------------------
+
   /**
    * Fetches drivers associated with a vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing vehicle drivers
    */
   public async getDrivers() {
-    return getApi1VehiclesByVinDrivers({
+    const { data } = await getApi1VehiclesByVinDrivers({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Removes driver access from a vehicle.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * @param body The driver removal configuration
+   * @return Promise to an object with response containing driver removal result
    */
   public async removeDriver(body: DeleteApi1VehiclesByVinDriversData) {
-    return deleteApi1VehiclesByVinDrivers({
+    const { data } = await deleteApi1VehiclesByVinDrivers({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Returns the active share invites for a vehicle.
-   * @param query.after - The cursor for the next page of results.
-   * @param query.limit - The maximum number of results to return.
-   * @returns A promise that resolves to a data object containing the response.
+   * @param query Optional query parameters
+   * @return Promise to an object with response containing vehicle invitations
    */
   public async getInvitations(query?: GetApi1VehiclesByVinInvitationsData) {
-    return getApi1VehiclesByVinInvitations({
+    const { data } = await getApi1VehiclesByVinInvitations({
       ...query,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Creates a share invitation for the vehicle.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Creates a vehicle share invitation.
+   * @param body The invitation creation configuration
+   * @return Promise to an object with response containing invitation creation result
    */
   public async createInvitation(body: PostApi1VehiclesByVinInvitationsData) {
-    return postApi1VehiclesByVinInvitations({
+    const { data } = await postApi1VehiclesByVinInvitations({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Revokes a share invite.
-   * @param id - The ID of the invitation to revoke.
-   * @returns A promise that resolves to a data object containing the response.
+   * Revokes a share invitation.
+   * @param id The invitation ID to revoke
+   * @return Promise to an object with response containing invitation revocation result
    */
   public async revokeInvitation(id: string) {
-    return postApi1VehiclesByVinInvitationsByIdRevoke({
+    const { data } = await postApi1VehiclesByVinInvitationsByIdRevoke({
       path: { id, vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   // --------------------------------------------------------------------------------
   // Custom Commands
   // --------------------------------------------------------------------------------
+
   /**
-   * Performs a no-op on the vehicle.
-   * @returns A promise that resolves to a data object containing the response.
+   * Sends a ping command to the vehicle.
+   * @return Promise to an object with response containing ping result
    */
   public async ping() {
-    return postApi1VehiclesByVinCustomCommandPing({
+    const { data } = await postApi1VehiclesByVinCustomCommandPing({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Open, Close, Move and Stop the vehicle's windows, doors, and frunk/trunk.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Controls vehicle closures (doors, windows, frunk, trunk).
+   * @param body The closure control configuration
+   * @return Promise to an object with response containing closure control result
    */
   public async closure(body: PostApi1VehiclesByVinCustomCommandClosureData) {
-    return postApi1VehiclesByVinCustomCommandClosure({
+    const { data } = await postApi1VehiclesByVinCustomCommandClosure({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Sets multiple seat heaters at once.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Sets multiple seat heaters simultaneously.
+   * @param body The seat heaters configuration
+   * @return Promise to an object with response containing seat heaters set result
    */
   public async setSeatHeaters(
     body: PostApi1VehiclesByVinCustomCommandSeatHeaterData,
   ) {
-    return postApi1VehiclesByVinCustomCommandSeatHeater({
+    const { data } = await postApi1VehiclesByVinCustomCommandSeatHeater({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Enable or disable charging on solar.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Enables or disables charging on solar.
+   * @param body The charge on solar configuration
+   * @return Promise to an object with response containing charge on solar result
    */
   public async chargeOnSolar(
     body: PostApi1VehiclesByVinCustomCommandChargeOnSolarData,
   ) {
-    return postApi1VehiclesByVinCustomCommandChargeOnSolar({
+    const { data } = await postApi1VehiclesByVinCustomCommandChargeOnSolar({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Save the last 10 minutes of dashcam footage.
-   * @returns A promise that resolves to a data object containing the response.
+   * Saves dashcam footage.
+   * @return Promise to an object with response containing dashcam save result
    */
   public async dashcamSave() {
-    return postApi1VehiclesByVinCustomCommandDashcamSave({
+    const { data } = await postApi1VehiclesByVinCustomCommandDashcamSave({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Play a supported video URL in the vehicle.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Plays video on the vehicle screen.
+   * @param body The video playback configuration
+   * @return Promise to an object with response containing video play result
    */
   public async playVideo(
     body: PostApi1VehiclesByVinCustomCommandPlayVideoData,
   ) {
-    return postApi1VehiclesByVinCustomCommandPlayVideo({
+    const { data } = await postApi1VehiclesByVinCustomCommandPlayVideo({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Stop the currently playing light show.
-   * @returns A promise that resolves to a data object containing the response.
+   * Stops the currently playing light show.
+   * @return Promise to an object with response containing light show stop result
    */
   public async stopLightShow() {
-    return postApi1VehiclesByVinCustomCommandStopLightShow({
+    const { data } = await postApi1VehiclesByVinCustomCommandStopLightShow({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Start a light show on the vehicle.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Starts a light show.
+   * @param body The light show configuration
+   * @return Promise to an object with response containing light show start result
    */
   public async startLightShow(
     body: PostApi1VehiclesByVinCustomCommandStartLightShowData,
   ) {
-    return postApi1VehiclesByVinCustomCommandStartLightShow({
+    const { data } = await postApi1VehiclesByVinCustomCommandStartLightShow({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Deactivates PIN to Drive
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Clears PIN to Drive mode.
+   * @param body The PIN to Drive clear configuration
+   * @return Promise to an object with response containing PIN to Drive clear result
    */
   public async clearPinToDrive(
     body: PostApi1VehiclesByVinCustomCommandClearPinToDriveData,
   ) {
-    return postApi1VehiclesByVinCustomCommandClearPinToDrive({
+    const { data } = await postApi1VehiclesByVinCustomCommandClearPinToDrive({
       ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Remove all impermanent keys
-   * @returns A promise that resolves to a data object containing the response.
+   * Removes all impermanent keys from the vehicle.
+   * @return Promise to an object with response containing impermanent key removal result
    */
   public async removeAllImpermanentKeys() {
-    return postApi1VehiclesByVinCustomCommandRemoveKey({
+    const { data } = await postApi1VehiclesByVinCustomCommandRemoveKey({
       path: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Returns eligible vehicle subscriptions.
-   * @param query
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing eligible subscriptions
    */
   public async getEligibleSubscriptions() {
-    return getApi1DxVehiclesSubscriptionsEligible({
+    const { data } = await getApi1DxVehiclesSubscriptionsEligible({
       query: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Returns eligibile vehicle upgrades.
-   * @param query
-   * @returns A promise that resolves to a data object containing the response.
+   * Returns eligible vehicle upgrades.
+   * @return Promise to an object with response containing eligible upgrades
    */
   public async getEligibleUpgrades() {
-    return getApi1DxVehiclesUpgradeEligibility({
+    const { data } = await getApi1DxVehiclesUpgradeEligibility({
       query: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
    * Returns vehicle option details.
-   * @param query
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing vehicle options
    */
   public async getVehicleOptions() {
-    return getApi1DxVehiclesOptions({
+    const { data } = await getApi1DxVehiclesOptions({
       query: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
-   * Returns the warranty information for a vehicle.
-   * @param query
-   * @returns A promise that resolves to a data object containing the response.
+   * Returns warranty information for the vehicle.
+   * @return Promise to an object with response containing warranty details
    */
   public async getWarrantyDetails() {
-    return getApi1DxWarrantyDetails({
+    const { data } = await getApi1DxWarrantyDetails({
       query: { vin: this.vin },
       client: this.root.client,
     });
+    return data;
   }
 }

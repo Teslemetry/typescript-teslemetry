@@ -14,34 +14,40 @@ export class TeslemetryUserApi {
   }
 
   /**
-   * Returns the user's feature configuration.
-   * @returns A promise that resolves to a data object containing the response.
+   * Returns the user's feature flags configuration.
+   * @return Promise to an object with response containing user feature configuration and flags
    */
   public async getFeatureConfig() {
-    return getApi1UsersFeatureConfig({ client: this.root.client });
+    const { data } = await getApi1UsersFeatureConfig({
+      client: this.root.client,
+    });
+    return data;
   }
 
   /**
-   * Returns the user's profile information.
-   * @returns A promise that resolves to a data object containing the response.
+   * Returns the user's profile data and account information.
+   * @return Promise to an object with response containing user profile and account information
    */
   public async getMe() {
-    return getApi1UsersMe({ client: this.root.client });
+    const { data } = await getApi1UsersMe({ client: this.root.client });
+    return data;
   }
 
   /**
    * Returns the user's order history.
-   * @returns A promise that resolves to a data object containing the response.
+   * @return Promise to an object with response containing user order history and purchase records
    */
   public async getOrders() {
-    return getApi1UsersOrders({ client: this.root.client });
+    const { data } = await getApi1UsersOrders({ client: this.root.client });
+    return data;
   }
 
   /**
-   * Returns the user's region.
-   * @returns A promise that resolves to a data object containing the response.
+   * Returns the user's region information.
+   * @return Promise to an object with response containing user's regional settings and location data
    */
   public async getRegion() {
-    return getApi1UsersRegion({ client: this.root.client });
+    const { data } = await getApi1UsersRegion({ client: this.root.client });
+    return data;
   }
 }
