@@ -691,10 +691,13 @@ export class TeslemetryVehicleApi {
    */
   public async setAutoSeatClimate(
     auto_seat_position: "front_left" | "front_right",
-    on: boolean,
+    auto_climate_on: boolean,
   ) {
     return postApi1VehiclesByVinCommandRemoteAutoSeatClimateRequest({
-      body: { auto_seat_position: SEATS[auto_seat_position], on },
+      body: {
+        auto_seat_position: SEATS[auto_seat_position],
+        auto_climate_on,
+      },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -719,10 +722,10 @@ export class TeslemetryVehicleApi {
    */
   public async setSeatCooler(
     seat_position: "front_left" | "front_right",
-    level: 0 | 1 | 2 | 3,
+    seat_cooler_level: 0 | 1 | 2 | 3,
   ) {
     return postApi1VehiclesByVinCommandRemoteSeatCoolerRequest({
-      body: { seat_position: SEATS[seat_position], level },
+      body: { seat_position: SEATS[seat_position], seat_cooler_level },
       path: { vin: this.vin },
       client: this.root.client,
     });

@@ -1,13 +1,7 @@
 import { TeslemetryStreamVehicle } from "./TeslemetryVehicleStream";
-import { EventSource, EventSourceInit } from "eventsource";
-import { ValueError } from "./exceptions"; // Import custom exceptions
+import { EventSource } from "eventsource";
 import { ISseCredits, ISseEvent } from "./const";
 import { Teslemetry } from "./Teslemetry";
-import {
-  getApiConfigByVin,
-  patchApiConfigByVin,
-  postApiConfigByVin,
-} from "./client";
 
 type ListenerCallback<T extends ISseEvent = ISseEvent> = (event: T) => void;
 type ConnectionListenerCallback = (connected: boolean) => void;
@@ -132,7 +126,10 @@ export class TeslemetryStream {
     const removeListener = () => {
       this._listeners.delete(removeListener);
     };
-    this._listeners.set(removeListener, { callback, filters });
+    this._listeners.set(removeListener, {
+      callback: callback as ListenerCallback<ISseEvent>,
+      filters,
+    });
 
     return removeListener;
   }

@@ -123,7 +123,12 @@ export class TeslemetryStreamVehicle {
   ): () => void {
     this.addField(field);
     return this.stream.addListener<ISseData>(
-      (event) => callback(event.data[field]),
+      (event) => {
+        const value = event.data[field];
+        if (value !== undefined) {
+          callback(value as Exclude<ISseData["data"][T], undefined>);
+        }
+      },
       { key: this.vin, data: { [field]: null } },
     );
   }

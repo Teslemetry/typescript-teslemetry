@@ -31,7 +31,92 @@ export type GetApi1ProductsResponses = {
      */
     200: {
         response: Array<{
-            [key: string]: unknown;
+            id: number;
+            user_id: number;
+            vehicle_id: number;
+            vin: string;
+            color: null;
+            access_type: null | string;
+            display_name: string;
+            option_codes: null | string;
+            cached_data: null | string | {
+                [key: string]: unknown;
+            };
+            mobile_access_disabled: boolean;
+            granular_access: {
+                hide_private: boolean;
+            };
+            tokens: null;
+            state: string;
+            in_service: boolean;
+            id_s: string;
+            calendar_enabled: boolean;
+            api_version: number;
+            backseat_token: null;
+            backseat_token_updated_at: null;
+            ble_autopair_enrolled: boolean;
+            device_type: 'vehicle';
+            command_signing: string;
+            release_notes_supported?: boolean;
+            share_type_s?: string;
+            bnd_enrolled?: boolean;
+        } | {
+            energy_site_id: number;
+            device_type: 'energy';
+            resource_type: string;
+            site_name?: string;
+            id: string;
+            gateway_id?: string;
+            asset_site_id: string;
+            warp_site_number: string;
+            percentage_charged?: number;
+            battery_type?: string;
+            battery_power?: number;
+            go_off_grid_test_banner_enabled: null;
+            storm_mode_enabled: boolean | null;
+            powerwall_onboarding_settings_set: boolean | null;
+            powerwall_tesla_electric_interested_in: null;
+            vpp_tour_enabled: null;
+            components: {
+                battery: boolean;
+                battery_type?: string;
+                solar: boolean;
+                solar_type?: string;
+                grid: boolean;
+                load_meter: boolean;
+                market_type: string;
+                gateways?: Array<{
+                    device_id: string;
+                    din: string;
+                    serial_number: string;
+                    part_number: string;
+                    is_active: boolean;
+                }>;
+                wall_connectors?: Array<{
+                    device_id: string;
+                    din: string;
+                    serial_number: string;
+                    part_number: string;
+                    is_active: boolean;
+                }>;
+                inverters?: Array<{
+                    device_id: string;
+                    din: string;
+                    serial_number: string;
+                    part_number: string;
+                    is_active: boolean;
+                    site_id: string;
+                    firmware_version?: string;
+                }>;
+                generator?: boolean;
+            };
+            features: {
+                rate_plan_manager_no_pricing_constraint?: boolean;
+            };
+            solar_power?: number;
+            charge_on_solar_capable?: boolean;
+            grid_installation_id?: string;
+            solar_type?: string;
         }>;
         count?: number;
     };
