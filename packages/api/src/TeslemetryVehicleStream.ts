@@ -16,6 +16,7 @@ import type {
   ISseState,
   Signals,
 } from "./const";
+import { Logger } from "./logger";
 
 export class TeslemetryVehicleStream {
   private root: Teslemetry;
@@ -24,11 +25,13 @@ export class TeslemetryVehicleStream {
   public fields: FieldsResponse = {};
   public preferTyped: boolean | null = null;
   private _pendingFields: FieldsRequest = {}; // Used for accumulating config changes before patching
+  public logger: Logger;
 
   constructor(root: Teslemetry, stream: TeslemetryStream, vin: string) {
     this.root = root;
     this.stream = stream;
     this.vin = vin;
+    this.logger = stream.logger;
 
     stream.addListener<ISseConfig>(
       (event) => {
@@ -50,29 +53,30 @@ export class TeslemetryVehicleStream {
       this.fields = data.fields || {};
       this.preferTyped = data.prefer_typed || false;
     } else if (response.status === 404) {
-      console.warn(`Config for VIN ${this.vin} not found (404).`);
+      this.logger.warn(`Config for VIN ${this.vin} not found (404).`);
       return;
     } else {
       throw new Error(`Failed to get config: ${response.statusText}`);
     }
   }
 
-  public async updateFields(fields: FieldsRequest): Promise<void> {
+  public async updateFields(fields: FieldsRequest) {
     this._pendingFields = { ...this._pendingFields, ...fields };
 
     const data = await this.patchConfig(this._pendingFields);
-    if (data.error) {
-      console.error(
-        `Error updating streaming config for ${this.vin}: ${data.error}`,
-      );
-    } else if (data.response?.updated_vehicles) {
-      console.info(`Updated vehicle streaming config for ${this.vin}`);
+    if (data?.updated_vehicles) {
+      this.logger.info(`Updated vehicle streaming config for ${this.vin}`);
       this.fields = { ...this.fields, ...fields };
       this._pendingFields = {};
+    } else {
+      this.logger.error(
+        `Error updating streaming config for ${this.vin}`,
+        data,
+      );
     }
   }
 
-  public async patchConfig(fields: FieldsRequest): Promise<any> {
+  public async patchConfig(fields: FieldsRequest) {
     const { data } = await patchApiConfigByVin({
       path: { vin: this.vin },
       body: { fields },
@@ -94,7 +98,7 @@ export class TeslemetryVehicleStream {
       (interval === undefined ||
         this.fields[field].interval_seconds === interval)
     ) {
-      console.debug(
+      this.logger.debug(
         `Streaming field ${field} already enabled @ ${this.fields[field]?.interval_seconds || "default"}s`,
       );
       return;

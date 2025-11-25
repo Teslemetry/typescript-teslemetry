@@ -2,6 +2,7 @@ import { TeslemetryVehicleStream } from "./TeslemetryVehicleStream";
 import { EventSource } from "eventsource";
 import { ISseCredits, ISseEvent } from "./const";
 import { Teslemetry } from "./Teslemetry";
+import { Logger } from "./logger";
 
 type ListenerCallback<T extends ISseEvent = ISseEvent> = (event: T) => void;
 type ConnectionListenerCallback = (connected: boolean) => void;
@@ -11,6 +12,7 @@ export class TeslemetryStream {
   private _access_token: string;
   public active: boolean = false;
   private vin: string | undefined;
+  public logger: Logger;
   private _listeners: Map<
     () => void,
     { callback: ListenerCallback; filters?: any }
@@ -21,10 +23,15 @@ export class TeslemetryStream {
   private eventSource: EventSource | null = null;
   private vehicles: Map<string, TeslemetryVehicleStream> = new Map();
 
-  constructor(root: Teslemetry, access_token: string, vin?: string) {
+  constructor(
+    root: Teslemetry,
+    access_token: string,
+    vin?: string,
+  ) {
     this.root = root;
     this._access_token = access_token;
     this.vin = vin;
+    this.logger = root.logger;
     if (this.vin) {
       this.getVehicle(this.vin);
     }
@@ -77,7 +84,7 @@ export class TeslemetryStream {
     this.eventSource = new EventSource(url.toString());
 
     this.eventSource.onopen = () => {
-      console.log(`Connected to ${url.toString()}`);
+      this.logger.info(`Connected to ${url.toString()}`);
       this.retries = 0;
       this._updateConnectionListeners(true);
     };
@@ -94,13 +101,13 @@ export class TeslemetryStream {
     };
 
     this.eventSource.onerror = (error: any) => {
-      console.error("EventSource error:", error);
+      this.logger.error("EventSource error:", error);
       this.close();
       this._updateConnectionListeners(false);
 
       this.retries++;
       const delay = Math.min(2 ** this.retries, 600) * 1000;
-      console.log(`Reconnecting in ${delay / 1000} seconds...`);
+      this.logger.info(`Reconnecting in ${delay / 1000} seconds...`);
       setTimeout(() => this.connect(), delay);
     };
   }
@@ -112,7 +119,7 @@ export class TeslemetryStream {
 
   public close(): void {
     if (this.eventSource) {
-      console.log(`Disconnecting from stream`);
+      this.logger.info(`Disconnecting from stream`);
       this.eventSource.close();
       this.eventSource = null;
     }
@@ -140,7 +147,7 @@ export class TeslemetryStream {
         try {
           callback(event);
         } catch (error) {
-          console.error("Uncaught error in listener:", error);
+          this.logger.error("Uncaught error in listener:", error);
         }
       }
     }

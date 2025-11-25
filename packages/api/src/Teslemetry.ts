@@ -6,6 +6,8 @@ import { TeslemetryUserApi } from "./TeslemetryUserApi";
 import { TeslemetryChargingApi } from "./TeslemetryChargingApi";
 import { Client, createClient } from "./client/client";
 import { getApiTest } from "./client";
+import { Logger, consoleLogger } from "./logger";
+import { version } from "../package.json";
 
 export class Teslemetry {
   public client: Client;
@@ -13,35 +15,68 @@ export class Teslemetry {
   public uid: string | null = null;
   public sse: TeslemetryStream;
   public api: TeslemetryApi;
+  public logger: Logger;
   private _user: TeslemetryUserApi | null = null;
   private _charging: TeslemetryChargingApi | null = null;
 
-  constructor(access_token: string, region?: "na" | "eu") {
+  constructor(
+    access_token: string,
+    region?: "na" | "eu",
+    logger: Logger = consoleLogger,
+  ) {
+    this.logger = logger;
     if (region) this.region = region;
+
+    // Initialize client with base URL
     this.client = createClient({
       auth: access_token,
       baseUrl: `https://${this.region || "api"}.teslemetry.com`,
       headers: {
-        "X-Library": "typescript teslemetry",
+        "X-Library": `typescript teslemetry ${version}`,
       },
     });
+
+    // Log requests and update region
+    this.client.interceptors.response.use((response) => {
+      this.logger.debug(`Response from ${response.url}: ${response.status}`);
+      if (!this.region) {
+        const userRegion = response.headers.get("x-region") as "na" | "eu";
+        if (userRegion) {
+          this.logger.debug(
+            `Changing region from ${this.region || "null"} to ${userRegion}`,
+          );
+          this.region = userRegion;
+          this.client.setConfig({
+            baseUrl: `https://${this.region}.teslemetry.com`,
+          });
+        }
+      }
+      return response;
+    });
+
     this.sse = new TeslemetryStream(this, access_token);
     this.api = new TeslemetryApi(this);
   }
 
+  /**
+   * Get a vehicle instance with both API and SSE capabilities.
+   * @param vin Vehicle Identification Number
+   * @returns Object containing both API and SSE vehicle instances
+   */
+  public getVehicle(vin: string) {
+    return {
+      api: this.api.getVehicle(vin),
+      sse: this.sse.getVehicle(vin),
+    };
+  }
+
+  /**
+   * Get the users region from the server
+   * @returns Promise that resolves to the region ("na" or "eu")
+   */
   public async getRegion(): Promise<"na" | "eu"> {
-    if (this.region) return this.region;
     const { response } = await getApiTest();
-    if (!response.ok) {
-      throw new Error(`Failed to test API: ${response.statusText}`);
-    }
-    this.uid = response.headers.get("X-Uid") as string | null;
-    this.region = response.headers.get("X-Region") as "na" | "eu" | null;
-    if (!this.region) throw new Error(`Failed to get region`);
-    this.client.setConfig({
-      baseUrl: `https://${this.region}.teslemetry.com`,
-    });
-    return this.region;
+    return response.headers.get("x-region") as "na" | "eu";
   }
 
   /**

@@ -1,50 +1,41 @@
 // examples/simple.ts
 
-import { TeslemetryStream } from "../src"; // Adjust path if needed
+import { config } from "dotenv";
+import { Teslemetry, TeslemetryStream } from "../src"; // Adjust path if needed
 
-// IMPORTANT: Replace with your actual Teslemetry Access Token and VIN
-const TESLEMTRY_ACCESS_TOKEN =
-  process.env.TESLEMTRY_ACCESS_TOKEN || "YOUR_ACCESS_TOKEN";
-const TESLEMTRY_VIN = process.env.TESLEMTRY_VIN || "YOUR_VIN";
+// Load environment variables from .env file
+const { TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN } = config().parsed as Record<
+  string,
+  string
+>;
 
 async function main() {
-  if (
-    TESLEMTRY_ACCESS_TOKEN === "YOUR_ACCESS_TOKEN" ||
-    TESLEMTRY_VIN === "YOUR_VIN"
-  ) {
-    console.error(
-      "Please set TESLEMTRY_ACCESS_TOKEN and TESLEMTRY_VIN environment variables or replace placeholders in examples/simple.ts",
-    );
-    process.exit(1);
-  }
+  //@ts-expect-error
+  const teslemetry = new Teslemetry(TESLEMETRY_ACCESS_TOKEN, "devapi");
+  await teslemetry.getRegion();
 
-  const stream = new TeslemetryStream({
-    access_token: TESLEMTRY_ACCESS_TOKEN,
-    vin: TESLEMTRY_VIN,
-    // server: "na.teslemetry.com", // Optional: specify server
-    parse_timestamp: true, // Optional: parse timestamps in events
-  });
-
-  const vehicle = stream.getVehicle(TESLEMTRY_VIN);
+  const sonic = teslemetry.getVehicle(TESLEMETRY_VIN);
+  const state = await sonic.api.state();
+  console.log(state);
 
   // Listen for battery level updates
-  const removeBatteryLevelListener = vehicle.listenData(
-    "battery_level",
+  const removeBatteryLevelListener = sonic.sse.listenData(
+    "BatteryLevel",
     (batteryLevel) => {
       console.log(`Battery Level: ${batteryLevel}%`);
     },
   );
 
   // Listen for vehicle speed updates
-  const removeVehicleSpeedListener = vehicle.listenData(
-    "vehicle_speed",
+  const removeVehicleSpeedListener = sonic.sse.listenData(
+    "VehicleSpeed",
     (speed) => {
       console.log(`Vehicle Speed: ${speed} km/h`);
     },
   );
 
   // Listen for connection status changes
-  const removeConnectionListener = stream.addConnectionListener(
+  const removeConnectionListener = teslemetry.sse.addConnectionListener(
     (connected: boolean) => {
       console.log(
         `Stream connection status: ${connected ? "Connected" : "Disconnected"}`,
@@ -61,7 +52,7 @@ async function main() {
     removeBatteryLevelListener();
     removeVehicleSpeedListener();
     removeConnectionListener();
-    stream.disconnect();
+    teslemetry.sse.disconnect();
     process.exit(0);
   });
 }

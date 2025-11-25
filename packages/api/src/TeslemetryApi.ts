@@ -24,7 +24,11 @@ export class TeslemetryApi {
     this.user = new TeslemetryUserApi(this.root);
     this.charging = new TeslemetryChargingApi(this.root);
   }
-
+  /**
+   * Gets or creates a vehicle API instance for the specified VIN.
+   * @param vin - The vehicle identification number.
+   * @returns The vehicle API instance for the specified VIN.
+   */
   public getVehicle(vin: string) {
     if (!this._vehicles[vin]) {
       this._vehicles[vin] = new TeslemetryVehicleApi(this.root, vin);
@@ -32,6 +36,11 @@ export class TeslemetryApi {
     return this._vehicles[vin];
   }
 
+  /**
+   * Gets or creates an energy site API instance for the specified ID.
+   * @param id - The energy site ID.
+   * @returns The energy site API instance for the specified ID.
+   */
   public getEnergySite(id: number) {
     if (!this._energySites[id]) {
       this._energySites[id] = new TeslemetryEnergyApi(this.root, id);
@@ -39,9 +48,13 @@ export class TeslemetryApi {
     return this._energySites[id];
   }
 
+  /**
+   * Creates API instances for all products (vehicles and energy sites) associated with the account.
+   * @returns A promise that resolves to an object containing vehicle and energy site API instances.
+   */
   public async createProducts() {
-    const { data } = await this.products();
-    data?.response?.forEach((product) => {
+    const { data } = await getApi1Products({ client: this.root.client });
+    data.response?.forEach((product) => {
       if (product.device_type === "vehicle") {
         this.getVehicle(product.vin);
       }
@@ -53,33 +66,39 @@ export class TeslemetryApi {
   }
 
   /**
-   * Returns products mapped to user.
-   * @returns A promise that resolves to a data object containing a response with an array of product objects.
+   * Returns a list of products (vehicles and energy sites) associated with the user account.
+   * @returns A promise that resolves to an object containing a `response` array and count.
+   * Each item in the array is a product, which can be a vehicle or an energy site, and a `count` of the products.
    */
   public async products() {
-    return getApi1Products({ client: this.root.client });
+    const { data } = await getApi1Products({ client: this.root.client });
+    return data;
   }
 
   /**
-   * Test API endpoint to verify connectivity.
-   * @returns A promise that resolves to a data object containing a response of true, indicating successful connectivity.
+   * Test connectivity and authentication to the Teslemetry API.
+   * @returns A promise that resolves to a data object containing a boolean `response` field indicating success.
    */
   public async test() {
-    return getApiTest({ client: this.root.client });
+    const { data } = await getApiTest({ client: this.root.client });
+    return data;
   }
 
   /**
-   * Get API metadata including UID and region information.
-   * @returns A promise that resolves to a data object containing response metadata with UID, region, scopes, and vehicle information.
+   * Get metadata about your Teslemetry account.
+   * @returns Promise to an object containing metadata about the account,
+   * including user UID, region, scopes, and lists of vehicles and energy sites.
    */
   public async metadata() {
-    return getApiMetadata({ client: this.root.client });
+    const { data } = await getApiMetadata({ client: this.root.client });
+    return data;
   }
 
   /**
-   * Checks whether vehicles can accept Tesla commands protocol for the partner's public key
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Checks whether vehicles can accept the Tesla commands protocol for the partner's public key.
+   * @param {string[]} vins - An array of VINs to check.
+   * @returns {Promise<PostApi1VehiclesFleetStatusResponses>} A promise that resolves to an object containing lists of paired and unpaired VINs,
+   * and detailed info for each vehicle.
    */
   public async fleetStatus(vins: string[]) {
     return postApi1VehiclesFleetStatus({
@@ -89,18 +108,18 @@ export class TeslemetryApi {
   }
 
   /**
-   * Returns vehicles belonging to the account.
-   * @param query
-   * @returns A promise that resolves to a data object containing the response.
+   * Returns vehicles belonging to the account. This endpoint is paginated.
+   * @returns {Promise<GetApi1VehiclesResponses>} A promise that resolves to an object containing a list of vehicles,
+   * pagination details, and a total count.
    */
   public async vehicles() {
     return getApi1Vehicles({ client: this.root.client });
   }
 
   /**
-   * Redeems a share invite.
-   * @param body
-   * @returns A promise that resolves to a data object containing the response.
+   * Redeems a share invite. Once redeemed, the account will gain access to the vehicle within the Tesla app.
+   * @param {string} code - The invitation code to redeem.
+   * @returns {Promise<PostApi1VehiclesInvitationsRedeemResponses>} A promise that resolves to an object containing the `vehicle_id_s` and `vin` of the shared vehicle.
    */
   public async redeemInvitation(code: string) {
     return postApi1VehiclesInvitationsRedeem({

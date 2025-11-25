@@ -178,28 +178,36 @@ export class TeslemetryVehicleApi {
     this.vin = vin;
   }
 
-  // --------------------------------------------------------------------------------
-  // Vehicle Data
-  // --------------------------------------------------------------------------------
   /**
-   * Returns the cached vehicle data for this vehicle.
-   * @param query.endpoints - A comma-separated list of endpoints to retrieve data for.
-   * @returns A promise that resolves to a data object containing the response.
+   * Data about the vehicle.
+   * @returns {Promise<GetApi1VehiclesByVinResponses>} A promise that resolves to an object containing the vehicle's state information.
    */
-  public async vehicleData(query?: GetApi1VehiclesByVinVehicleDataData) {
-    return getApi1VehiclesByVinVehicleData({
-      ...query,
+  public async state() {
+    return getApi1VehiclesByVin({
       path: { vin: this.vin },
       client: this.root.client,
     });
   }
 
+  // --------------------------------------------------------------------------------
+  // Vehicle Data
+  // --------------------------------------------------------------------------------
+
   /**
-   * Data about the vehicle
-   * @returns A promise that resolves to a data object containing the response.
+   *
+   * Returns the cached vehicle data for this vehicle. `location_data` will only be present if you have provided the `location_data` scope.
+   * @param {GetApi1VehiclesByVinVehicleDataData} [query] - Optional query parameters.
+   * @param {string} [query.endpoints] - A comma-separated list of endpoints to retrieve data for. Valid values are: `charge_state`, `climate_state`, `closures_state`, `drive_state`, `gui_settings`, `location_data`, `vehicle_config`, `vehicle_state`.
+   * @returns {Promise<GetApi1VehiclesByVinVehicleDataResponses>} A promise that resolves to the vehicle data.
    */
-  public async get() {
-    return getApi1VehiclesByVin({
+  public async vehicleData(
+    endpoints?: NonNullable<
+      GetApi1VehiclesByVinVehicleDataData["query"]
+    >["endpoints"],
+    use_cache: boolean = true,
+  ) {
+    return getApi1VehiclesByVinVehicleData({
+      query: { endpoints, use_cache },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -207,7 +215,7 @@ export class TeslemetryVehicleApi {
 
   /**
    * Refresh the cached vehicle data immediately. Consumes 2 command credits.
-   * @returns A promise that resolves to a data object containing the response.
+   * @returns {Promise<GetApiRefreshByVinResponses>} A promise that resolves to an empty response on success.
    */
   public async refreshData() {
     return getApiRefreshByVin({
@@ -218,7 +226,7 @@ export class TeslemetryVehicleApi {
 
   /**
    * Redirect to the Tesla Design Studio image of a vehicle
-   * @returns A promise that resolves to a data object containing the response.
+   * @returns {Promise<GetApiImageByVinResponses>} A promise that resolves to a redirect response.
    */
   public async getImage() {
     return getApiImageByVin({
