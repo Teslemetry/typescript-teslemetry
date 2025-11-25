@@ -1,22 +1,21 @@
-import { TeslemetryStreamVehicle } from "./TeslemetryStreamVehicle";
+import { TeslemetryStreamVehicle } from "./TeslemetryVehicleStream";
 import { EventSource, EventSourceInit } from "eventsource";
 import { ValueError } from "./exceptions"; // Import custom exceptions
-import { ISseCredits } from "./const";
+import { ISseCredits, ISseEvent } from "./const";
+import { Teslemetry } from "./Teslemetry";
+import {
+  getApiConfigByVin,
+  patchApiConfigByVin,
+  postApiConfigByVin,
+} from "./client";
 
-type ListenerCallback = (event: any) => void;
+type ListenerCallback<T extends ISseEvent = ISseEvent> = (event: T) => void;
 type ConnectionListenerCallback = (connected: boolean) => void;
 
-interface TeslemetryStreamOptions {
-  access_token: string;
-  region?: "na" | "eu";
-  vin?: string;
-  parse_timestamp?: boolean;
-  manual?: boolean;
-}
-
 export class TeslemetryStream {
+  private root: Teslemetry;
+  private _access_token: string;
   public active: boolean = false;
-  public region: "na" | "eu" | null;
   private vin: string | undefined;
   private _listeners: Map<
     () => void,
@@ -24,34 +23,14 @@ export class TeslemetryStream {
   > = new Map();
   private _connectionListeners: Map<() => void, ConnectionListenerCallback> =
     new Map();
-  private _headers: { [key: string]: string };
-  private _accessToken: string;
-  private parseTimestamp: boolean;
-  private manual: boolean;
   private retries: number = 0;
   private eventSource: EventSource | null = null;
   private vehicles: Map<string, TeslemetryStreamVehicle> = new Map();
 
-  constructor(options: TeslemetryStreamOptions) {
-    const {
-      access_token,
-      region,
-      vin,
-      parse_timestamp = false,
-      manual = false,
-    } = options;
-
-    this.region = region || null;
+  constructor(root: Teslemetry, access_token: string, vin?: string) {
+    this.root = root;
+    this._access_token = access_token;
     this.vin = vin;
-    this._accessToken = access_token;
-    this._headers = {
-      Authorization: `Bearer ${access_token}`,
-      "X-Library": "typescript teslemetry-stream",
-      "Content-Type": "application/json",
-    };
-    this.parseTimestamp = parse_timestamp;
-    this.manual = manual;
-
     if (this.vin) {
       this.getVehicle(this.vin);
     }
@@ -59,7 +38,7 @@ export class TeslemetryStream {
 
   public getVehicle(vin: string): TeslemetryStreamVehicle {
     if (!this.vehicles.has(vin)) {
-      this.vehicles.set(vin, new TeslemetryStreamVehicle(this, vin));
+      this.vehicles.set(vin, new TeslemetryStreamVehicle(this.root, this, vin));
     }
     return this.vehicles.get(vin)!;
   }
@@ -69,56 +48,6 @@ export class TeslemetryStream {
       this.eventSource !== null &&
       this.eventSource.readyState === EventSource.OPEN
     );
-  }
-
-  public async getConfig(vin?: string): Promise<void> {
-    vin ??= this.vin;
-    if (!vin) throw new Error("VIN is required");
-
-    if (!this.region) {
-      await this.findRegion();
-    }
-    if (this.vehicles.has(vin)) {
-      await this.getVehicle(vin).getConfig();
-    }
-  }
-
-  public async findRegion(): Promise<void> {
-    const response = await fetch("https://api.teslemetry.com/api/test", {
-      headers: this._headers,
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to test API: ${response.statusText}`);
-    }
-    const region = response.headers.get("X-Region") as "na" | "eu" | null;
-    if (!region) {
-      throw new Error("Region header not found");
-    }
-    this.region = region;
-  }
-
-  public async updateFields(fields: any, vin: string): Promise<any> {
-    const response = await fetch(
-      `https://api.teslemetry.com/api/config/${vin}`,
-      {
-        method: "PATCH",
-        headers: this._headers,
-        body: JSON.stringify({ fields }),
-      },
-    );
-    return await response.json();
-  }
-
-  public async replaceFields(fields: any, vin: string): Promise<any> {
-    const response = await fetch(
-      `https://api.teslemetry.com/api/config/${vin}`,
-      {
-        method: "POST",
-        headers: this._headers,
-        body: JSON.stringify({ fields }),
-      },
-    );
-    return await response.json();
   }
 
   public addConnectionListener(
@@ -143,15 +72,13 @@ export class TeslemetryStream {
     }
 
     this.active = true;
-    if (!this.region) {
-      await this.findRegion();
-    }
+    const region = await this.root.getRegion();
+    const url = new URL(`https://${region}.teslemetry.com/sse`);
 
-    const url = new URL(`https://${this.region}.teslemetry.com/sse`);
     if (this.vin) {
       url.pathname += `/${this.vin}`;
     }
-    url.searchParams.append("token", this._accessToken);
+    url.searchParams.append("token", this._access_token);
 
     this.eventSource = new EventSource(url.toString());
 
@@ -163,7 +90,7 @@ export class TeslemetryStream {
 
     this.eventSource.onmessage = (event: any) => {
       let data = JSON.parse(event.data);
-      if (this.parseTimestamp && data.createdAt) {
+      if (data.createdAt) {
         const [main, ns] = data.createdAt.split(".");
         const date = new Date(main + "Z");
         data.timestamp =
@@ -191,27 +118,21 @@ export class TeslemetryStream {
 
   public close(): void {
     if (this.eventSource) {
-      console.log(`Disconnecting from ${this.region}.teslemetry.com`);
+      console.log(`Disconnecting from stream`);
       this.eventSource.close();
       this.eventSource = null;
     }
     this._updateConnectionListeners(false);
   }
 
-  public addListener(callback: ListenerCallback, filters?: any): () => void {
+  public addListener<T extends ISseEvent>(
+    callback: ListenerCallback<T>,
+    filters?: Record<string, any>,
+  ): () => void {
     const removeListener = () => {
       this._listeners.delete(removeListener);
-      if (this._listeners.size === 0) {
-        console.log("Shutting down stream as there are no more listeners");
-        this.active = false;
-        this.close();
-      }
     };
     this._listeners.set(removeListener, { callback, filters });
-
-    if (this._listeners.size === 1 && !this.manual) {
-      this.connect();
-    }
 
     return removeListener;
   }
@@ -225,12 +146,6 @@ export class TeslemetryStream {
           console.error("Uncaught error in listener:", error);
         }
       }
-    }
-  }
-
-  public async listen(): Promise<void> {
-    if (!this.manual && !this.connected) {
-      await this.connect();
     }
   }
 

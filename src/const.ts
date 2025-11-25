@@ -198,394 +198,326 @@ export interface ISseState extends ISseBase {
 export interface ISseData extends ISseBase {
   data: {
     // Vehicle basic info
-    drive_rail?: number | null;
-    charge_state?: ChargeState | null;
-    bms_full_charge_complete?: boolean | null;
-    vehicle_speed?: number | null;
-    odometer?: number | null;
-    pack_voltage?: number | null;
-    pack_current?: number | null;
-    soc?: number | null;
-    dcdc_enable?: boolean | null;
-    gear?: ShiftState | null;
-    isolation_resistance?: number | null;
-    pedal_position?: number | null;
-    brake_pedal?: boolean | null;
+    DriveRail?: number | null;
+    ChargeState?: ChargeState | null;
+    BmsFullchargecomplete?: boolean | null;
+    VehicleSpeed?: number | null;
+    Odometer?: number | null;
+    PackVoltage?: number | null;
+    PackCurrent?: number | null;
+    Soc?: number | null;
+    DCDCEnable?: boolean | null;
+    Gear?: ShiftState | null;
+    IsolationResistance?: number | null;
+    PedalPosition?: number | null;
+    BrakePedal?: boolean | null;
 
     // Drive inverter data
-    di_state_r?: DriveInverterState | null;
-    di_heatsink_tr?: number | null;
-    di_axle_speed_r?: number | null;
-    di_torquemotor?: number | null;
-    di_stator_temp_r?: number | null;
-    di_v_bat_r?: number | null;
-    di_motor_current_r?: number | null;
-    di_state_f?: DriveInverterState | null;
-    di_state_rel?: DriveInverterState | null;
-    di_state_rer?: DriveInverterState | null;
-    di_heatsink_tf?: number | null;
-    di_heatsink_trel?: number | null;
-    di_heatsink_trer?: number | null;
-    di_axle_speed_f?: number | null;
-    di_axle_speed_rel?: number | null;
-    di_axle_speed_rer?: number | null;
-    di_slave_torque_cmd?: number | null;
-    di_torque_actual_r?: number | null;
-    di_torque_actual_f?: number | null;
-    di_torque_actual_rel?: number | null;
-    di_torque_actual_rer?: number | null;
-    di_stator_temp_f?: number | null;
-    di_stator_temp_rel?: number | null;
-    di_stator_temp_rer?: number | null;
-    di_v_bat_f?: number | null;
-    di_v_bat_rel?: number | null;
-    di_v_bat_rer?: number | null;
-    di_motor_current_f?: number | null;
-    di_motor_current_rel?: number | null;
-    di_motor_current_rer?: number | null;
-    di_inverter_tr?: number | null;
-    di_inverter_tf?: number | null;
-    di_inverter_trel?: number | null;
-    di_inverter_trer?: number | null;
+    DiStateR?: DriveInverterState | null;
+    DiHeatsinkTR?: number | null;
+    DiAxleSpeedR?: number | null;
+    DiTorquemotor?: number | null;
+    DiStatorTempR?: number | null;
+    DiVBatR?: number | null;
+    DiMotorCurrentR?: number | null;
+    DiStateF?: DriveInverterState | null;
+    DiStateREL?: DriveInverterState | null;
+    DiStateRER?: DriveInverterState | null;
+    DiHeatsinkTF?: number | null;
+    DiHeatsinkTREL?: number | null;
+    DiHeatsinkTRER?: number | null;
+    DiAxleSpeedF?: number | null;
+    DiAxleSpeedREL?: number | null;
+    DiAxleSpeedRER?: number | null;
+    DiSlaveTorqueCmd?: number | null;
+    DiTorqueActualR?: number | null;
+    DiTorqueActualF?: number | null;
+    DiTorqueActualREL?: number | null;
+    DiTorqueActualRER?: number | null;
+    DiStatorTempF?: number | null;
+    DiStatorTempREL?: number | null;
+    DiStatorTempRER?: number | null;
+    DiVBatF?: number | null;
+    DiVBatREL?: number | null;
+    DiVBatRER?: number | null;
+    DiMotorCurrentF?: number | null;
+    DiMotorCurrentREL?: number | null;
+    DiMotorCurrentRER?: number | null;
+    DiInverterTR?: number | null;
+    DiInverterTF?: number | null;
+    DiInverterTREL?: number | null;
+    DiInverterTRER?: number | null;
 
     // Location and GPS
-    location?: LocationValue | null;
-    gps_state?: number | null;
-    gps_heading?: number | null;
-    origin_location?: LocationValue | null;
-    destination_location?: LocationValue | null;
+    Location?: LocationValue | null;
+    GpsState?: number | null;
+    GpsHeading?: number | null;
+    OriginLocation?: LocationValue | null;
+    DestinationLocation?: LocationValue | null;
 
     // Battery data
-    num_brick_voltage_max?: number | null;
-    brick_voltage_max?: number | null;
-    num_brick_voltage_min?: number | null;
-    brick_voltage_min?: number | null;
-    num_module_temp_max?: number | null;
-    module_temp_max?: number | null;
-    num_module_temp_min?: number | null;
-    module_temp_min?: number | null;
-    rated_range?: number | null;
-    hvil?: number | null;
-    est_battery_range?: number | null;
-    ideal_battery_range?: number | null;
-    battery_level?: number | null;
-    energy_remaining?: number | null;
-    battery_heater_on?: boolean | null;
-    not_enough_power_to_heat?: boolean | null;
-    bms_state?: BMSState | null;
+    NumBrickVoltageMax?: number | null;
+    BrickVoltageMax?: number | null;
+    NumBrickVoltageMin?: number | null;
+    BrickVoltageMin?: number | null;
+    NumModuleTempMax?: number | null;
+    ModuleTempMax?: number | null;
+    NumModuleTempMin?: number | null;
+    ModuleTempMin?: number | null;
+    RatedRange?: number | null;
+    Hvil?: number | null;
+    EstBatteryRange?: number | null;
+    IdealBatteryRange?: number | null;
+    BatteryLevel?: number | null;
+    EnergyRemaining?: number | null;
+    BatteryHeaterOn?: boolean | null;
+    NotEnoughPowerToHeat?: boolean | null;
+    BMSState?: BMSState | null;
 
     // Charging data
-    dc_charging_energy_in?: number | null;
-    dc_charging_power?: number | null;
-    ac_charging_energy_in?: number | null;
-    ac_charging_power?: number | null;
-    charge_limit_soc?: number | null;
-    fast_charger_present?: boolean | null;
-    time_to_full_charge?: number | null;
-    scheduled_charging_start_time?: number | null;
-    scheduled_charging_pending?: boolean | null;
-    scheduled_departure_time?: number | null;
-    preconditioning_enabled?: boolean | null;
-    scheduled_charging_mode?: ScheduledChargingMode | null;
-    charge_amps?: number | null;
-    charge_enable_request?: boolean | null;
-    charger_phases?: number | null;
-    charge_port_cold_weather_mode?: boolean | null;
-    charge_current_request?: number | null;
-    charge_current_request_max?: number | null;
-    supercharger_session_trip_planner?: boolean | null;
-    charge_port?: ChargePort | null;
-    charge_port_latch?: ChargePortLatch | null;
-    charge_port_door_open?: boolean | null;
-    charger_voltage?: number | null;
-    charging_cable_type?: CableType | null;
-    detailed_charge_state?: DetailedChargeState | null;
-    estimated_hours_to_charge_termination?: number | null;
-    fast_charger_type?: FastCharger | null;
-    charge_rate_mile_per_hour?: number | null;
+    DCChargingEnergyIn?: number | null;
+    DCChargingPower?: number | null;
+    ACChargingEnergyIn?: number | null;
+    ACChargingPower?: number | null;
+    ChargeLimitSoc?: number | null;
+    FastChargerPresent?: boolean | null;
+    TimeToFullCharge?: number | null;
+    ScheduledChargingStartTime?: number | null;
+    ScheduledChargingPending?: boolean | null;
+    ScheduledDepartureTime?: number | null;
+    PreconditioningEnabled?: boolean | null;
+    ScheduledChargingMode?: ScheduledChargingMode | null;
+    ChargeAmps?: number | null;
+    ChargeEnableRequest?: boolean | null;
+    ChargerPhases?: number | null;
+    ChargePortColdWeatherMode?: boolean | null;
+    ChargeCurrentRequest?: number | null;
+    ChargeCurrentRequestMax?: number | null;
+    SuperchargerSessionTripPlanner?: boolean | null;
+    ChargePort?: ChargePort | null;
+    ChargePortLatch?: ChargePortLatch | null;
+    ChargePortDoorOpen?: boolean | null;
+    ChargerVoltage?: number | null;
+    ChargingCableType?: CableType | null;
+    DetailedChargeState?: DetailedChargeState | null;
+    EstimatedHoursToChargeTermination?: number | null;
+    FastChargerType?: FastCharger | null;
+    ChargeRateMilePerHour?: number | null;
 
     // Doors and windows
-    door_state?: Doors | null;
-    locked?: boolean | null;
-    fd_window?: WindowState | null;
-    fp_window?: WindowState | null;
-    rd_window?: WindowState | null;
-    rp_window?: WindowState | null;
+    DoorState?: Doors | null;
+    Locked?: boolean | null;
+    FdWindow?: WindowState | null;
+    FpWindow?: WindowState | null;
+    RdWindow?: WindowState | null;
+    RpWindow?: WindowState | null;
 
     // Vehicle info
-    vehicle_name?: string | null;
-    version?: string | null;
-    car_type?: CarType | null;
-    trim?: string | null;
-    exterior_color?: string | null;
-    roof_color?: string | null;
-    efficiency_package?: boolean | null;
-    europe_vehicle?: boolean | null;
-    right_hand_drive?: boolean | null;
-    wheel_type?: string | null;
+    VehicleName?: string | null;
+    Version?: string | null;
+    CarType?: CarType | null;
+    Trim?: string | null;
+    ExteriorColor?: string | null;
+    RoofColor?: string | null;
+    EfficiencyPackage?: boolean | null;
+    EuropeVehicle?: boolean | null;
+    RightHandDrive?: boolean | null;
+    WheelType?: string | null;
 
     // Security and access
-    sentry_mode?: SentryMode | null;
-    speed_limit_mode?: boolean | null;
-    current_limit_mph?: number | null;
-    guest_mode_enabled?: boolean | null;
-    pin_to_drive_enabled?: boolean | null;
-    paired_phone_key_and_key_fob_qty?: number | null;
-    guest_mode_mobile_access_state?: GuestModeMobileAccess | null;
-    valet_mode_enabled?: boolean | null;
-    remote_start_enabled?: boolean | null;
+    SentryMode?: SentryMode | null;
+    SpeedLimitMode?: boolean | null;
+    CurrentLimitMph?: number | null;
+    GuestModeEnabled?: boolean | null;
+    PinToDriveEnabled?: boolean | null;
+    PairedPhoneKeyAndKeyFobQty?: number | null;
+    GuestModeMobileAccessState?: GuestModeMobileAccess | null;
+    ValetModeEnabled?: boolean | null;
+    RemoteStartEnabled?: boolean | null;
 
     // TPMS data
-    tpms_pressure_fl?: number | null;
-    tpms_pressure_fr?: number | null;
-    tpms_pressure_rl?: number | null;
-    tpms_pressure_rr?: number | null;
-    semitruck_tpms_pressure_re1_l0?: number | null;
-    semitruck_tpms_pressure_re1_l1?: number | null;
-    semitruck_tpms_pressure_re1_r0?: number | null;
-    semitruck_tpms_pressure_re1_r1?: number | null;
-    semitruck_tpms_pressure_re2_l0?: number | null;
-    semitruck_tpms_pressure_re2_l1?: number | null;
-    semitruck_tpms_pressure_re2_r0?: number | null;
-    semitruck_tpms_pressure_re2_r1?: number | null;
-    tpms_last_seen_pressure_time_fl?: TireLocation | null;
-    tpms_last_seen_pressure_time_fr?: TireLocation | null;
-    tpms_last_seen_pressure_time_rl?: TireLocation | null;
-    tpms_last_seen_pressure_time_rr?: TireLocation | null;
-    tpms_hard_warnings?: TireLocation | null;
-    tpms_soft_warnings?: TireLocation | null;
+    TpmsPressureFl?: number | null;
+    TpmsPressureFr?: number | null;
+    TpmsPressureRl?: number | null;
+    TpmsPressureRr?: number | null;
+    SemitruckTpmsPressureRe1L0?: number | null;
+    SemitruckTpmsPressureRe1L1?: number | null;
+    SemitruckTpmsPressureRe1R0?: number | null;
+    SemitruckTpmsPressureRe1R1?: number | null;
+    SemitruckTpmsPressureRe2L0?: number | null;
+    SemitruckTpmsPressureRe2L1?: number | null;
+    SemitruckTpmsPressureRe2R0?: number | null;
+    SemitruckTpmsPressureRe2R1?: number | null;
+    TpmsLastSeenPressureTimeFl?: TireLocation | null;
+    TpmsLastSeenPressureTimeFr?: TireLocation | null;
+    TpmsLastSeenPressureTimeRl?: TireLocation | null;
+    TpmsLastSeenPressureTimeRr?: TireLocation | null;
+    TpmsHardWarnings?: TireLocation | null;
+    TpmsSoftWarnings?: TireLocation | null;
 
     // Climate control
-    inside_temp?: number | null;
-    outside_temp?: number | null;
-    seat_heater_left?: number | null;
-    seat_heater_right?: number | null;
-    seat_heater_rear_left?: number | null;
-    seat_heater_rear_right?: number | null;
-    seat_heater_rear_center?: number | null;
-    auto_seat_climate_left?: number | null;
-    auto_seat_climate_right?: number | null;
-    climate_seat_cooling_front_left?: number | null;
-    climate_seat_cooling_front_right?: number | null;
-    cabin_overheat_protection_mode?: CabinOverheatProtectionMode | null;
-    cabin_overheat_protection_temperature_limit?: ClimateOverheatProtectionTempLimit | null;
-    climate_keeper_mode?: ClimateKeeperMode | null;
-    defrost_for_preconditioning?: boolean | null;
-    defrost_mode?: DefrostMode | null;
-    hvac_ac_enabled?: boolean | null;
-    hvac_auto_mode?: HvacAutoMode | null;
-    hvac_fan_speed?: number | null;
-    hvac_fan_status?: number | null;
-    hvac_left_temperature_request?: number | null;
-    hvac_power?: HvacPower | null;
-    hvac_right_temperature_request?: number | null;
-    hvac_steering_wheel_heat_auto?: boolean | null;
-    hvac_steering_wheel_heat_level?: number | null;
-    rear_display_hvac_enabled?: boolean | null;
-    rear_seat_heaters?: boolean | null;
-    seat_vent_enabled?: boolean | null;
-    rear_defrost_enabled?: boolean | null;
-    wiper_heat_enabled?: boolean | null;
+    InsideTemp?: number | null;
+    OutsideTemp?: number | null;
+    SeatHeaterLeft?: number | null;
+    SeatHeaterRight?: number | null;
+    SeatHeaterRearLeft?: number | null;
+    SeatHeaterRearRight?: number | null;
+    SeatHeaterRearCenter?: number | null;
+    AutoSeatClimateLeft?: number | null;
+    AutoSeatClimateRight?: number | null;
+    ClimateSeatCoolingFrontLeft?: number | null;
+    ClimateSeatCoolingFrontRight?: number | null;
+    CabinOverheatProtectionMode?: CabinOverheatProtectionMode | null;
+    CabinOverheatProtectionTemperatureLimit?: ClimateOverheatProtectionTempLimit | null;
+    ClimateKeeperMode?: ClimateKeeperMode | null;
+    DefrostForPreconditioning?: boolean | null;
+    DefrostMode?: DefrostMode | null;
+    HvacACEnabled?: boolean | null;
+    HvacAutoMode?: HvacAutoMode | null;
+    HvacFanSpeed?: number | null;
+    HvacFanStatus?: number | null;
+    HvacLeftTemperatureRequest?: number | null;
+    HvacPower?: HvacPower | null;
+    HvacRightTemperatureRequest?: number | null;
+    HvacSteeringWheelHeatAuto?: boolean | null;
+    HvacSteeringWheelHeatLevel?: number | null;
+    RearDisplayHvacEnabled?: boolean | null;
+    RearSeatHeaters?: boolean | null;
+    SeatVentEnabled?: boolean | null;
+    RearDefrostEnabled?: boolean | null;
+    WiperHeatEnabled?: boolean | null;
 
     // Seat occupancy
-    driver_seat_belt?: string | null;
-    passenger_seat_belt?: string | null;
-    driver_seat_occupied?: boolean | null;
-    semitruck_passenger_seat_fold_position?: string | null;
+    DriverSeatBelt?: string | null;
+    PassengerSeatBelt?: string | null;
+    DriverSeatOccupied?: boolean | null;
+    SemitruckPassengerSeatFoldPosition?: string | null;
 
     // Vehicle dynamics
-    lateral_acceleration?: number | null;
-    longitudinal_acceleration?: number | null;
-    cruise_set_speed?: number | null;
-    cruise_follow_distance?: FollowDistance | null;
-    brake_pedal_pos?: number | null;
+    LateralAcceleration?: number | null;
+    LongitudinalAcceleration?: number | null;
+    CruiseSetSpeed?: number | null;
+    CruiseFollowDistance?: FollowDistance | null;
+    BrakePedalPos?: number | null;
 
     // Energy usage
-    lifetime_energy_used?: number | null;
-    lifetime_energy_used_drive?: number | null;
-    lifetime_energy_gained_regen?: number | null;
+    LifetimeEnergyUsed?: number | null;
+    LifetimeEnergyUsedDrive?: number | null;
+    LifetimeEnergyGainedRegen?: number | null;
 
     // Semi-truck specific
-    semitruck_tractor_park_brake_status?: string | null;
-    semitruck_trailer_park_brake_status?: string | null;
+    SemitruckTractorParkBrakeStatus?: string | null;
+    SemitruckTrailerParkBrakeStatus?: string | null;
 
     // Navigation
-    route_last_updated?: number | null;
-    route_line?: string | null;
-    miles_to_arrival?: number | null;
-    minutes_to_arrival?: number | null;
-    destination_name?: string | null;
-    route_traffic_minutes_delay?: number | null;
+    RouteLastUpdated?: number | null;
+    RouteLine?: string | null;
+    MilesToArrival?: number | null;
+    MinutesToArrival?: number | null;
+    DestinationName?: string | null;
+    RouteTrafficMinutesDelay?: number | null;
 
     // Safety features
-    automatic_blind_spot_camera?: boolean | null;
-    blind_spot_collision_warning_chime?: boolean | null;
-    speed_limit_warning?: boolean | null;
-    forward_collision_warning?: ForwardCollisionSensitivity | null;
-    lane_departure_avoidance?: string | null;
-    emergency_lane_departure_avoidance?: boolean | null;
-    automatic_emergency_braking_off?: boolean | null;
+    AutomaticBlindSpotCamera?: boolean | null;
+    BlindSpotCollisionWarningChime?: boolean | null;
+    SpeedLimitWarning?: boolean | null;
+    ForwardCollisionWarning?: ForwardCollisionSensitivity | null;
+    LaneDepartureAvoidance?: string | null;
+    EmergencyLaneDepartureAvoidance?: boolean | null;
+    AutomaticEmergencyBrakingOff?: boolean | null;
 
     // Experimental fields
-    experimental_1?: number | null;
-    experimental_2?: number | null;
-    experimental_3?: number | null;
-    experimental_4?: number | null;
-    experimental_5?: number | null;
-    experimental_6?: number | null;
-    experimental_7?: number | null;
-    experimental_8?: number | null;
-    experimental_9?: number | null;
-    experimental_10?: number | null;
-    experimental_11?: number | null;
-    experimental_12?: number | null;
-    experimental_13?: number | null;
-    experimental_14?: number | null;
-    experimental_15?: number | null;
+    Experimental_1?: number | null;
+    Experimental_2?: number | null;
+    Experimental_3?: number | null;
+    Experimental_4?: number | null;
+    Experimental_5?: number | null;
+    Experimental_6?: number | null;
+    Experimental_7?: number | null;
+    Experimental_8?: number | null;
+    Experimental_9?: number | null;
+    Experimental_10?: number | null;
+    Experimental_11?: number | null;
+    Experimental_12?: number | null;
+    Experimental_13?: number | null;
+    Experimental_14?: number | null;
+    Experimental_15?: number | null;
 
     // Service and diagnostics
-    service_mode?: boolean | null;
+    ServiceMode?: boolean | null;
 
     // Deprecated fields
-    deprecated_1?: number | null;
-    deprecated_2?: number | null;
-    deprecated_3?: number | null;
+    Deprecated_1?: number | null;
+    Deprecated_2?: number | null;
+    Deprecated_3?: number | null;
 
     // Display and UI
-    center_display?: DisplayState | null;
+    CenterDisplay?: DisplayState | null;
 
     // Homelink
-    homelink_device_count?: number | null;
-    homelink_nearby?: boolean | null;
+    HomelinkDeviceCount?: number | null;
+    HomelinkNearby?: boolean | null;
 
     // Powershare
-    powershare_hours_left?: number | null;
-    powershare_instantaneous_power_kw?: number | null;
-    powershare_status?: PowershareState | null;
-    powershare_stop_reason?: PowershareStopReason | null;
-    powershare_type?: PowershareType | null;
+    PowershareHoursLeft?: number | null;
+    PowershareInstantaneousPowerKW?: number | null;
+    PowershareStatus?: PowershareState | null;
+    PowershareStopReason?: PowershareStopReason | null;
+    PowershareType?: PowershareType | null;
 
     // Software updates
-    software_update_download_percent_complete?: number | null;
-    software_update_expected_duration_minutes?: number | null;
-    software_update_installation_percent_complete?: number | null;
-    software_update_scheduled_start_time?: number | null;
-    software_update_version?: string | null;
+    SoftwareUpdateDownloadPercentComplete?: number | null;
+    SoftwareUpdateExpectedDurationMinutes?: number | null;
+    SoftwareUpdateInstallationPercentComplete?: number | null;
+    SoftwareUpdateScheduledStartTime?: number | null;
+    SoftwareUpdateVersion?: string | null;
 
     // Tonneau cover
-    tonneau_open_percent?: number | null;
-    tonneau_position?: TonneauPosition | null;
-    tonneau_tent_mode?: TonneauTentMode | null;
+    TonneauOpenPercent?: number | null;
+    TonneauPosition?: TonneauPosition | null;
+    TonneauTentMode?: TonneauTentMode | null;
 
     // Offroad features
-    offroad_lightbar_present?: boolean | null;
+    OffroadLightbarPresent?: boolean | null;
 
     // Location-based features
-    located_at_home?: boolean | null;
-    located_at_work?: boolean | null;
-    located_at_favorite?: boolean | null;
+    LocatedAtHome?: boolean | null;
+    LocatedAtWork?: boolean | null;
+    LocatedAtFavorite?: boolean | null;
 
     // Settings
-    setting_distance_unit?: DistanceUnit | null;
-    setting_temperature_unit?: TemperatureUnit | null;
-    setting_24_hour_time?: boolean | null;
-    setting_tire_pressure_unit?: PressureUnit | null;
-    setting_charge_unit?: string | null;
+    SettingDistanceUnit?: DistanceUnit | null;
+    SettingTemperatureUnit?: TemperatureUnit | null;
+    Setting24HourTime?: boolean | null;
+    SettingTirePressureUnit?: PressureUnit | null;
+    SettingChargeUnit?: string | null;
 
     // Lights
-    lights_hazards_active?: boolean | null;
-    lights_turn_signal?: TurnSignal | null;
-    lights_high_beams?: boolean | null;
+    LightsHazardsActive?: boolean | null;
+    LightsTurnSignal?: TurnSignal | null;
+    LightsHighBeams?: boolean | null;
 
     // Media
-    media_playback_status?: MediaStatus | null;
-    media_playback_source?: string | null;
-    media_audio_volume?: number | null;
-    media_now_playing_duration?: number | null;
-    media_now_playing_elapsed?: number | null;
-    media_now_playing_artist?: string | null;
-    media_now_playing_title?: string | null;
-    media_now_playing_album?: string | null;
-    media_now_playing_station?: string | null;
-    media_audio_volume_increment?: number | null;
-    media_audio_volume_max?: number | null;
+    MediaPlaybackStatus?: MediaStatus | null;
+    MediaPlaybackSource?: string | null;
+    MediaAudioVolume?: number | null;
+    MediaNowPlayingDuration?: number | null;
+    MediaNowPlayingElapsed?: number | null;
+    MediaNowPlayingArtist?: string | null;
+    MediaNowPlayingTitle?: string | null;
+    MediaNowPlayingAlbum?: string | null;
+    MediaNowPlayingStation?: string | null;
+    MediaAudioVolumeIncrement?: number | null;
+    MediaAudioVolumeMax?: number | null;
 
     // Sunroof
-    sunroof_installed?: SunroofInstalled | null;
+    SunroofInstalled?: SunroofInstalled | null;
 
     // Trip data
-    expected_energy_percent_at_trip_arrival?: number | null;
-
-    // Additional properties from Signal enum
-    speed_limit_acclimation?: number | null;
-    state_of_charge?: number | null;
-    steering_wheel_heated?: boolean | null;
-    sunroof_state?: string | null;
-    sunroof_tilt_only?: boolean | null;
-    supercharger_session_active?: boolean | null;
-    tailgating_warning?: boolean | null;
-    tire_pressure_front_left?: number | null;
-    tire_pressure_front_right?: number | null;
-    tire_pressure_rear_left?: number | null;
-    tire_pressure_rear_right?: number | null;
-    traffic_based_cruise_control?: boolean | null;
-    traffic_warning?: boolean | null;
-    trailer_brake_controller_connected?: boolean | null;
-    trailer_hitch_active?: boolean | null;
-    turn_signal?: TurnSignal | null;
-    tyre_pressure_cold_warning?: boolean | null;
-    unsafe_ride_exit?: boolean | null;
-    update_available?: boolean | null;
-    user_present?: boolean | null;
-    vehicle_data?: any | null;
-    vehicle_home_link?: any | null;
-    vehicle_power?: number | null;
-    vehicle_range?: number | null;
-    vent_driver_window?: boolean | null;
-    vent_passenger_window?: boolean | null;
-    vent_rear_driver_window?: boolean | null;
-    vent_rear_passenger_window?: boolean | null;
-    wall_connector_max_amps?: number | null;
-    wipers_on?: boolean | null;
-    charging_state_change?: any | null;
-    connection_state?: string | null;
-    credits?: number | null;
-    status?: Status | null;
-    alerts?: any | null;
-    errors?: any | null;
-    network_interface?: NetworkInterface | null;
-    battery_charge_state?: ChargeState | null;
-    charge_current_requested?: number | null;
-    charge_port_open?: boolean | null;
-    charge_rate?: number | null;
-    charge_total_charge_miles?: number | null;
-    estimated_charge_time?: number | null;
-    trip_energy_added?: number | null;
-    trip_miles_added?: number | null;
-    trip_remaining_supercharger_session_minutes?: number | null;
-    trip_supercharger_session_active?: boolean | null;
-    trip_supercharger_session_energy_added?: number | null;
-    trip_supercharger_session_miles_added?: number | null;
-    supercharger_location?: LocationValue | null;
-    state?: State | null;
-    credits_balance?: number | null;
-    charge_with_solar_history_daily?: number | null;
-    charge_with_solar_history_monthly?: number | null;
-    charge_with_solar_history_yearly?: number | null;
-    charge_with_solar_history_lifetime?: number | null;
-    charge_with_solar_status?: string | null;
-    charge_with_solar_start_time?: number | null;
-    charge_with_solar_end_time?: number | null;
-    charge_with_solar_min_limit?: number | null;
-    charge_with_solar_max_limit?: number | null;
-    charge_with_solar_grid_export_enabled?: boolean | null;
-    charge_with_solar_min_soc?: number | null;
-    charge_with_solar_max_soc?: number | null;
-    charge_with_solar_solar_offset?: number | null;
-    charge_with_solar_estimated_duration_seconds?: number | null;
-    charge_with_solar_estimated_energy_gained_kwh?: number | null;
+    ExpectedEnergyPercentAtTripArrival?: number | null;
   };
 }
+export type Signals = keyof ISseData["data"];
 
 export interface ISseErrors extends ISseBase {
   errors: Array<{
@@ -632,6 +564,22 @@ export interface ISseVehicleData extends ISseBase {
   vehicle_data: Record<string, any>;
 }
 
+export interface ISseConfig extends ISseBase {
+  config: { fields: FieldsResponse };
+}
+export type FieldsResponse = { [key in Signals]?: FieldResponse };
+export type FieldResponse = {
+  interval_seconds: number;
+  minimum_delta?: number;
+  resend_interval_seconds?: number;
+};
+export type FieldsRequest = { [key in Signals]?: FieldResponse };
+export type FieldRequest = {
+  interval_seconds: number | null;
+  minimum_delta?: number | null;
+  resend_interval_seconds?: number | null;
+};
+
 interface LocationValue {
   latitude: number;
   longitude: number;
@@ -673,4 +621,5 @@ export type ISseEvent =
   | ISseAlerts
   | ISseConnectivity
   | ISseCredits
-  | ISseVehicleData;
+  | ISseVehicleData
+  | ISseConfig;

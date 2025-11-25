@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "client": "openapi-ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.18.1",
   "devDependencies": {
+    "@hey-api/openapi-ts": "0.88.0",
     "@types/eventsource": "^3.0.0",
     "@types/node": "^24.10.1",
     "eventsource": "^4.1.0",
