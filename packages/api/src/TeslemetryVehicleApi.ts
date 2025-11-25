@@ -169,6 +169,18 @@ import {
 
 const SEATS = { front_left: 1, front_right: 2 } as const;
 
+type VehicleDataEndpoints =
+  | "charge_state"
+  | "climate_state"
+  | "closures_state"
+  | "drive_state"
+  | "gui_settings"
+  | "location_data"
+  | "charge_schedule_data"
+  | "preconditioning_schedule_data"
+  | "vehicle_config"
+  | "vehicle_state";
+
 export class TeslemetryVehicleApi {
   private root: Teslemetry;
   public vin: string;
@@ -196,18 +208,19 @@ export class TeslemetryVehicleApi {
 
   /**
    * Returns the cached vehicle data for this vehicle. location_data will only be present if you have provided the location_data scope.
-   * @param endpoints A comma-separated list of endpoints to retrieve data for
+   * @param endpoints An array of endpoint strings to retrieve data for
    * @param use_cache Whether to use cached data
    * @return Promise to an object with response containing the cached vehicle data
    */
   public async vehicleData(
-    endpoints?: NonNullable<
-      GetApi1VehiclesByVinVehicleDataData["query"]
-    >["endpoints"],
+    endpoints?: VehicleDataEndpoints[],
     use_cache: boolean = true,
   ) {
     const { data } = await getApi1VehiclesByVinVehicleData({
-      query: { endpoints, use_cache },
+      query: {
+        endpoints: endpoints ? endpoints.join(",") : undefined,
+        use_cache,
+      },
       path: { vin: this.vin },
       client: this.root.client,
     });
