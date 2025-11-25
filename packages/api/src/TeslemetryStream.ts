@@ -1,4 +1,4 @@
-import { TeslemetryStreamVehicle } from "./TeslemetryVehicleStream";
+import { TeslemetryVehicleStream } from "./TeslemetryVehicleStream";
 import { EventSource } from "eventsource";
 import { ISseCredits, ISseEvent } from "./const";
 import { Teslemetry } from "./Teslemetry";
@@ -19,7 +19,7 @@ export class TeslemetryStream {
     new Map();
   private retries: number = 0;
   private eventSource: EventSource | null = null;
-  private vehicles: Map<string, TeslemetryStreamVehicle> = new Map();
+  private vehicles: Map<string, TeslemetryVehicleStream> = new Map();
 
   constructor(root: Teslemetry, access_token: string, vin?: string) {
     this.root = root;
@@ -30,9 +30,9 @@ export class TeslemetryStream {
     }
   }
 
-  public getVehicle(vin: string): TeslemetryStreamVehicle {
+  public getVehicle(vin: string): TeslemetryVehicleStream {
     if (!this.vehicles.has(vin)) {
-      this.vehicles.set(vin, new TeslemetryStreamVehicle(this.root, this, vin));
+      this.vehicles.set(vin, new TeslemetryVehicleStream(this.root, this, vin));
     }
     return this.vehicles.get(vin)!;
   }

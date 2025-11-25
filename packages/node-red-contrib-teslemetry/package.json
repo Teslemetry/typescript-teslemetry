@@ -1,0 +1,20 @@
+{
+  "name": "@teslemetry/node-red-contrib-teslemetry",
+  "version": "1.0.0",
+  "description": "Node-RED integration for Teslemetry",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc"
+  },
+  "keywords": [
+    "node-red",
+    "tesla",
+    "teslemetry"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@teslemetry/api": "workspace:*"
+  }
+}

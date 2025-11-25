@@ -1,4 +1,4 @@
-// src/TeslemetryStreamVehicle.ts
+// src/TeslemetryVehicleStream.ts
 
 import { Teslemetry } from "./Teslemetry";
 import { TeslemetryStream } from "./TeslemetryStream";
@@ -17,7 +17,7 @@ import type {
   Signals,
 } from "./const";
 
-export class TeslemetryStreamVehicle {
+export class TeslemetryVehicleStream {
   private root: Teslemetry;
   private stream: TeslemetryStream;
   public vin: string;

@@ -1,0 +1,27 @@
+{
+  "name": "@teslemetry/api",
+  "version": "1.0.0",
+  "description": "API client for Teslemetry",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "client": "openapi-ts -c openapi-ts.config.ts",
+    "build": "tsup",
+    "tsc": "tsc --noEmit"
+  },
+  "keywords": [
+    "tesla",
+    "teslemetry"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "eventsource": "^4.1.0"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.88.0",
+    "@types/eventsource": "^3.0.0"
+  }
+}

@@ -1,15 +1,19 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "module": "commonjs",
     "lib": ["es2022", "dom"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "declaration": true
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "baseUrl": ".",
+    "paths": {
+      "@teslemetry/api": ["packages/api/src"],
+      "@teslemetry/node-red-contrib-teslemetry": ["packages/node-red-contrib-teslemetry/src"],
+      "@teslemetry/n8n-nodes-teslemetry": ["packages/n8n-nodes-teslemetry/src"]
+    }
   },
-  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,21 +1,16 @@
 {
-  "name": "typescript-teslemetry-stream",
+  "name": "@teslemetry/root",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "client": "openapi-ts"
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r tsc"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "packageManager": "pnpm@10.18.1",
   "devDependencies": {
-    "@hey-api/openapi-ts": "0.88.0",
-    "@types/eventsource": "^3.0.0",
     "@types/node": "^24.10.1",
-    "eventsource": "^4.1.0",
+    "tsup": "^8.2.3",
     "typescript": "^5.9.3"
   }
 }

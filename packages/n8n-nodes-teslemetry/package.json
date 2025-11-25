@@ -1,0 +1,20 @@
+{
+  "name": "@teslemetry/n8n-nodes-teslemetry",
+  "version": "1.0.0",
+  "description": "n8n.io integration for Teslemetry",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc"
+  },
+  "keywords": [
+    "n8n",
+    "tesla",
+    "teslemetry"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@teslemetry/api": "workspace:*"
+  }
+}

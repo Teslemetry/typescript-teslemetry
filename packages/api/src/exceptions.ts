@@ -14,10 +14,10 @@ export class TeslemetryStreamConnectionError extends TeslemetryStreamError {
   }
 }
 
-export class TeslemetryStreamVehicleNotConfigured extends TeslemetryStreamError {
+export class TeslemetryVehicleStreamNotConfigured extends TeslemetryStreamError {
   constructor(message: string) {
     super(message);
-    this.name = "TeslemetryStreamVehicleNotConfigured";
+    this.name = "TeslemetryVehicleStreamNotConfigured";
   }
 }
 
