@@ -2,13 +2,24 @@
   "name": "@teslemetry/api",
   "version": "0.0.1",
   "description": "API client for Teslemetry",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "types": "dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "tsx --env-file=.env examples/simple.ts",
+    "test": "tsc --noEmit",
+    "api": "pnpm build && node examples/api.ts",
+    "sse": "pnpm build && node examples/sse.ts",
     "client": "openapi-ts --file openapi-ts.config.ts",
-    "build": "tsup",
+    "build": "tsdown",
     "tsc": "tsc --noEmit"
   },
   "keywords": [
@@ -25,6 +36,7 @@
   "devDependencies": {
     "@hey-api/openapi-ts": "0.88.0",
     "dotenv": "^17.2.3",
+    "tsdown": "^0.16.7",
     "tsx": "^4.20.6"
   }
 }

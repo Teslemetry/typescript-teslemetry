@@ -1,20 +1,20 @@
 import { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
 import {
-  ISseCredits,
-  ISseEvent,
-  ISseState,
-  ISseData,
-  ISseErrors,
-  ISseAlerts,
-  ISseConnectivity,
-  ISseVehicleData,
-  ISseConfig,
+  SseCredits,
+  SseEvent,
+  SseState,
+  SseData,
+  SseErrors,
+  SseAlerts,
+  SseConnectivity,
+  SseVehicleData,
+  SseConfig,
 } from "./const.js";
 import { Teslemetry } from "./Teslemetry.js";
 import { Logger } from "./logger.js";
 import { getSseByVin_ } from "./client/sdk.gen.js";
 
-type ListenerCallback<T extends ISseEvent = ISseEvent> = (event: T) => void;
+type ListenerCallback<T extends SseEvent = SseEvent> = (event: T) => void;
 type ConnectionListenerCallback = (connected: boolean) => void;
 type EventType =
   | "state"
@@ -24,7 +24,8 @@ type EventType =
   | "connectivity"
   | "credits"
   | "vehicle_data"
-  | "config";
+  | "config"
+  | "all";
 
 interface ListenerEntry {
   callback: (event: any) => void;
@@ -139,90 +140,66 @@ export class TeslemetryStream {
 
   // Event listeners (typed by event type)
   public onState(
-    callback: (event: ISseState) => void,
+    callback: (event: SseState) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("state", callback, filters);
   }
 
   public onData(
-    callback: (event: ISseData) => void,
+    callback: (event: SseData) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("data", callback, filters);
   }
 
   public onErrors(
-    callback: (event: ISseErrors) => void,
+    callback: (event: SseErrors) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("errors", callback, filters);
   }
 
   public onAlerts(
-    callback: (event: ISseAlerts) => void,
+    callback: (event: SseAlerts) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("alerts", callback, filters);
   }
 
   public onConnectivity(
-    callback: (event: ISseConnectivity) => void,
+    callback: (event: SseConnectivity) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("connectivity", callback, filters);
   }
 
   public onCredits(
-    callback: (event: ISseCredits) => void,
+    callback: (event: SseCredits) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("credits", callback, filters);
   }
 
   public onVehicleData(
-    callback: (event: ISseVehicleData) => void,
+    callback: (event: SseVehicleData) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("vehicle_data", callback, filters);
   }
 
   public onConfig(
-    callback: (event: ISseConfig) => void,
+    callback: (event: SseConfig) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("config", callback, filters);
   }
 
-  // Legacy and convenience methods
-  public on<T extends ISseEvent>(
-    callback: ListenerCallback<T>,
+  public on(
+    callback: (event: SseEvent) => void,
     filters?: Record<string, any>,
   ): () => void {
-    const eventTypes = [
-      "state",
-      "data",
-      "errors",
-      "alerts",
-      "connectivity",
-      "credits",
-      "vehicle_data",
-      "config",
-    ] as const;
-    const removeListeners: (() => void)[] = [];
-
-    for (const eventType of eventTypes) {
-      const removeListener = this._createListener(
-        eventType,
-        callback as (event: any) => void,
-        filters,
-      );
-      removeListeners.push(removeListener);
-    }
-
-    return () => {
-      removeListeners.forEach((remove) => remove());
-    };
+    return this._createListener("all", callback, filters);
   }
 
   // Private methods
@@ -232,7 +209,7 @@ export class TeslemetryStream {
     }
   }
 
-  private _createListener<T extends ISseEvent>(
+  private _createListener<T extends SseEvent>(
     eventType: EventType,
     callback: (event: T) => void,
     filters?: Record<string, any>,
@@ -264,6 +241,17 @@ export class TeslemetryStream {
         date.getTime() + parseInt((ns || "000").substring(0, 3));
     }
 
+    // Always dispatch to 'all' listeners first
+    const allListeners = this.listeners.get("all");
+    if (allListeners) {
+      for (const entry of allListeners) {
+        if (recursiveMatch(entry.filters, event)) {
+          entry.callback(event);
+        }
+      }
+    }
+
+    // Then dispatch to specific event type listeners
     let eventType: EventType | undefined;
 
     if ("state" in event) eventType = "state";

@@ -1,7 +1,7 @@
 // examples/simple.ts
 
 import { config } from "dotenv";
-import { Teslemetry } from "../src"; // Adjust path if needed
+import { Teslemetry } from "@teslemetry/api"; // Adjust path if needed
 
 // Load environment variables from .env file
 const { TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN } = config().parsed as Record<

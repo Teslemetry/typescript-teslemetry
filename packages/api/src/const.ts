@@ -7,15 +7,15 @@ import type {
 // Helper to extract members from the union
 type ExtractSse<T> = Extract<GetSseByVin_Response, T>;
 
-export type ISseEvent = GetSseByVin_Response;
-export type ISseState = ExtractSse<{ state: any }>;
-export type ISseData = ExtractSse<{ data: any }>;
-export type ISseErrors = ExtractSse<{ errors: any }>;
-export type ISseAlerts = ExtractSse<{ alerts: any }>;
-export type ISseConnectivity = ExtractSse<{ networkInterface: any }>;
-export type ISseCredits = ExtractSse<{ credits: any }>;
-export type ISseVehicleData = ExtractSse<{ vehicle_data: any }>;
-export type ISseConfig = ExtractSse<{ config: any }>;
+export type SseEvent = GetSseByVin_Response;
+export type SseState = ExtractSse<{ state: any }>;
+export type SseData = ExtractSse<{ data: any }>;
+export type SseErrors = ExtractSse<{ errors: any }>;
+export type SseAlerts = ExtractSse<{ alerts: any }>;
+export type SseConnectivity = ExtractSse<{ networkInterface: any }>;
+export type SseCredits = ExtractSse<{ credits: any }>;
+export type SseVehicleData = ExtractSse<{ vehicle_data: any }>;
+export type SseConfig = ExtractSse<{ config: any }>;
 
 export type FieldsResponse = GetApiConfigByVinResponses[200]["fields"];
 // The body of patch/post config is { fields: ... }
@@ -23,4 +23,4 @@ export type FieldsRequest = NonNullable<
   NonNullable<PatchApiConfigByVinData["body"]>["fields"]
 >;
 
-export type Signals = keyof ISseData["data"];
+export type Signals = keyof SseData["data"];
