@@ -55,7 +55,6 @@ export class TeslemetryVehicleStream {
 
     if (response.status === 200 && data) {
       this.fields = (data.fields as FieldsResponse) || {};
-      // this.preferTyped = data.prefer_typed || false; // Removed
     } else if (response.status === 404) {
       this.logger.warn(`Config for VIN ${this.vin} not found (404).`);
       return;
@@ -79,6 +78,7 @@ export class TeslemetryVehicleStream {
         this.logger.info(
           `Updated ${Object.keys(this._pendingFields).length} streaming fields for ${this.vin}`,
         );
+        // null means default, not delete, so its okay
         this.fields = { ...this.fields, ...this._pendingFields };
         this._pendingFields = {};
       } else {
@@ -95,7 +95,7 @@ export class TeslemetryVehicleStream {
     const { data } = await patchApiConfigByVin({
       client: this.root.client,
       path: { vin: this.vin },
-      body: { fields: fields as any }, // Cast to any to avoid potential type mismatch with generated types if strict
+      body: { fields },
     });
     return data;
   }
@@ -104,13 +104,14 @@ export class TeslemetryVehicleStream {
     const { data } = await postApiConfigByVin({
       client: this.root.client,
       path: { vin: this.vin },
-      body: { fields: fields as any },
+      body: { fields },
     });
     return data;
   }
 
   public async addField(field: Signals, interval?: number): Promise<void> {
     if (
+      this.fields &&
       this.fields[field] &&
       (interval === undefined ||
         this.fields[field]!.interval_seconds === interval)
@@ -123,7 +124,7 @@ export class TeslemetryVehicleStream {
 
     const value =
       interval !== undefined ? { interval_seconds: interval } : null;
-    this.updateFields({ [field]: value });
+    this.updateFields({ [field]: value } as FieldsRequest);
   }
 
   // Event listeners (all pre-filtered by VIN)

@@ -84,7 +84,6 @@ export class TeslemetryStream {
         });
 
         if ((sse as any).controller) {
-          console.log("CONTROLLER", this.controller);
           this.controller = (sse as any).controller;
         }
 
