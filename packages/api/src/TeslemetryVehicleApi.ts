@@ -975,14 +975,12 @@ export class TeslemetryVehicleApi {
 
   /**
    * Sets the charging amps.
-   * @param body The charging amps configuration
+   * @param charging_amps The charging amps value
    * @return Promise to an object with response containing charging amps set result
    */
-  public async setChargingAmps(
-    body: PostApi1VehiclesByVinCommandSetChargingAmpsData,
-  ) {
+  public async setChargingAmps(charging_amps: number) {
     const { data } = await postApi1VehiclesByVinCommandSetChargingAmps({
-      ...body,
+      body: { charging_amps },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -991,14 +989,13 @@ export class TeslemetryVehicleApi {
 
   /**
    * Sets scheduled charging.
-   * @param body The scheduled charging configuration
+   * @param enable Whether to enable scheduled charging
+   * @param time The scheduled charging time
    * @return Promise to an object with response containing scheduled charging set result
    */
-  public async setScheduledCharging(
-    body: PostApi1VehiclesByVinCommandSetScheduledChargingData,
-  ) {
+  public async setScheduledCharging(enable: boolean, time: number) {
     const { data } = await postApi1VehiclesByVinCommandSetScheduledCharging({
-      ...body,
+      body: { enable, time },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1007,14 +1004,14 @@ export class TeslemetryVehicleApi {
 
   /**
    * Sets scheduled departure.
-   * @param body The scheduled departure configuration
+   * @param config The scheduled departure configuration
    * @return Promise to an object with response containing scheduled departure set result
    */
   public async setScheduledDeparture(
-    body: PostApi1VehiclesByVinCommandSetScheduledDepartureData,
+    config: PostApi1VehiclesByVinCommandSetScheduledDepartureData["body"],
   ) {
     const { data } = await postApi1VehiclesByVinCommandSetScheduledDeparture({
-      ...body,
+      body: config,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1023,14 +1020,14 @@ export class TeslemetryVehicleApi {
 
   /**
    * Adds a charge schedule.
-   * @param body The charge schedule configuration
-   * @return Promise to an object with response containing charge schedule add result
+   * @param config The charge schedule configuration
+   * @return Promise to an object with response containing add charge schedule result
    */
   public async addChargeSchedule(
-    body: PostApi1VehiclesByVinCommandAddChargeScheduleData,
+    config: PostApi1VehiclesByVinCommandAddChargeScheduleData["body"],
   ) {
     const { data } = await postApi1VehiclesByVinCommandAddChargeSchedule({
-      ...body,
+      body: config,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1039,14 +1036,12 @@ export class TeslemetryVehicleApi {
 
   /**
    * Removes a charge schedule.
-   * @param body The charge schedule removal configuration
-   * @return Promise to an object with response containing charge schedule removal result
+   * @param id The schedule ID to remove
+   * @return Promise to an object with response containing remove charge schedule result
    */
-  public async removeChargeSchedule(
-    body: PostApi1VehiclesByVinCommandRemoveChargeScheduleData,
-  ) {
+  public async removeChargeSchedule(id: number) {
     const { data } = await postApi1VehiclesByVinCommandRemoveChargeSchedule({
-      ...body,
+      body: { id },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1058,15 +1053,15 @@ export class TeslemetryVehicleApi {
   // --------------------------------------------------------------------------------
 
   /**
-   * Adds a preconditioning schedule.
-   * @param body The preconditioning schedule configuration
-   * @return Promise to an object with response containing precondition schedule add result
+   * Adds a precondition schedule.
+   * @param config The precondition schedule configuration
+   * @return Promise to an object with response containing add precondition schedule result
    */
   public async addPreconditionSchedule(
-    body: PostApi1VehiclesByVinCommandAddPreconditionScheduleData,
+    config: PostApi1VehiclesByVinCommandAddPreconditionScheduleData["body"],
   ) {
     const { data } = await postApi1VehiclesByVinCommandAddPreconditionSchedule({
-      ...body,
+      body: config,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1074,16 +1069,14 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Removes a preconditioning schedule.
-   * @param body The preconditioning schedule removal configuration
-   * @return Promise to an object with response containing precondition schedule removal result
+   * Removes a precondition schedule.
+   * @param id The schedule ID to remove
+   * @return Promise to an object with response containing remove precondition schedule result
    */
-  public async removePreconditionSchedule(
-    body: PostApi1VehiclesByVinCommandRemovePreconditionScheduleData,
-  ) {
+  public async removePreconditionSchedule(id: number) {
     const { data } =
       await postApi1VehiclesByVinCommandRemovePreconditionSchedule({
-        ...body,
+        body: { id },
         path: { vin: this.vin },
         client: this.root.client,
       });
@@ -1096,15 +1089,15 @@ export class TeslemetryVehicleApi {
 
   /**
    * Sets cabin overheat protection.
-   * @param body The cabin overheat protection configuration
+   * @param config The cabin overheat protection configuration
    * @return Promise to an object with response containing cabin overheat protection set result
    */
   public async setCabinOverheatProtection(
-    body: PostApi1VehiclesByVinCommandSetCabinOverheatProtectionData,
+    config: PostApi1VehiclesByVinCommandSetCabinOverheatProtectionData["body"],
   ) {
     const { data } =
       await postApi1VehiclesByVinCommandSetCabinOverheatProtection({
-        ...body,
+        body: config,
         path: { vin: this.vin },
         client: this.root.client,
       });
@@ -1112,13 +1105,13 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Sets cabin overheat protection temperature.
-   * @param body The COP temperature configuration
-   * @return Promise to an object with response containing COP temperature set result
+   * Sets the cabin overheat protection temperature.
+   * @param cop_temp The cabin overheat protection temperature (0=Low, 1=Medium, 2=High)
+   * @return Promise to an object with response containing cabin overheat protection temperature set result
    */
-  public async setCopTemp(body: PostApi1VehiclesByVinCommandSetCopTempData) {
+  public async setCopTemp(cop_temp: 0 | 1 | 2) {
     const { data } = await postApi1VehiclesByVinCommandSetCopTemp({
-      ...body,
+      body: { cop_temp },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1130,15 +1123,13 @@ export class TeslemetryVehicleApi {
   // --------------------------------------------------------------------------------
 
   /**
-   * Turns sentry mode on or off.
-   * @param body The sentry mode configuration
+   * Sets sentry mode.
+   * @param on Whether to enable sentry mode
    * @return Promise to an object with response containing sentry mode set result
    */
-  public async setSentryMode(
-    body: PostApi1VehiclesByVinCommandSetSentryModeData,
-  ) {
+  public async setSentryMode(on: boolean) {
     const { data } = await postApi1VehiclesByVinCommandSetSentryMode({
-      ...body,
+      body: { on },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1150,15 +1141,14 @@ export class TeslemetryVehicleApi {
   // --------------------------------------------------------------------------------
 
   /**
-   * Turns valet mode on or off.
-   * @param body The valet mode configuration
+   * Sets valet mode.
+   * @param on Whether to enable valet mode
+   * @param password The valet mode password
    * @return Promise to an object with response containing valet mode set result
    */
-  public async setValetMode(
-    body: PostApi1VehiclesByVinCommandSetValetModeData,
-  ) {
+  public async setValetMode(on: boolean, password: string) {
     const { data } = await postApi1VehiclesByVinCommandSetValetMode({
-      ...body,
+      body: { on, password },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1170,15 +1160,14 @@ export class TeslemetryVehicleApi {
   // --------------------------------------------------------------------------------
 
   /**
-   * Sets a PIN for PIN to Drive mode.
-   * @param body The PIN to Drive configuration
-   * @return Promise to an object with response containing PIN to Drive set result
+   * Sets PIN to drive.
+   * @param on Whether to enable PIN to drive
+   * @param password The PIN password
+   * @return Promise to an object with response containing PIN to drive set result
    */
-  public async setPinToDrive(
-    body: PostApi1VehiclesByVinCommandSetPinToDriveData,
-  ) {
+  public async setPinToDrive(on: boolean, password: string) {
     const { data } = await postApi1VehiclesByVinCommandSetPinToDrive({
-      ...body,
+      body: { on, password },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1214,15 +1203,13 @@ export class TeslemetryVehicleApi {
   // --------------------------------------------------------------------------------
 
   /**
-   * Activates speed limit mode.
-   * @param body The speed limit activation configuration
+   * Activates speed limit.
+   * @param pin The PIN for speed limit
    * @return Promise to an object with response containing speed limit activation result
    */
-  public async speedLimitActivate(
-    body: PostApi1VehiclesByVinCommandSpeedLimitActivateData,
-  ) {
+  public async speedLimitActivate(pin: string) {
     const { data } = await postApi1VehiclesByVinCommandSpeedLimitActivate({
-      ...body,
+      body: { pin },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1230,15 +1217,13 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Deactivates speed limit mode.
-   * @param body The speed limit deactivation configuration
+   * Deactivates speed limit.
+   * @param pin The PIN for speed limit
    * @return Promise to an object with response containing speed limit deactivation result
    */
-  public async speedLimitDeactivate(
-    body: PostApi1VehiclesByVinCommandSpeedLimitDeactivateData,
-  ) {
+  public async speedLimitDeactivate(pin: string) {
     const { data } = await postApi1VehiclesByVinCommandSpeedLimitDeactivate({
-      ...body,
+      body: { pin },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1247,14 +1232,12 @@ export class TeslemetryVehicleApi {
 
   /**
    * Clears speed limit PIN.
-   * @param body The speed limit PIN clear configuration
+   * @param pin The PIN for speed limit
    * @return Promise to an object with response containing speed limit PIN clear result
    */
-  public async speedLimitClearPin(
-    body: PostApi1VehiclesByVinCommandSpeedLimitClearPinData,
-  ) {
+  public async speedLimitClearPin(pin: string) {
     const { data } = await postApi1VehiclesByVinCommandSpeedLimitClearPin({
-      ...body,
+      body: { pin },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1274,15 +1257,13 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Sets the speed limit.
-   * @param body The speed limit configuration
+   * Sets speed limit.
+   * @param limit_mph The speed limit in mph
    * @return Promise to an object with response containing speed limit set result
    */
-  public async speedLimitSetLimit(
-    body: PostApi1VehiclesByVinCommandSpeedLimitSetLimitData,
-  ) {
+  public async speedLimitSetLimit(limit_mph: number) {
     const { data } = await postApi1VehiclesByVinCommandSpeedLimitSetLimit({
-      ...body,
+      body: { limit_mph },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1294,15 +1275,13 @@ export class TeslemetryVehicleApi {
   // --------------------------------------------------------------------------------
 
   /**
-   * Schedules a software update.
-   * @param body The software update schedule configuration
+   * Schedules software update.
+   * @param offset_sec The offset in seconds for the update
    * @return Promise to an object with response containing software update schedule result
    */
-  public async scheduleSoftwareUpdate(
-    body: PostApi1VehiclesByVinCommandScheduleSoftwareUpdateData,
-  ) {
+  public async scheduleSoftwareUpdate(offset_sec: number) {
     const { data } = await postApi1VehiclesByVinCommandScheduleSoftwareUpdate({
-      ...body,
+      body: { offset_sec },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1327,14 +1306,14 @@ export class TeslemetryVehicleApi {
 
   /**
    * Sends a navigation request.
-   * @param body The navigation request configuration
+   * @param config The navigation request configuration
    * @return Promise to an object with response containing navigation request result
    */
   public async navigationRequest(
-    body: PostApi1VehiclesByVinCommandNavigationRequestData,
+    config: PostApi1VehiclesByVinCommandNavigationRequestData["body"],
   ) {
     const { data } = await postApi1VehiclesByVinCommandNavigationRequest({
-      ...body,
+      body: config,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1342,15 +1321,15 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Sends a GPS navigation request.
-   * @param body The GPS navigation request configuration
-   * @return Promise to an object with response containing GPS navigation request result
+   * Sends a navigation GPS request.
+   * @param config The GPS navigation request configuration
+   * @return Promise to an object with response containing navigation GPS request result
    */
   public async navigationGpsRequest(
-    body: PostApi1VehiclesByVinCommandNavigationGpsRequestData,
+    config: PostApi1VehiclesByVinCommandNavigationGpsRequestData["body"],
   ) {
     const { data } = await postApi1VehiclesByVinCommandNavigationGpsRequest({
-      ...body,
+      body: config,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1358,15 +1337,15 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Sends a supercharger navigation request.
-   * @param body The supercharger navigation request configuration
-   * @return Promise to an object with response containing supercharger navigation request result
+   * Sends a navigation supercharger request.
+   * @param config The supercharger navigation request configuration
+   * @return Promise to an object with response containing navigation supercharger request result
    */
   public async navigationSuperchargerRequest(
-    body: PostApi1VehiclesByVinCommandNavigationScRequestData,
+    config: PostApi1VehiclesByVinCommandNavigationScRequestData["body"],
   ) {
     const { data } = await postApi1VehiclesByVinCommandNavigationScRequest({
-      ...body,
+      body: config,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1374,16 +1353,16 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Sends a waypoints navigation request.
-   * @param body The waypoints navigation request configuration
-   * @return Promise to an object with response containing waypoints navigation request result
+   * Sends a navigation waypoints request.
+   * @param config The waypoints navigation request configuration
+   * @return Promise to an object with response containing navigation waypoints request result
    */
   public async navigationWaypointsRequest(
-    body: PostApi1VehiclesByVinCommandNavigationWaypointsRequestData,
+    config: PostApi1VehiclesByVinCommandNavigationWaypointsRequestData["body"],
   ) {
     const { data } =
       await postApi1VehiclesByVinCommandNavigationWaypointsRequest({
-        ...body,
+        body: config,
         path: { vin: this.vin },
         client: this.root.client,
       });
@@ -1407,13 +1386,13 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Removes driver access from a vehicle.
-   * @param body The driver removal configuration
-   * @return Promise to an object with response containing driver removal result
+   * Removes a driver.
+   * @param config The driver removal configuration
+   * @return Promise to an object with response containing remove driver result
    */
-  public async removeDriver(body: DeleteApi1VehiclesByVinDriversData) {
+  public async removeDriver(share_user_id: string) {
     const { data } = await deleteApi1VehiclesByVinDrivers({
-      ...body,
+      query: { share_user_id },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1421,13 +1400,11 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Returns the active share invites for a vehicle.
-   * @param query Optional query parameters
-   * @return Promise to an object with response containing vehicle invitations
+   * Gets invitations.
+   * @return Promise to an object with response containing invitations
    */
-  public async getInvitations(query?: GetApi1VehiclesByVinInvitationsData) {
+  public async getInvitations() {
     const { data } = await getApi1VehiclesByVinInvitations({
-      ...query,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1436,12 +1413,10 @@ export class TeslemetryVehicleApi {
 
   /**
    * Creates a vehicle share invitation.
-   * @param body The invitation creation configuration
    * @return Promise to an object with response containing invitation creation result
    */
-  public async createInvitation(body: PostApi1VehiclesByVinInvitationsData) {
+  public async createInvitation() {
     const { data } = await postApi1VehiclesByVinInvitations({
-      ...body,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1478,13 +1453,15 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Controls vehicle closures (doors, windows, frunk, trunk).
-   * @param body The closure control configuration
-   * @return Promise to an object with response containing closure control result
+   * Sends a closure command.
+   * @param config The closure configuration
+   * @return Promise to an object with response containing closure result
    */
-  public async closure(body: PostApi1VehiclesByVinCustomCommandClosureData) {
+  public async closure(
+    config: PostApi1VehiclesByVinCustomCommandClosureData["body"],
+  ) {
     const { data } = await postApi1VehiclesByVinCustomCommandClosure({
-      ...body,
+      body: config,
       path: { vin: this.vin },
       client: this.root.client,
     });
