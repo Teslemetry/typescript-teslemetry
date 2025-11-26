@@ -23,11 +23,7 @@ export class TeslemetryStream {
   private eventSource: EventSource | null = null;
   private vehicles: Map<string, TeslemetryVehicleStream> = new Map();
 
-  constructor(
-    root: Teslemetry,
-    access_token: string,
-    vin?: string,
-  ) {
+  constructor(root: Teslemetry, access_token: string, vin?: string) {
     this.root = root;
     this._access_token = access_token;
     this.vin = vin;
@@ -108,7 +104,13 @@ export class TeslemetryStream {
       this.retries++;
       const delay = Math.min(2 ** this.retries, 600) * 1000;
       this.logger.info(`Reconnecting in ${delay / 1000} seconds...`);
-      setTimeout(() => this.connect(), delay);
+      setTimeout(
+        () =>
+          this.connect().catch((error) => {
+            this.logger.error("Failed to reconnect:", error);
+          }),
+        delay,
+      );
     };
   }
 

@@ -25,6 +25,7 @@ export class TeslemetryVehicleStream {
   public fields: FieldsResponse = {};
   public preferTyped: boolean | null = null;
   private _pendingFields: FieldsRequest = {}; // Used for accumulating config changes before patching
+  private _debounceTimeout: NodeJS.Timeout | null = null; // Debounce timeout for patchConfig
   public logger: Logger;
 
   constructor(root: Teslemetry, stream: TeslemetryStream, vin: string) {
@@ -60,24 +61,36 @@ export class TeslemetryVehicleStream {
     }
   }
 
-  public async updateFields(fields: FieldsRequest) {
+  public updateFields(fields: FieldsRequest) {
     this._pendingFields = { ...this._pendingFields, ...fields };
 
-    const data = await this.patchConfig(this._pendingFields);
-    if (data?.updated_vehicles) {
-      this.logger.info(`Updated vehicle streaming config for ${this.vin}`);
-      this.fields = { ...this.fields, ...fields };
-      this._pendingFields = {};
-    } else {
-      this.logger.error(
-        `Error updating streaming config for ${this.vin}`,
-        data,
-      );
+    // Clear existing timeout if it exists
+    if (this._debounceTimeout) {
+      clearTimeout(this._debounceTimeout);
     }
+
+    // Set new timeout to debounce patchConfig calls
+    this._debounceTimeout = setTimeout(async () => {
+      const data = await this.patchConfig(this._pendingFields);
+      if (data?.updated_vehicles) {
+        this.logger.info(
+          `Updated ${Object.keys(this._pendingFields).length} streaming fields for ${this.vin}`,
+        );
+        this.fields = { ...this.fields, ...this._pendingFields };
+        this._pendingFields = {};
+      } else {
+        this.logger.error(
+          `Error updating streaming config for ${this.vin}`,
+          data,
+        );
+      }
+      this._debounceTimeout = null;
+    }, 100);
   }
 
   public async patchConfig(fields: FieldsRequest) {
     const { data } = await patchApiConfigByVin({
+      client: this.root.client,
       path: { vin: this.vin },
       body: { fields },
     });
@@ -86,6 +99,7 @@ export class TeslemetryVehicleStream {
 
   public async postConfig(fields: FieldsRequest): Promise<any> {
     const { data } = await postApiConfigByVin({
+      client: this.root.client,
       path: { vin: this.vin },
       body: { fields },
     });
@@ -125,7 +139,9 @@ export class TeslemetryVehicleStream {
     field: T,
     callback: (value: Exclude<ISseData["data"][T], undefined>) => void,
   ): () => void {
-    this.addField(field);
+    this.addField(field).catch((error) => {
+      this.logger.error(`Failed to add field ${field}:`, error);
+    });
     return this.stream.addListener<ISseData>(
       (event) => {
         const value = event.data[field];

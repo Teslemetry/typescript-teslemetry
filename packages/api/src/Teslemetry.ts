@@ -71,11 +71,12 @@ export class Teslemetry {
   }
 
   /**
-   * Get the users region from the server
+   * Ensure the users region has been set
    * @returns Promise that resolves to the region ("na" or "eu")
    */
   public async getRegion(): Promise<"na" | "eu"> {
-    const { response } = await getApiTest();
+    if (this.region) return this.region;
+    const { response } = await getApiTest({ client: this.client });
     return response.headers.get("x-region") as "na" | "eu";
   }
 

@@ -1,7 +1,7 @@
 // examples/simple.ts
 
 import { config } from "dotenv";
-import { Teslemetry, TeslemetryStream } from "../src"; // Adjust path if needed
+import { Teslemetry } from "../src"; // Adjust path if needed
 
 // Load environment variables from .env file
 const { TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN } = config().parsed as Record<
@@ -9,14 +9,17 @@ const { TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN } = config().parsed as Record<
   string
 >;
 
+console.log({ TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN });
+
 async function main() {
-  //@ts-expect-error
-  const teslemetry = new Teslemetry(TESLEMETRY_ACCESS_TOKEN, "devapi");
+  const teslemetry = new Teslemetry(TESLEMETRY_ACCESS_TOKEN, "na");
   await teslemetry.getRegion();
+  await teslemetry.api.test();
 
   const sonic = teslemetry.getVehicle(TESLEMETRY_VIN);
   const state = await sonic.api.state();
   console.log(state);
+  await sonic.api.flashLights();
 
   // Listen for battery level updates
   const removeBatteryLevelListener = sonic.sse.listenData(
@@ -42,6 +45,9 @@ async function main() {
       );
     },
   );
+
+  // Connect to the stream
+  await teslemetry.sse.connect();
 
   console.log("Listening for Teslemetry Stream events...");
   console.log("Press Ctrl+C to stop.");
