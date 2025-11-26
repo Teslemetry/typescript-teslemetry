@@ -1,11 +1,37 @@
 import { TeslemetryVehicleStream } from "./TeslemetryVehicleStream";
 import { EventSource } from "eventsource";
-import { ISseCredits, ISseEvent } from "./const";
+import {
+  ISseCredits,
+  ISseEvent,
+  ISseState,
+  ISseData,
+  ISseErrors,
+  ISseAlerts,
+  ISseConnectivity,
+  ISseVehicleData,
+  ISseConfig,
+} from "./const";
 import { Teslemetry } from "./Teslemetry";
 import { Logger } from "./logger";
 
 type ListenerCallback<T extends ISseEvent = ISseEvent> = (event: T) => void;
 type ConnectionListenerCallback = (connected: boolean) => void;
+type EventType =
+  | "state"
+  | "data"
+  | "errors"
+  | "alerts"
+  | "connectivity"
+  | "credits"
+  | "vehicle_data"
+  | "config";
+
+interface PendingListener {
+  eventType: EventType;
+  callback: (event: any) => void;
+  filters?: Record<string, any>;
+  removeFunction?: () => void;
+}
 
 export class TeslemetryStream {
   private root: Teslemetry;
@@ -13,9 +39,10 @@ export class TeslemetryStream {
   public active: boolean = false;
   private vin: string | undefined;
   public logger: Logger;
-  private _listeners: Map<
+  private pendingListeners: PendingListener[] = [];
+  private activeListeners: Map<
     () => void,
-    { callback: ListenerCallback; filters?: any }
+    { eventSourceCallback: (event: any) => void }
   > = new Map();
   private _connectionListeners: Map<() => void, ConnectionListenerCallback> =
     new Map();
@@ -86,16 +113,8 @@ export class TeslemetryStream {
       this._updateConnectionListeners(true);
     };
 
-    this.eventSource.onmessage = (event: any) => {
-      let data = JSON.parse(event.data);
-      if (data.createdAt) {
-        const [main, ns] = data.createdAt.split(".");
-        const date = new Date(main + "Z");
-        data.timestamp =
-          date.getTime() + parseInt((ns || "000").substring(0, 3));
-      }
-      this._dispatchEvent(data);
-    };
+    // Register all pending listeners
+    this._registerPendingListeners();
 
     this.eventSource.onerror = (error: any) => {
       this.logger.error("EventSource error:", error);
@@ -126,48 +145,195 @@ export class TeslemetryStream {
       this.eventSource.close();
       this.eventSource = null;
     }
+    // Clear all active listeners
+    this.activeListeners.clear();
     this._updateConnectionListeners(false);
   }
 
-  public addListener<T extends ISseEvent>(
+  private _registerPendingListeners(): void {
+    // Move pending listeners to active EventSource listeners
+    for (const pendingListener of this.pendingListeners) {
+      this._addEventSourceListener(
+        pendingListener.eventType,
+        pendingListener.callback,
+        pendingListener.filters,
+      );
+    }
+    // Clear pending listeners
+    this.pendingListeners = [];
+  }
+
+  private _addEventSourceListener(
+    eventType: EventType,
+    callback: (event: any) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    if (!this.eventSource) {
+      throw new Error("EventSource not available");
+    }
+
+    const wrappedCallback = (event: any) => {
+      const data = this._parseEventData(event.data);
+      if (recursiveMatch(filters, data)) {
+        callback(data);
+      }
+    };
+
+    this.eventSource.addEventListener(eventType, wrappedCallback);
+
+    const removeFunction = () => {
+      this.eventSource?.removeEventListener(eventType, wrappedCallback);
+      this.activeListeners.delete(removeFunction);
+    };
+
+    this.activeListeners.set(removeFunction, {
+      eventSourceCallback: wrappedCallback,
+    });
+
+    return removeFunction;
+  }
+
+  private _createListener<T extends ISseEvent>(
+    eventType: EventType,
+    callback: (event: T) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    if (this.eventSource && this.connected) {
+      // EventSource exists and is connected - add directly
+      return this._addEventSourceListener(eventType, callback, filters);
+    } else {
+      // EventSource doesn't exist yet - store for later
+      const pendingListener: PendingListener = {
+        eventType,
+        callback,
+        filters,
+      };
+
+      this.pendingListeners.push(pendingListener);
+
+      return () => {
+        const index = this.pendingListeners.indexOf(pendingListener);
+        if (index > -1) {
+          this.pendingListeners.splice(index, 1);
+        }
+      };
+    }
+  }
+
+  public addStateListener(
+    callback: (event: ISseState) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    return this._createListener("state", callback, filters);
+  }
+
+  public addDataListener(
+    callback: (event: ISseData) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    return this._createListener("data", callback, filters);
+  }
+
+  public addErrorsListener(
+    callback: (event: ISseErrors) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    return this._createListener("errors", callback, filters);
+  }
+
+  public addAlertsListener(
+    callback: (event: ISseAlerts) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    return this._createListener("alerts", callback, filters);
+  }
+
+  public addConnectivityListener(
+    callback: (event: ISseConnectivity) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    return this._createListener("connectivity", callback, filters);
+  }
+
+  public addCreditsListener(
+    callback: (event: ISseCredits) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    return this._createListener("credits", callback, filters);
+  }
+
+  public addVehicleDataListener(
+    callback: (event: ISseVehicleData) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    return this._createListener("vehicle_data", callback, filters);
+  }
+
+  public addConfigListener(
+    callback: (event: ISseConfig) => void,
+    filters?: Record<string, any>,
+  ): () => void {
+    return this._createListener("config", callback, filters);
+  }
+
+  private _parseEventData(eventData: string): ISseEvent {
+    let data = JSON.parse(eventData);
+    if (data.createdAt) {
+      const [main, ns] = data.createdAt.split(".");
+      const date = new Date(main + "Z");
+      data.timestamp = date.getTime() + parseInt((ns || "000").substring(0, 3));
+    }
+    return data;
+  }
+
+  // Legacy method for backward compatibility
+  public listen<T extends ISseEvent>(
     callback: ListenerCallback<T>,
     filters?: Record<string, any>,
   ): () => void {
-    const removeListener = () => {
-      this._listeners.delete(removeListener);
-    };
-    this._listeners.set(removeListener, {
-      callback: callback as ListenerCallback<ISseEvent>,
-      filters,
-    });
+    // For backward compatibility, we'll treat this as a generic event listener
+    // that works with any event type by checking all possible event types
+    const eventTypes = [
+      "state",
+      "data",
+      "errors",
+      "alerts",
+      "connectivity",
+      "credits",
+      "vehicle_data",
+      "config",
+    ] as const;
+    const removeListeners: (() => void)[] = [];
 
-    return removeListener;
-  }
-
-  private _dispatchEvent(event: any): void {
-    for (const { callback, filters } of this._listeners.values()) {
-      if (recursiveMatch(filters, event)) {
-        try {
-          callback(event);
-        } catch (error) {
-          this.logger.error("Uncaught error in listener:", error);
-        }
-      }
+    for (const eventType of eventTypes) {
+      const removeListener = this._createListener(
+        eventType,
+        callback as (event: any) => void,
+        filters,
+      );
+      removeListeners.push(removeListener);
     }
+
+    return () => {
+      removeListeners.forEach((remove) => remove());
+    };
   }
 
   public listenCredits(
     callback: (credits: ISseCredits["credits"]) => void,
   ): () => void {
-    return this.addListener((event: ISseCredits) => callback(event.credits), {
-      credits: null,
-    });
+    return this.addCreditsListener(
+      (event: ISseCredits) => callback(event.credits),
+      {
+        credits: null,
+      },
+    );
   }
 
   public listenBalance(
     callback: (balance: ISseCredits["credits"]["balance"]) => void,
   ): () => void {
-    return this.addListener(
+    return this.addCreditsListener(
       (event: ISseCredits) => callback(event.credits.balance),
       {
         credits: { balance: null },

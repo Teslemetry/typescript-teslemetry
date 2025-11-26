@@ -34,12 +34,11 @@ export class TeslemetryVehicleStream {
     this.vin = vin;
     this.logger = stream.logger;
 
-    stream.addListener<ISseConfig>(
+    stream.addConfigListener(
       (event) => {
         this.fields = event.config.fields;
       },
       {
-        config: null,
         vin: this.vin,
       },
     );
@@ -120,18 +119,24 @@ export class TeslemetryVehicleStream {
 
     const value =
       interval !== undefined ? { interval_seconds: interval } : null;
-    await this.updateFields({ [field]: value });
+    this.updateFields({ [field]: value });
   }
 
   public listenState(
     callback: (state: ISseState["state"]) => void,
   ): () => void {
-    return this.stream.addListener<ISseState>(
-      (event) => callback(event["state"]),
-      {
-        vin: this.vin,
-        state: null,
+    return this.stream.addStateListener((event) => callback(event["state"]), {
+      vin: this.vin,
+      state: null,
+    });
+  }
+
+  public listen(callback: (value: ISseEvent) => void): () => void {
+    return this.stream.listen<ISseEvent>(
+      (event) => {
+        callback(event);
       },
+      { vin: this.vin },
     );
   }
 
@@ -142,14 +147,12 @@ export class TeslemetryVehicleStream {
     this.addField(field).catch((error) => {
       this.logger.error(`Failed to add field ${field}:`, error);
     });
-    return this.stream.addListener<ISseData>(
-      (event) => {
-        const value = event.data[field];
-        if (value !== undefined) {
-          callback(value as Exclude<ISseData["data"][T], undefined>);
-        }
-      },
-      { key: this.vin, data: { [field]: null } },
-    );
+    const filter = { vin: this.vin, data: { [field]: null } };
+    return this.stream.listen<ISseData>((event) => {
+      const value = event.data[field];
+      if (value !== undefined) {
+        callback(value as Exclude<ISseData["data"][T], undefined>);
+      }
+    }, filter);
   }
 }

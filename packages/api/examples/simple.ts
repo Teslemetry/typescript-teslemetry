@@ -22,21 +22,18 @@ async function main() {
   await sonic.api.flashLights();
 
   // Listen for battery level updates
-  const removeBatteryLevelListener = sonic.sse.listenData(
-    "BatteryLevel",
-    (batteryLevel) => {
-      console.log(`Battery Level: ${batteryLevel}%`);
-    },
-  );
-
-  // Listen for vehicle speed updates
-  const removeVehicleSpeedListener = sonic.sse.listenData(
-    "VehicleSpeed",
-    (speed) => {
-      console.log(`Vehicle Speed: ${speed} km/h`);
-    },
-  );
-
+  const removeDataListener = sonic.sse.listenData("ChargerVoltage", (x) => {
+    console.log(`BChargerVoltage: ${x}`);
+  });
+  const removeDataListener2 = sonic.sse.listenData("PackCurrent", (x) => {
+    console.log(`PackCurrent: ${x}`);
+  });
+  sonic.sse.listen((event) => {
+    console.log(`Sonic listen:`, event);
+  });
+  teslemetry.sse.listen((event) => {
+    console.log(`listen:`, event);
+  });
   // Listen for connection status changes
   const removeConnectionListener = teslemetry.sse.addConnectionListener(
     (connected: boolean) => {
@@ -55,8 +52,7 @@ async function main() {
   // Keep the script running
   process.on("SIGINT", () => {
     console.log("Disconnecting from Teslemetry Stream...");
-    removeBatteryLevelListener();
-    removeVehicleSpeedListener();
+    removeDataListener();
     removeConnectionListener();
     teslemetry.sse.disconnect();
     process.exit(0);
