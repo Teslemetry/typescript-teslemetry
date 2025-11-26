@@ -162,12 +162,37 @@ import {
   PostApi1VehiclesByVinCustomCommandClearPinToDriveData,
   PatchApiConfigByVinData,
   PostApiConfigByVinData,
-  GetApi1VehiclesByVinVehicleDataData,
   GetApi1VehiclesByVinFleetTelemetryErrorsData,
   GetApi1VehiclesByVinInvitationsData,
 } from "./client/types.gen";
 
-const SEATS = { front_left: 1, front_right: 2 } as const;
+const FRONT_SEATS = {
+  front_left: 1,
+  front_right: 2,
+  1: 1,
+  2: 2,
+} as const;
+
+const ALL_SEATS = {
+  front_left: 0,
+  front_right: 1,
+  rear_left: 2,
+  rear_left_back: 3,
+  rear_center: 4,
+  rear_right: 5,
+  rear_right_back: 6,
+  third_row_left: 7,
+  third_row_right: 8,
+  0: 0,
+  1: 1,
+  2: 2,
+  3: 3,
+  4: 4,
+  5: 5,
+  6: 6,
+  7: 7,
+  8: 8,
+} as const;
 
 type VehicleDataEndpoints =
   | "charge_state"
@@ -277,12 +302,14 @@ export class TeslemetryVehicleApi {
 
   /**
    * Modify the streaming configuration for a specific vehicle.
-   * @param body The request body
+   * @param fields The fields to update in the configuration
    * @return Promise to an object with response containing the updated configuration
    */
-  public async patchConfig(body: PatchApiConfigByVinData) {
+  public async patchConfig(
+    fields: NonNullable<PatchApiConfigByVinData["body"]>["fields"],
+  ) {
     const { data } = await patchApiConfigByVin({
-      ...body,
+      body: { fields },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -290,13 +317,13 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Modify the streaming configuration for a specific vehicle.
-   * @param body The request body
-   * @return Promise to an object with response containing the updated configuration
+   * Create the streaming configuration for a specific vehicle.
+   * @param body The request body containing configuration details
+   * @return Promise to an object with response containing the created configuration
    */
-  public async postConfig(body: PostApiConfigByVinData) {
+  public async postConfig(body: NonNullable<PostApiConfigByVinData["body"]>) {
     const { data } = await postApiConfigByVin({
-      ...body,
+      body,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -416,14 +443,10 @@ export class TeslemetryVehicleApi {
 
   /**
    * Returns recent fleet telemetry errors reported for the specified vehicle.
-   * @param query Optional query parameters including error type filter
    * @return Promise to an object with response containing recent fleet telemetry errors
    */
-  public async getFleetTelemetryErrors(
-    query?: GetApi1VehiclesByVinFleetTelemetryErrorsData,
-  ) {
+  public async getFleetTelemetryErrors() {
     const { data } = await getApi1VehiclesByVinFleetTelemetryErrors({
-      ...query,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -759,16 +782,15 @@ export class TeslemetryVehicleApi {
    * @return Promise to an object with response containing auto seat climate set result
    */
   public async setAutoSeatClimate(
-    auto_seat_position: 1 | 2,
+    auto_seat_position: keyof typeof FRONT_SEATS,
     auto_climate_on: boolean,
   ) {
-    const body = {
-      auto_seat_position,
-      auto_climate_on,
-    };
     const { data } =
       await postApi1VehiclesByVinCommandRemoteAutoSeatClimateRequest({
-        body,
+        body: {
+          auto_seat_position: FRONT_SEATS[auto_seat_position],
+          auto_climate_on,
+        },
         path: { vin: this.vin },
         client: this.root.client,
       });
@@ -798,13 +820,15 @@ export class TeslemetryVehicleApi {
    * @param seat_cooler_level The cooler level
    * @return Promise to an object with response containing seat cooler set result
    */
-  public async setSeatCooler(seat_position: number, seat_cooler_level: number) {
-    const body = {
-      seat_position,
-      seat_cooler_level,
-    };
+  public async setSeatCooler(
+    seat_position: keyof typeof FRONT_SEATS,
+    seat_cooler_level: number,
+  ) {
     const { data } = await postApi1VehiclesByVinCommandRemoteSeatCoolerRequest({
-      body,
+      body: {
+        seat_position: FRONT_SEATS[seat_position],
+        seat_cooler_level,
+      },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -817,13 +841,12 @@ export class TeslemetryVehicleApi {
    * @param level The heater level
    * @return Promise to an object with response containing seat heater set result
    */
-  public async setSeatHeater(heater: number, level: number) {
-    const body = {
-      heater,
-      level,
-    };
+  public async setSeatHeater(seat: keyof typeof ALL_SEATS, level: number) {
     const { data } = await postApi1VehiclesByVinCommandRemoteSeatHeaterRequest({
-      body,
+      body: {
+        heater: ALL_SEATS[seat],
+        level,
+      },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -938,14 +961,12 @@ export class TeslemetryVehicleApi {
 
   /**
    * Sets the charge limit.
-   * @param body The charge limit configuration
+   * @param percent The charge limit percentage
    * @return Promise to an object with response containing charge limit set result
    */
-  public async setChargeLimit(
-    body: PostApi1VehiclesByVinCommandSetChargeLimitData,
-  ) {
+  public async setChargeLimit(percent: number) {
     const { data } = await postApi1VehiclesByVinCommandSetChargeLimit({
-      ...body,
+      body: { percent },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1472,14 +1493,14 @@ export class TeslemetryVehicleApi {
 
   /**
    * Sets multiple seat heaters simultaneously.
-   * @param body The seat heaters configuration
+   * @param config The seat heaters configuration
    * @return Promise to an object with response containing seat heaters set result
    */
   public async setSeatHeaters(
-    body: PostApi1VehiclesByVinCustomCommandSeatHeaterData,
+    config: PostApi1VehiclesByVinCustomCommandSeatHeaterData["body"],
   ) {
     const { data } = await postApi1VehiclesByVinCustomCommandSeatHeater({
-      ...body,
+      body: config,
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1488,14 +1509,22 @@ export class TeslemetryVehicleApi {
 
   /**
    * Enables or disables charging on solar.
-   * @param body The charge on solar configuration
+   * @param enabled Whether to enable charging on solar
+   * @param lowerChargeLimit Lower charge limit for solar charging
+   * @param upperChargeLimit Upper charge limit for solar charging
    * @return Promise to an object with response containing charge on solar result
    */
   public async chargeOnSolar(
-    body: PostApi1VehiclesByVinCustomCommandChargeOnSolarData,
+    enabled?: boolean,
+    lowerChargeLimit?: number,
+    upperChargeLimit?: number,
   ) {
     const { data } = await postApi1VehiclesByVinCustomCommandChargeOnSolar({
-      ...body,
+      body: {
+        enabled,
+        lowerChargeLimit,
+        upperChargeLimit,
+      },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1516,14 +1545,12 @@ export class TeslemetryVehicleApi {
 
   /**
    * Plays video on the vehicle screen.
-   * @param body The video playback configuration
+   * @param url The url of the video
    * @return Promise to an object with response containing video play result
    */
-  public async playVideo(
-    body: PostApi1VehiclesByVinCustomCommandPlayVideoData,
-  ) {
+  public async playVideo(url: string) {
     const { data } = await postApi1VehiclesByVinCustomCommandPlayVideo({
-      ...body,
+      body: { url },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1544,14 +1571,25 @@ export class TeslemetryVehicleApi {
 
   /**
    * Starts a light show.
-   * @param body The light show configuration
+   * @param show_index The light show index
+   * @param start_time Optional start time for the light show
+   * @param volume Optional volume level for the light show
+   * @param dance_moves Optional flag to enable dance moves
    * @return Promise to an object with response containing light show start result
    */
   public async startLightShow(
-    body: PostApi1VehiclesByVinCustomCommandStartLightShowData,
+    show_index: number,
+    start_time?: number,
+    volume?: number,
+    dance_moves?: boolean,
   ) {
     const { data } = await postApi1VehiclesByVinCustomCommandStartLightShow({
-      ...body,
+      body: {
+        show_index,
+        start_time,
+        volume,
+        dance_moves,
+      },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1560,14 +1598,14 @@ export class TeslemetryVehicleApi {
 
   /**
    * Clears PIN to Drive mode.
-   * @param body The PIN to Drive clear configuration
+   * @param pin 4 digit pin as a string
    * @return Promise to an object with response containing PIN to Drive clear result
    */
-  public async clearPinToDrive(
-    body: PostApi1VehiclesByVinCustomCommandClearPinToDriveData,
-  ) {
+  public async clearPinToDrive(pin: string) {
     const { data } = await postApi1VehiclesByVinCustomCommandClearPinToDrive({
-      ...body,
+      body: {
+        pin,
+      },
       path: { vin: this.vin },
       client: this.root.client,
     });
