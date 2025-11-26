@@ -5,6 +5,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
+    "tsc": "pnpm -r tsc",
     "typecheck": "pnpm -r tsc"
   },
   "packageManager": "pnpm@10.18.1",

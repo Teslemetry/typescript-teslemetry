@@ -1,15 +1,12 @@
 import { Teslemetry } from "./Teslemetry";
 import {
-  getApi1DcChargingHistory,
-  getApi1DcChargingInvoiceById,
-  getApi1DcChargingSessions,
   getApi1DxChargingHistory,
+  getApi1DxChargingInvoiceById,
+  getApi1DxChargingSessions,
 } from "./client";
 import {
-  GetApi1DcChargingHistoryData,
-  GetApi1DcChargingInvoiceByIdData,
-  GetApi1DcChargingSessionsData,
   GetApi1DxChargingHistoryData,
+  GetApi1DxChargingSessionsData,
 } from "./client/types.gen";
 
 export class TeslemetryChargingApi {
@@ -31,10 +28,10 @@ export class TeslemetryChargingApi {
    * @param query.vin Vehicle Identification Number (VIN) of the selected vehicle
    * @return Promise to an object with response containing paginated charging history records
    */
-  public async getDcChargingHistoryWTFISTHIS(
-    query?: GetApi1DcChargingHistoryData["query"],
+  public async getChargingHistory(
+    query: GetApi1DxChargingHistoryData["query"],
   ) {
-    const { data } = await getApi1DcChargingHistory({
+    const { data } = await getApi1DxChargingHistory({
       query,
       client: this.root.client,
     });
@@ -44,10 +41,10 @@ export class TeslemetryChargingApi {
   /**
    * Returns a charging invoice pdf for an event from charging history.
    * @param id The charging session ID
-   * @return Promise to an object with response containing charging invoice PDF document
+   * @return Promise to an object with response containing charging invoice PDF URL
    */
   public async getInvoice(id: string) {
-    const { data } = await getApi1DcChargingInvoiceById({
+    const { data } = await getApi1DxChargingInvoiceById({
       path: { id },
       client: this.root.client,
     });
@@ -65,31 +62,9 @@ export class TeslemetryChargingApi {
    * @return Promise to an object with response containing charging session information with pricing and energy data
    */
   public async getChargingSessions(
-    query?: GetApi1DcChargingSessionsData["query"],
+    query?: GetApi1DxChargingSessionsData["query"],
   ) {
-    const { data } = await getApi1DcChargingSessions({
-      query,
-      client: this.root.client,
-    });
-    return data;
-  }
-
-  /**
-   * Returns the paginated charging history.
-   * @param query Query parameters for filtering charging history
-   * @param query.endTime End time of the windows to download charging history for (i.e "2023-07-28T11:43:45-07:00")
-   * @param query.pageNo Current page number
-   * @param query.pageSize Number of records per page
-   * @param query.sortBy Field to sort by
-   * @param query.sortOrder Sort order (ASC or DESC)
-   * @param query.startTime Start time of the windows to download charging history for (i.e "2023-07-27T11:43:45-07:00")
-   * @param query.vin Vehicle Identification Number (VIN) of the selected vehicle
-   * @return Promise to an object with response containing paginated charging history records
-   */
-  public async getChargingHistory(
-    query: GetApi1DxChargingHistoryData["query"],
-  ) {
-    const { data } = await getApi1DxChargingHistory({
+    const { data } = await getApi1DxChargingSessions({
       query,
       client: this.root.client,
     });

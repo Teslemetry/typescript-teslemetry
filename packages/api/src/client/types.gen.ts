@@ -12954,49 +12954,6 @@ export type GetApi1DxWarrantyDetailsResponses = {
     200: unknown;
 };
 
-export type GetApi1DxChargingHistoryData = {
-    body?: never;
-    path?: never;
-    query: {
-        /**
-         * Vehicle Identification Number (VIN) of the selected vehicle.
-         */
-        vin: string;
-        /**
-         * Start time of the windows to download charging history for (i,e "2023-07-27T11:43:45-07:00").
-         */
-        startTime?: string;
-        /**
-         * End time of the windows to download charging history for (i,e "2023-07-28T11:43:45-07:00").
-         */
-        endTime?: string;
-        /**
-         * Current page number.
-         */
-        pageNo?: number;
-        /**
-         * Number of records per page.
-         */
-        pageSize?: number;
-        /**
-         * Field to sort by.
-         */
-        sortBy?: string;
-        /**
-         * Sort order (ASC or DESC).
-         */
-        sortOrder?: 'ASC' | 'DESC';
-    };
-    url: '/api/1/dx/charging/history';
-};
-
-export type GetApi1DxChargingHistoryResponses = {
-    /**
-     * Default Response
-     */
-    200: unknown;
-};
-
 export type PostApi1EnergySitesByIdBackupData = {
     body: {
         /**
@@ -13571,7 +13528,7 @@ export type GetApi1UsersRegionResponses = {
 
 export type GetApi1UsersRegionResponse = GetApi1UsersRegionResponses[keyof GetApi1UsersRegionResponses];
 
-export type GetApi1DcChargingHistoryData = {
+export type GetApi1DxChargingHistoryData = {
     body?: never;
     path?: never;
     query?: {
@@ -13604,17 +13561,17 @@ export type GetApi1DcChargingHistoryData = {
          */
         vin?: string;
     };
-    url: '/api/1/dc/charging/history';
+    url: '/api/1/dx/charging/history';
 };
 
-export type GetApi1DcChargingHistoryResponses = {
+export type GetApi1DxChargingHistoryResponses = {
     /**
      * Default Response
      */
     200: unknown;
 };
 
-export type GetApi1DcChargingInvoiceByIdData = {
+export type GetApi1DxChargingInvoiceByIdData = {
     body?: never;
     path: {
         /**
@@ -13623,17 +13580,17 @@ export type GetApi1DcChargingInvoiceByIdData = {
         id: string;
     };
     query?: never;
-    url: '/api/1/dc/charging/invoice/{id}';
+    url: '/api/1/dx/charging/invoice/{id}';
 };
 
-export type GetApi1DcChargingInvoiceByIdResponses = {
+export type GetApi1DxChargingInvoiceByIdResponses = {
     /**
      * Default Response
      */
     200: unknown;
 };
 
-export type GetApi1DcChargingSessionsData = {
+export type GetApi1DxChargingSessionsData = {
     body?: never;
     path?: never;
     query?: {
@@ -13658,10 +13615,10 @@ export type GetApi1DcChargingSessionsData = {
          */
         vin?: string;
     };
-    url: '/api/1/dc/charging/sessions';
+    url: '/api/1/dx/charging/sessions';
 };
 
-export type GetApi1DcChargingSessionsResponses = {
+export type GetApi1DxChargingSessionsResponses = {
     /**
      * Default Response
      */
