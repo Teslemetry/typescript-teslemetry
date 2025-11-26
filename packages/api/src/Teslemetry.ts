@@ -54,7 +54,7 @@ export class Teslemetry {
       return response;
     });
 
-    this.sse = new TeslemetryStream(this, access_token);
+    this.sse = new TeslemetryStream(this);
     this.api = new TeslemetryApi(this);
   }
 

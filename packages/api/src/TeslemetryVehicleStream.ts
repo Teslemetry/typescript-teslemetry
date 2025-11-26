@@ -28,7 +28,6 @@ export class TeslemetryVehicleStream {
   private stream: TeslemetryStream;
   public vin: string;
   public fields: FieldsResponse = {};
-  public preferTyped: boolean | null = null;
   private _pendingFields: FieldsRequest = {}; // Used for accumulating config changes before patching
   private _debounceTimeout: NodeJS.Timeout | null = null; // Debounce timeout for patchConfig
   public logger: Logger;
@@ -55,8 +54,8 @@ export class TeslemetryVehicleStream {
     });
 
     if (response.status === 200 && data) {
-      this.fields = data.fields || {};
-      this.preferTyped = data.prefer_typed || false;
+      this.fields = (data.fields as FieldsResponse) || {};
+      // this.preferTyped = data.prefer_typed || false; // Removed
     } else if (response.status === 404) {
       this.logger.warn(`Config for VIN ${this.vin} not found (404).`);
       return;
@@ -96,7 +95,7 @@ export class TeslemetryVehicleStream {
     const { data } = await patchApiConfigByVin({
       client: this.root.client,
       path: { vin: this.vin },
-      body: { fields },
+      body: { fields: fields as any }, // Cast to any to avoid potential type mismatch with generated types if strict
     });
     return data;
   }
@@ -105,7 +104,7 @@ export class TeslemetryVehicleStream {
     const { data } = await postApiConfigByVin({
       client: this.root.client,
       path: { vin: this.vin },
-      body: { fields },
+      body: { fields: fields as any },
     });
     return data;
   }
@@ -114,7 +113,7 @@ export class TeslemetryVehicleStream {
     if (
       this.fields[field] &&
       (interval === undefined ||
-        this.fields[field].interval_seconds === interval)
+        this.fields[field]!.interval_seconds === interval)
     ) {
       this.logger.debug(
         `Streaming field ${field} already enabled @ ${this.fields[field]?.interval_seconds || "default"}s`,

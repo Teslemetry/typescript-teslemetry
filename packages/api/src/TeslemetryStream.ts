@@ -1,5 +1,4 @@
 import { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
-import { EventSource } from "eventsource";
 import {
   ISseCredits,
   ISseEvent,
@@ -13,6 +12,7 @@ import {
 } from "./const.js";
 import { Teslemetry } from "./Teslemetry.js";
 import { Logger } from "./logger.js";
+import { getSseByVin_ } from "./client/sdk.gen.js";
 
 type ListenerCallback<T extends ISseEvent = ISseEvent> = (event: T) => void;
 type ConnectionListenerCallback = (connected: boolean) => void;
@@ -26,34 +26,26 @@ type EventType =
   | "vehicle_data"
   | "config";
 
-interface PendingListener {
-  eventType: EventType;
+interface ListenerEntry {
   callback: (event: any) => void;
   filters?: Record<string, any>;
-  removeFunction?: () => void;
 }
 
 export class TeslemetryStream {
   private root: Teslemetry;
-  private _access_token: string;
   public active: boolean = false;
   private vin: string | undefined;
   public logger: Logger;
-  private pendingListeners: PendingListener[] = [];
-  private activeListeners: Map<
-    () => void,
-    { eventSourceCallback: (event: any) => void }
-  > = new Map();
+
+  private listeners: Map<EventType, Set<ListenerEntry>> = new Map();
   private _connectionListeners: Map<() => void, ConnectionListenerCallback> =
     new Map();
-  private retries: number = 0;
-  private eventSource: EventSource | null = null;
   private vehicles: Map<string, TeslemetryVehicleStream> = new Map();
+  private controller: AbortController | null = null;
 
   // Constructor and basic setup
-  constructor(root: Teslemetry, access_token: string, vin?: string) {
+  constructor(root: Teslemetry, vin?: string) {
     this.root = root;
-    this._access_token = access_token;
     this.vin = vin;
     this.logger = root.logger;
     if (this.vin) {
@@ -70,54 +62,56 @@ export class TeslemetryStream {
 
   // Connection status and management
   public get connected(): boolean {
-    return (
-      this.eventSource !== null &&
-      this.eventSource.readyState === EventSource.OPEN
-    );
+    return this.active;
   }
 
   public async connect(): Promise<void> {
-    if (this.eventSource && this.eventSource.readyState === EventSource.OPEN) {
+    if (this.active) {
       return; // Already connected
     }
 
     this.active = true;
-    const region = await this.root.getRegion();
-    const url = new URL(`https://${region}.teslemetry.com/sse`);
+    this._connectLoop();
+  }
 
-    if (this.vin) {
-      url.pathname += `/${this.vin}`;
+  private async _connectLoop() {
+    let retries = 0;
+    while (this.active) {
+      try {
+        const sse = await getSseByVin_({
+          client: this.root.client,
+          path: { vin: this.vin || "" },
+        });
+
+        if ((sse as any).controller) {
+          console.log("CONTROLLER", this.controller);
+          this.controller = (sse as any).controller;
+        }
+
+        this.logger.info(`Connected to stream`);
+        retries = 0;
+        this._updateConnectionListeners(true);
+
+        if (sse.stream) {
+          for await (const event of sse.stream) {
+            if (!this.active) break;
+            this._dispatch(event);
+          }
+        }
+      } catch (error) {
+        if (!this.active) break;
+
+        this.logger.error("SSE error:", error);
+        this._updateConnectionListeners(false);
+
+        retries++;
+        const delay = Math.min(2 ** retries, 600) * 1000;
+        this.logger.info(`Reconnecting in ${delay / 1000} seconds...`);
+
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
     }
-    const urlString = url.toString();
-    url.searchParams.append("token", this._access_token);
-
-    this.eventSource = new EventSource(url.toString());
-
-    // Register all pending listeners ASAP
-    this._registerPendingListeners();
-
-    this.eventSource.onopen = () => {
-      this.logger.info(`Connected to ${urlString}`);
-      this.retries = 0;
-      this._updateConnectionListeners(true);
-    };
-
-    this.eventSource.onerror = (error: any) => {
-      this.logger.error("EventSource error:", error);
-      this.close();
-      this._updateConnectionListeners(false);
-
-      this.retries++;
-      const delay = Math.min(2 ** this.retries, 600) * 1000;
-      this.logger.info(`Reconnecting in ${delay / 1000} seconds...`);
-      setTimeout(
-        () =>
-          this.connect().catch((error) => {
-            this.logger.error("Failed to reconnect:", error);
-          }),
-        delay,
-      );
-    };
+    this._updateConnectionListeners(false);
   }
 
   public disconnect(): void {
@@ -126,13 +120,12 @@ export class TeslemetryStream {
   }
 
   public close(): void {
-    if (this.eventSource) {
-      this.logger.info(`Disconnecting from stream`);
-      this.eventSource.close();
-      this.eventSource = null;
+    this.active = false;
+    if (this.controller) {
+      this.controller.abort();
+      this.controller = null;
     }
-    // Clear all active listeners
-    this.activeListeners.clear();
+    this.logger.info(`Disconnecting from stream`);
     this._updateConnectionListeners(false);
   }
 
@@ -207,8 +200,6 @@ export class TeslemetryStream {
     callback: ListenerCallback<T>,
     filters?: Record<string, any>,
   ): () => void {
-    // For backward compatibility, we'll treat this as a generic event listener
-    // that works with any event type by checking all possible event types
     const eventTypes = [
       "state",
       "data",
@@ -242,84 +233,59 @@ export class TeslemetryStream {
     }
   }
 
-  private _registerPendingListeners(): void {
-    // Move pending listeners to active EventSource listeners
-    for (const pendingListener of this.pendingListeners) {
-      this._addEventSourceListener(
-        pendingListener.eventType,
-        pendingListener.callback,
-        pendingListener.filters,
-      );
-    }
-    // Clear pending listeners
-    this.pendingListeners = [];
-  }
-
-  private _addEventSourceListener(
-    eventType: EventType,
-    callback: (event: any) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    if (!this.eventSource) {
-      throw new Error("EventSource not available");
-    }
-
-    const wrappedCallback = (event: any) => {
-      const data = this._parseEventData(event.data);
-      if (recursiveMatch(filters, data)) {
-        callback(data);
-      }
-    };
-
-    this.eventSource.addEventListener(eventType, wrappedCallback);
-
-    const removeFunction = () => {
-      this.eventSource?.removeEventListener(eventType, wrappedCallback);
-      this.activeListeners.delete(removeFunction);
-    };
-
-    this.activeListeners.set(removeFunction, {
-      eventSourceCallback: wrappedCallback,
-    });
-
-    return removeFunction;
-  }
-
   private _createListener<T extends ISseEvent>(
     eventType: EventType,
     callback: (event: T) => void,
     filters?: Record<string, any>,
   ): () => void {
-    if (this.eventSource) {
-      // EventSource exists
-      return this._addEventSourceListener(eventType, callback, filters);
-    } else {
-      // EventSource doesn't exist yet - store for later
-      const pendingListener: PendingListener = {
-        eventType,
-        callback,
-        filters,
-      };
+    const entry: ListenerEntry = { callback: callback as any, filters };
 
-      this.pendingListeners.push(pendingListener);
-
-      return () => {
-        const index = this.pendingListeners.indexOf(pendingListener);
-        if (index > -1) {
-          this.pendingListeners.splice(index, 1);
-        }
-      };
+    if (!this.listeners.has(eventType)) {
+      this.listeners.set(eventType, new Set());
     }
+    this.listeners.get(eventType)!.add(entry);
+
+    return () => {
+      const set = this.listeners.get(eventType);
+      if (set) {
+        set.delete(entry);
+        if (set.size === 0) {
+          this.listeners.delete(eventType);
+        }
+      }
+    };
   }
 
-  private _parseEventData(eventData: string): ISseEvent {
-    let data = JSON.parse(eventData);
-    if (data.createdAt) {
-      const [main, ns] = data.createdAt.split(".");
+  private _dispatch(event: any) {
+    // Add timestamp if missing (parse createdAt)
+    if (event.createdAt && !event.timestamp) {
+      const [main, ns] = event.createdAt.split(".");
       const date = new Date(main + "Z");
-      data.timestamp = date.getTime() + parseInt((ns || "000").substring(0, 3));
+      event.timestamp =
+        date.getTime() + parseInt((ns || "000").substring(0, 3));
     }
-    return data;
+
+    let eventType: EventType | undefined;
+
+    if ("state" in event) eventType = "state";
+    else if ("data" in event) eventType = "data";
+    else if ("errors" in event) eventType = "errors";
+    else if ("alerts" in event) eventType = "alerts";
+    else if ("networkInterface" in event) eventType = "connectivity";
+    else if ("credits" in event) eventType = "credits";
+    else if ("vehicle_data" in event) eventType = "vehicle_data";
+    else if ("config" in event) eventType = "config";
+
+    if (eventType) {
+      const set = this.listeners.get(eventType);
+      if (set) {
+        for (const entry of set) {
+          if (recursiveMatch(entry.filters, event)) {
+            entry.callback(event);
+          }
+        }
+      }
+    }
   }
 }
 

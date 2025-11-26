@@ -5529,6 +5529,26 @@ export type PostApiConfigByVinResponses = {
 
 export type PostApiConfigByVinResponse = PostApiConfigByVinResponses[keyof PostApiConfigByVinResponses];
 
+export type PostApiAutoByIdData = {
+    body?: never;
+    path: {
+        id: string | number;
+    };
+    query?: never;
+    url: '/api/auto/{id}';
+};
+
+export type PostApiAutoByIdResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response: boolean;
+    };
+};
+
+export type PostApiAutoByIdResponse = PostApiAutoByIdResponses[keyof PostApiAutoByIdResponses];
+
 export type GetApiRefreshByVinData = {
     body?: never;
     path: {
@@ -12647,6 +12667,34 @@ export type PostApi1VehiclesByVinCustomCommandSeatHeaterResponses = {
 
 export type PostApi1VehiclesByVinCustomCommandSeatHeaterResponse = PostApi1VehiclesByVinCustomCommandSeatHeaterResponses[keyof PostApi1VehiclesByVinCustomCommandSeatHeaterResponses];
 
+export type GetApi1VehiclesByVinCustomCommandChargeOnSolarData = {
+    body?: never;
+    path: {
+        /**
+         * Vehicle Identification Number
+         */
+        vin: string;
+    };
+    query?: never;
+    url: '/api/1/vehicles/{vin}/custom_command/charge_on_solar';
+};
+
+export type GetApi1VehiclesByVinCustomCommandChargeOnSolarResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response: {
+            result: boolean | {
+                [key: string]: unknown;
+            };
+            reason?: string;
+        };
+    };
+};
+
+export type GetApi1VehiclesByVinCustomCommandChargeOnSolarResponse = GetApi1VehiclesByVinCustomCommandChargeOnSolarResponses[keyof GetApi1VehiclesByVinCustomCommandChargeOnSolarResponses];
+
 export type PostApi1VehiclesByVinCustomCommandChargeOnSolarData = {
     body?: {
         enabled?: boolean;
@@ -12736,6 +12784,96 @@ export type PostApi1VehiclesByVinCustomCommandPlayVideoResponses = {
 };
 
 export type PostApi1VehiclesByVinCustomCommandPlayVideoResponse = PostApi1VehiclesByVinCustomCommandPlayVideoResponses[keyof PostApi1VehiclesByVinCustomCommandPlayVideoResponses];
+
+export type PostApi1VehiclesByVinCustomCommandDrivenoteData = {
+    body: {
+        note: string;
+    };
+    path: {
+        /**
+         * Vehicle Identification Number
+         */
+        vin: string;
+    };
+    query?: never;
+    url: '/api/1/vehicles/{vin}/custom_command/drivenote';
+};
+
+export type PostApi1VehiclesByVinCustomCommandDrivenoteResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response: {
+            result: boolean | {
+                [key: string]: unknown;
+            };
+            reason?: string;
+        };
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandDrivenoteResponse = PostApi1VehiclesByVinCustomCommandDrivenoteResponses[keyof PostApi1VehiclesByVinCustomCommandDrivenoteResponses];
+
+export type PostApi1VehiclesByVinCustomCommandFrontZoneLightData = {
+    body: {
+        level: 'off' | 'low' | 'med' | 'high';
+    };
+    path: {
+        /**
+         * Vehicle Identification Number
+         */
+        vin: string;
+    };
+    query?: never;
+    url: '/api/1/vehicles/{vin}/custom_command/front_zone_light';
+};
+
+export type PostApi1VehiclesByVinCustomCommandFrontZoneLightResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response: {
+            result: boolean | {
+                [key: string]: unknown;
+            };
+            reason?: string;
+        };
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandFrontZoneLightResponse = PostApi1VehiclesByVinCustomCommandFrontZoneLightResponses[keyof PostApi1VehiclesByVinCustomCommandFrontZoneLightResponses];
+
+export type PostApi1VehiclesByVinCustomCommandRearZoneLightData = {
+    body: {
+        level: 'off' | 'low' | 'med' | 'high';
+    };
+    path: {
+        /**
+         * Vehicle Identification Number
+         */
+        vin: string;
+    };
+    query?: never;
+    url: '/api/1/vehicles/{vin}/custom_command/rear_zone_light';
+};
+
+export type PostApi1VehiclesByVinCustomCommandRearZoneLightResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response: {
+            result: boolean | {
+                [key: string]: unknown;
+            };
+            reason?: string;
+        };
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandRearZoneLightResponse = PostApi1VehiclesByVinCustomCommandRearZoneLightResponses[keyof PostApi1VehiclesByVinCustomCommandRearZoneLightResponses];
 
 export type PostApi1VehiclesByVinCustomCommandStopLightShowData = {
     body?: never;
@@ -12871,6 +13009,25 @@ export type PostApi1VehiclesByVinCustomCommandRemoveKeyResponses = {
 
 export type PostApi1VehiclesByVinCustomCommandRemoveKeyResponse = PostApi1VehiclesByVinCustomCommandRemoveKeyResponses[keyof PostApi1VehiclesByVinCustomCommandRemoveKeyResponses];
 
+export type WakeUpOldData = {
+    body?: never;
+    path: {
+        /**
+         * Vehicle Identification Number
+         */
+        vin: string;
+    };
+    query?: never;
+    url: '/api/1/vehicles/{vin}/wake_up_old';
+};
+
+export type WakeUpOldResponses = {
+    /**
+     * Default Response
+     */
+    200: unknown;
+};
+
 export type WakeUpData = {
     body?: never;
     path: {
@@ -12889,6 +13046,34 @@ export type WakeUpResponses = {
      */
     200: unknown;
 };
+
+export type PostApi1VehiclesByVinSignedCommandData = {
+    body: {
+        /**
+         * Base64 encoded Tesla Vehicle Command Protocol message
+         */
+        routable_message: string;
+    };
+    path: {
+        /**
+         * Vehicle Identification Number
+         */
+        vin: string;
+    };
+    query?: never;
+    url: '/api/1/vehicles/{vin}/signed_command';
+};
+
+export type PostApi1VehiclesByVinSignedCommandResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response: string;
+    };
+};
+
+export type PostApi1VehiclesByVinSignedCommandResponse = PostApi1VehiclesByVinSignedCommandResponses[keyof PostApi1VehiclesByVinSignedCommandResponses];
 
 export type GetApi1DxVehiclesSubscriptionsEligibleData = {
     body?: never;
@@ -13415,6 +13600,25 @@ export type PostApi1EnergySitesByIdTimeOfUseSettingsResponses = {
 
 export type PostApi1EnergySitesByIdTimeOfUseSettingsResponse = PostApi1EnergySitesByIdTimeOfUseSettingsResponses[keyof PostApi1EnergySitesByIdTimeOfUseSettingsResponses];
 
+export type PostApi1EnergySitesByIdVehicleChargingSettingsData = {
+    body?: never;
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/vehicle_charging_settings';
+};
+
+export type PostApi1EnergySitesByIdVehicleChargingSettingsResponses = {
+    /**
+     * Default Response
+     */
+    200: unknown;
+};
+
 export type GetApi1UsersFeatureConfigData = {
     body?: never;
     path?: never;
@@ -13528,6 +13732,26 @@ export type GetApi1UsersRegionResponses = {
 
 export type GetApi1UsersRegionResponse = GetApi1UsersRegionResponses[keyof GetApi1UsersRegionResponses];
 
+export type PostApi1UsersKeysData = {
+    body: {
+        public_key: string;
+        kind: string;
+        model: string;
+        name: string;
+        tag: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/1/users/keys';
+};
+
+export type PostApi1UsersKeysResponses = {
+    /**
+     * Default Response
+     */
+    200: unknown;
+};
+
 export type GetApi1DxChargingHistoryData = {
     body?: never;
     path?: never;
@@ -13619,6 +13843,282 @@ export type GetApi1DxChargingSessionsData = {
 };
 
 export type GetApi1DxChargingSessionsResponses = {
+    /**
+     * Default Response
+     */
+    200: unknown;
+};
+
+export type GetSseByVin_Data = {
+    body?: never;
+    path: {
+        /**
+         * Vehicle Identification Number
+         */
+        vin: string;
+    };
+    query?: never;
+    url: '/sse/{vin}?';
+};
+
+export type GetSseByVin_Errors = {
+    /**
+     * Default Response
+     */
+    401: {
+        status?: 401;
+        response?: null;
+        error: string;
+    };
+    /**
+     * Default Response
+     */
+    402: {
+        status?: 402;
+        response?: null;
+        error: string;
+    };
+};
+
+export type GetSseByVin_Error = GetSseByVin_Errors[keyof GetSseByVin_Errors];
+
+export type GetSseByVin_Responses = {
+    /**
+     * Default Response
+     */
+    200: {
+        createdAt: string;
+        vin: string;
+        isCache?: boolean;
+        state: 'online' | 'offline' | 'asleep';
+    } | {
+        createdAt: string;
+        vin: string;
+        isCache?: boolean;
+        data: {
+            DriveRail?: number | null;
+            ChargeState?: 'Disconnected' | 'Charging' | 'Complete' | 'Stopped' | 'NoPower' | 'Scheduled' | 'Starting' | 'Preconditioning' | 'WaitingForCar' | 'WaitingForScheduledCharge' | 'Error' | null;
+            BmsFullchargecomplete?: boolean | null;
+            VehicleSpeed?: number | null;
+            Odometer?: number | null;
+            PackVoltage?: number | null;
+            PackCurrent?: number | null;
+            Soc?: number | null;
+            DCDCEnable?: boolean | null;
+            Gear?: 'P' | 'D' | 'R' | 'N' | null;
+            IsolationResistance?: number | null;
+            PedalPosition?: number | null;
+            BrakePedal?: boolean | null;
+            DiStateR?: 'Off' | 'Standby' | 'PreparingToDrive' | 'Drive' | 'Error' | null;
+            DiHeatsinkTR?: number | null;
+            DiAxleSpeedR?: number | null;
+            DiTorquemotor?: number | null;
+            DiStatorTempR?: number | null;
+            DiVBatR?: number | null;
+            DiMotorCurrentR?: number | null;
+            DiStateF?: 'Off' | 'Standby' | 'PreparingToDrive' | 'Drive' | 'Error' | null;
+            DiStateREL?: 'Off' | 'Standby' | 'PreparingToDrive' | 'Drive' | 'Error' | null;
+            DiStateRER?: 'Off' | 'Standby' | 'PreparingToDrive' | 'Drive' | 'Error' | null;
+            DiHeatsinkTF?: number | null;
+            DiHeatsinkTREL?: number | null;
+            DiHeatsinkTRER?: number | null;
+            DiAxleSpeedF?: number | null;
+            DiAxleSpeedREL?: number | null;
+            DiAxleSpeedRER?: number | null;
+            DiSlaveTorqueCmd?: number | null;
+            DiTorqueActualR?: number | null;
+            DiTorqueActualF?: number | null;
+            DiTorqueActualREL?: number | null;
+            DiTorqueActualRER?: number | null;
+            DiStatorTempF?: number | null;
+            DiStatorTempREL?: number | null;
+            DiStatorTempRER?: number | null;
+            DiVBatF?: number | null;
+            DiVBatREL?: number | null;
+            DiVBatRER?: number | null;
+            DiMotorCurrentF?: number | null;
+            DiMotorCurrentREL?: number | null;
+            DiMotorCurrentRER?: number | null;
+            DiInverterTR?: number | null;
+            DiInverterTF?: number | null;
+            DiInverterTREL?: number | null;
+            DiInverterTRER?: number | null;
+            Location?: {
+                latitude: number;
+                longitude: number;
+            } | null;
+            GpsState?: number | null;
+            GpsHeading?: number | null;
+            OriginLocation?: {
+                latitude: number;
+                longitude: number;
+            } | null;
+            DestinationLocation?: {
+                latitude: number;
+                longitude: number;
+            } | null;
+            NumBrickVoltageMax?: number | null;
+            BrickVoltageMax?: number | null;
+            NumBrickVoltageMin?: number | null;
+            BrickVoltageMin?: number | null;
+            NumModuleTempMax?: number | null;
+            ModuleTempMax?: number | null;
+            NumModuleTempMin?: number | null;
+            ModuleTempMin?: number | null;
+            RatedRange?: number | null;
+            Hvil?: number | null;
+            EstBatteryRange?: number | null;
+            IdealBatteryRange?: number | null;
+            BatteryLevel?: number | null;
+            EnergyRemaining?: number | null;
+            BatteryHeaterOn?: boolean | null;
+            NotEnoughPowerToHeat?: boolean | null;
+            BMSState?: 'Discharging' | 'Charging' | 'Idle' | 'Balancing' | null;
+            DCChargingEnergyIn?: number | null;
+            DCChargingPower?: number | null;
+            ACChargingEnergyIn?: number | null;
+            ACChargingPower?: number | null;
+            ChargeLimitSoc?: number | null;
+            FastChargerPresent?: boolean | null;
+            TimeToFullCharge?: number | null;
+            ScheduledChargingStartTime?: number | null;
+            ScheduledChargingPending?: boolean | null;
+            ScheduledDepartureTime?: number | null;
+            PreconditioningEnabled?: boolean | null;
+            ScheduledChargingMode?: 'Off' | 'StartAt' | 'DepartBy' | null;
+            ChargeAmps?: number | null;
+            ChargeEnableRequest?: boolean | null;
+            ChargerPhases?: number | null;
+            ChargePortColdWeatherMode?: boolean | null;
+            ChargeCurrentRequest?: number | null;
+            ChargeCurrentRequestMax?: number | null;
+            SuperchargerSessionTripPlanner?: boolean | null;
+            ChargePort?: 'Open' | 'Closed' | null;
+            ChargePortLatch?: 'Engaged' | 'Disengaged' | 'Unknown' | null;
+            ChargePortDoorOpen?: boolean | null;
+            ChargerVoltage?: number | null;
+            ChargingCableType?: 'TypeUnknown' | 'TypeJ1772' | 'TypeMennekes' | 'TypeCCS' | 'TypeCHAdeMO' | 'TypeGB' | 'TypeTesla' | 'TypeSAE' | 'TypeCCS2' | 'TypeAdapter' | null;
+            DetailedChargeState?: 'Disconnected' | 'Charging' | 'Complete' | 'WaitingForCar' | 'WaitingForScheduledCharge' | 'Error' | 'Unknown' | null;
+            EstimatedHoursToChargeTermination?: number | null;
+            FastChargerType?: 'Tesla' | 'CCS' | 'CHAdeMO' | 'Unknown' | null;
+            ChargeRateMilePerHour?: number | null;
+            DoorState?: {
+                DriverFront: boolean;
+                DriverRear: boolean;
+                PassengerFront: boolean;
+                PassengerRear: boolean;
+                TrunkFront: boolean;
+                TrunkRear: boolean;
+            } | null;
+            Locked?: boolean | null;
+            FdWindow?: 'Closed' | 'Open' | 'Venting' | null;
+            FpWindow?: 'Closed' | 'Open' | 'Venting' | null;
+            RdWindow?: 'Closed' | 'Open' | 'Venting' | null;
+            RpWindow?: 'Closed' | 'Open' | 'Venting' | null;
+            VehicleName?: string | null;
+            Version?: string | null;
+            CarType?: 'ModelS' | 'ModelX' | 'Model3' | 'ModelY' | 'Cybertruck' | 'Semi' | 'Roadster' | null;
+            Trim?: string | null;
+            ExteriorColor?: string | null;
+            RoofColor?: string | null;
+            EfficiencyPackage?: boolean | null;
+            EuropeVehicle?: boolean | null;
+            RightHandDrive?: boolean | null;
+            WheelType?: string | null;
+            SentryMode?: 'Off' | 'On' | 'Enabled' | null;
+            SpeedLimitMode?: boolean | null;
+            CurrentLimitMph?: number | null;
+            GuestModeEnabled?: boolean | null;
+            PinToDriveEnabled?: boolean | null;
+            PairedPhoneKeyAndKeyFobQty?: number | null;
+            GuestModeMobileAccessState?: 'FullAccess' | 'LimitedAccess' | 'NoAccess' | null;
+            ValetModeEnabled?: boolean | null;
+            RemoteStartEnabled?: boolean | null;
+        };
+    } | {
+        createdAt: string;
+        vin: string;
+        isCache?: boolean;
+        errors: Array<{
+            createdAt: string;
+            name: 'POWER_REDUCED' | 'BMS_high_voltage_immediate_action' | 'BMS_low_voltage_immediate_action' | 'BMS_over_current' | 'BMS_cell_imbalance' | 'BMS_temp_high_charge' | 'BMS_temp_low_charge' | 'BMS_temp_high_discharge' | 'BMS_temp_low_discharge' | 'BMS_max_pack_volt_high' | 'BMS_min_pack_volt_low' | 'BMS_high_cell_volt' | 'BMS_low_cell_volt' | 'CC_over_current' | 'CC_voltage_too_high' | 'CC_voltage_too_low' | 'CC_temp_too_high' | 'CC_internal_fault' | 'DC_bus_undercurrent' | 'DC_bus_overcurrent' | 'ISO_fault' | 'ISO_fault_charging' | 'ISO_fault_driving' | 'DI_A_temp_limit' | 'DI_B_temp_limit' | 'DI_C_temp_limit' | 'DI_DC_volt_supply_low' | 'DI_DC_volt_supply_high' | 'DI_volt_sensor_fault' | 'DI_current_sensor_fault' | 'DI_temp_sensor_fault' | 'VEHICLE_low_12v_power' | 'VEHICLE_critical_12v_power' | 'VEHICLE_12v_power_failure' | 'VEHICLE_power_reduced' | 'VCFRONT_air_suspension_fail' | 'VCFRONT_parking_brake_fail' | 'VCFRONT_brake_fluid_low' | 'VCFRONT_power_steering_fail' | 'VCFRONT_abs_fail' | 'VCFRONT_esp_fail' | 'VCFRONT_epas_fail' | 'VCFRONT_driver_door_open' | 'VCFRONT_psgr_door_open' | 'VCFRONT_driveunit_fail' | 'VCFRONT_charger_fail' | 'VCFRONT_bms_fail' | 'VCFRONT_hvac_fail' | 'VCFRONT_seatbelt_driver_unbuckled' | 'VCFRONT_seatbelt_passenger_unbuckled' | 'VCFRONT_tpms_fault' | 'VCFRONT_washer_fluid_low' | 'VCFRONT_wheel_fault' | 'VCFRONT_adapter_fault' | 'VCFRONT_sunroof_fault' | 'VCFRONT_trunk_open' | 'VCFRONT_frunk_open' | 'VCFRONT_gear_not_park' | 'VCFRONT_door_open' | 'VCFRONT_key_not_present' | 'VCFRONT_charge_port_open' | 'VCFRONT_tow_haul_mode' | 'VCFRONT_sentry_mode_event' | 'VCFRONT_home_link_failure' | 'VCFRONT_door_lock_failure' | 'VCREAR_air_suspension_fail' | 'VCREAR_brake_fluid_low' | 'VCREAR_power_steering_fail' | 'VCREAR_abs_fail' | 'VCREAR_esp_fail' | 'VCREAR_epas_fail' | 'VCREAR_driveunit_fail' | 'VCREAR_charger_fail' | 'VCREAR_bms_fail' | 'VCREAR_hvac_fail' | 'VCREAR_seatbelt_driver_unbuckled' | 'VCREAR_seatbelt_passenger_unbuckled' | 'VCREAR_tpms_fault' | 'VCREAR_washer_fluid_low' | 'VCREAR_wheel_fault' | 'VCREAR_adapter_fault' | 'VCREAR_sunroof_fault' | 'VCREAR_trunk_open' | 'VCREAR_frunk_open' | 'VCREAR_gear_not_park' | 'VCREAR_door_open' | 'VCREAR_key_not_present' | 'VCREAR_charge_port_open' | 'VCREAR_tow_haul_mode' | 'VCREAR_sentry_mode_event' | 'VCREAR_home_link_failure' | 'VCREAR_door_lock_failure' | 'UNKNOWN' | 'GENERIC' | 'OTHER';
+            tags: {
+                field_name: string;
+                name: string;
+            };
+            body: string;
+        }>;
+    } | {
+        createdAt: string;
+        vin: string;
+        isCache?: boolean;
+        alerts: Array<{
+            name: 'POWER_REDUCED' | 'BMS_high_voltage_immediate_action' | 'BMS_low_voltage_immediate_action' | 'BMS_over_current' | 'BMS_cell_imbalance' | 'BMS_temp_high_charge' | 'BMS_temp_low_charge' | 'BMS_temp_high_discharge' | 'BMS_temp_low_discharge' | 'BMS_max_pack_volt_high' | 'BMS_min_pack_volt_low' | 'BMS_high_cell_volt' | 'BMS_low_cell_volt' | 'CC_over_current' | 'CC_voltage_too_high' | 'CC_voltage_too_low' | 'CC_temp_too_high' | 'CC_internal_fault' | 'DC_bus_undercurrent' | 'DC_bus_overcurrent' | 'ISO_fault' | 'ISO_fault_charging' | 'ISO_fault_driving' | 'DI_A_temp_limit' | 'DI_B_temp_limit' | 'DI_C_temp_limit' | 'DI_DC_volt_supply_low' | 'DI_DC_volt_supply_high' | 'DI_volt_sensor_fault' | 'DI_current_sensor_fault' | 'DI_temp_sensor_fault' | 'VEHICLE_low_12v_power' | 'VEHICLE_critical_12v_power' | 'VEHICLE_12v_power_failure' | 'VEHICLE_power_reduced' | 'VCFRONT_air_suspension_fail' | 'VCFRONT_parking_brake_fail' | 'VCFRONT_brake_fluid_low' | 'VCFRONT_power_steering_fail' | 'VCFRONT_abs_fail' | 'VCFRONT_esp_fail' | 'VCFRONT_epas_fail' | 'VCFRONT_driver_door_open' | 'VCFRONT_psgr_door_open' | 'VCFRONT_driveunit_fail' | 'VCFRONT_charger_fail' | 'VCFRONT_bms_fail' | 'VCFRONT_hvac_fail' | 'VCFRONT_seatbelt_driver_unbuckled' | 'VCFRONT_seatbelt_passenger_unbuckled' | 'VCFRONT_tpms_fault' | 'VCFRONT_washer_fluid_low' | 'VCFRONT_wheel_fault' | 'VCFRONT_adapter_fault' | 'VCFRONT_sunroof_fault' | 'VCFRONT_trunk_open' | 'VCFRONT_frunk_open' | 'VCFRONT_gear_not_park' | 'VCFRONT_door_open' | 'VCFRONT_key_not_present' | 'VCFRONT_charge_port_open' | 'VCFRONT_tow_haul_mode' | 'VCFRONT_sentry_mode_event' | 'VCFRONT_home_link_failure' | 'VCFRONT_door_lock_failure' | 'VCREAR_air_suspension_fail' | 'VCREAR_brake_fluid_low' | 'VCREAR_power_steering_fail' | 'VCREAR_abs_fail' | 'VCREAR_esp_fail' | 'VCREAR_epas_fail' | 'VCREAR_driveunit_fail' | 'VCREAR_charger_fail' | 'VCREAR_bms_fail' | 'VCREAR_hvac_fail' | 'VCREAR_seatbelt_driver_unbuckled' | 'VCREAR_seatbelt_passenger_unbuckled' | 'VCREAR_tpms_fault' | 'VCREAR_washer_fluid_low' | 'VCREAR_wheel_fault' | 'VCREAR_adapter_fault' | 'VCREAR_sunroof_fault' | 'VCREAR_trunk_open' | 'VCREAR_frunk_open' | 'VCREAR_gear_not_park' | 'VCREAR_door_open' | 'VCREAR_key_not_present' | 'VCREAR_charge_port_open' | 'VCREAR_tow_haul_mode' | 'VCREAR_sentry_mode_event' | 'VCREAR_home_link_failure' | 'VCREAR_door_lock_failure' | 'UNKNOWN' | 'GENERIC' | 'OTHER';
+            audiences: Array<string>;
+            startedAt: string;
+            endedAt?: string;
+            condition: string;
+            clearCondition: string;
+            description: string;
+            potentialImpact: string;
+            customerFacingMessage1?: string;
+            customerFacingMessage2?: string;
+        }>;
+    } | {
+        createdAt: string;
+        vin: string;
+        isCache?: boolean;
+        networkInterface: 'Cellular' | 'WiFi' | 'Ethernet';
+        status: 'connected' | 'disconnected';
+    } | {
+        createdAt: string;
+        vin: string;
+        isCache?: boolean;
+        credits: {
+            balance: number;
+            cost: number;
+            name: string;
+            type: string;
+        };
+    } | {
+        createdAt: string;
+        vin: string;
+        isCache?: boolean;
+        vehicle_data: {
+            [key: string]: unknown;
+        };
+    } | {
+        createdAt: string;
+        vin: string;
+        isCache?: boolean;
+        config: {
+            fields: {
+                [key: string]: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+            };
+        };
+    };
+};
+
+export type GetSseByVin_Response = GetSseByVin_Responses[keyof GetSseByVin_Responses];
+
+export type GetSseByVinByFieldData = {
+    body?: never;
+    path: {
+        /**
+         * Vehicle Identification Number
+         */
+        vin: string;
+        field: 'ACChargingEnergyIn' | 'ACChargingPower' | 'AutoSeatClimateLeft' | 'AutoSeatClimateRight' | 'AutomaticBlindSpotCamera' | 'AutomaticEmergencyBrakingOff' | 'BMSState' | 'BatteryHeaterOn' | 'BatteryLevel' | 'BlindSpotCollisionWarningChime' | 'BmsFullchargecomplete' | 'BrakePedal' | 'BrakePedalPos' | 'BrickVoltageMax' | 'BrickVoltageMin' | 'CabinOverheatProtectionMode' | 'CabinOverheatProtectionTemperatureLimit' | 'CarType' | 'CenterDisplay' | 'ChargeAmps' | 'ChargeCurrentRequest' | 'ChargeCurrentRequestMax' | 'ChargeEnableRequest' | 'ChargeLimitSoc' | 'ChargePort' | 'ChargePortColdWeatherMode' | 'ChargePortDoorOpen' | 'ChargePortLatch' | 'ChargeRateMilePerHour' | 'ChargeState' | 'ChargerPhases' | 'ChargerVoltage' | 'ChargingCableType' | 'ClimateKeeperMode' | 'ClimateSeatCoolingFrontLeft' | 'ClimateSeatCoolingFrontRight' | 'CruiseFollowDistance' | 'CruiseSetSpeed' | 'CurrentLimitMph' | 'DCChargingEnergyIn' | 'DCChargingPower' | 'DCDCEnable' | 'DefrostForPreconditioning' | 'DefrostMode' | 'DestinationLocation' | 'DestinationName' | 'DetailedChargeState' | 'DiAxleSpeedF' | 'DiAxleSpeedR' | 'DiAxleSpeedREL' | 'DiAxleSpeedRER' | 'DiHeatsinkTF' | 'DiHeatsinkTR' | 'DiHeatsinkTREL' | 'DiHeatsinkTRER' | 'DiInverterTF' | 'DiInverterTR' | 'DiInverterTREL' | 'DiInverterTRER' | 'DiMotorCurrentF' | 'DiMotorCurrentR' | 'DiMotorCurrentREL' | 'DiMotorCurrentRER' | 'DiSlaveTorqueCmd' | 'DiStateF' | 'DiStateR' | 'DiStateREL' | 'DiStateRER' | 'DiStatorTempF' | 'DiStatorTempR' | 'DiStatorTempREL' | 'DiStatorTempRER' | 'DiTorqueActualF' | 'DiTorqueActualR' | 'DiTorqueActualREL' | 'DiTorqueActualRER' | 'DiTorquemotor' | 'DiVBatF' | 'DiVBatR' | 'DiVBatREL' | 'DiVBatRER' | 'DoorState' | 'DriveRail' | 'DriverSeatBelt' | 'DriverSeatOccupied' | 'EfficiencyPackage' | 'EmergencyLaneDepartureAvoidance' | 'EnergyRemaining' | 'EstBatteryRange' | 'EstimatedHoursToChargeTermination' | 'EuropeVehicle' | 'ExpectedEnergyPercentAtTripArrival' | 'ExteriorColor' | 'FastChargerPresent' | 'FastChargerType' | 'FdWindow' | 'ForwardCollisionWarning' | 'FpWindow' | 'Gear' | 'GpsHeading' | 'GpsState' | 'GuestModeEnabled' | 'GuestModeMobileAccessState' | 'HomelinkDeviceCount' | 'HomelinkNearby' | 'HvacACEnabled' | 'HvacAutoMode' | 'HvacFanSpeed' | 'HvacFanStatus' | 'HvacLeftTemperatureRequest' | 'HvacPower' | 'HvacRightTemperatureRequest' | 'HvacSteeringWheelHeatAuto' | 'HvacSteeringWheelHeatLevel' | 'Hvil' | 'IdealBatteryRange' | 'InsideTemp' | 'IsolationResistance' | 'LaneDepartureAvoidance' | 'LateralAcceleration' | 'LifetimeEnergyUsed' | 'LightsHazardsActive' | 'LightsHighBeams' | 'LightsTurnSignal' | 'LocatedAtFavorite' | 'LocatedAtHome' | 'LocatedAtWork' | 'Location' | 'Locked' | 'LongitudinalAcceleration' | 'MediaAudioVolume' | 'MediaAudioVolumeIncrement' | 'MediaAudioVolumeMax' | 'MediaNowPlayingAlbum' | 'MediaNowPlayingArtist' | 'MediaNowPlayingDuration' | 'MediaNowPlayingElapsed' | 'MediaNowPlayingStation' | 'MediaNowPlayingTitle' | 'MediaPlaybackSource' | 'MediaPlaybackStatus' | 'MilesToArrival' | 'MinutesToArrival' | 'ModuleTempMax' | 'ModuleTempMin' | 'NotEnoughPowerToHeat' | 'NumBrickVoltageMax' | 'NumBrickVoltageMin' | 'NumModuleTempMax' | 'NumModuleTempMin' | 'Odometer' | 'OffroadLightbarPresent' | 'OriginLocation' | 'OutsideTemp' | 'PackCurrent' | 'PackVoltage' | 'PairedPhoneKeyAndKeyFobQty' | 'PassengerSeatBelt' | 'PedalPosition' | 'PinToDriveEnabled' | 'PowershareHoursLeft' | 'PowershareInstantaneousPowerKW' | 'PowershareStatus' | 'PowershareStopReason' | 'PowershareType' | 'PreconditioningEnabled' | 'RatedRange' | 'RdWindow' | 'RearDefrostEnabled' | 'RearDisplayHvacEnabled' | 'RearSeatHeaters' | 'RemoteStartEnabled' | 'RightHandDrive' | 'RoofColor' | 'RouteLine' | 'RouteTrafficMinutesDelay' | 'RpWindow' | 'ScheduledChargingMode' | 'ScheduledChargingPending' | 'ScheduledChargingStartTime' | 'ScheduledDepartureTime' | 'SeatHeaterLeft' | 'SeatHeaterRearCenter' | 'SeatHeaterRearLeft' | 'SeatHeaterRearRight' | 'SeatHeaterRight' | 'SeatVentEnabled' | 'SentryMode' | 'ServiceMode' | 'Setting24HourTime' | 'SettingChargeUnit' | 'SettingDistanceUnit' | 'SettingTemperatureUnit' | 'SettingTirePressureUnit' | 'Soc' | 'SoftwareUpdateDownloadPercentComplete' | 'SoftwareUpdateExpectedDurationMinutes' | 'SoftwareUpdateInstallationPercentComplete' | 'SoftwareUpdateScheduledStartTime' | 'SoftwareUpdateVersion' | 'SpeedLimitMode' | 'SpeedLimitWarning' | 'SunroofInstalled' | 'SuperchargerSessionTripPlanner' | 'TimeToFullCharge' | 'TonneauOpenPercent' | 'TonneauPosition' | 'TonneauTentMode' | 'TpmsHardWarnings' | 'TpmsLastSeenPressureTimeFl' | 'TpmsLastSeenPressureTimeFr' | 'TpmsLastSeenPressureTimeRl' | 'TpmsLastSeenPressureTimeRr' | 'TpmsPressureFl' | 'TpmsPressureFr' | 'TpmsPressureRl' | 'TpmsPressureRr' | 'TpmsSoftWarnings' | 'Trim' | 'ValetModeEnabled' | 'VehicleName' | 'VehicleSpeed' | 'Version' | 'WheelType' | 'WiperHeatEnabled';
+    };
+    query?: never;
+    url: '/sse/{vin}/{field}';
+};
+
+export type GetSseByVinByFieldResponses = {
     /**
      * Default Response
      */

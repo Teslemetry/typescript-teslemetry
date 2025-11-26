@@ -6,7 +6,7 @@ export default defineConfig({
   parser: {
     filters: {
       operations: {
-        include: ["/^[A-Z]+ /api/"],
+        include: ["/^[A-Z]+ /api/", "/^[A-Z]+ /sse/"],
       },
     },
   },

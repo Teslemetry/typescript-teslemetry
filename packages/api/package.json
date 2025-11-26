@@ -22,13 +22,8 @@
     "url": "https://teslemetry.com"
   },
   "license": "Apache-2.0",
-  "dependencies": {
-    "eventsource": "^4.1.0"
-  },
   "devDependencies": {
-    "@hey-api/client-fetch": "^0.13.1",
     "@hey-api/openapi-ts": "0.88.0",
-    "@types/eventsource": "^3.0.0",
     "dotenv": "^17.2.3",
     "tsx": "^4.20.6"
   }
