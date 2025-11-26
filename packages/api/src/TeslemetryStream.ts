@@ -75,12 +75,13 @@ export class TeslemetryStream {
     if (this.vin) {
       url.pathname += `/${this.vin}`;
     }
+    const urlString = url.toString();
     url.searchParams.append("token", this._access_token);
 
     this.eventSource = new EventSource(url.toString());
 
     this.eventSource.onopen = () => {
-      this.logger.info(`Connected to ${url.toString()}`);
+      this.logger.info(`Connected to ${urlString}`);
       this.retries = 0;
       this._updateConnectionListeners(true);
     };
