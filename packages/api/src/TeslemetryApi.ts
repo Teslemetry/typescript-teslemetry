@@ -96,8 +96,8 @@ export class TeslemetryApi {
 
   /**
    * Checks whether vehicles can accept the Tesla commands protocol for the partner's public key.
-   * @param {string[]} vins - An array of VINs to check.
-   * @returns {Promise<PostApi1VehiclesFleetStatusResponses>} A promise that resolves to an object containing lists of paired and unpaired VINs,
+   * @param vins - An array of VINs to check.
+   * @returns Promise to an object containing lists of paired and unpaired VINs,
    * and detailed info for each vehicle.
    */
   public async fleetStatus(vins: string[]) {
@@ -109,7 +109,7 @@ export class TeslemetryApi {
 
   /**
    * Returns vehicles belonging to the account. This endpoint is paginated.
-   * @returns {Promise<GetApi1VehiclesResponses>} A promise that resolves to an object containing a list of vehicles,
+   * @returns Promise to an object containing a list of vehicles,
    * pagination details, and a total count.
    */
   public async vehicles() {
@@ -118,8 +118,8 @@ export class TeslemetryApi {
 
   /**
    * Redeems a share invite. Once redeemed, the account will gain access to the vehicle within the Tesla app.
-   * @param {string} code - The invitation code to redeem.
-   * @returns {Promise<PostApi1VehiclesInvitationsRedeemResponses>} A promise that resolves to an object containing the `vehicle_id_s` and `vin` of the shared vehicle.
+   * @param code - The invitation code to redeem.
+   * @returns Promise to an object containing the `vehicle_id_s` and `vin` of the shared vehicle.
    */
   public async redeemInvitation(code: string) {
     return postApi1VehiclesInvitationsRedeem({
