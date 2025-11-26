@@ -5529,26 +5529,6 @@ export type PostApiConfigByVinResponses = {
 
 export type PostApiConfigByVinResponse = PostApiConfigByVinResponses[keyof PostApiConfigByVinResponses];
 
-export type PostApiAutoByIdData = {
-    body?: never;
-    path: {
-        id: string | number;
-    };
-    query?: never;
-    url: '/api/auto/{id}';
-};
-
-export type PostApiAutoByIdResponses = {
-    /**
-     * Default Response
-     */
-    200: {
-        response: boolean;
-    };
-};
-
-export type PostApiAutoByIdResponse = PostApiAutoByIdResponses[keyof PostApiAutoByIdResponses];
-
 export type GetApiRefreshByVinData = {
     body?: never;
     path: {
@@ -12667,34 +12647,6 @@ export type PostApi1VehiclesByVinCustomCommandSeatHeaterResponses = {
 
 export type PostApi1VehiclesByVinCustomCommandSeatHeaterResponse = PostApi1VehiclesByVinCustomCommandSeatHeaterResponses[keyof PostApi1VehiclesByVinCustomCommandSeatHeaterResponses];
 
-export type GetApi1VehiclesByVinCustomCommandChargeOnSolarData = {
-    body?: never;
-    path: {
-        /**
-         * Vehicle Identification Number
-         */
-        vin: string;
-    };
-    query?: never;
-    url: '/api/1/vehicles/{vin}/custom_command/charge_on_solar';
-};
-
-export type GetApi1VehiclesByVinCustomCommandChargeOnSolarResponses = {
-    /**
-     * Default Response
-     */
-    200: {
-        response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
-            reason?: string;
-        };
-    };
-};
-
-export type GetApi1VehiclesByVinCustomCommandChargeOnSolarResponse = GetApi1VehiclesByVinCustomCommandChargeOnSolarResponses[keyof GetApi1VehiclesByVinCustomCommandChargeOnSolarResponses];
-
 export type PostApi1VehiclesByVinCustomCommandChargeOnSolarData = {
     body?: {
         enabled?: boolean;
@@ -12784,96 +12736,6 @@ export type PostApi1VehiclesByVinCustomCommandPlayVideoResponses = {
 };
 
 export type PostApi1VehiclesByVinCustomCommandPlayVideoResponse = PostApi1VehiclesByVinCustomCommandPlayVideoResponses[keyof PostApi1VehiclesByVinCustomCommandPlayVideoResponses];
-
-export type PostApi1VehiclesByVinCustomCommandDrivenoteData = {
-    body: {
-        note: string;
-    };
-    path: {
-        /**
-         * Vehicle Identification Number
-         */
-        vin: string;
-    };
-    query?: never;
-    url: '/api/1/vehicles/{vin}/custom_command/drivenote';
-};
-
-export type PostApi1VehiclesByVinCustomCommandDrivenoteResponses = {
-    /**
-     * Default Response
-     */
-    200: {
-        response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
-            reason?: string;
-        };
-    };
-};
-
-export type PostApi1VehiclesByVinCustomCommandDrivenoteResponse = PostApi1VehiclesByVinCustomCommandDrivenoteResponses[keyof PostApi1VehiclesByVinCustomCommandDrivenoteResponses];
-
-export type PostApi1VehiclesByVinCustomCommandFrontZoneLightData = {
-    body: {
-        level: 'off' | 'low' | 'med' | 'high';
-    };
-    path: {
-        /**
-         * Vehicle Identification Number
-         */
-        vin: string;
-    };
-    query?: never;
-    url: '/api/1/vehicles/{vin}/custom_command/front_zone_light';
-};
-
-export type PostApi1VehiclesByVinCustomCommandFrontZoneLightResponses = {
-    /**
-     * Default Response
-     */
-    200: {
-        response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
-            reason?: string;
-        };
-    };
-};
-
-export type PostApi1VehiclesByVinCustomCommandFrontZoneLightResponse = PostApi1VehiclesByVinCustomCommandFrontZoneLightResponses[keyof PostApi1VehiclesByVinCustomCommandFrontZoneLightResponses];
-
-export type PostApi1VehiclesByVinCustomCommandRearZoneLightData = {
-    body: {
-        level: 'off' | 'low' | 'med' | 'high';
-    };
-    path: {
-        /**
-         * Vehicle Identification Number
-         */
-        vin: string;
-    };
-    query?: never;
-    url: '/api/1/vehicles/{vin}/custom_command/rear_zone_light';
-};
-
-export type PostApi1VehiclesByVinCustomCommandRearZoneLightResponses = {
-    /**
-     * Default Response
-     */
-    200: {
-        response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
-            reason?: string;
-        };
-    };
-};
-
-export type PostApi1VehiclesByVinCustomCommandRearZoneLightResponse = PostApi1VehiclesByVinCustomCommandRearZoneLightResponses[keyof PostApi1VehiclesByVinCustomCommandRearZoneLightResponses];
 
 export type PostApi1VehiclesByVinCustomCommandStopLightShowData = {
     body?: never;
@@ -13009,25 +12871,6 @@ export type PostApi1VehiclesByVinCustomCommandRemoveKeyResponses = {
 
 export type PostApi1VehiclesByVinCustomCommandRemoveKeyResponse = PostApi1VehiclesByVinCustomCommandRemoveKeyResponses[keyof PostApi1VehiclesByVinCustomCommandRemoveKeyResponses];
 
-export type WakeUpOldData = {
-    body?: never;
-    path: {
-        /**
-         * Vehicle Identification Number
-         */
-        vin: string;
-    };
-    query?: never;
-    url: '/api/1/vehicles/{vin}/wake_up_old';
-};
-
-export type WakeUpOldResponses = {
-    /**
-     * Default Response
-     */
-    200: unknown;
-};
-
 export type WakeUpData = {
     body?: never;
     path: {
@@ -13046,34 +12889,6 @@ export type WakeUpResponses = {
      */
     200: unknown;
 };
-
-export type PostApi1VehiclesByVinSignedCommandData = {
-    body: {
-        /**
-         * Base64 encoded Tesla Vehicle Command Protocol message
-         */
-        routable_message: string;
-    };
-    path: {
-        /**
-         * Vehicle Identification Number
-         */
-        vin: string;
-    };
-    query?: never;
-    url: '/api/1/vehicles/{vin}/signed_command';
-};
-
-export type PostApi1VehiclesByVinSignedCommandResponses = {
-    /**
-     * Default Response
-     */
-    200: {
-        response: string;
-    };
-};
-
-export type PostApi1VehiclesByVinSignedCommandResponse = PostApi1VehiclesByVinSignedCommandResponses[keyof PostApi1VehiclesByVinSignedCommandResponses];
 
 export type GetApi1DxVehiclesSubscriptionsEligibleData = {
     body?: never;
@@ -13600,25 +13415,6 @@ export type PostApi1EnergySitesByIdTimeOfUseSettingsResponses = {
 
 export type PostApi1EnergySitesByIdTimeOfUseSettingsResponse = PostApi1EnergySitesByIdTimeOfUseSettingsResponses[keyof PostApi1EnergySitesByIdTimeOfUseSettingsResponses];
 
-export type PostApi1EnergySitesByIdVehicleChargingSettingsData = {
-    body?: never;
-    path: {
-        /**
-         * Energy Site ID
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/1/energy_sites/{id}/vehicle_charging_settings';
-};
-
-export type PostApi1EnergySitesByIdVehicleChargingSettingsResponses = {
-    /**
-     * Default Response
-     */
-    200: unknown;
-};
-
 export type GetApi1UsersFeatureConfigData = {
     body?: never;
     path?: never;
@@ -13731,26 +13527,6 @@ export type GetApi1UsersRegionResponses = {
 };
 
 export type GetApi1UsersRegionResponse = GetApi1UsersRegionResponses[keyof GetApi1UsersRegionResponses];
-
-export type PostApi1UsersKeysData = {
-    body: {
-        public_key: string;
-        kind: string;
-        model: string;
-        name: string;
-        tag: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/1/users/keys';
-};
-
-export type PostApi1UsersKeysResponses = {
-    /**
-     * Default Response
-     */
-    200: unknown;
-};
 
 export type GetApi1DxChargingHistoryData = {
     body?: never;
@@ -13897,28 +13673,153 @@ export type GetSseByVin_Responses = {
         isCache?: boolean;
         data: {
             DriveRail?: number | null;
-            ChargeState?: 'Disconnected' | 'Charging' | 'Complete' | 'Stopped' | 'NoPower' | 'Scheduled' | 'Starting' | 'Preconditioning' | 'WaitingForCar' | 'WaitingForScheduledCharge' | 'Error' | null;
-            BmsFullchargecomplete?: boolean | null;
+            ChargeState?: 'ChargeStateUnknown' | 'ChargeStateDisconnected' | 'ChargeStateNoPower' | 'ChargeStateStarting' | 'ChargeStateCharging' | 'ChargeStateComplete' | 'ChargeStateStopped' | null;
+            BmsFullchargecomplete?: number | null;
             VehicleSpeed?: number | null;
             Odometer?: number | null;
             PackVoltage?: number | null;
             PackCurrent?: number | null;
             Soc?: number | null;
-            DCDCEnable?: boolean | null;
-            Gear?: 'P' | 'D' | 'R' | 'N' | null;
+            DCDCEnable?: number | null;
+            Gear?: 'ShiftStateUnknown' | 'ShiftStateInvalid' | 'ShiftStateP' | 'ShiftStateR' | 'ShiftStateN' | 'ShiftStateD' | 'ShiftStateSNA' | null;
             IsolationResistance?: number | null;
             PedalPosition?: number | null;
-            BrakePedal?: boolean | null;
-            DiStateR?: 'Off' | 'Standby' | 'PreparingToDrive' | 'Drive' | 'Error' | null;
+            BrakePedal?: number | null;
+            DiStateR?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
             DiHeatsinkTR?: number | null;
             DiAxleSpeedR?: number | null;
             DiTorquemotor?: number | null;
             DiStatorTempR?: number | null;
             DiVBatR?: number | null;
             DiMotorCurrentR?: number | null;
-            DiStateF?: 'Off' | 'Standby' | 'PreparingToDrive' | 'Drive' | 'Error' | null;
-            DiStateREL?: 'Off' | 'Standby' | 'PreparingToDrive' | 'Drive' | 'Error' | null;
-            DiStateRER?: 'Off' | 'Standby' | 'PreparingToDrive' | 'Drive' | 'Error' | null;
+            Location?: {
+                latitude: number;
+                longitude: number;
+            } | null;
+            GpsState?: number | null;
+            GpsHeading?: number | null;
+            NumBrickVoltageMax?: number | null;
+            BrickVoltageMax?: number | null;
+            NumBrickVoltageMin?: number | null;
+            BrickVoltageMin?: number | null;
+            NumModuleTempMax?: number | null;
+            ModuleTempMax?: number | null;
+            NumModuleTempMin?: number | null;
+            ModuleTempMin?: number | null;
+            RatedRange?: number | null;
+            Hvil?: 'HvilStatusUnknown' | 'HvilStatusFault' | 'HvilStatusOK' | null;
+            DCChargingEnergyIn?: number | null;
+            DCChargingPower?: number | null;
+            ACChargingEnergyIn?: number | null;
+            ACChargingPower?: number | null;
+            ChargeLimitSoc?: boolean | null;
+            FastChargerPresent?: boolean | null;
+            EstBatteryRange?: number | null;
+            IdealBatteryRange?: number | null;
+            BatteryLevel?: number | null;
+            TimeToFullCharge?: number | null;
+            ScheduledChargingStartTime?: number | null;
+            ScheduledChargingPending?: number | null;
+            ScheduledDepartureTime?: number | null;
+            PreconditioningEnabled?: boolean | null;
+            ScheduledChargingMode?: 'ScheduledChargingModeUnknown' | 'ScheduledChargingModeOff' | 'ScheduledChargingModeStartAt' | 'ScheduledChargingModeDepartBy' | null;
+            ChargeAmps?: number | null;
+            ChargeEnableRequest?: number | null;
+            ChargerPhases?: number | null;
+            ChargePortColdWeatherMode?: number | null;
+            ChargeCurrentRequest?: number | null;
+            ChargeCurrentRequestMax?: number | null;
+            BatteryHeaterOn?: boolean | null;
+            NotEnoughPowerToHeat?: number | null;
+            SuperchargerSessionTripPlanner?: boolean | null;
+            DoorState?: {
+                DriverFront: boolean;
+                DriverRear: boolean;
+                PassengerFront: boolean;
+                PassengerRear: boolean;
+                TrunkFront: boolean;
+                TrunkRear: boolean;
+            } | null;
+            Locked?: boolean | null;
+            FdWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
+            FpWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
+            RdWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
+            RpWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
+            VehicleName?: string | null;
+            SentryMode?: 'SentryModeStateUnknown' | 'SentryModeStateOff' | 'SentryModeStateIdle' | 'SentryModeStateArmed' | 'SentryModeStateAware' | 'SentryModeStatePanic' | 'SentryModeStateQuiet' | null;
+            SpeedLimitMode?: 'SpeedAssistLevelUnknown' | 'SpeedAssistLevelNone' | 'SpeedAssistLevelDisplay' | 'SpeedAssistLevelChime' | null;
+            CurrentLimitMph?: boolean | null;
+            Version?: string | null;
+            TpmsPressureFl?: number | null;
+            TpmsPressureFr?: number | null;
+            TpmsPressureRl?: number | null;
+            TpmsPressureRr?: number | null;
+            SemitruckTpmsPressureRe1L0?: number | null;
+            SemitruckTpmsPressureRe1L1?: number | null;
+            SemitruckTpmsPressureRe1R0?: number | null;
+            SemitruckTpmsPressureRe1R1?: number | null;
+            SemitruckTpmsPressureRe2L0?: number | null;
+            SemitruckTpmsPressureRe2L1?: number | null;
+            SemitruckTpmsPressureRe2R0?: number | null;
+            SemitruckTpmsPressureRe2R1?: number | null;
+            TpmsLastSeenPressureTimeFl?: number | null;
+            TpmsLastSeenPressureTimeFr?: number | null;
+            TpmsLastSeenPressureTimeRl?: number | null;
+            TpmsLastSeenPressureTimeRr?: number | null;
+            InsideTemp?: number | null;
+            OutsideTemp?: number | null;
+            SeatHeaterLeft?: number | null;
+            SeatHeaterRight?: number | null;
+            SeatHeaterRearLeft?: number | null;
+            SeatHeaterRearRight?: number | null;
+            SeatHeaterRearCenter?: number | null;
+            AutoSeatClimateLeft?: boolean | null;
+            AutoSeatClimateRight?: boolean | null;
+            DriverSeatBelt?: 'BuckleStatusUnknown' | 'BuckleStatusUnlatched' | 'BuckleStatusLatched' | 'BuckleStatusFaulted' | null;
+            PassengerSeatBelt?: 'BuckleStatusUnknown' | 'BuckleStatusUnlatched' | 'BuckleStatusLatched' | 'BuckleStatusFaulted' | null;
+            DriverSeatOccupied?: boolean | null;
+            SemitruckPassengerSeatFoldPosition?: 'SeatFoldPositionUnknown' | 'SeatFoldPositionSNA' | 'SeatFoldPositionFaulted' | 'SeatFoldPositionNotConfigured' | 'SeatFoldPositionFolded' | 'SeatFoldPositionUnfolded' | null;
+            LateralAcceleration?: number | null;
+            LongitudinalAcceleration?: number | null;
+            CruiseSetSpeed?: number | null;
+            LifetimeEnergyUsed?: number | null;
+            LifetimeEnergyUsedDrive?: number | null;
+            SemitruckTractorParkBrakeStatus?: 'TractorAirStatusUnknown' | 'TractorAirStatusNotAvailable' | 'TractorAirStatusError' | 'TractorAirStatusCharged' | 'TractorAirStatusBuildingPressureIntermediate' | 'TractorAirStatusExhaustingPressureIntermediate' | 'TractorAirStatusExhausted' | null;
+            SemitruckTrailerParkBrakeStatus?: 'TrailerAirStatusUnknown' | 'TrailerAirStatusSNA' | 'TrailerAirStatusInvalid' | 'TrailerAirStatusBobtailMode' | 'TrailerAirStatusCharged' | 'TrailerAirStatusBuildingPressureIntermediate' | 'TrailerAirStatusExhaustingPressureIntermediate' | 'TrailerAirStatusExhausted' | null;
+            BrakePedalPos?: number | null;
+            RouteLastUpdated?: number | null;
+            RouteLine?: number | null;
+            MilesToArrival?: number | null;
+            MinutesToArrival?: number | null;
+            OriginLocation?: {
+                latitude: number;
+                longitude: number;
+            } | null;
+            DestinationLocation?: {
+                latitude: number;
+                longitude: number;
+            } | null;
+            CarType?: 'CarTypeUnknown' | 'CarTypeModelS' | 'CarTypeModelX' | 'CarTypeModel3' | 'CarTypeModelY' | 'CarTypeSemiTruck' | 'CarTypeCybertruck' | null;
+            Trim?: string | null;
+            ExteriorColor?: string | null;
+            RoofColor?: string | null;
+            ChargePort?: 'ChargePortUnknown' | 'ChargePortUS' | 'ChargePortEU' | 'ChargePortGB' | 'ChargePortCCS' | null;
+            ChargePortLatch?: 'ChargePortLatchUnknown' | 'ChargePortLatchSNA' | 'ChargePortLatchDisengaged' | 'ChargePortLatchEngaged' | 'ChargePortLatchBlocking' | null;
+            GuestModeEnabled?: boolean | null;
+            PinToDriveEnabled?: boolean | null;
+            PairedPhoneKeyAndKeyFobQty?: number | null;
+            CruiseFollowDistance?: 'FollowDistanceUnknown' | 'FollowDistance1' | 'FollowDistance2' | 'FollowDistance3' | 'FollowDistance4' | 'FollowDistance5' | 'FollowDistance6' | 'FollowDistance7' | null;
+            AutomaticBlindSpotCamera?: boolean | null;
+            BlindSpotCollisionWarningChime?: boolean | null;
+            SpeedLimitWarning?: boolean | null;
+            ForwardCollisionWarning?: 'ForwardCollisionSensitivityUnknown' | 'ForwardCollisionSensitivityOff' | 'ForwardCollisionSensitivityLate' | 'ForwardCollisionSensitivityAverage' | 'ForwardCollisionSensitivityEarly' | null;
+            LaneDepartureAvoidance?: 'LaneAssistLevelUnknown' | 'LaneAssistLevelNone' | 'LaneAssistLevelWarning' | 'LaneAssistLevelAssist' | null;
+            EmergencyLaneDepartureAvoidance?: number | null;
+            AutomaticEmergencyBrakingOff?: boolean | null;
+            LifetimeEnergyGainedRegen?: number | null;
+            DiStateF?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
+            DiStateREL?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
+            DiStateRER?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
             DiHeatsinkTF?: number | null;
             DiHeatsinkTREL?: number | null;
             DiHeatsinkTRER?: number | null;
@@ -13939,101 +13840,115 @@ export type GetSseByVin_Responses = {
             DiMotorCurrentF?: number | null;
             DiMotorCurrentREL?: number | null;
             DiMotorCurrentRER?: number | null;
+            EnergyRemaining?: number | null;
+            ServiceMode?: boolean | null;
+            BMSState?: 'BMSStateUnknown' | 'BMSStateStandby' | 'BMSStateDrive' | 'BMSStateSupport' | 'BMSStateCharge' | 'BMSStateFEIM' | 'BMSStateClearFault' | 'BMSStateFault' | 'BMSStateWeld' | 'BMSStateTest' | 'BMSStateSNA' | null;
+            GuestModeMobileAccessState?: 'GuestModeMobileAccessUnknown' | 'GuestModeMobileAccessInit' | 'GuestModeMobileAccessNotAuthenticated' | 'GuestModeMobileAccessAuthenticated' | 'GuestModeMobileAccessAbortedDriving' | 'GuestModeMobileAccessAbortedUsingRemoteStart' | 'GuestModeMobileAccessAbortedUsingBLEKeys' | 'GuestModeMobileAccessAbortedValetMode' | 'GuestModeMobileAccessAbortedGuestModeOff' | 'GuestModeMobileAccessAbortedDriveAuthTimeExceeded' | 'GuestModeMobileAccessAbortedNoDataReceived' | 'GuestModeMobileAccessRequestingFromMothership' | 'GuestModeMobileAccessRequestingFromAuthD' | 'GuestModeMobileAccessAbortedFetchFailed' | 'GuestModeMobileAccessAbortedBadDataReceived' | 'GuestModeMobileAccessShowingQRCode' | 'GuestModeMobileAccessSwipedAway' | 'GuestModeMobileAccessDismissedQRCodeExpired' | 'GuestModeMobileAccessSucceededPairedNewBLEKey' | null;
+            DestinationName?: string | null;
             DiInverterTR?: number | null;
             DiInverterTF?: number | null;
             DiInverterTREL?: number | null;
             DiInverterTRER?: number | null;
-            Location?: {
-                latitude: number;
-                longitude: number;
-            } | null;
-            GpsState?: number | null;
-            GpsHeading?: number | null;
-            OriginLocation?: {
-                latitude: number;
-                longitude: number;
-            } | null;
-            DestinationLocation?: {
-                latitude: number;
-                longitude: number;
-            } | null;
-            NumBrickVoltageMax?: number | null;
-            BrickVoltageMax?: number | null;
-            NumBrickVoltageMin?: number | null;
-            BrickVoltageMin?: number | null;
-            NumModuleTempMax?: number | null;
-            ModuleTempMax?: number | null;
-            NumModuleTempMin?: number | null;
-            ModuleTempMin?: number | null;
-            RatedRange?: number | null;
-            Hvil?: number | null;
-            EstBatteryRange?: number | null;
-            IdealBatteryRange?: number | null;
-            BatteryLevel?: number | null;
-            EnergyRemaining?: number | null;
-            BatteryHeaterOn?: boolean | null;
-            NotEnoughPowerToHeat?: boolean | null;
-            BMSState?: 'Discharging' | 'Charging' | 'Idle' | 'Balancing' | null;
-            DCChargingEnergyIn?: number | null;
-            DCChargingPower?: number | null;
-            ACChargingEnergyIn?: number | null;
-            ACChargingPower?: number | null;
-            ChargeLimitSoc?: number | null;
-            FastChargerPresent?: boolean | null;
-            TimeToFullCharge?: number | null;
-            ScheduledChargingStartTime?: number | null;
-            ScheduledChargingPending?: boolean | null;
-            ScheduledDepartureTime?: number | null;
-            PreconditioningEnabled?: boolean | null;
-            ScheduledChargingMode?: 'Off' | 'StartAt' | 'DepartBy' | null;
-            ChargeAmps?: number | null;
-            ChargeEnableRequest?: boolean | null;
-            ChargerPhases?: number | null;
-            ChargePortColdWeatherMode?: boolean | null;
-            ChargeCurrentRequest?: number | null;
-            ChargeCurrentRequestMax?: number | null;
-            SuperchargerSessionTripPlanner?: boolean | null;
-            ChargePort?: 'Open' | 'Closed' | null;
-            ChargePortLatch?: 'Engaged' | 'Disengaged' | 'Unknown' | null;
-            ChargePortDoorOpen?: boolean | null;
+            DetailedChargeState?: 'DetailedChargeStateUnknown' | 'DetailedChargeStateDisconnected' | 'DetailedChargeStateNoPower' | 'DetailedChargeStateStarting' | 'DetailedChargeStateCharging' | 'DetailedChargeStateComplete' | 'DetailedChargeStateStopped' | null;
+            CabinOverheatProtectionMode?: 'CabinOverheatProtectionModeStateUnknown' | 'CabinOverheatProtectionModeStateOff' | 'CabinOverheatProtectionModeStateOn' | 'CabinOverheatProtectionModeStateFanOnly' | null;
+            CabinOverheatProtectionTemperatureLimit?: 'ClimateOverheatProtectionTempLimitUnknown' | 'ClimateOverheatProtectionTempLimitHigh' | 'ClimateOverheatProtectionTempLimitMedium' | 'ClimateOverheatProtectionTempLimitLow' | null;
+            CenterDisplay?: 'DisplayStateUnknown' | 'DisplayStateOff' | 'DisplayStateDim' | 'DisplayStateAccessory' | 'DisplayStateOn' | 'DisplayStateDriving' | 'DisplayStateCharging' | 'DisplayStateLock' | 'DisplayStateSentry' | 'DisplayStateDog' | 'DisplayStateEntertainment' | null;
+            ChargePortDoorOpen?: number | null;
             ChargerVoltage?: number | null;
-            ChargingCableType?: 'TypeUnknown' | 'TypeJ1772' | 'TypeMennekes' | 'TypeCCS' | 'TypeCHAdeMO' | 'TypeGB' | 'TypeTesla' | 'TypeSAE' | 'TypeCCS2' | 'TypeAdapter' | null;
-            DetailedChargeState?: 'Disconnected' | 'Charging' | 'Complete' | 'WaitingForCar' | 'WaitingForScheduledCharge' | 'Error' | 'Unknown' | null;
+            ChargingCableType?: 'CableTypeUnknown' | 'CableTypeIEC' | 'CableTypeSAE' | 'CableTypeGB_AC' | 'CableTypeGB_DC' | 'CableTypeSNA' | null;
+            ClimateKeeperMode?: 'ClimateKeeperModeStateUnknown' | 'ClimateKeeperModeStateOff' | 'ClimateKeeperModeStateOn' | 'ClimateKeeperModeStateDog' | 'ClimateKeeperModeStateParty' | null;
+            DefrostForPreconditioning?: number | null;
+            DefrostMode?: 'DefrostModeStateUnknown' | 'DefrostModeStateOff' | 'DefrostModeStateNormal' | 'DefrostModeStateMax' | 'DefrostModeStateAutoDefog' | null;
+            EfficiencyPackage?: number | null;
             EstimatedHoursToChargeTermination?: number | null;
-            FastChargerType?: 'Tesla' | 'CCS' | 'CHAdeMO' | 'Unknown' | null;
-            ChargeRateMilePerHour?: number | null;
-            DoorState?: {
-                DriverFront: boolean;
-                DriverRear: boolean;
-                PassengerFront: boolean;
-                PassengerRear: boolean;
-                TrunkFront: boolean;
-                TrunkRear: boolean;
-            } | null;
-            Locked?: boolean | null;
-            FdWindow?: 'Closed' | 'Open' | 'Venting' | null;
-            FpWindow?: 'Closed' | 'Open' | 'Venting' | null;
-            RdWindow?: 'Closed' | 'Open' | 'Venting' | null;
-            RpWindow?: 'Closed' | 'Open' | 'Venting' | null;
-            VehicleName?: string | null;
-            Version?: string | null;
-            CarType?: 'ModelS' | 'ModelX' | 'Model3' | 'ModelY' | 'Cybertruck' | 'Semi' | 'Roadster' | null;
-            Trim?: string | null;
-            ExteriorColor?: string | null;
-            RoofColor?: string | null;
-            EfficiencyPackage?: boolean | null;
-            EuropeVehicle?: boolean | null;
-            RightHandDrive?: boolean | null;
-            WheelType?: string | null;
-            SentryMode?: 'Off' | 'On' | 'Enabled' | null;
-            SpeedLimitMode?: boolean | null;
-            CurrentLimitMph?: number | null;
-            GuestModeEnabled?: boolean | null;
-            PinToDriveEnabled?: boolean | null;
-            PairedPhoneKeyAndKeyFobQty?: number | null;
-            GuestModeMobileAccessState?: 'FullAccess' | 'LimitedAccess' | 'NoAccess' | null;
-            ValetModeEnabled?: boolean | null;
+            EuropeVehicle?: number | null;
+            ExpectedEnergyPercentAtTripArrival?: number | null;
+            FastChargerType?: 'FastChargerUnknown' | 'FastChargerSupercharger' | 'FastChargerCHAdeMO' | 'FastChargerGB' | 'FastChargerACSingleWireCAN' | 'FastChargerCombo' | 'FastChargerMCSingleWireCAN' | 'FastChargerOther' | 'FastChargerSNA' | null;
+            HomelinkDeviceCount?: number | null;
+            HomelinkNearby?: boolean | null;
+            HvacACEnabled?: boolean | null;
+            HvacAutoMode?: 'HvacAutoModeStateUnknown' | 'HvacAutoModeStateOn' | 'HvacAutoModeStateOverride' | null;
+            HvacFanSpeed?: number | null;
+            HvacFanStatus?: number | null;
+            HvacLeftTemperatureRequest?: number | null;
+            HvacPower?: 'HvacPowerStateUnknown' | 'HvacPowerStateOff' | 'HvacPowerStateOn' | 'HvacPowerStatePrecondition' | 'HvacPowerStateOverheatProtect' | null;
+            HvacRightTemperatureRequest?: number | null;
+            HvacSteeringWheelHeatAuto?: number | null;
+            HvacSteeringWheelHeatLevel?: number | null;
+            OffroadLightbarPresent?: boolean | null;
+            PowershareHoursLeft?: number | null;
+            PowershareInstantaneousPowerKW?: number | null;
+            PowershareStatus?: 'PowershareStateUnknown' | 'PowershareStateInactive' | 'PowershareStateHandshaking' | 'PowershareStateInit' | 'PowershareStateEnabled' | 'PowershareStateEnabledReconnectingSoon' | 'PowershareStateStopped' | null;
+            PowershareStopReason?: 'PowershareStopReasonStatusUnknown' | 'PowershareStopReasonStatusNone' | 'PowershareStopReasonStatusSOCTooLow' | 'PowershareStopReasonStatusRetry' | 'PowershareStopReasonStatusFault' | 'PowershareStopReasonStatusUser' | 'PowershareStopReasonStatusReconnecting' | 'PowershareStopReasonStatusAuthentication' | null;
+            PowershareType?: 'PowershareTypeStatusUnknown' | 'PowershareTypeStatusNone' | 'PowershareTypeStatusLoad' | 'PowershareTypeStatusHome' | null;
+            RearDisplayHvacEnabled?: boolean | null;
+            RearSeatHeaters?: number | null;
             RemoteStartEnabled?: boolean | null;
+            RightHandDrive?: boolean | null;
+            RouteTrafficMinutesDelay?: number | null;
+            SoftwareUpdateDownloadPercentComplete?: number | null;
+            SoftwareUpdateExpectedDurationMinutes?: number | null;
+            SoftwareUpdateInstallationPercentComplete?: number | null;
+            SoftwareUpdateScheduledStartTime?: number | null;
+            SoftwareUpdateVersion?: string | null;
+            TonneauOpenPercent?: number | null;
+            TonneauPosition?: 'TonneauPositionStateUnknown' | 'TonneauPositionStateInvalid' | 'TonneauPositionStateClosed' | 'TonneauPositionStatePartiallyOpen' | 'TonneauPositionStateFullyOpen' | null;
+            TonneauTentMode?: 'TonneauTentModeStateUnknown' | 'TonneauTentModeStateInactive' | 'TonneauTentModeStateMoving' | 'TonneauTentModeStateFailed' | 'TonneauTentModeStateActive' | null;
+            TpmsHardWarnings?: {
+                front_left: boolean;
+                front_right: boolean;
+                rear_left: boolean;
+                rear_right: boolean;
+                semi_middle_axle_left_2: boolean;
+                semi_middle_axle_right_2: boolean;
+                semi_rear_axle_left: boolean;
+                semi_rear_axle_right: boolean;
+                semi_rear_axle_left_2: boolean;
+                semi_rear_axle_right_2: boolean;
+            } | null;
+            TpmsSoftWarnings?: {
+                front_left: boolean;
+                front_right: boolean;
+                rear_left: boolean;
+                rear_right: boolean;
+                semi_middle_axle_left_2: boolean;
+                semi_middle_axle_right_2: boolean;
+                semi_rear_axle_left: boolean;
+                semi_rear_axle_right: boolean;
+                semi_rear_axle_left_2: boolean;
+                semi_rear_axle_right_2: boolean;
+            } | null;
+            ValetModeEnabled?: boolean | null;
+            WheelType?: string | null;
+            WiperHeatEnabled?: boolean | null;
+            LocatedAtHome?: number | null;
+            LocatedAtWork?: number | null;
+            LocatedAtFavorite?: number | null;
+            SettingDistanceUnit?: 'DistanceUnitUnknown' | 'DistanceUnitMiles' | 'DistanceUnitKilometers' | null;
+            SettingTemperatureUnit?: 'TemperatureUnitUnknown' | 'TemperatureUnitFahrenheit' | 'TemperatureUnitCelsius' | null;
+            Setting24HourTime?: boolean | null;
+            SettingTirePressureUnit?: 'PressureUnitUnknown' | 'PressureUnitPsi' | 'PressureUnitBar' | null;
+            SettingChargeUnit?: 'ChargeUnitUnknown' | 'ChargeUnitDistance' | 'ChargeUnitPercent' | null;
+            ClimateSeatCoolingFrontLeft?: number | null;
+            ClimateSeatCoolingFrontRight?: number | null;
+            LightsHazardsActive?: boolean | null;
+            LightsTurnSignal?: 'TurnSignalStateUnknown' | 'TurnSignalStateOff' | 'TurnSignalStateLeft' | 'TurnSignalStateRight' | 'TurnSignalStateBoth' | null;
+            LightsHighBeams?: boolean | null;
+            MediaPlaybackStatus?: 'MediaStatusUnknown' | 'MediaStatusStopped' | 'MediaStatusPlaying' | 'MediaStatusPaused' | null;
+            MediaPlaybackSource?: string | null;
+            MediaAudioVolume?: number | null;
+            MediaNowPlayingDuration?: number | null;
+            MediaNowPlayingElapsed?: number | null;
+            MediaNowPlayingArtist?: string | null;
+            MediaNowPlayingTitle?: string | null;
+            MediaNowPlayingAlbum?: string | null;
+            MediaNowPlayingStation?: string | null;
+            MediaAudioVolumeIncrement?: number | null;
+            MediaAudioVolumeMax?: number | null;
+            SunroofInstalled?: 'SunroofInstalledStateUnknown' | 'SunroofInstalledStateNotInstalled' | 'SunroofInstalledStateGen1Installed' | 'SunroofInstalledStateGen2Installed' | null;
+            SeatVentEnabled?: boolean | null;
+            RearDefrostEnabled?: boolean | null;
+            ChargeRateMilePerHour?: number | null;
         };
     } | {
         createdAt: string;
@@ -14041,7 +13956,7 @@ export type GetSseByVin_Responses = {
         isCache?: boolean;
         errors: Array<{
             createdAt: string;
-            name: 'POWER_REDUCED' | 'BMS_high_voltage_immediate_action' | 'BMS_low_voltage_immediate_action' | 'BMS_over_current' | 'BMS_cell_imbalance' | 'BMS_temp_high_charge' | 'BMS_temp_low_charge' | 'BMS_temp_high_discharge' | 'BMS_temp_low_discharge' | 'BMS_max_pack_volt_high' | 'BMS_min_pack_volt_low' | 'BMS_high_cell_volt' | 'BMS_low_cell_volt' | 'CC_over_current' | 'CC_voltage_too_high' | 'CC_voltage_too_low' | 'CC_temp_too_high' | 'CC_internal_fault' | 'DC_bus_undercurrent' | 'DC_bus_overcurrent' | 'ISO_fault' | 'ISO_fault_charging' | 'ISO_fault_driving' | 'DI_A_temp_limit' | 'DI_B_temp_limit' | 'DI_C_temp_limit' | 'DI_DC_volt_supply_low' | 'DI_DC_volt_supply_high' | 'DI_volt_sensor_fault' | 'DI_current_sensor_fault' | 'DI_temp_sensor_fault' | 'VEHICLE_low_12v_power' | 'VEHICLE_critical_12v_power' | 'VEHICLE_12v_power_failure' | 'VEHICLE_power_reduced' | 'VCFRONT_air_suspension_fail' | 'VCFRONT_parking_brake_fail' | 'VCFRONT_brake_fluid_low' | 'VCFRONT_power_steering_fail' | 'VCFRONT_abs_fail' | 'VCFRONT_esp_fail' | 'VCFRONT_epas_fail' | 'VCFRONT_driver_door_open' | 'VCFRONT_psgr_door_open' | 'VCFRONT_driveunit_fail' | 'VCFRONT_charger_fail' | 'VCFRONT_bms_fail' | 'VCFRONT_hvac_fail' | 'VCFRONT_seatbelt_driver_unbuckled' | 'VCFRONT_seatbelt_passenger_unbuckled' | 'VCFRONT_tpms_fault' | 'VCFRONT_washer_fluid_low' | 'VCFRONT_wheel_fault' | 'VCFRONT_adapter_fault' | 'VCFRONT_sunroof_fault' | 'VCFRONT_trunk_open' | 'VCFRONT_frunk_open' | 'VCFRONT_gear_not_park' | 'VCFRONT_door_open' | 'VCFRONT_key_not_present' | 'VCFRONT_charge_port_open' | 'VCFRONT_tow_haul_mode' | 'VCFRONT_sentry_mode_event' | 'VCFRONT_home_link_failure' | 'VCFRONT_door_lock_failure' | 'VCREAR_air_suspension_fail' | 'VCREAR_brake_fluid_low' | 'VCREAR_power_steering_fail' | 'VCREAR_abs_fail' | 'VCREAR_esp_fail' | 'VCREAR_epas_fail' | 'VCREAR_driveunit_fail' | 'VCREAR_charger_fail' | 'VCREAR_bms_fail' | 'VCREAR_hvac_fail' | 'VCREAR_seatbelt_driver_unbuckled' | 'VCREAR_seatbelt_passenger_unbuckled' | 'VCREAR_tpms_fault' | 'VCREAR_washer_fluid_low' | 'VCREAR_wheel_fault' | 'VCREAR_adapter_fault' | 'VCREAR_sunroof_fault' | 'VCREAR_trunk_open' | 'VCREAR_frunk_open' | 'VCREAR_gear_not_park' | 'VCREAR_door_open' | 'VCREAR_key_not_present' | 'VCREAR_charge_port_open' | 'VCREAR_tow_haul_mode' | 'VCREAR_sentry_mode_event' | 'VCREAR_home_link_failure' | 'VCREAR_door_lock_failure' | 'UNKNOWN' | 'GENERIC' | 'OTHER';
+            name: string;
             tags: {
                 field_name: string;
                 name: string;
@@ -14053,14 +13968,14 @@ export type GetSseByVin_Responses = {
         vin: string;
         isCache?: boolean;
         alerts: Array<{
-            name: 'POWER_REDUCED' | 'BMS_high_voltage_immediate_action' | 'BMS_low_voltage_immediate_action' | 'BMS_over_current' | 'BMS_cell_imbalance' | 'BMS_temp_high_charge' | 'BMS_temp_low_charge' | 'BMS_temp_high_discharge' | 'BMS_temp_low_discharge' | 'BMS_max_pack_volt_high' | 'BMS_min_pack_volt_low' | 'BMS_high_cell_volt' | 'BMS_low_cell_volt' | 'CC_over_current' | 'CC_voltage_too_high' | 'CC_voltage_too_low' | 'CC_temp_too_high' | 'CC_internal_fault' | 'DC_bus_undercurrent' | 'DC_bus_overcurrent' | 'ISO_fault' | 'ISO_fault_charging' | 'ISO_fault_driving' | 'DI_A_temp_limit' | 'DI_B_temp_limit' | 'DI_C_temp_limit' | 'DI_DC_volt_supply_low' | 'DI_DC_volt_supply_high' | 'DI_volt_sensor_fault' | 'DI_current_sensor_fault' | 'DI_temp_sensor_fault' | 'VEHICLE_low_12v_power' | 'VEHICLE_critical_12v_power' | 'VEHICLE_12v_power_failure' | 'VEHICLE_power_reduced' | 'VCFRONT_air_suspension_fail' | 'VCFRONT_parking_brake_fail' | 'VCFRONT_brake_fluid_low' | 'VCFRONT_power_steering_fail' | 'VCFRONT_abs_fail' | 'VCFRONT_esp_fail' | 'VCFRONT_epas_fail' | 'VCFRONT_driver_door_open' | 'VCFRONT_psgr_door_open' | 'VCFRONT_driveunit_fail' | 'VCFRONT_charger_fail' | 'VCFRONT_bms_fail' | 'VCFRONT_hvac_fail' | 'VCFRONT_seatbelt_driver_unbuckled' | 'VCFRONT_seatbelt_passenger_unbuckled' | 'VCFRONT_tpms_fault' | 'VCFRONT_washer_fluid_low' | 'VCFRONT_wheel_fault' | 'VCFRONT_adapter_fault' | 'VCFRONT_sunroof_fault' | 'VCFRONT_trunk_open' | 'VCFRONT_frunk_open' | 'VCFRONT_gear_not_park' | 'VCFRONT_door_open' | 'VCFRONT_key_not_present' | 'VCFRONT_charge_port_open' | 'VCFRONT_tow_haul_mode' | 'VCFRONT_sentry_mode_event' | 'VCFRONT_home_link_failure' | 'VCFRONT_door_lock_failure' | 'VCREAR_air_suspension_fail' | 'VCREAR_brake_fluid_low' | 'VCREAR_power_steering_fail' | 'VCREAR_abs_fail' | 'VCREAR_esp_fail' | 'VCREAR_epas_fail' | 'VCREAR_driveunit_fail' | 'VCREAR_charger_fail' | 'VCREAR_bms_fail' | 'VCREAR_hvac_fail' | 'VCREAR_seatbelt_driver_unbuckled' | 'VCREAR_seatbelt_passenger_unbuckled' | 'VCREAR_tpms_fault' | 'VCREAR_washer_fluid_low' | 'VCREAR_wheel_fault' | 'VCREAR_adapter_fault' | 'VCREAR_sunroof_fault' | 'VCREAR_trunk_open' | 'VCREAR_frunk_open' | 'VCREAR_gear_not_park' | 'VCREAR_door_open' | 'VCREAR_key_not_present' | 'VCREAR_charge_port_open' | 'VCREAR_tow_haul_mode' | 'VCREAR_sentry_mode_event' | 'VCREAR_home_link_failure' | 'VCREAR_door_lock_failure' | 'UNKNOWN' | 'GENERIC' | 'OTHER';
-            audiences: Array<string>;
+            name: string;
+            audiences: Array<'Customer' | 'Service' | 'ServiceFix'>;
             startedAt: string;
             endedAt?: string;
-            condition: string;
-            clearCondition: string;
-            description: string;
-            potentialImpact: string;
+            condition?: string;
+            clearCondition?: string;
+            description?: string;
+            potentialImpact?: string;
             customerFacingMessage1?: string;
             customerFacingMessage2?: string;
         }>;
@@ -14093,11 +14008,245 @@ export type GetSseByVin_Responses = {
         isCache?: boolean;
         config: {
             fields: {
-                [key: string]: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
+                DriveRail?: unknown;
+                ChargeState?: unknown;
+                BmsFullchargecomplete?: unknown;
+                VehicleSpeed?: unknown;
+                Odometer?: unknown;
+                PackVoltage?: unknown;
+                PackCurrent?: unknown;
+                Soc?: unknown;
+                DCDCEnable?: unknown;
+                Gear?: unknown;
+                IsolationResistance?: unknown;
+                PedalPosition?: unknown;
+                BrakePedal?: unknown;
+                DiStateR?: unknown;
+                DiHeatsinkTR?: unknown;
+                DiAxleSpeedR?: unknown;
+                DiTorquemotor?: unknown;
+                DiStatorTempR?: unknown;
+                DiVBatR?: unknown;
+                DiMotorCurrentR?: unknown;
+                Location?: unknown;
+                GpsState?: unknown;
+                GpsHeading?: unknown;
+                NumBrickVoltageMax?: unknown;
+                BrickVoltageMax?: unknown;
+                NumBrickVoltageMin?: unknown;
+                BrickVoltageMin?: unknown;
+                NumModuleTempMax?: unknown;
+                ModuleTempMax?: unknown;
+                NumModuleTempMin?: unknown;
+                ModuleTempMin?: unknown;
+                RatedRange?: unknown;
+                Hvil?: unknown;
+                DCChargingEnergyIn?: unknown;
+                DCChargingPower?: unknown;
+                ACChargingEnergyIn?: unknown;
+                ACChargingPower?: unknown;
+                ChargeLimitSoc?: unknown;
+                FastChargerPresent?: unknown;
+                EstBatteryRange?: unknown;
+                IdealBatteryRange?: unknown;
+                BatteryLevel?: unknown;
+                TimeToFullCharge?: unknown;
+                ScheduledChargingStartTime?: unknown;
+                ScheduledChargingPending?: unknown;
+                ScheduledDepartureTime?: unknown;
+                PreconditioningEnabled?: unknown;
+                ScheduledChargingMode?: unknown;
+                ChargeAmps?: unknown;
+                ChargeEnableRequest?: unknown;
+                ChargerPhases?: unknown;
+                ChargePortColdWeatherMode?: unknown;
+                ChargeCurrentRequest?: unknown;
+                ChargeCurrentRequestMax?: unknown;
+                BatteryHeaterOn?: unknown;
+                NotEnoughPowerToHeat?: unknown;
+                SuperchargerSessionTripPlanner?: unknown;
+                DoorState?: unknown;
+                Locked?: unknown;
+                FdWindow?: unknown;
+                FpWindow?: unknown;
+                RdWindow?: unknown;
+                RpWindow?: unknown;
+                VehicleName?: unknown;
+                SentryMode?: unknown;
+                SpeedLimitMode?: unknown;
+                CurrentLimitMph?: unknown;
+                Version?: unknown;
+                TpmsPressureFl?: unknown;
+                TpmsPressureFr?: unknown;
+                TpmsPressureRl?: unknown;
+                TpmsPressureRr?: unknown;
+                SemitruckTpmsPressureRe1L0?: unknown;
+                SemitruckTpmsPressureRe1L1?: unknown;
+                SemitruckTpmsPressureRe1R0?: unknown;
+                SemitruckTpmsPressureRe1R1?: unknown;
+                SemitruckTpmsPressureRe2L0?: unknown;
+                SemitruckTpmsPressureRe2L1?: unknown;
+                SemitruckTpmsPressureRe2R0?: unknown;
+                SemitruckTpmsPressureRe2R1?: unknown;
+                TpmsLastSeenPressureTimeFl?: unknown;
+                TpmsLastSeenPressureTimeFr?: unknown;
+                TpmsLastSeenPressureTimeRl?: unknown;
+                TpmsLastSeenPressureTimeRr?: unknown;
+                InsideTemp?: unknown;
+                OutsideTemp?: unknown;
+                SeatHeaterLeft?: unknown;
+                SeatHeaterRight?: unknown;
+                SeatHeaterRearLeft?: unknown;
+                SeatHeaterRearRight?: unknown;
+                SeatHeaterRearCenter?: unknown;
+                AutoSeatClimateLeft?: unknown;
+                AutoSeatClimateRight?: unknown;
+                DriverSeatBelt?: unknown;
+                PassengerSeatBelt?: unknown;
+                DriverSeatOccupied?: unknown;
+                SemitruckPassengerSeatFoldPosition?: unknown;
+                LateralAcceleration?: unknown;
+                LongitudinalAcceleration?: unknown;
+                CruiseSetSpeed?: unknown;
+                LifetimeEnergyUsed?: unknown;
+                LifetimeEnergyUsedDrive?: unknown;
+                SemitruckTractorParkBrakeStatus?: unknown;
+                SemitruckTrailerParkBrakeStatus?: unknown;
+                BrakePedalPos?: unknown;
+                RouteLastUpdated?: unknown;
+                RouteLine?: unknown;
+                MilesToArrival?: unknown;
+                MinutesToArrival?: unknown;
+                OriginLocation?: unknown;
+                DestinationLocation?: unknown;
+                CarType?: unknown;
+                Trim?: unknown;
+                ExteriorColor?: unknown;
+                RoofColor?: unknown;
+                ChargePort?: unknown;
+                ChargePortLatch?: unknown;
+                GuestModeEnabled?: unknown;
+                PinToDriveEnabled?: unknown;
+                PairedPhoneKeyAndKeyFobQty?: unknown;
+                CruiseFollowDistance?: unknown;
+                AutomaticBlindSpotCamera?: unknown;
+                BlindSpotCollisionWarningChime?: unknown;
+                SpeedLimitWarning?: unknown;
+                ForwardCollisionWarning?: unknown;
+                LaneDepartureAvoidance?: unknown;
+                EmergencyLaneDepartureAvoidance?: unknown;
+                AutomaticEmergencyBrakingOff?: unknown;
+                LifetimeEnergyGainedRegen?: unknown;
+                DiStateF?: unknown;
+                DiStateREL?: unknown;
+                DiStateRER?: unknown;
+                DiHeatsinkTF?: unknown;
+                DiHeatsinkTREL?: unknown;
+                DiHeatsinkTRER?: unknown;
+                DiAxleSpeedF?: unknown;
+                DiAxleSpeedREL?: unknown;
+                DiAxleSpeedRER?: unknown;
+                DiSlaveTorqueCmd?: unknown;
+                DiTorqueActualR?: unknown;
+                DiTorqueActualF?: unknown;
+                DiTorqueActualREL?: unknown;
+                DiTorqueActualRER?: unknown;
+                DiStatorTempF?: unknown;
+                DiStatorTempREL?: unknown;
+                DiStatorTempRER?: unknown;
+                DiVBatF?: unknown;
+                DiVBatREL?: unknown;
+                DiVBatRER?: unknown;
+                DiMotorCurrentF?: unknown;
+                DiMotorCurrentREL?: unknown;
+                DiMotorCurrentRER?: unknown;
+                EnergyRemaining?: unknown;
+                ServiceMode?: unknown;
+                BMSState?: unknown;
+                GuestModeMobileAccessState?: unknown;
+                DestinationName?: unknown;
+                DiInverterTR?: unknown;
+                DiInverterTF?: unknown;
+                DiInverterTREL?: unknown;
+                DiInverterTRER?: unknown;
+                DetailedChargeState?: unknown;
+                CabinOverheatProtectionMode?: unknown;
+                CabinOverheatProtectionTemperatureLimit?: unknown;
+                CenterDisplay?: unknown;
+                ChargePortDoorOpen?: unknown;
+                ChargerVoltage?: unknown;
+                ChargingCableType?: unknown;
+                ClimateKeeperMode?: unknown;
+                DefrostForPreconditioning?: unknown;
+                DefrostMode?: unknown;
+                EfficiencyPackage?: unknown;
+                EstimatedHoursToChargeTermination?: unknown;
+                EuropeVehicle?: unknown;
+                ExpectedEnergyPercentAtTripArrival?: unknown;
+                FastChargerType?: unknown;
+                HomelinkDeviceCount?: unknown;
+                HomelinkNearby?: unknown;
+                HvacACEnabled?: unknown;
+                HvacAutoMode?: unknown;
+                HvacFanSpeed?: unknown;
+                HvacFanStatus?: unknown;
+                HvacLeftTemperatureRequest?: unknown;
+                HvacPower?: unknown;
+                HvacRightTemperatureRequest?: unknown;
+                HvacSteeringWheelHeatAuto?: unknown;
+                HvacSteeringWheelHeatLevel?: unknown;
+                OffroadLightbarPresent?: unknown;
+                PowershareHoursLeft?: unknown;
+                PowershareInstantaneousPowerKW?: unknown;
+                PowershareStatus?: unknown;
+                PowershareStopReason?: unknown;
+                PowershareType?: unknown;
+                RearDisplayHvacEnabled?: unknown;
+                RearSeatHeaters?: unknown;
+                RemoteStartEnabled?: unknown;
+                RightHandDrive?: unknown;
+                RouteTrafficMinutesDelay?: unknown;
+                SoftwareUpdateDownloadPercentComplete?: unknown;
+                SoftwareUpdateExpectedDurationMinutes?: unknown;
+                SoftwareUpdateInstallationPercentComplete?: unknown;
+                SoftwareUpdateScheduledStartTime?: unknown;
+                SoftwareUpdateVersion?: unknown;
+                TonneauOpenPercent?: unknown;
+                TonneauPosition?: unknown;
+                TonneauTentMode?: unknown;
+                TpmsHardWarnings?: unknown;
+                TpmsSoftWarnings?: unknown;
+                ValetModeEnabled?: unknown;
+                WheelType?: unknown;
+                WiperHeatEnabled?: unknown;
+                LocatedAtHome?: unknown;
+                LocatedAtWork?: unknown;
+                LocatedAtFavorite?: unknown;
+                SettingDistanceUnit?: unknown;
+                SettingTemperatureUnit?: unknown;
+                Setting24HourTime?: unknown;
+                SettingTirePressureUnit?: unknown;
+                SettingChargeUnit?: unknown;
+                ClimateSeatCoolingFrontLeft?: unknown;
+                ClimateSeatCoolingFrontRight?: unknown;
+                LightsHazardsActive?: unknown;
+                LightsTurnSignal?: unknown;
+                LightsHighBeams?: unknown;
+                MediaPlaybackStatus?: unknown;
+                MediaPlaybackSource?: unknown;
+                MediaAudioVolume?: unknown;
+                MediaNowPlayingDuration?: unknown;
+                MediaNowPlayingElapsed?: unknown;
+                MediaNowPlayingArtist?: unknown;
+                MediaNowPlayingTitle?: unknown;
+                MediaNowPlayingAlbum?: unknown;
+                MediaNowPlayingStation?: unknown;
+                MediaAudioVolumeIncrement?: unknown;
+                MediaAudioVolumeMax?: unknown;
+                SunroofInstalled?: unknown;
+                SeatVentEnabled?: unknown;
+                RearDefrostEnabled?: unknown;
+                ChargeRateMilePerHour?: unknown;
             };
         };
     };
