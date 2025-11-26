@@ -1,6 +1,6 @@
 {
   "name": "@teslemetry/api",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "API client for Teslemetry",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -15,8 +15,13 @@
     "tesla",
     "teslemetry"
   ],
-  "author": "",
-  "license": "ISC",
+  "type": "module",
+  "author": {
+    "name": "Teslemetry",
+    "email": "hello@teslemetry.com",
+    "url": "https://teslemetry.com"
+  },
+  "license": "Apache-2.0",
   "dependencies": {
     "eventsource": "^4.1.0"
   },
