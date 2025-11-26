@@ -1,12 +1,12 @@
 // src/TeslemetryVehicleStream.ts
 
-import { Teslemetry } from "./Teslemetry";
-import { TeslemetryStream } from "./TeslemetryStream";
+import { Teslemetry } from "./Teslemetry.js";
+import { TeslemetryStream } from "./TeslemetryStream.js";
 import {
   getApiConfigByVin,
   patchApiConfigByVin,
   postApiConfigByVin,
-} from "./client";
+} from "./client/index.js";
 import type {
   FieldsRequest,
   FieldsResponse,
@@ -20,8 +20,8 @@ import type {
   ISseCredits,
   ISseVehicleData,
   Signals,
-} from "./const";
-import { Logger } from "./logger";
+} from "./const.js";
+import { Logger } from "./logger.js";
 
 export class TeslemetryVehicleStream {
   private root: Teslemetry;

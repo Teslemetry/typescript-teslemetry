@@ -1,13 +1,13 @@
-import { TeslemetryStream } from "./TeslemetryStream";
-import { TeslemetryApi } from "./TeslemetryApi";
-import { TeslemetryVehicleApi } from "./TeslemetryVehicleApi";
-import { TeslemetryEnergyApi } from "./TeslemetryEnergyApi";
-import { TeslemetryUserApi } from "./TeslemetryUserApi";
-import { TeslemetryChargingApi } from "./TeslemetryChargingApi";
-import { Client, createClient } from "./client/client";
-import { getApiTest } from "./client";
-import { Logger, consoleLogger } from "./logger";
-import { version } from "../package.json";
+import { TeslemetryStream } from "./TeslemetryStream.js";
+import { TeslemetryApi } from "./TeslemetryApi.js";
+import { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
+import { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
+import { TeslemetryUserApi } from "./TeslemetryUserApi.js";
+import { TeslemetryChargingApi } from "./TeslemetryChargingApi.js";
+import { Client, createClient } from "./client/client/index.js";
+import { getApiTest } from "./client/index.js";
+import { Logger, consoleLogger } from "./logger.js";
+import pkg from "../package.json" with { type: "json" };
 
 export class Teslemetry {
   public client: Client;
@@ -32,7 +32,7 @@ export class Teslemetry {
       auth: access_token,
       baseUrl: `https://${this.region || "api"}.teslemetry.com`,
       headers: {
-        "X-Library": `typescript teslemetry ${version}`,
+        "X-Library": `typescript teslemetry ${pkg.version}`,
       },
     });
 

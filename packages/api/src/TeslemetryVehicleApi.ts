@@ -1,4 +1,4 @@
-import { Teslemetry } from "./Teslemetry";
+import { Teslemetry } from "./Teslemetry.js";
 import {
   // Vehicle Data
   getApi1VehiclesByVinVehicleData,
@@ -128,7 +128,7 @@ import {
   getApi1DxWarrantyDetails,
   getApi1DxVehiclesSubscriptionsEligible,
   getApi1DxVehiclesUpgradeEligibility,
-} from "./client";
+} from "./client/index.js";
 import {
   PostApi1VehiclesByVinCommandSetChargeLimitData,
   PostApi1VehiclesByVinCommandSetChargingAmpsData,
@@ -164,7 +164,7 @@ import {
   PostApiConfigByVinData,
   GetApi1VehiclesByVinFleetTelemetryErrorsData,
   GetApi1VehiclesByVinInvitationsData,
-} from "./client/types.gen";
+} from "./client/types.gen.js";
 
 const FRONT_SEATS = {
   front_left: 1,

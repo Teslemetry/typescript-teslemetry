@@ -1,4 +1,4 @@
-import { TeslemetryVehicleStream } from "./TeslemetryVehicleStream";
+import { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
 import { EventSource } from "eventsource";
 import {
   ISseCredits,
@@ -10,9 +10,9 @@ import {
   ISseConnectivity,
   ISseVehicleData,
   ISseConfig,
-} from "./const";
-import { Teslemetry } from "./Teslemetry";
-import { Logger } from "./logger";
+} from "./const.js";
+import { Teslemetry } from "./Teslemetry.js";
+import { Logger } from "./logger.js";
 
 type ListenerCallback<T extends ISseEvent = ISseEvent> = (event: T) => void;
 type ConnectionListenerCallback = (connected: boolean) => void;

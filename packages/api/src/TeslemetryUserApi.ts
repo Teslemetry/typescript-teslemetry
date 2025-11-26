@@ -1,10 +1,10 @@
-import { Teslemetry } from "./Teslemetry";
+import { Teslemetry } from "./Teslemetry.js";
 import {
   getApi1UsersFeatureConfig,
   getApi1UsersMe,
   getApi1UsersOrders,
   getApi1UsersRegion,
-} from "./client";
+} from "./client/index.js";
 
 export class TeslemetryUserApi {
   private root: Teslemetry;

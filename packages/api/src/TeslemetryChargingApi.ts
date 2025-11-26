@@ -1,13 +1,13 @@
-import { Teslemetry } from "./Teslemetry";
+import { Teslemetry } from "./Teslemetry.js";
 import {
   getApi1DxChargingHistory,
   getApi1DxChargingInvoiceById,
   getApi1DxChargingSessions,
-} from "./client";
+} from "./client/index.js";
 import {
   GetApi1DxChargingHistoryData,
   GetApi1DxChargingSessionsData,
-} from "./client/types.gen";
+} from "./client/types.gen.js";
 
 export class TeslemetryChargingApi {
   private root: Teslemetry;

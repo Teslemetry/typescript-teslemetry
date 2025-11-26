@@ -5,12 +5,12 @@ import {
   postApi1VehiclesFleetStatus,
   getApi1Vehicles,
   postApi1VehiclesInvitationsRedeem,
-} from "./client";
-import { Teslemetry } from "./Teslemetry";
-import { TeslemetryChargingApi } from "./TeslemetryChargingApi";
-import { TeslemetryEnergyApi } from "./TeslemetryEnergyApi";
-import { TeslemetryUserApi } from "./TeslemetryUserApi";
-import { TeslemetryVehicleApi } from "./TeslemetryVehicleApi";
+} from "./client/index.js";
+import { Teslemetry } from "./Teslemetry.js";
+import { TeslemetryChargingApi } from "./TeslemetryChargingApi.js";
+import { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
+import { TeslemetryUserApi } from "./TeslemetryUserApi.js";
+import { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
 
 export class TeslemetryApi {
   private root: Teslemetry;

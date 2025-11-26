@@ -1,4 +1,4 @@
-import { Teslemetry } from "./Teslemetry";
+import { Teslemetry } from "./Teslemetry.js";
 import {
   postApi1EnergySitesByIdBackup,
   getApi1EnergySitesByIdCalendarHistory,
@@ -9,7 +9,7 @@ import {
   postApi1EnergySitesByIdOperation,
   postApi1EnergySitesByIdStormMode,
   getApi1EnergySitesByIdTelemetryHistory,
-} from "./client";
+} from "./client/index.js";
 
 export class TeslemetryEnergyApi {
   private root: Teslemetry;
