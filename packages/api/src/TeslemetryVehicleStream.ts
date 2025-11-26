@@ -39,7 +39,7 @@ export class TeslemetryVehicleStream {
     this.vin = vin;
     this.logger = stream.logger;
 
-    stream.addConfigListener(
+    stream.onConfig(
       (event) => {
         this.fields = event.config.fields;
       },
@@ -128,63 +128,59 @@ export class TeslemetryVehicleStream {
   }
 
   // Event listeners (all pre-filtered by VIN)
-  public addStateListener(callback: (event: ISseState) => void): () => void {
-    return this.stream.addStateListener(callback, {
+  public onState(callback: (event: ISseState) => void): () => void {
+    return this.stream.onState(callback, {
       vin: this.vin,
     });
   }
 
-  public addDataListener(callback: (event: ISseData) => void): () => void {
-    return this.stream.addDataListener(callback, {
+  public onData(callback: (event: ISseData) => void): () => void {
+    return this.stream.onData(callback, {
       vin: this.vin,
     });
   }
 
-  public addErrorsListener(callback: (event: ISseErrors) => void): () => void {
-    return this.stream.addErrorsListener(callback, {
+  public onErrors(callback: (event: ISseErrors) => void): () => void {
+    return this.stream.onErrors(callback, {
       vin: this.vin,
     });
   }
 
-  public addAlertsListener(callback: (event: ISseAlerts) => void): () => void {
-    return this.stream.addAlertsListener(callback, {
+  public onAlerts(callback: (event: ISseAlerts) => void): () => void {
+    return this.stream.onAlerts(callback, {
       vin: this.vin,
     });
   }
 
-  public addConnectivityListener(
+  public onConnectivity(
     callback: (event: ISseConnectivity) => void,
   ): () => void {
-    return this.stream.addConnectivityListener(callback, {
+    return this.stream.onConnectivity(callback, {
       vin: this.vin,
     });
   }
 
-  public addCreditsListener(
-    callback: (event: ISseCredits) => void,
-  ): () => void {
-    return this.stream.addCreditsListener(callback, {
+  public onCredits(callback: (event: ISseCredits) => void): () => void {
+    return this.stream.onCredits(callback, {
       vin: this.vin,
     });
   }
 
-  public addVehicleDataListener(
-    callback: (event: ISseVehicleData) => void,
-  ): () => void {
-    return this.stream.addVehicleDataListener(callback, {
+  public onVehicleData(callback: (event: ISseVehicleData) => void): () => void {
+    return this.stream.onVehicleData(callback, {
       vin: this.vin,
     });
   }
 
-  public addConfigListener(callback: (event: ISseConfig) => void): () => void {
-    return this.stream.addConfigListener(callback, {
+  public onConfig(callback: (event: ISseConfig) => void): () => void {
+    return this.stream.onConfig(callback, {
       vin: this.vin,
     });
   }
 
   // Legacy and generic methods
-  public listen(callback: (value: ISseEvent) => void): () => void {
-    return this.stream.listen<ISseEvent>(
+  public on(callback: (value: ISseEvent) => void): () => void {
+    return this.stream.on<ISseEvent>(
       (event) => {
         callback(event);
       },
@@ -192,14 +188,14 @@ export class TeslemetryVehicleStream {
     );
   }
 
-  public addSignalListener<T extends Signals>(
+  public onSignal<T extends Signals>(
     field: T,
     callback: (value: Exclude<ISseData["data"][T], undefined>) => void,
   ): () => void {
     this.addField(field).catch((error) => {
       this.logger.error(`Failed to add field ${field}:`, error);
     });
-    return this.stream.addDataListener(
+    return this.stream.onData(
       (event) => {
         const value = event.data[field];
         if (value !== undefined) {

@@ -137,9 +137,7 @@ export class TeslemetryStream {
   }
 
   // Connection listeners
-  public addConnectionListener(
-    callback: ConnectionListenerCallback,
-  ): () => void {
+  public onConnection(callback: ConnectionListenerCallback): () => void {
     const removeListener = () => {
       this._connectionListeners.delete(removeListener);
     };
@@ -148,56 +146,56 @@ export class TeslemetryStream {
   }
 
   // Event listeners (typed by event type)
-  public addStateListener(
+  public onState(
     callback: (event: ISseState) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("state", callback, filters);
   }
 
-  public addDataListener(
+  public onData(
     callback: (event: ISseData) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("data", callback, filters);
   }
 
-  public addErrorsListener(
+  public onErrors(
     callback: (event: ISseErrors) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("errors", callback, filters);
   }
 
-  public addAlertsListener(
+  public onAlerts(
     callback: (event: ISseAlerts) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("alerts", callback, filters);
   }
 
-  public addConnectivityListener(
+  public onConnectivity(
     callback: (event: ISseConnectivity) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("connectivity", callback, filters);
   }
 
-  public addCreditsListener(
+  public onCredits(
     callback: (event: ISseCredits) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("credits", callback, filters);
   }
 
-  public addVehicleDataListener(
+  public onVehicleData(
     callback: (event: ISseVehicleData) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("vehicle_data", callback, filters);
   }
 
-  public addConfigListener(
+  public onConfig(
     callback: (event: ISseConfig) => void,
     filters?: Record<string, any>,
   ): () => void {
@@ -205,7 +203,7 @@ export class TeslemetryStream {
   }
 
   // Legacy and convenience methods
-  public listen<T extends ISseEvent>(
+  public on<T extends ISseEvent>(
     callback: ListenerCallback<T>,
     filters?: Record<string, any>,
   ): () => void {

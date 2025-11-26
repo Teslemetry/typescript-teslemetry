@@ -22,20 +22,17 @@ async function main() {
   await sonic.api.flashLights();
 
   // Listen for battery level updates
-  const removeDataListener = sonic.sse.listenData("ChargerVoltage", (x) => {
+  const removeDataListener = sonic.sse.onSignal("ChargerVoltage", (x) => {
     console.log(`BChargerVoltage: ${x}`);
   });
-  const removeDataListener2 = sonic.sse.listenData("PackCurrent", (x) => {
+  const removeDataListener2 = sonic.sse.onSignal("PackCurrent", (x) => {
     console.log(`PackCurrent: ${x}`);
   });
-  sonic.sse.listen((event) => {
-    console.log(`Sonic listen:`, event);
-  });
-  teslemetry.sse.listen((event) => {
+  teslemetry.sse.on((event) => {
     console.log(`listen:`, event);
   });
   // Listen for connection status changes
-  const removeConnectionListener = teslemetry.sse.addConnectionListener(
+  const removeConnectionListener = teslemetry.sse.onConnection(
     (connected: boolean) => {
       console.log(
         `Stream connection status: ${connected ? "Connected" : "Disconnected"}`,
