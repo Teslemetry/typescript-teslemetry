@@ -128,6 +128,11 @@ import {
   getApi1DxWarrantyDetails,
   getApi1DxVehiclesSubscriptionsEligible,
   getApi1DxVehiclesUpgradeEligibility,
+  postApi1VehiclesByVinChargeHistory,
+  postApi1VehiclesByVinCommandGuestMode,
+  postApi1VehiclesByVinCommandRemoteBoombox,
+  postApi1VehiclesByVinCommandSunRoofControl,
+  postApi1VehiclesByVinCommandUpcomingCalendarEntries,
 } from "./client/index.js";
 import {
   PostApi1VehiclesByVinCommandSetChargeLimitData,
@@ -164,6 +169,7 @@ import {
   PostApiConfigByVinData,
   GetApi1VehiclesByVinFleetTelemetryErrorsData,
   GetApi1VehiclesByVinInvitationsData,
+  PostApi1VehiclesByVinCommandUpcomingCalendarEntriesData,
 } from "./client/types.gen.js";
 
 const FRONT_SEATS = {
@@ -403,6 +409,18 @@ export class TeslemetryVehicleApi {
   }
 
   /**
+   * Returns the charge history for the vehicle.
+   * @return Promise to an object with response containing charge history
+   */
+  public async chargeHistory() {
+    const { data } = await postApi1VehiclesByVinChargeHistory({
+      path: { vin: this.vin },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
    * Wakes the vehicle from sleep. This command costs 20 command credits
    * @return Promise to an object with response containing wake up confirmation
    */
@@ -485,6 +503,20 @@ export class TeslemetryVehicleApi {
   }
 
   /**
+   * Plays a sound through the vehicle external speaker.
+   * @param sound The sound to play
+   * @return Promise to an object with response containing remote boombox result
+   */
+  public async remoteBoombox(sound?: number) {
+    const { data } = await postApi1VehiclesByVinCommandRemoteBoombox({
+      body: { sound },
+      path: { vin: this.vin },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
    * Starts climate preconditioning.
    * @return Promise to an object with response containing auto conditioning start result
    */
@@ -538,6 +570,20 @@ export class TeslemetryVehicleApi {
    */
   public async eraseUserData() {
     const { data } = await postApi1VehiclesByVinCommandEraseUserData({
+      path: { vin: this.vin },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Enable/disable guest mode.
+   * @param enable Whether to enable guest mode
+   * @return Promise to an object with response containing guest mode set result
+   */
+  public async setGuestMode(enable: boolean) {
+    const { data } = await postApi1VehiclesByVinCommandGuestMode({
+      body: { enable },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -707,6 +753,20 @@ export class TeslemetryVehicleApi {
   ) {
     const { data } = await postApi1VehiclesByVinCommandWindowControl({
       body: { command, lat, lon },
+      path: { vin: this.vin },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Controls the sunroof on sunroof-enabled vehicles.
+   * @param state The sunroof state
+   * @return Promise to an object with response containing sunroof control result
+   */
+  public async sunRoofControl(state: "vent" | "close" | "stop") {
+    const { data } = await postApi1VehiclesByVinCommandSunRoofControl({
+      body: { state },
       path: { vin: this.vin },
       client: this.root.client,
     });
@@ -1366,6 +1426,22 @@ export class TeslemetryVehicleApi {
         path: { vin: this.vin },
         client: this.root.client,
       });
+    return data;
+  }
+
+  /**
+   * Syncs upcoming calendar entries to the vehicle.
+   * @param calendar_data The calendar data
+   * @return Promise to an object with response containing upcoming calendar entries result
+   */
+  public async upcomingCalendarEntries(
+    calendar_data: PostApi1VehiclesByVinCommandUpcomingCalendarEntriesData["body"]["calendar_data"],
+  ) {
+    const { data } = await postApi1VehiclesByVinCommandUpcomingCalendarEntries({
+      body: { calendar_data },
+      path: { vin: this.vin },
+      client: this.root.client,
+    });
     return data;
   }
 
