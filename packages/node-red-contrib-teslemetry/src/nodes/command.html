@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    RED.nodes.registerType("teslemetry-vehicle-command", {
+    RED.nodes.registerType("command", {
         category: "Teslemetry Vehicle",
         color: "#cc0000",
         defaults: {
@@ -16,7 +16,7 @@
         outputs: 1,
         icon: "font-awesome/fa-car",
         label: function () {
-            return this.name || "Vehicle: " + (this.command || "Data");
+            return this.name || "Command: " + (this.command || "Data");
         },
         oneditprepare: function () {
             const node = this;
@@ -68,7 +68,7 @@
     });
 </script>
 
-<script type="text/html" data-template-name="teslemetry-vehicle-command">
+<script type="text/html" data-template-name="command">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name" />
@@ -148,7 +148,7 @@
     </div>
 </script>
 
-<script type="text/html" data-help-name="teslemetry-vehicle-command">
+<script type="text/html" data-help-name="command">
     <p>Interacts with a vehicle via Teslemetry API.</p>
     <p>Requires a valid Teslemetry configuration and a VIN.</p>
 

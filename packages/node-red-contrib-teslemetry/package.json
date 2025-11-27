@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsdown src/nodes/*.ts --out-dir dist/nodes --format cjs --clean --bundle && cp src/nodes/*.html dist/nodes/",
+    "dev": "pnpm build && mkdir -p .node-red-home && cd .node-red-home && pnpm install .. && cd .. && node-red -u .node-red-home -p 1880",
     "tsc": "tsc",
     "pack": "npm pack"
   },
@@ -20,14 +21,13 @@
     "url": "https://teslemetry.com"
   },
   "license": "Apache-2.0",
-  "dependencies": {},
   "files": [
     "dist"
   ],
   "node-red": {
     "nodes": {
       "teslemetry-config": "dist/nodes/teslemetry-config.cjs",
-      "teslemetry-vehicle": "dist/nodes/teslemetry-vehicle.cjs",
+      "command": "dist/nodes/command.cjs",
       "teslemetry-event": "dist/nodes/teslemetry-event.cjs",
       "teslemetry-signal": "dist/nodes/teslemetry-signal.cjs",
       "teslemetry-energy-command": "dist/nodes/teslemetry-energy-command.cjs"
@@ -35,6 +35,10 @@
   },
   "devDependencies": {
     "@teslemetry/api": "workspace:*",
+    "node-red": "^4.1.1",
     "tsdown": "^0.16.7"
+  },
+  "dependencies": {
+    "packages": "link:.."
   }
 }

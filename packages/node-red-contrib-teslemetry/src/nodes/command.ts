@@ -2,7 +2,7 @@ import { Teslemetry } from "@teslemetry/api";
 import { TeslemetryConfigNode } from "./teslemetry-config";
 
 export default function (RED: any) {
-  function TeslemetryVehicleCommandNode(this: any, config: any) {
+  function CommandNode(this: any, config: any) {
     RED.nodes.createNode(this, config);
     const node = this;
 
@@ -175,8 +175,5 @@ export default function (RED: any) {
       node.error("No Teslemetry configuration found");
     }
   }
-  RED.nodes.registerType(
-    "teslemetry-vehicle-command",
-    TeslemetryVehicleCommandNode,
-  );
+  RED.nodes.registerType("command", CommandNode);
 }
