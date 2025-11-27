@@ -2,10 +2,10 @@
   "name": "@teslemetry/n8n-nodes-teslemetry",
   "version": "1.0.0",
   "description": "n8n.io integration for Teslemetry",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "tsdown src/index.ts --format cjs --clean --bundle",
     "tsc": "tsc"
   },
   "keywords": [
@@ -15,14 +15,22 @@
   ],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@teslemetry/api": "workspace:*"
-  },
+  "dependencies": {},
   "files": [
     "dist"
   ],
+  "n8n": {
+    "credentials": [
+      "dist/index.cjs"
+    ],
+    "nodes": [
+      "dist/index.cjs"
+    ]
+  },
   "devDependencies": {
+    "@teslemetry/api": "workspace:*",
     "n8n-core": "^1.0.0",
-    "n8n-workflow": "^1.0.0"
+    "n8n-workflow": "^1.0.0",
+    "tsdown": "^0.16.7"
   }
 }

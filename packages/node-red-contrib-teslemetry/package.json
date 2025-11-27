@@ -2,10 +2,10 @@
   "name": "@teslemetry/node-red-contrib-teslemetry",
   "version": "1.0.0",
   "description": "Node-RED integration for Teslemetry",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc && mkdir -p dist/nodes && cp src/nodes/*.html dist/nodes/",
+    "build": "tsdown src/nodes/*.ts --out-dir dist/nodes --format cjs --clean --bundle && cp src/nodes/*.html dist/nodes/",
     "tsc": "tsc"
   },
   "keywords": [
@@ -19,16 +19,18 @@
     "url": "https://teslemetry.com"
   },
   "license": "Apache-2.0",
-  "dependencies": {
-    "@teslemetry/api": "workspace:*"
-  },
+  "dependencies": {},
   "files": [
     "dist"
   ],
   "node-red": {
     "nodes": {
-      "teslemetry-config": "dist/nodes/teslemetry-config.js",
-      "teslemetry-vehicle": "dist/nodes/teslemetry-vehicle.js"
+      "teslemetry-config": "dist/nodes/teslemetry-config.cjs",
+      "teslemetry-vehicle": "dist/nodes/teslemetry-vehicle.cjs"
     }
+  },
+  "devDependencies": {
+    "@teslemetry/api": "workspace:*",
+    "tsdown": "^0.16.7"
   }
 }

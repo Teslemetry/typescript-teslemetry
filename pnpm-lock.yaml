@@ -45,12 +45,19 @@ importers:
       n8n-workflow:
         specifier: ^1.0.0
         version: 1.119.1
+      tsdown:
+        specifier: ^0.16.7
+        version: 0.16.7(typescript@5.9.3)
 
   packages/node-red-contrib-teslemetry:
     dependencies:
       '@teslemetry/api':
         specifier: workspace:*
         version: link:../api
+    devDependencies:
+      tsdown:
+        specifier: ^0.16.7
+        version: 0.16.7(typescript@5.9.3)
 
 packages:
 
