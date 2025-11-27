@@ -1,38 +1,136 @@
 <script type="text/javascript">
-    RED.nodes.registerType('teslemetry-vehicle', {
-        category: 'Tesla',
-        color: '#cc0000',
+    RED.nodes.registerType("teslemetry-vehicle", {
+        category: "Teslemetry Vehicle",
+        color: "#cc0000",
         defaults: {
             name: { value: "" },
-            teslemetryConfig: { value: "", type: "teslemetry-config", required: true },
-            vin: { value: "" }
+            teslemetryConfig: {
+                value: "",
+                type: "teslemetry-config",
+                required: true,
+            },
+            vin: { value: "" },
+            command: { value: "vehicleData" }
         },
         inputs: 1,
         outputs: 1,
         icon: "font-awesome/fa-car",
         label: function () {
-            return this.name || "Vehicle Data";
-        }
+            return this.name || "Vehicle: " + (this.command || "Data");
+        },
+        oneditprepare: function () {
+            const node = this;
+            const vinSelect = $("#node-input-vin");
+            const configInput = $("#node-input-teslemetryConfig");
+
+            function updateVins() {
+                const configId = configInput.val();
+                if (configId && configId !== "_ADD_") {
+                    $.getJSON("teslemetry/vehicles", { config: configId })
+                        .done(function (data) {
+                            const current = vinSelect.val() || node.vin;
+                            vinSelect.empty();
+                            vinSelect.append(
+                                '<option value="">From msg.vin</option>'
+                            );
+                            if (data && data.length > 0) {
+                                data.forEach(function (v) {
+                                    vinSelect.append(
+                                        '<option value="' +
+                                            v.vin +
+                                            '">' +
+                                            v.display_name +
+                                            " (" +
+                                            v.vin +
+                                            ")</option>"
+                                    );
+                                });
+                            }
+                            if (current) {
+                                vinSelect.val(current);
+                            }
+                        })
+                        .fail(function (jqxhr, textStatus, error) {
+                            console.error("Failed to fetch vehicles", error);
+                        });
+                }
+            }
+
+            configInput.change(function () {
+                updateVins();
+            });
+
+            // Initial load if config is already selected
+            if (configInput.val()) {
+                updateVins();
+            }
+        },
     });
 </script>
 
 <script type="text/html" data-template-name="teslemetry-vehicle">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <input type="text" id="node-input-name" placeholder="Name" />
     </div>
     <div class="form-row">
-        <label for="node-input-teslemetryConfig"><i class="fa fa-globe"></i> Config</label>
-        <input type="text" id="node-input-teslemetryConfig">
+        <label for="node-input-teslemetryConfig"
+            ><i class="fa fa-globe"></i> Config</label
+        >
+        <input type="text" id="node-input-teslemetryConfig" />
     </div>
     <div class="form-row">
         <label for="node-input-vin"><i class="fa fa-car"></i> VIN</label>
-        <input type="text" id="node-input-vin" placeholder="VIN (optional)">
+        <select id="node-input-vin" style="width: 70%;">
+            <option value="">From msg.vin</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-command"><i class="fa fa-cogs"></i> Command</label>
+        <select id="node-input-command">
+            <option value="vehicleData">Get Vehicle Data</option>
+            <option value="wakeUp">Wake Up</option>
+            <option value="flashLights">Flash Lights</option>
+            <option value="honkHorn">Honk Horn</option>
+            <option value="lockDoors">Lock Doors</option>
+            <option value="unlockDoors">Unlock Doors</option>
+            <option value="actuateTrunk">Actuate Trunk (msg.which_trunk)</option>
+            <option value="startAutoConditioning">Start HVAC</option>
+            <option value="stopAutoConditioning">Stop HVAC</option>
+            <option value="setTemps">Set Temps (msg.driver_temp)</option>
+            <option value="setSeatHeater">Set Seat Heater (msg.heater, msg.level)</option>
+            <option value="setSteeringWheelHeater">Set Steering Wheel Heater (msg.on)</option>
+            <option value="startCharging">Start Charging</option>
+            <option value="stopCharging">Stop Charging</option>
+            <option value="openChargePort">Open Charge Port</option>
+            <option value="closeChargePort">Close Charge Port</option>
+            <option value="setChargeLimit">Set Charge Limit (msg.percent)</option>
+            <option value="setChargingAmps">Set Charging Amps (msg.charging_amps)</option>
+            <option value="setSentryMode">Set Sentry Mode (msg.on)</option>
+            <option value="remoteStart">Remote Start</option>
+            <option value="triggerHomelink">Trigger Homelink (msg.lat, msg.lon)</option>
+            <option value="navigationRequest">Navigation Request (msg.payload)</option>
+        </select>
     </div>
 </script>
 
 <script type="text/html" data-help-name="teslemetry-vehicle">
-    <p>Retrieves vehicle data from Teslemetry.</p>
-    <p>Requires a valid Teslemetry configuration.</p>
-    <p>If <code>VIN</code> is not specified in the configuration, it must be provided in <code>msg.vin</code>.</p>
+    <p>Interacts with a vehicle via Teslemetry API.</p>
+    <p>Requires a valid Teslemetry configuration and a VIN.</p>
+    
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">vin <span class="property-type">string</span></dt>
+        <dd>Vehicle Identification Number (if not set in config)</dd>
+        <dt class="optional">command <span class="property-type">string</span></dt>
+        <dd>Command to execute (overrides config)</dd>
+        <dt class="optional">payload <span class="property-type">object</span></dt>
+        <dd>Arguments for commands (e.g. <code>{ "percent": 80 }</code> for Set Charge Limit)</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>The response from the API.</dd>
+    </dl>
 </script>

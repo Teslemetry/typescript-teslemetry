@@ -1,13 +1,13 @@
 {
   "name": "@teslemetry/node-red-contrib-teslemetry",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Node-RED integration for Teslemetry",
   "main": "dist/index.cjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsdown src/nodes/*.ts --out-dir dist/nodes --format cjs --clean --bundle && cp src/nodes/*.html dist/nodes/",
     "tsc": "tsc",
-    "release": "pnpm version patch"
+    "pack": "npm pack"
   },
   "keywords": [
     "node-red",
@@ -27,7 +27,10 @@
   "node-red": {
     "nodes": {
       "teslemetry-config": "dist/nodes/teslemetry-config.cjs",
-      "teslemetry-vehicle": "dist/nodes/teslemetry-vehicle.cjs"
+      "teslemetry-vehicle": "dist/nodes/teslemetry-vehicle.cjs",
+      "teslemetry-event": "dist/nodes/teslemetry-event.cjs",
+      "teslemetry-signal": "dist/nodes/teslemetry-signal.cjs",
+      "teslemetry-energy-command": "dist/nodes/teslemetry-energy-command.cjs"
     }
   },
   "devDependencies": {

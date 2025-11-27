@@ -1,0 +1,102 @@
+<script type="text/javascript">
+    RED.nodes.registerType("teslemetry-event", {
+        category: "Teslemetry",
+        color: "#cc0000",
+        defaults: {
+            name: { value: "" },
+            teslemetryConfig: {
+                value: "",
+                type: "teslemetry-config",
+                required: true,
+            },
+            vin: { value: "" },
+            event: { value: "all", required: true }
+        },
+        inputs: 0,
+        outputs: 1,
+        icon: "font-awesome/fa-rss",
+        label: function () {
+            return this.name || "Teslemetry Event: " + this.event;
+        },
+        oneditprepare: function () {
+            const node = this;
+            const vinSelect = $("#node-input-vin");
+            const configInput = $("#node-input-teslemetryConfig");
+
+            function updateVins() {
+                const configId = configInput.val();
+                if (configId && configId !== "_ADD_") {
+                    $.getJSON("teslemetry/vehicles", { config: configId })
+                        .done(function (data) {
+                            const current = vinSelect.val() || node.vin;
+                            vinSelect.empty();
+                            vinSelect.append('<option value="">All Vehicles (or Generic)</option>');
+                            if (data && data.length > 0) {
+                                data.forEach(function (v) {
+                                    vinSelect.append(
+                                        '<option value="' +
+                                            v.vin +
+                                            '">' +
+                                            v.display_name +
+                                            " (" +
+                                            v.vin +
+                                            ")</option>"
+                                    );
+                                });
+                            }
+                            if (current) {
+                                vinSelect.val(current);
+                            }
+                        })
+                        .fail(function (jqxhr, textStatus, error) {
+                            console.error("Failed to fetch vehicles", error);
+                        });
+                }
+            }
+
+            configInput.change(function () {
+                updateVins();
+            });
+
+            if (configInput.val()) {
+                updateVins();
+            }
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="teslemetry-event">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-teslemetryConfig"><i class="fa fa-globe"></i> Config</label>
+        <input type="text" id="node-input-teslemetryConfig" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-vin"><i class="fa fa-car"></i> VIN</label>
+        <select id="node-input-vin" style="width: 70%;">
+            <option value="">All Vehicles (or Generic)</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-event"><i class="fa fa-list"></i> Event Type</label>
+        <select id="node-input-event">
+            <option value="all">All Events</option>
+            <option value="data">Data</option>
+            <option value="state">State</option>
+            <option value="vehicle_data">Vehicle Data</option>
+            <option value="errors">Errors</option>
+            <option value="alerts">Alerts</option>
+            <option value="connectivity">Connectivity</option>
+            <option value="credits">Credits</option>
+            <option value="config">Config</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="teslemetry-event">
+    <p>Listens for Server-Sent Events (SSE) from Teslemetry.</p>
+    <p>Select a specific VIN to filter events, or leave empty for all.</p>
+</script>

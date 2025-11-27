@@ -1,0 +1,93 @@
+<script type="text/javascript">
+    RED.nodes.registerType("teslemetry-signal", {
+        category: "Teslemetry",
+        color: "#cc0000",
+        defaults: {
+            name: { value: "" },
+            teslemetryConfig: {
+                value: "",
+                type: "teslemetry-config",
+                required: true,
+            },
+            vin: { value: "", required: true },
+            field: { value: "", required: true }
+        },
+        inputs: 0,
+        outputs: 1,
+        icon: "font-awesome/fa-bolt",
+        label: function () {
+            return this.name || "Signal: " + (this.field || "...");
+        },
+        oneditprepare: function () {
+            const node = this;
+            const vinSelect = $("#node-input-vin");
+            const configInput = $("#node-input-teslemetryConfig");
+
+            function updateVins() {
+                const configId = configInput.val();
+                if (configId && configId !== "_ADD_") {
+                    $.getJSON("teslemetry/vehicles", { config: configId })
+                        .done(function (data) {
+                            const current = vinSelect.val() || node.vin;
+                            vinSelect.empty();
+                            // VIN is required for Signal
+                            if (data && data.length > 0) {
+                                data.forEach(function (v) {
+                                    vinSelect.append(
+                                        '<option value="' +
+                                            v.vin +
+                                            '">' +
+                                            v.display_name +
+                                            " (" +
+                                            v.vin +
+                                            ")</option>"
+                                    );
+                                });
+                            } else {
+                                vinSelect.append('<option value="">No vehicles found</option>');
+                            }
+                            if (current) {
+                                vinSelect.val(current);
+                            }
+                        })
+                        .fail(function (jqxhr, textStatus, error) {
+                            console.error("Failed to fetch vehicles", error);
+                        });
+                }
+            }
+
+            configInput.change(function () {
+                updateVins();
+            });
+
+            if (configInput.val()) {
+                updateVins();
+            }
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="teslemetry-signal">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-teslemetryConfig"><i class="fa fa-globe"></i> Config</label>
+        <input type="text" id="node-input-teslemetryConfig" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-vin"><i class="fa fa-car"></i> VIN</label>
+        <select id="node-input-vin" style="width: 70%;">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-field"><i class="fa fa-tag"></i> Field</label>
+        <input type="text" id="node-input-field" placeholder="e.g. odometer, battery_level">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="teslemetry-signal">
+    <p>Listens for a specific signal field from a vehicle.</p>
+    <p>Requires a VIN and a Field name (e.g., <code>odometer</code>, <code>battery_level</code>).</p>
+</script>

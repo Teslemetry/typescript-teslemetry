@@ -1,0 +1,120 @@
+<script type="text/javascript">
+    RED.nodes.registerType("teslemetry-energy-command", {
+        category: "Teslemetry Energy",
+        color: "#e6e600",
+        defaults: {
+            name: { value: "" },
+            teslemetryConfig: {
+                value: "",
+                type: "teslemetry-config",
+                required: true,
+            },
+            siteId: { value: "" },
+            command: { value: "getLiveStatus" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-bolt",
+        label: function () {
+            return this.name || "Energy: " + (this.command || "Status");
+        },
+        oneditprepare: function () {
+            const node = this;
+            const siteSelect = $("#node-input-siteId");
+            const configInput = $("#node-input-teslemetryConfig");
+
+            function updateSites() {
+                const configId = configInput.val();
+                if (configId && configId !== "_ADD_") {
+                    $.getJSON("teslemetry/energy_sites", { config: configId })
+                        .done(function (data) {
+                            const current = siteSelect.val() || node.siteId;
+                            siteSelect.empty();
+                            siteSelect.append(
+                                '<option value="">From msg.siteId</option>'
+                            );
+                            if (data && data.length > 0) {
+                                data.forEach(function (s) {
+                                    // Use energy_site_id and label (site_name or id)
+                                    const label = s.site_name || s.energy_site_id;
+                                    siteSelect.append(
+                                        '<option value="' +
+                                            s.energy_site_id +
+                                            '">' +
+                                            label +
+                                            " (" +
+                                            s.energy_site_id +
+                                            ")</option>"
+                                    );
+                                });
+                            }
+                            if (current) {
+                                siteSelect.val(current);
+                            }
+                        })
+                        .fail(function (jqxhr, textStatus, error) {
+                            console.error("Failed to fetch energy sites", error);
+                        });
+                }
+            }
+
+            configInput.change(function () {
+                updateSites();
+            });
+
+            if (configInput.val()) {
+                updateSites();
+            }
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="teslemetry-energy-command">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-teslemetryConfig"><i class="fa fa-globe"></i> Config</label>
+        <input type="text" id="node-input-teslemetryConfig" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-siteId"><i class="fa fa-home"></i> Site ID</label>
+        <select id="node-input-siteId" style="width: 70%;">
+            <option value="">From msg.siteId</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-command"><i class="fa fa-cogs"></i> Command</label>
+        <select id="node-input-command">
+            <option value="getLiveStatus">Get Live Status</option>
+            <option value="getSiteInfo">Get Site Info</option>
+            <option value="setBackupReserve">Set Backup Reserve (msg.backup_reserve_percent)</option>
+            <option value="setOperationMode">Set Operation Mode (msg.default_real_mode)</option>
+            <option value="setStormMode">Set Storm Mode (msg.enabled)</option>
+            <option value="gridImportExport">Set Grid Import/Export (msg.customer_preferred_export_rule)</option>
+            <option value="setOffGridVehicleChargingReserve">Set Off-Grid Charge Reserve (msg.percent)</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="teslemetry-energy-command">
+    <p>Interacts with an Energy Site via Teslemetry API.</p>
+    <p>Requires a valid Teslemetry configuration and a Site ID.</p>
+    
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">siteId <span class="property-type">number</span></dt>
+        <dd>Energy Site ID (if not set in config)</dd>
+        <dt class="optional">command <span class="property-type">string</span></dt>
+        <dd>Command to execute</dd>
+        <dt class="optional">payload <span class="property-type">object</span></dt>
+        <dd>Arguments for commands</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>The response from the API.</dd>
+    </dl>
+</script>

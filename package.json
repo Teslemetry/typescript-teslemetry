@@ -10,7 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "changeset": "changeset",
-    "version": "changeset version"
+    "version": "changeset version",
+    "pack": "pnpm -r pack"
   },
   "packageManager": "pnpm@10.18.1",
   "devDependencies": {
