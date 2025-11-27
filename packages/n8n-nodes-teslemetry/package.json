@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsdown src/index.ts --format cjs --clean --bundle",
+    "dev": "pnpm build && mkdir -p .n8n-home/nodes && ln -sf $(pwd) .n8n-home/nodes/teslemetry && N8N_USER_FOLDER=$(pwd)/.n8n-home n8n start",
     "tsc": "tsc",
     "pack": "npm pack"
   },
@@ -16,7 +17,6 @@
   ],
   "author": "",
   "license": "Apache-2.0",
-  "dependencies": {},
   "files": [
     "dist"
   ],
@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@teslemetry/api": "workspace:*",
+    "n8n": "^1.121.3",
     "n8n-core": "^1.0.0",
     "n8n-workflow": "^1.0.0",
     "tsdown": "^0.16.7"
