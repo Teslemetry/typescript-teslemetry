@@ -47,8 +47,23 @@ export default function (RED: any) {
                              // "self_consumption" | "backup" | "autonomous"
                             result = await energy.setOperationMode(args.default_real_mode || msg.default_real_mode);
                             break;
+                        case 'setOperationModeSelfConsumption':
+                            result = await energy.setOperationMode("self_consumption");
+                            break;
+                        case 'setOperationModeBackup':
+                            result = await energy.setOperationMode("backup");
+                            break;
+                        case 'setOperationModeAutonomous':
+                            result = await energy.setOperationMode("autonomous");
+                            break;
                         case 'setStormMode':
                             result = await energy.setStormMode(args.enabled !== undefined ? args.enabled : (msg.enabled !== undefined ? msg.enabled : true));
+                            break;
+                        case 'setStormModeOn':
+                            result = await energy.setStormMode(true);
+                            break;
+                        case 'setStormModeOff':
+                            result = await energy.setStormMode(false);
                             break;
                         case 'gridImportExport':
                              // customer_preferred_export_rule: "battery_ok" | "pv_only" | "never"
@@ -57,6 +72,15 @@ export default function (RED: any) {
                                 args.customer_preferred_export_rule || msg.customer_preferred_export_rule,
                                 args.disallow_charge_from_grid_with_solar_installed || msg.disallow_charge_from_grid_with_solar_installed
                             );
+                            break;
+                        case 'gridImportExportBatteryOk':
+                            result = await energy.gridImportExport("battery_ok");
+                            break;
+                        case 'gridImportExportPvOnly':
+                            result = await energy.gridImportExport("pv_only");
+                            break;
+                        case 'gridImportExportNever':
+                            result = await energy.gridImportExport("never");
                             break;
                         case 'setOffGridVehicleChargingReserve':
                             result = await energy.setOffGridVehicleChargingReserve(args.percent || msg.percent);
@@ -81,30 +105,4 @@ export default function (RED: any) {
         }
     }
     RED.nodes.registerType("teslemetry-energy-command", TeslemetryEnergyCommandNode);
-
-    RED.httpAdmin.get('/teslemetry/energy_sites', async (req: any, res: any) => {
-        const configNodeId = req.query.config;
-        
-        if (!configNodeId) {
-             res.status(400).send("Missing config node ID");
-             return;
-        }
-
-        const configNode = RED.nodes.getNode(configNodeId) as TeslemetryConfigNode & { credentials: { token: string } };
-
-        if (!configNode || !configNode.credentials || !configNode.credentials.token) {
-            res.status(400).send("Missing or invalid configuration");
-            return;
-        }
-
-        try {
-            const teslemetry = new Teslemetry(configNode.credentials.token);
-            const response = await teslemetry.api.products();
-            // Filter for energy sites
-            const sites = (response.response || []).filter((p: any) => p.resource_type === "battery" || p.resource_type === "solar" || "energy_site_id" in p);
-            res.json(sites);
-        } catch (err: any) {
-            res.status(500).send(err.message);
-        }
-    });
 }

@@ -1,6 +1,6 @@
 <script type="text/javascript">
     RED.nodes.registerType("teslemetry-event", {
-        category: "Teslemetry",
+        category: "Teslemetry Vehicle",
         color: "#cc0000",
         defaults: {
             name: { value: "" },
@@ -10,7 +10,7 @@
                 required: true,
             },
             vin: { value: "" },
-            event: { value: "all", required: true }
+            event: { value: "all", required: true },
         },
         inputs: 0,
         outputs: 1,
@@ -30,7 +30,9 @@
                         .done(function (data) {
                             const current = vinSelect.val() || node.vin;
                             vinSelect.empty();
-                            vinSelect.append('<option value="">All Vehicles (or Generic)</option>');
+                            vinSelect.append(
+                                '<option value="">All Vehicles (or Generic)</option>',
+                            );
                             if (data && data.length > 0) {
                                 data.forEach(function (v) {
                                     vinSelect.append(
@@ -40,7 +42,7 @@
                                             v.display_name +
                                             " (" +
                                             v.vin +
-                                            ")</option>"
+                                            ")</option>",
                                     );
                                 });
                             }
@@ -71,7 +73,9 @@
         <input type="text" id="node-input-name" placeholder="Name" />
     </div>
     <div class="form-row">
-        <label for="node-input-teslemetryConfig"><i class="fa fa-globe"></i> Config</label>
+        <label for="node-input-teslemetryConfig"
+            ><i class="fa fa-globe"></i> Config</label
+        >
         <input type="text" id="node-input-teslemetryConfig" />
     </div>
     <div class="form-row">
@@ -81,7 +85,9 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-event"><i class="fa fa-list"></i> Event Type</label>
+        <label for="node-input-event"
+            ><i class="fa fa-list"></i> Event Type</label
+        >
         <select id="node-input-event">
             <option value="all">All Events</option>
             <option value="data">Data</option>

@@ -1,6 +1,6 @@
 <script type="text/javascript">
     RED.nodes.registerType("teslemetry-signal", {
-        category: "Teslemetry",
+        category: "Teslemetry Vehicle",
         color: "#cc0000",
         defaults: {
             name: { value: "" },
@@ -10,7 +10,7 @@
                 required: true,
             },
             vin: { value: "", required: true },
-            field: { value: "", required: true }
+            field: { value: "", required: true },
         },
         inputs: 0,
         outputs: 1,
@@ -21,6 +21,7 @@
         oneditprepare: function () {
             const node = this;
             const vinSelect = $("#node-input-vin");
+            const fieldSelect = $("#node-input-field");
             const configInput = $("#node-input-teslemetryConfig");
 
             function updateVins() {
@@ -30,7 +31,6 @@
                         .done(function (data) {
                             const current = vinSelect.val() || node.vin;
                             vinSelect.empty();
-                            // VIN is required for Signal
                             if (data && data.length > 0) {
                                 data.forEach(function (v) {
                                     vinSelect.append(
@@ -40,11 +40,13 @@
                                             v.display_name +
                                             " (" +
                                             v.vin +
-                                            ")</option>"
+                                            ")</option>",
                                     );
                                 });
                             } else {
-                                vinSelect.append('<option value="">No vehicles found</option>');
+                                vinSelect.append(
+                                    '<option value="">No vehicles found</option>',
+                                );
                             }
                             if (current) {
                                 vinSelect.val(current);
@@ -56,12 +58,39 @@
                 }
             }
 
+            function updateFields() {
+                const configId = configInput.val();
+                if (configId && configId !== "_ADD_") {
+                    $.getJSON("teslemetry/fields", { config: configId })
+                        .done(function (data) {
+                            const current = fieldSelect.val() || node.field;
+                            fieldSelect.empty();
+                            fieldSelect.append('<option value="">From msg.field</option>');
+                            if (data && data.length > 0) {
+                                data.forEach(function (f) {
+                                    fieldSelect.append(
+                                        '<option value="' + f + '">' + f + '</option>',
+                                    );
+                                });
+                            }
+                            if (current) {
+                                fieldSelect.val(current);
+                            }
+                        })
+                        .fail(function (jqxhr, textStatus, error) {
+                            console.error("Failed to fetch fields", error);
+                        });
+                }
+            }
+
             configInput.change(function () {
                 updateVins();
+                updateFields();
             });
 
             if (configInput.val()) {
                 updateVins();
+                updateFields();
             }
         },
     });
@@ -73,21 +102,27 @@
         <input type="text" id="node-input-name" placeholder="Name" />
     </div>
     <div class="form-row">
-        <label for="node-input-teslemetryConfig"><i class="fa fa-globe"></i> Config</label>
+        <label for="node-input-teslemetryConfig"
+            ><i class="fa fa-globe"></i> Config</label
+        >
         <input type="text" id="node-input-teslemetryConfig" />
     </div>
     <div class="form-row">
         <label for="node-input-vin"><i class="fa fa-car"></i> VIN</label>
-        <select id="node-input-vin" style="width: 70%;">
-        </select>
+        <select id="node-input-vin" style="width: 70%;"></select>
     </div>
     <div class="form-row">
         <label for="node-input-field"><i class="fa fa-tag"></i> Field</label>
-        <input type="text" id="node-input-field" placeholder="e.g. odometer, battery_level">
+        <select id="node-input-field" style="width: 70%;">
+             <option value="">From msg.field</option>
+        </select>
     </div>
 </script>
 
 <script type="text/html" data-help-name="teslemetry-signal">
     <p>Listens for a specific signal field from a vehicle.</p>
-    <p>Requires a VIN and a Field name (e.g., <code>odometer</code>, <code>battery_level</code>).</p>
+    <p>
+        Requires a VIN and a Field name. The field can be selected from the
+        dropdown or provided via <code>msg.field</code>.
+    </p>
 </script>

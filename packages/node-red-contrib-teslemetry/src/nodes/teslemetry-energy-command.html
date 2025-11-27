@@ -89,11 +89,31 @@
         <select id="node-input-command">
             <option value="getLiveStatus">Get Live Status</option>
             <option value="getSiteInfo">Get Site Info</option>
-            <option value="setBackupReserve">Set Backup Reserve (msg.backup_reserve_percent)</option>
-            <option value="setOperationMode">Set Operation Mode (msg.default_real_mode)</option>
-            <option value="setStormMode">Set Storm Mode (msg.enabled)</option>
-            <option value="gridImportExport">Set Grid Import/Export (msg.customer_preferred_export_rule)</option>
-            <option value="setOffGridVehicleChargingReserve">Set Off-Grid Charge Reserve (msg.percent)</option>
+            
+            <optgroup label="Operation Mode">
+                <option value="setOperationMode">Set Mode (msg.default_real_mode)</option>
+                <option value="setOperationModeSelfConsumption">Mode: Self Consumption</option>
+                <option value="setOperationModeBackup">Mode: Backup</option>
+                <option value="setOperationModeAutonomous">Mode: Autonomous</option>
+            </optgroup>
+
+            <optgroup label="Storm Watch">
+                <option value="setStormMode">Set Storm Mode (msg.enabled)</option>
+                <option value="setStormModeOn">Enable Storm Mode</option>
+                <option value="setStormModeOff">Disable Storm Mode</option>
+            </optgroup>
+
+            <optgroup label="Grid Control">
+                <option value="gridImportExport">Set Grid Import/Export (msg...)</option>
+                <option value="gridImportExportBatteryOk">Grid Rule: Battery OK</option>
+                <option value="gridImportExportPvOnly">Grid Rule: PV Only</option>
+                <option value="gridImportExportNever">Grid Rule: Never</option>
+            </optgroup>
+            
+            <optgroup label="Reserves">
+                <option value="setBackupReserve">Set Backup Reserve (msg.backup_reserve_percent)</option>
+                <option value="setOffGridVehicleChargingReserve">Set Off-Grid Charge Reserve (msg.percent)</option>
+            </optgroup>
         </select>
     </div>
 </script>

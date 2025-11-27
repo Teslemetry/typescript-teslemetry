@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    RED.nodes.registerType("teslemetry-vehicle", {
+    RED.nodes.registerType("teslemetry-vehicle-command", {
         category: "Teslemetry Vehicle",
         color: "#cc0000",
         defaults: {
@@ -10,7 +10,7 @@
                 required: true,
             },
             vin: { value: "" },
-            command: { value: "vehicleData" }
+            command: { value: "vehicleData" },
         },
         inputs: 1,
         outputs: 1,
@@ -31,7 +31,7 @@
                             const current = vinSelect.val() || node.vin;
                             vinSelect.empty();
                             vinSelect.append(
-                                '<option value="">From msg.vin</option>'
+                                '<option value="">From msg.vin</option>',
                             );
                             if (data && data.length > 0) {
                                 data.forEach(function (v) {
@@ -42,7 +42,7 @@
                                             v.display_name +
                                             " (" +
                                             v.vin +
-                                            ")</option>"
+                                            ")</option>",
                                     );
                                 });
                             }
@@ -68,7 +68,7 @@
     });
 </script>
 
-<script type="text/html" data-template-name="teslemetry-vehicle">
+<script type="text/html" data-template-name="teslemetry-vehicle-command">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name" />
@@ -86,46 +86,87 @@
         </select>
     </div>
     <div class="form-row">
-        <label for="node-input-command"><i class="fa fa-cogs"></i> Command</label>
+        <label for="node-input-command"
+            ><i class="fa fa-cogs"></i> Command</label
+        >
         <select id="node-input-command">
             <option value="vehicleData">Get Vehicle Data</option>
             <option value="wakeUp">Wake Up</option>
-            <option value="flashLights">Flash Lights</option>
-            <option value="honkHorn">Honk Horn</option>
-            <option value="lockDoors">Lock Doors</option>
-            <option value="unlockDoors">Unlock Doors</option>
-            <option value="actuateTrunk">Actuate Trunk (msg.which_trunk)</option>
-            <option value="startAutoConditioning">Start HVAC</option>
-            <option value="stopAutoConditioning">Stop HVAC</option>
-            <option value="setTemps">Set Temps (msg.driver_temp)</option>
-            <option value="setSeatHeater">Set Seat Heater (msg.heater, msg.level)</option>
-            <option value="setSteeringWheelHeater">Set Steering Wheel Heater (msg.on)</option>
-            <option value="startCharging">Start Charging</option>
-            <option value="stopCharging">Stop Charging</option>
-            <option value="openChargePort">Open Charge Port</option>
-            <option value="closeChargePort">Close Charge Port</option>
-            <option value="setChargeLimit">Set Charge Limit (msg.percent)</option>
-            <option value="setChargingAmps">Set Charging Amps (msg.charging_amps)</option>
-            <option value="setSentryMode">Set Sentry Mode (msg.on)</option>
-            <option value="remoteStart">Remote Start</option>
-            <option value="triggerHomelink">Trigger Homelink (msg.lat, msg.lon)</option>
-            <option value="navigationRequest">Navigation Request (msg.payload)</option>
+
+            <optgroup label="Controls">
+                <option value="flashLights">Flash Lights</option>
+                <option value="honkHorn">Honk Horn</option>
+                <option value="lockDoors">Lock Doors</option>
+                <option value="unlockDoors">Unlock Doors</option>
+                <option value="remoteStart">Remote Start</option>
+                <option value="actuateTrunkRear">Open Rear Trunk</option>
+                <option value="actuateTrunkFront">Open Front Trunk</option>
+            </optgroup>
+
+            <optgroup label="Climate">
+                <option value="startAutoConditioning">Start HVAC</option>
+                <option value="stopAutoConditioning">Stop HVAC</option>
+                <option value="setSteeringWheelHeaterOn">
+                    Enable Steering Wheel Heater
+                </option>
+                <option value="setSteeringWheelHeaterOff">
+                    Disable Steering Wheel Heater
+                </option>
+                <option value="setTemps">Set Temps (msg.driver_temp)</option>
+                <option value="setSeatHeater">
+                    Set Seat Heater (msg.heater, msg.level)
+                </option>
+            </optgroup>
+
+            <optgroup label="Charging">
+                <option value="startCharging">Start Charging</option>
+                <option value="stopCharging">Stop Charging</option>
+                <option value="openChargePort">Open Charge Port</option>
+                <option value="closeChargePort">Close Charge Port</option>
+                <option value="setChargeLimit">
+                    Set Charge Limit (msg.percent)
+                </option>
+                <option value="setChargingAmps">
+                    Set Charging Amps (msg.charging_amps)
+                </option>
+            </optgroup>
+
+            <optgroup label="Security">
+                <option value="setSentryModeOn">Enable Sentry Mode</option>
+                <option value="setSentryModeOff">Disable Sentry Mode</option>
+            </optgroup>
+
+            <optgroup label="Advanced">
+                <option value="triggerHomelink">
+                    Trigger Homelink (msg.lat, msg.lon)
+                </option>
+                <option value="navigationRequest">
+                    Navigation Request (msg.payload)
+                </option>
+            </optgroup>
         </select>
     </div>
 </script>
 
-<script type="text/html" data-help-name="teslemetry-vehicle">
+<script type="text/html" data-help-name="teslemetry-vehicle-command">
     <p>Interacts with a vehicle via Teslemetry API.</p>
     <p>Requires a valid Teslemetry configuration and a VIN.</p>
-    
+
     <h3>Inputs</h3>
     <dl class="message-properties">
         <dt class="optional">vin <span class="property-type">string</span></dt>
         <dd>Vehicle Identification Number (if not set in config)</dd>
-        <dt class="optional">command <span class="property-type">string</span></dt>
+        <dt class="optional">
+            command <span class="property-type">string</span>
+        </dt>
         <dd>Command to execute (overrides config)</dd>
-        <dt class="optional">payload <span class="property-type">object</span></dt>
-        <dd>Arguments for commands (e.g. <code>{ "percent": 80 }</code> for Set Charge Limit)</dd>
+        <dt class="optional">
+            payload <span class="property-type">object</span>
+        </dt>
+        <dd>
+            Arguments for commands (e.g. <code>{ "percent": 80 }</code> for Set
+            Charge Limit)
+        </dd>
     </dl>
 
     <h3>Outputs</h3>
