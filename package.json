@@ -1,7 +1,13 @@
 {
   "name": "@teslemetry/root",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
+  "author": {
+    "name": "Teslemetry",
+    "email": "hello@teslemetry.com",
+    "url": "https://teslemetry.com"
+  },
+  "license": "Apache-2.0",
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
