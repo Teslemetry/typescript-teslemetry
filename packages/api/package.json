@@ -19,7 +19,6 @@
     "dist"
   ],
   "scripts": {
-    "test": "tsc --noEmit",
     "api": "pnpm build && node examples/api.ts",
     "sse": "pnpm build && node examples/sse.ts",
     "client": "openapi-ts --file openapi-ts.config.ts",
