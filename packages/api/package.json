@@ -2,13 +2,17 @@
   "name": "@teslemetry/api",
   "version": "0.0.1",
   "description": "API client for Teslemetry",
-  "main": "dist/index.mjs",
+  "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -19,7 +23,7 @@
     "api": "pnpm build && node examples/api.ts",
     "sse": "pnpm build && node examples/sse.ts",
     "client": "openapi-ts --file openapi-ts.config.ts",
-    "build": "tsdown",
+    "build": "tsdown --format cjs,esm",
     "tsc": "tsc --noEmit"
   },
   "keywords": [
