@@ -18,6 +18,9 @@
   "dependencies": {
     "@teslemetry/api": "workspace:*"
   },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "n8n-core": "^1.0.0",
     "n8n-workflow": "^1.0.0"

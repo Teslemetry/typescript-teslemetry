@@ -22,6 +22,9 @@
   "dependencies": {
     "@teslemetry/api": "workspace:*"
   },
+  "files": [
+    "dist"
+  ],
   "node-red": {
     "nodes": {
       "teslemetry-config": "dist/nodes/teslemetry-config.js",
