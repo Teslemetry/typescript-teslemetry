@@ -1,7 +1,6 @@
 {
   "name": "@teslemetry/root",
   "version": "1.0.0",
-  "private": false,
   "author": {
     "name": "Teslemetry",
     "email": "hello@teslemetry.com",
@@ -9,13 +8,13 @@
   },
   "license": "Apache-2.0",
   "scripts": {
-    "build": "pnpm -r build",
-    "test": "pnpm -r test",
-    "tsc": "pnpm -r tsc",
-    "typecheck": "pnpm -r tsc"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "changeset": "changeset",
+    "version": "changeset version"
   },
   "packageManager": "pnpm@10.18.1",
   "devDependencies": {
+    "@changesets/cli": "^2.29.7",
     "@types/node": "^24.10.1",
     "tsup": "^8.2.3",
     "typescript": "^5.9.3"

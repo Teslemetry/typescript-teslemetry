@@ -1,12 +1,13 @@
 {
   "name": "@teslemetry/n8n-nodes-teslemetry",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "n8n.io integration for Teslemetry",
   "main": "dist/index.cjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsdown src/index.ts --format cjs --clean --bundle",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "release": "pnpm version patch"
   },
   "keywords": [
     "n8n",

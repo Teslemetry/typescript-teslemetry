@@ -1,12 +1,13 @@
 {
   "name": "@teslemetry/node-red-contrib-teslemetry",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Node-RED integration for Teslemetry",
   "main": "dist/index.cjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsdown src/nodes/*.ts --out-dir dist/nodes --format cjs --clean --bundle && cp src/nodes/*.html dist/nodes/",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "release": "pnpm version patch"
   },
   "keywords": [
     "node-red",
