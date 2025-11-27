@@ -2,9 +2,10 @@
   "name": "@teslemetry/n8n-nodes-teslemetry",
   "version": "1.0.0",
   "description": "n8n.io integration for Teslemetry",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
     "tsc": "tsc"
   },
   "keywords": [
@@ -16,5 +17,9 @@
   "license": "ISC",
   "dependencies": {
     "@teslemetry/api": "workspace:*"
+  },
+  "devDependencies": {
+    "n8n-core": "^1.0.0",
+    "n8n-workflow": "^1.0.0"
   }
 }

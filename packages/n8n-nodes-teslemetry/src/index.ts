@@ -1,3 +1,2 @@
-import { Teslemetry } from '@teslemetry/api';
-
-console.log(Teslemetry);
+export { TeslemetryApi } from './credentials/TeslemetryApi.credentials';
+export { TeslemetryVehicle } from './nodes/TeslemetryVehicle.node';
