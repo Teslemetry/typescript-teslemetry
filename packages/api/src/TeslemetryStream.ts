@@ -195,8 +195,8 @@ export class TeslemetryStream {
     return this._createListener("config", callback, filters);
   }
 
-  public on(
-    callback: (event: SseEvent) => void,
+  public on<T extends SseEvent>(
+    callback: (event: T) => void,
     filters?: Record<string, any>,
   ): () => void {
     return this._createListener("all", callback, filters);

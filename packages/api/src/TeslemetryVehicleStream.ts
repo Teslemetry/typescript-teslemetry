@@ -27,7 +27,7 @@ export class TeslemetryVehicleStream {
   private root: Teslemetry;
   private stream: TeslemetryStream;
   public vin: string;
-  public fields: FieldsResponse = {};
+  public fields: FieldsRequest = {}; // Allow updates from both requests, and responses
   private _pendingFields: FieldsRequest = {}; // Used for accumulating config changes before patching
   private _debounceTimeout: NodeJS.Timeout | null = null; // Debounce timeout for patchConfig
   public logger: Logger;
@@ -180,7 +180,7 @@ export class TeslemetryVehicleStream {
 
   // Legacy and generic methods
   public on(callback: (value: SseEvent) => void): () => void {
-    return this.stream.on<SseEvent>(
+    return this.stream.on(
       (event) => {
         callback(event);
       },
