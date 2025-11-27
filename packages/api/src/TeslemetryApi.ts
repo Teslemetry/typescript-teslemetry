@@ -101,10 +101,11 @@ export class TeslemetryApi {
    * and detailed info for each vehicle.
    */
   public async fleetStatus(vins: string[]) {
-    return postApi1VehiclesFleetStatus({
+    const { data } = await postApi1VehiclesFleetStatus({
       body: { vins },
       client: this.root.client,
     });
+    return data;
   }
 
   /**
@@ -113,7 +114,8 @@ export class TeslemetryApi {
    * pagination details, and a total count.
    */
   public async vehicles() {
-    return getApi1Vehicles({ client: this.root.client });
+    const { data } = await getApi1Vehicles({ client: this.root.client });
+    return data;
   }
 
   /**
@@ -122,9 +124,10 @@ export class TeslemetryApi {
    * @returns Promise to an object containing the `vehicle_id_s` and `vin` of the shared vehicle.
    */
   public async redeemInvitation(code: string) {
-    return postApi1VehiclesInvitationsRedeem({
+    const { data } = await postApi1VehiclesInvitationsRedeem({
       body: { code },
       client: this.root.client,
     });
+    return data;
   }
 }
