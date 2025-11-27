@@ -4,6 +4,64 @@ export type ClientOptions = {
     baseUrl: 'https://api.teslemetry.com' | 'https://na.teslemetry.com' | 'https://eu.teslemetry.com' | (string & {});
 };
 
+export type GetFieldsJsonData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/fields.json';
+};
+
+export type GetFieldsJsonResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        [key: string]: {
+            type?: 'int' | 'float' | 'bool' | 'enum' | 'string' | 'time' | 'location' | 'unknown';
+            minimum_delta?: {
+                default?: number;
+                min?: number;
+            };
+            scale?: number;
+            description?: string;
+            category?: string;
+            /**
+             * Vehicle models this field applies to
+             */
+            models?: Array<string>;
+            /**
+             * The scopes required for the field
+             */
+            scopes?: Array<string>;
+            /**
+             * The minimum interval the field will be sent when it's value has changed
+             */
+            interval_seconds?: {
+                default?: number;
+                min?: number;
+                max?: number;
+            };
+            /**
+             * The interval the field will be resent if the value has not changed
+             */
+            resend_interval_seconds?: {
+                default?: number;
+                min?: number;
+            };
+            /**
+             * The minimum firmware version required
+             */
+            version?: string;
+            /**
+             * Indicates whether the field is allowed to send null
+             */
+            nullable?: boolean;
+        };
+    };
+};
+
+export type GetFieldsJsonResponse = GetFieldsJsonResponses[keyof GetFieldsJsonResponses];
+
 export type GetApi1ProductsData = {
     body?: never;
     path?: never;
@@ -14212,66 +14270,90 @@ export type GetSseByVin_Responses = {
         vin: string;
         isCache?: boolean;
         data: {
-            DriveRail?: number | null;
-            ChargeState?: 'ChargeStateUnknown' | 'ChargeStateDisconnected' | 'ChargeStateNoPower' | 'ChargeStateStarting' | 'ChargeStateCharging' | 'ChargeStateComplete' | 'ChargeStateStopped' | null;
+            ACChargingEnergyIn?: number | null;
+            ACChargingPower?: number | null;
+            AutoSeatClimateLeft?: boolean | null;
+            AutoSeatClimateRight?: boolean | null;
+            AutomaticBlindSpotCamera?: boolean | null;
+            AutomaticEmergencyBrakingOff?: boolean | null;
+            BMSState?: 'BMSStateUnknown' | 'BMSStateStandby' | 'BMSStateDrive' | 'BMSStateSupport' | 'BMSStateCharge' | 'BMSStateFEIM' | 'BMSStateClearFault' | 'BMSStateFault' | 'BMSStateWeld' | 'BMSStateTest' | 'BMSStateSNA' | null;
+            BatteryHeaterOn?: boolean | null;
+            BatteryLevel?: number | null;
+            BlindSpotCollisionWarningChime?: boolean | null;
             BmsFullchargecomplete?: number | null;
-            VehicleSpeed?: number | null;
-            Odometer?: number | null;
-            PackVoltage?: number | null;
-            PackCurrent?: number | null;
-            Soc?: number | null;
-            DCDCEnable?: number | null;
-            Gear?: 'ShiftStateUnknown' | 'ShiftStateInvalid' | 'ShiftStateP' | 'ShiftStateR' | 'ShiftStateN' | 'ShiftStateD' | 'ShiftStateSNA' | null;
-            IsolationResistance?: number | null;
-            PedalPosition?: number | null;
             BrakePedal?: number | null;
-            DiStateR?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
-            DiHeatsinkTR?: number | null;
-            DiAxleSpeedR?: number | null;
-            DiTorquemotor?: number | null;
-            DiStatorTempR?: number | null;
-            DiVBatR?: number | null;
-            DiMotorCurrentR?: number | null;
-            Location?: {
+            BrakePedalPos?: number | null;
+            BrickVoltageMax?: number | null;
+            BrickVoltageMin?: number | null;
+            CabinOverheatProtectionMode?: 'CabinOverheatProtectionModeStateUnknown' | 'CabinOverheatProtectionModeStateOff' | 'CabinOverheatProtectionModeStateOn' | 'CabinOverheatProtectionModeStateFanOnly' | null;
+            CabinOverheatProtectionTemperatureLimit?: 'ClimateOverheatProtectionTempLimitUnknown' | 'ClimateOverheatProtectionTempLimitHigh' | 'ClimateOverheatProtectionTempLimitMedium' | 'ClimateOverheatProtectionTempLimitLow' | null;
+            CarType?: 'CarTypeUnknown' | 'CarTypeModelS' | 'CarTypeModelX' | 'CarTypeModel3' | 'CarTypeModelY' | 'CarTypeSemiTruck' | 'CarTypeCybertruck' | null;
+            CenterDisplay?: 'DisplayStateUnknown' | 'DisplayStateOff' | 'DisplayStateDim' | 'DisplayStateAccessory' | 'DisplayStateOn' | 'DisplayStateDriving' | 'DisplayStateCharging' | 'DisplayStateLock' | 'DisplayStateSentry' | 'DisplayStateDog' | 'DisplayStateEntertainment' | null;
+            ChargeAmps?: number | null;
+            ChargeCurrentRequest?: number | null;
+            ChargeCurrentRequestMax?: number | null;
+            ChargeEnableRequest?: number | null;
+            ChargeLimitSoc?: boolean | null;
+            ChargePort?: 'ChargePortUnknown' | 'ChargePortUS' | 'ChargePortEU' | 'ChargePortGB' | 'ChargePortCCS' | null;
+            ChargePortColdWeatherMode?: number | null;
+            ChargePortDoorOpen?: number | null;
+            ChargePortLatch?: 'ChargePortLatchUnknown' | 'ChargePortLatchSNA' | 'ChargePortLatchDisengaged' | 'ChargePortLatchEngaged' | 'ChargePortLatchBlocking' | null;
+            ChargeRateMilePerHour?: number | null;
+            ChargeState?: 'ChargeStateUnknown' | 'ChargeStateDisconnected' | 'ChargeStateNoPower' | 'ChargeStateStarting' | 'ChargeStateCharging' | 'ChargeStateComplete' | 'ChargeStateStopped' | null;
+            ChargerPhases?: number | null;
+            ChargerVoltage?: number | null;
+            ChargingCableType?: 'CableTypeUnknown' | 'CableTypeIEC' | 'CableTypeSAE' | 'CableTypeGB_AC' | 'CableTypeGB_DC' | 'CableTypeSNA' | null;
+            ClimateKeeperMode?: 'ClimateKeeperModeStateUnknown' | 'ClimateKeeperModeStateOff' | 'ClimateKeeperModeStateOn' | 'ClimateKeeperModeStateDog' | 'ClimateKeeperModeStateParty' | null;
+            ClimateSeatCoolingFrontLeft?: number | null;
+            ClimateSeatCoolingFrontRight?: number | null;
+            CruiseFollowDistance?: 'FollowDistanceUnknown' | 'FollowDistance1' | 'FollowDistance2' | 'FollowDistance3' | 'FollowDistance4' | 'FollowDistance5' | 'FollowDistance6' | 'FollowDistance7' | null;
+            CruiseSetSpeed?: number | null;
+            CurrentLimitMph?: boolean | null;
+            DCChargingEnergyIn?: number | null;
+            DCChargingPower?: number | null;
+            DCDCEnable?: number | null;
+            DefrostForPreconditioning?: number | null;
+            DefrostMode?: 'DefrostModeStateUnknown' | 'DefrostModeStateOff' | 'DefrostModeStateNormal' | 'DefrostModeStateMax' | 'DefrostModeStateAutoDefog' | null;
+            DestinationLocation?: {
                 latitude: number;
                 longitude: number;
             } | null;
-            GpsState?: number | null;
-            GpsHeading?: number | null;
-            NumBrickVoltageMax?: number | null;
-            BrickVoltageMax?: number | null;
-            NumBrickVoltageMin?: number | null;
-            BrickVoltageMin?: number | null;
-            NumModuleTempMax?: number | null;
-            ModuleTempMax?: number | null;
-            NumModuleTempMin?: number | null;
-            ModuleTempMin?: number | null;
-            RatedRange?: number | null;
-            Hvil?: 'HvilStatusUnknown' | 'HvilStatusFault' | 'HvilStatusOK' | null;
-            DCChargingEnergyIn?: number | null;
-            DCChargingPower?: number | null;
-            ACChargingEnergyIn?: number | null;
-            ACChargingPower?: number | null;
-            ChargeLimitSoc?: boolean | null;
-            FastChargerPresent?: boolean | null;
-            EstBatteryRange?: number | null;
-            IdealBatteryRange?: number | null;
-            BatteryLevel?: number | null;
-            TimeToFullCharge?: number | null;
-            ScheduledChargingStartTime?: number | null;
-            ScheduledChargingPending?: number | null;
-            ScheduledDepartureTime?: number | null;
-            PreconditioningEnabled?: boolean | null;
-            ScheduledChargingMode?: 'ScheduledChargingModeUnknown' | 'ScheduledChargingModeOff' | 'ScheduledChargingModeStartAt' | 'ScheduledChargingModeDepartBy' | null;
-            ChargeAmps?: number | null;
-            ChargeEnableRequest?: number | null;
-            ChargerPhases?: number | null;
-            ChargePortColdWeatherMode?: number | null;
-            ChargeCurrentRequest?: number | null;
-            ChargeCurrentRequestMax?: number | null;
-            BatteryHeaterOn?: boolean | null;
-            NotEnoughPowerToHeat?: number | null;
-            SuperchargerSessionTripPlanner?: boolean | null;
+            DestinationName?: string | null;
+            DetailedChargeState?: 'DetailedChargeStateUnknown' | 'DetailedChargeStateDisconnected' | 'DetailedChargeStateNoPower' | 'DetailedChargeStateStarting' | 'DetailedChargeStateCharging' | 'DetailedChargeStateComplete' | 'DetailedChargeStateStopped' | null;
+            DiAxleSpeedF?: number | null;
+            DiAxleSpeedR?: number | null;
+            DiAxleSpeedREL?: number | null;
+            DiAxleSpeedRER?: number | null;
+            DiHeatsinkTF?: number | null;
+            DiHeatsinkTR?: number | null;
+            DiHeatsinkTREL?: number | null;
+            DiHeatsinkTRER?: number | null;
+            DiInverterTF?: number | null;
+            DiInverterTR?: number | null;
+            DiInverterTREL?: number | null;
+            DiInverterTRER?: number | null;
+            DiMotorCurrentF?: number | null;
+            DiMotorCurrentR?: number | null;
+            DiMotorCurrentREL?: number | null;
+            DiMotorCurrentRER?: number | null;
+            DiSlaveTorqueCmd?: number | null;
+            DiStateF?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
+            DiStateR?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
+            DiStateREL?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
+            DiStateRER?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
+            DiStatorTempF?: number | null;
+            DiStatorTempR?: number | null;
+            DiStatorTempREL?: number | null;
+            DiStatorTempRER?: number | null;
+            DiTorqueActualF?: number | null;
+            DiTorqueActualR?: number | null;
+            DiTorqueActualREL?: number | null;
+            DiTorqueActualRER?: number | null;
+            DiTorquemotor?: number | null;
+            DiVBatF?: number | null;
+            DiVBatR?: number | null;
+            DiVBatREL?: number | null;
+            DiVBatRER?: number | null;
             DoorState?: {
                 DriverFront: boolean;
                 DriverRear: boolean;
@@ -14280,130 +14362,27 @@ export type GetSseByVin_Responses = {
                 TrunkFront: boolean;
                 TrunkRear: boolean;
             } | null;
-            Locked?: boolean | null;
-            FdWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
-            FpWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
-            RdWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
-            RpWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
-            VehicleName?: string | null;
-            SentryMode?: 'SentryModeStateUnknown' | 'SentryModeStateOff' | 'SentryModeStateIdle' | 'SentryModeStateArmed' | 'SentryModeStateAware' | 'SentryModeStatePanic' | 'SentryModeStateQuiet' | null;
-            SpeedLimitMode?: 'SpeedAssistLevelUnknown' | 'SpeedAssistLevelNone' | 'SpeedAssistLevelDisplay' | 'SpeedAssistLevelChime' | null;
-            CurrentLimitMph?: boolean | null;
-            Version?: string | null;
-            TpmsPressureFl?: number | null;
-            TpmsPressureFr?: number | null;
-            TpmsPressureRl?: number | null;
-            TpmsPressureRr?: number | null;
-            SemitruckTpmsPressureRe1L0?: number | null;
-            SemitruckTpmsPressureRe1L1?: number | null;
-            SemitruckTpmsPressureRe1R0?: number | null;
-            SemitruckTpmsPressureRe1R1?: number | null;
-            SemitruckTpmsPressureRe2L0?: number | null;
-            SemitruckTpmsPressureRe2L1?: number | null;
-            SemitruckTpmsPressureRe2R0?: number | null;
-            SemitruckTpmsPressureRe2R1?: number | null;
-            TpmsLastSeenPressureTimeFl?: number | null;
-            TpmsLastSeenPressureTimeFr?: number | null;
-            TpmsLastSeenPressureTimeRl?: number | null;
-            TpmsLastSeenPressureTimeRr?: number | null;
-            InsideTemp?: number | null;
-            OutsideTemp?: number | null;
-            SeatHeaterLeft?: number | null;
-            SeatHeaterRight?: number | null;
-            SeatHeaterRearLeft?: number | null;
-            SeatHeaterRearRight?: number | null;
-            SeatHeaterRearCenter?: number | null;
-            AutoSeatClimateLeft?: boolean | null;
-            AutoSeatClimateRight?: boolean | null;
+            DriveRail?: number | null;
             DriverSeatBelt?: 'BuckleStatusUnknown' | 'BuckleStatusUnlatched' | 'BuckleStatusLatched' | 'BuckleStatusFaulted' | null;
-            PassengerSeatBelt?: 'BuckleStatusUnknown' | 'BuckleStatusUnlatched' | 'BuckleStatusLatched' | 'BuckleStatusFaulted' | null;
             DriverSeatOccupied?: boolean | null;
-            SemitruckPassengerSeatFoldPosition?: 'SeatFoldPositionUnknown' | 'SeatFoldPositionSNA' | 'SeatFoldPositionFaulted' | 'SeatFoldPositionNotConfigured' | 'SeatFoldPositionFolded' | 'SeatFoldPositionUnfolded' | null;
-            LateralAcceleration?: number | null;
-            LongitudinalAcceleration?: number | null;
-            CruiseSetSpeed?: number | null;
-            LifetimeEnergyUsed?: number | null;
-            LifetimeEnergyUsedDrive?: number | null;
-            SemitruckTractorParkBrakeStatus?: 'TractorAirStatusUnknown' | 'TractorAirStatusNotAvailable' | 'TractorAirStatusError' | 'TractorAirStatusCharged' | 'TractorAirStatusBuildingPressureIntermediate' | 'TractorAirStatusExhaustingPressureIntermediate' | 'TractorAirStatusExhausted' | null;
-            SemitruckTrailerParkBrakeStatus?: 'TrailerAirStatusUnknown' | 'TrailerAirStatusSNA' | 'TrailerAirStatusInvalid' | 'TrailerAirStatusBobtailMode' | 'TrailerAirStatusCharged' | 'TrailerAirStatusBuildingPressureIntermediate' | 'TrailerAirStatusExhaustingPressureIntermediate' | 'TrailerAirStatusExhausted' | null;
-            BrakePedalPos?: number | null;
-            RouteLastUpdated?: number | null;
-            RouteLine?: number | null;
-            MilesToArrival?: number | null;
-            MinutesToArrival?: number | null;
-            OriginLocation?: {
-                latitude: number;
-                longitude: number;
-            } | null;
-            DestinationLocation?: {
-                latitude: number;
-                longitude: number;
-            } | null;
-            CarType?: 'CarTypeUnknown' | 'CarTypeModelS' | 'CarTypeModelX' | 'CarTypeModel3' | 'CarTypeModelY' | 'CarTypeSemiTruck' | 'CarTypeCybertruck' | null;
-            Trim?: string | null;
-            ExteriorColor?: string | null;
-            RoofColor?: string | null;
-            ChargePort?: 'ChargePortUnknown' | 'ChargePortUS' | 'ChargePortEU' | 'ChargePortGB' | 'ChargePortCCS' | null;
-            ChargePortLatch?: 'ChargePortLatchUnknown' | 'ChargePortLatchSNA' | 'ChargePortLatchDisengaged' | 'ChargePortLatchEngaged' | 'ChargePortLatchBlocking' | null;
-            GuestModeEnabled?: boolean | null;
-            PinToDriveEnabled?: boolean | null;
-            PairedPhoneKeyAndKeyFobQty?: number | null;
-            CruiseFollowDistance?: 'FollowDistanceUnknown' | 'FollowDistance1' | 'FollowDistance2' | 'FollowDistance3' | 'FollowDistance4' | 'FollowDistance5' | 'FollowDistance6' | 'FollowDistance7' | null;
-            AutomaticBlindSpotCamera?: boolean | null;
-            BlindSpotCollisionWarningChime?: boolean | null;
-            SpeedLimitWarning?: boolean | null;
-            ForwardCollisionWarning?: 'ForwardCollisionSensitivityUnknown' | 'ForwardCollisionSensitivityOff' | 'ForwardCollisionSensitivityLate' | 'ForwardCollisionSensitivityAverage' | 'ForwardCollisionSensitivityEarly' | null;
-            LaneDepartureAvoidance?: 'LaneAssistLevelUnknown' | 'LaneAssistLevelNone' | 'LaneAssistLevelWarning' | 'LaneAssistLevelAssist' | null;
-            EmergencyLaneDepartureAvoidance?: number | null;
-            AutomaticEmergencyBrakingOff?: boolean | null;
-            LifetimeEnergyGainedRegen?: number | null;
-            DiStateF?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
-            DiStateREL?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
-            DiStateRER?: 'DriveInverterStateUnknown' | 'DriveInverterStateUnavailable' | 'DriveInverterStateStandby' | 'DriveInverterStateFault' | 'DriveInverterStateAbort' | 'DriveInverterStateEnable' | null;
-            DiHeatsinkTF?: number | null;
-            DiHeatsinkTREL?: number | null;
-            DiHeatsinkTRER?: number | null;
-            DiAxleSpeedF?: number | null;
-            DiAxleSpeedREL?: number | null;
-            DiAxleSpeedRER?: number | null;
-            DiSlaveTorqueCmd?: number | null;
-            DiTorqueActualR?: number | null;
-            DiTorqueActualF?: number | null;
-            DiTorqueActualREL?: number | null;
-            DiTorqueActualRER?: number | null;
-            DiStatorTempF?: number | null;
-            DiStatorTempREL?: number | null;
-            DiStatorTempRER?: number | null;
-            DiVBatF?: number | null;
-            DiVBatREL?: number | null;
-            DiVBatRER?: number | null;
-            DiMotorCurrentF?: number | null;
-            DiMotorCurrentREL?: number | null;
-            DiMotorCurrentRER?: number | null;
-            EnergyRemaining?: number | null;
-            ServiceMode?: boolean | null;
-            BMSState?: 'BMSStateUnknown' | 'BMSStateStandby' | 'BMSStateDrive' | 'BMSStateSupport' | 'BMSStateCharge' | 'BMSStateFEIM' | 'BMSStateClearFault' | 'BMSStateFault' | 'BMSStateWeld' | 'BMSStateTest' | 'BMSStateSNA' | null;
-            GuestModeMobileAccessState?: 'GuestModeMobileAccessUnknown' | 'GuestModeMobileAccessInit' | 'GuestModeMobileAccessNotAuthenticated' | 'GuestModeMobileAccessAuthenticated' | 'GuestModeMobileAccessAbortedDriving' | 'GuestModeMobileAccessAbortedUsingRemoteStart' | 'GuestModeMobileAccessAbortedUsingBLEKeys' | 'GuestModeMobileAccessAbortedValetMode' | 'GuestModeMobileAccessAbortedGuestModeOff' | 'GuestModeMobileAccessAbortedDriveAuthTimeExceeded' | 'GuestModeMobileAccessAbortedNoDataReceived' | 'GuestModeMobileAccessRequestingFromMothership' | 'GuestModeMobileAccessRequestingFromAuthD' | 'GuestModeMobileAccessAbortedFetchFailed' | 'GuestModeMobileAccessAbortedBadDataReceived' | 'GuestModeMobileAccessShowingQRCode' | 'GuestModeMobileAccessSwipedAway' | 'GuestModeMobileAccessDismissedQRCodeExpired' | 'GuestModeMobileAccessSucceededPairedNewBLEKey' | null;
-            DestinationName?: string | null;
-            DiInverterTR?: number | null;
-            DiInverterTF?: number | null;
-            DiInverterTREL?: number | null;
-            DiInverterTRER?: number | null;
-            DetailedChargeState?: 'DetailedChargeStateUnknown' | 'DetailedChargeStateDisconnected' | 'DetailedChargeStateNoPower' | 'DetailedChargeStateStarting' | 'DetailedChargeStateCharging' | 'DetailedChargeStateComplete' | 'DetailedChargeStateStopped' | null;
-            CabinOverheatProtectionMode?: 'CabinOverheatProtectionModeStateUnknown' | 'CabinOverheatProtectionModeStateOff' | 'CabinOverheatProtectionModeStateOn' | 'CabinOverheatProtectionModeStateFanOnly' | null;
-            CabinOverheatProtectionTemperatureLimit?: 'ClimateOverheatProtectionTempLimitUnknown' | 'ClimateOverheatProtectionTempLimitHigh' | 'ClimateOverheatProtectionTempLimitMedium' | 'ClimateOverheatProtectionTempLimitLow' | null;
-            CenterDisplay?: 'DisplayStateUnknown' | 'DisplayStateOff' | 'DisplayStateDim' | 'DisplayStateAccessory' | 'DisplayStateOn' | 'DisplayStateDriving' | 'DisplayStateCharging' | 'DisplayStateLock' | 'DisplayStateSentry' | 'DisplayStateDog' | 'DisplayStateEntertainment' | null;
-            ChargePortDoorOpen?: number | null;
-            ChargerVoltage?: number | null;
-            ChargingCableType?: 'CableTypeUnknown' | 'CableTypeIEC' | 'CableTypeSAE' | 'CableTypeGB_AC' | 'CableTypeGB_DC' | 'CableTypeSNA' | null;
-            ClimateKeeperMode?: 'ClimateKeeperModeStateUnknown' | 'ClimateKeeperModeStateOff' | 'ClimateKeeperModeStateOn' | 'ClimateKeeperModeStateDog' | 'ClimateKeeperModeStateParty' | null;
-            DefrostForPreconditioning?: number | null;
-            DefrostMode?: 'DefrostModeStateUnknown' | 'DefrostModeStateOff' | 'DefrostModeStateNormal' | 'DefrostModeStateMax' | 'DefrostModeStateAutoDefog' | null;
             EfficiencyPackage?: number | null;
+            EmergencyLaneDepartureAvoidance?: number | null;
+            EnergyRemaining?: number | null;
+            EstBatteryRange?: number | null;
             EstimatedHoursToChargeTermination?: number | null;
             EuropeVehicle?: number | null;
             ExpectedEnergyPercentAtTripArrival?: number | null;
+            ExteriorColor?: string | null;
+            FastChargerPresent?: boolean | null;
             FastChargerType?: 'FastChargerUnknown' | 'FastChargerSupercharger' | 'FastChargerCHAdeMO' | 'FastChargerGB' | 'FastChargerACSingleWireCAN' | 'FastChargerCombo' | 'FastChargerMCSingleWireCAN' | 'FastChargerOther' | 'FastChargerSNA' | null;
+            FdWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
+            ForwardCollisionWarning?: 'ForwardCollisionSensitivityUnknown' | 'ForwardCollisionSensitivityOff' | 'ForwardCollisionSensitivityLate' | 'ForwardCollisionSensitivityAverage' | 'ForwardCollisionSensitivityEarly' | null;
+            FpWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
+            Gear?: 'ShiftStateUnknown' | 'ShiftStateInvalid' | 'ShiftStateP' | 'ShiftStateR' | 'ShiftStateN' | 'ShiftStateD' | 'ShiftStateSNA' | null;
+            GpsHeading?: number | null;
+            GpsState?: number | null;
+            GuestModeEnabled?: boolean | null;
+            GuestModeMobileAccessState?: 'GuestModeMobileAccessUnknown' | 'GuestModeMobileAccessInit' | 'GuestModeMobileAccessNotAuthenticated' | 'GuestModeMobileAccessAuthenticated' | 'GuestModeMobileAccessAbortedDriving' | 'GuestModeMobileAccessAbortedUsingRemoteStart' | 'GuestModeMobileAccessAbortedUsingBLEKeys' | 'GuestModeMobileAccessAbortedValetMode' | 'GuestModeMobileAccessAbortedGuestModeOff' | 'GuestModeMobileAccessAbortedDriveAuthTimeExceeded' | 'GuestModeMobileAccessAbortedNoDataReceived' | 'GuestModeMobileAccessRequestingFromMothership' | 'GuestModeMobileAccessRequestingFromAuthD' | 'GuestModeMobileAccessAbortedFetchFailed' | 'GuestModeMobileAccessAbortedBadDataReceived' | 'GuestModeMobileAccessShowingQRCode' | 'GuestModeMobileAccessSwipedAway' | 'GuestModeMobileAccessDismissedQRCodeExpired' | 'GuestModeMobileAccessSucceededPairedNewBLEKey' | null;
             HomelinkDeviceCount?: number | null;
             HomelinkNearby?: boolean | null;
             HvacACEnabled?: boolean | null;
@@ -14415,22 +14394,117 @@ export type GetSseByVin_Responses = {
             HvacRightTemperatureRequest?: number | null;
             HvacSteeringWheelHeatAuto?: number | null;
             HvacSteeringWheelHeatLevel?: number | null;
+            Hvil?: 'HvilStatusUnknown' | 'HvilStatusFault' | 'HvilStatusOK' | null;
+            IdealBatteryRange?: number | null;
+            InsideTemp?: number | null;
+            IsolationResistance?: number | null;
+            LaneDepartureAvoidance?: 'LaneAssistLevelUnknown' | 'LaneAssistLevelNone' | 'LaneAssistLevelWarning' | 'LaneAssistLevelAssist' | null;
+            LateralAcceleration?: number | null;
+            LifetimeEnergyGainedRegen?: number | null;
+            LifetimeEnergyUsed?: number | null;
+            LifetimeEnergyUsedDrive?: number | null;
+            LightsHazardsActive?: boolean | null;
+            LightsHighBeams?: boolean | null;
+            LightsTurnSignal?: 'TurnSignalStateUnknown' | 'TurnSignalStateOff' | 'TurnSignalStateLeft' | 'TurnSignalStateRight' | 'TurnSignalStateBoth' | null;
+            LocatedAtFavorite?: number | null;
+            LocatedAtHome?: number | null;
+            LocatedAtWork?: number | null;
+            Location?: {
+                latitude: number;
+                longitude: number;
+            } | null;
+            Locked?: boolean | null;
+            LongitudinalAcceleration?: number | null;
+            MediaAudioVolume?: number | null;
+            MediaAudioVolumeIncrement?: number | null;
+            MediaAudioVolumeMax?: number | null;
+            MediaNowPlayingAlbum?: string | null;
+            MediaNowPlayingArtist?: string | null;
+            MediaNowPlayingDuration?: number | null;
+            MediaNowPlayingElapsed?: number | null;
+            MediaNowPlayingStation?: string | null;
+            MediaNowPlayingTitle?: string | null;
+            MediaPlaybackSource?: string | null;
+            MediaPlaybackStatus?: 'MediaStatusUnknown' | 'MediaStatusStopped' | 'MediaStatusPlaying' | 'MediaStatusPaused' | null;
+            MilesToArrival?: number | null;
+            MinutesToArrival?: number | null;
+            ModuleTempMax?: number | null;
+            ModuleTempMin?: number | null;
+            NotEnoughPowerToHeat?: number | null;
+            NumBrickVoltageMax?: number | null;
+            NumBrickVoltageMin?: number | null;
+            NumModuleTempMax?: number | null;
+            NumModuleTempMin?: number | null;
+            Odometer?: number | null;
             OffroadLightbarPresent?: boolean | null;
+            OriginLocation?: {
+                latitude: number;
+                longitude: number;
+            } | null;
+            OutsideTemp?: number | null;
+            PackCurrent?: number | null;
+            PackVoltage?: number | null;
+            PairedPhoneKeyAndKeyFobQty?: number | null;
+            PassengerSeatBelt?: 'BuckleStatusUnknown' | 'BuckleStatusUnlatched' | 'BuckleStatusLatched' | 'BuckleStatusFaulted' | null;
+            PedalPosition?: number | null;
+            PinToDriveEnabled?: boolean | null;
             PowershareHoursLeft?: number | null;
             PowershareInstantaneousPowerKW?: number | null;
             PowershareStatus?: 'PowershareStateUnknown' | 'PowershareStateInactive' | 'PowershareStateHandshaking' | 'PowershareStateInit' | 'PowershareStateEnabled' | 'PowershareStateEnabledReconnectingSoon' | 'PowershareStateStopped' | null;
             PowershareStopReason?: 'PowershareStopReasonStatusUnknown' | 'PowershareStopReasonStatusNone' | 'PowershareStopReasonStatusSOCTooLow' | 'PowershareStopReasonStatusRetry' | 'PowershareStopReasonStatusFault' | 'PowershareStopReasonStatusUser' | 'PowershareStopReasonStatusReconnecting' | 'PowershareStopReasonStatusAuthentication' | null;
             PowershareType?: 'PowershareTypeStatusUnknown' | 'PowershareTypeStatusNone' | 'PowershareTypeStatusLoad' | 'PowershareTypeStatusHome' | null;
+            PreconditioningEnabled?: boolean | null;
+            RatedRange?: number | null;
+            RdWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
+            RearDefrostEnabled?: boolean | null;
             RearDisplayHvacEnabled?: boolean | null;
             RearSeatHeaters?: number | null;
             RemoteStartEnabled?: boolean | null;
             RightHandDrive?: boolean | null;
+            RoofColor?: string | null;
+            RouteLastUpdated?: number | null;
+            RouteLine?: number | null;
             RouteTrafficMinutesDelay?: number | null;
+            RpWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
+            ScheduledChargingMode?: 'ScheduledChargingModeUnknown' | 'ScheduledChargingModeOff' | 'ScheduledChargingModeStartAt' | 'ScheduledChargingModeDepartBy' | null;
+            ScheduledChargingPending?: number | null;
+            ScheduledChargingStartTime?: number | null;
+            ScheduledDepartureTime?: number | null;
+            SeatHeaterLeft?: number | null;
+            SeatHeaterRearCenter?: number | null;
+            SeatHeaterRearLeft?: number | null;
+            SeatHeaterRearRight?: number | null;
+            SeatHeaterRight?: number | null;
+            SeatVentEnabled?: boolean | null;
+            SemitruckPassengerSeatFoldPosition?: 'SeatFoldPositionUnknown' | 'SeatFoldPositionSNA' | 'SeatFoldPositionFaulted' | 'SeatFoldPositionNotConfigured' | 'SeatFoldPositionFolded' | 'SeatFoldPositionUnfolded' | null;
+            SemitruckTpmsPressureRe1L0?: number | null;
+            SemitruckTpmsPressureRe1L1?: number | null;
+            SemitruckTpmsPressureRe1R0?: number | null;
+            SemitruckTpmsPressureRe1R1?: number | null;
+            SemitruckTpmsPressureRe2L0?: number | null;
+            SemitruckTpmsPressureRe2L1?: number | null;
+            SemitruckTpmsPressureRe2R0?: number | null;
+            SemitruckTpmsPressureRe2R1?: number | null;
+            SemitruckTractorParkBrakeStatus?: 'TractorAirStatusUnknown' | 'TractorAirStatusNotAvailable' | 'TractorAirStatusError' | 'TractorAirStatusCharged' | 'TractorAirStatusBuildingPressureIntermediate' | 'TractorAirStatusExhaustingPressureIntermediate' | 'TractorAirStatusExhausted' | null;
+            SemitruckTrailerParkBrakeStatus?: 'TrailerAirStatusUnknown' | 'TrailerAirStatusSNA' | 'TrailerAirStatusInvalid' | 'TrailerAirStatusBobtailMode' | 'TrailerAirStatusCharged' | 'TrailerAirStatusBuildingPressureIntermediate' | 'TrailerAirStatusExhaustingPressureIntermediate' | 'TrailerAirStatusExhausted' | null;
+            SentryMode?: 'SentryModeStateUnknown' | 'SentryModeStateOff' | 'SentryModeStateIdle' | 'SentryModeStateArmed' | 'SentryModeStateAware' | 'SentryModeStatePanic' | 'SentryModeStateQuiet' | null;
+            ServiceMode?: boolean | null;
+            Setting24HourTime?: boolean | null;
+            SettingChargeUnit?: 'ChargeUnitUnknown' | 'ChargeUnitDistance' | 'ChargeUnitPercent' | null;
+            SettingDistanceUnit?: 'DistanceUnitUnknown' | 'DistanceUnitMiles' | 'DistanceUnitKilometers' | null;
+            SettingTemperatureUnit?: 'TemperatureUnitUnknown' | 'TemperatureUnitFahrenheit' | 'TemperatureUnitCelsius' | null;
+            SettingTirePressureUnit?: 'PressureUnitUnknown' | 'PressureUnitPsi' | 'PressureUnitBar' | null;
+            Soc?: number | null;
             SoftwareUpdateDownloadPercentComplete?: number | null;
             SoftwareUpdateExpectedDurationMinutes?: number | null;
             SoftwareUpdateInstallationPercentComplete?: number | null;
             SoftwareUpdateScheduledStartTime?: number | null;
             SoftwareUpdateVersion?: string | null;
+            SpeedLimitMode?: 'SpeedAssistLevelUnknown' | 'SpeedAssistLevelNone' | 'SpeedAssistLevelDisplay' | 'SpeedAssistLevelChime' | null;
+            SpeedLimitWarning?: boolean | null;
+            SunroofInstalled?: 'SunroofInstalledStateUnknown' | 'SunroofInstalledStateNotInstalled' | 'SunroofInstalledStateGen1Installed' | 'SunroofInstalledStateGen2Installed' | null;
+            SuperchargerSessionTripPlanner?: boolean | null;
+            TimeToFullCharge?: number | null;
             TonneauOpenPercent?: number | null;
             TonneauPosition?: 'TonneauPositionStateUnknown' | 'TonneauPositionStateInvalid' | 'TonneauPositionStateClosed' | 'TonneauPositionStatePartiallyOpen' | 'TonneauPositionStateFullyOpen' | null;
             TonneauTentMode?: 'TonneauTentModeStateUnknown' | 'TonneauTentModeStateInactive' | 'TonneauTentModeStateMoving' | 'TonneauTentModeStateFailed' | 'TonneauTentModeStateActive' | null;
@@ -14446,6 +14520,14 @@ export type GetSseByVin_Responses = {
                 semi_rear_axle_left_2: boolean;
                 semi_rear_axle_right_2: boolean;
             } | null;
+            TpmsLastSeenPressureTimeFl?: number | null;
+            TpmsLastSeenPressureTimeFr?: number | null;
+            TpmsLastSeenPressureTimeRl?: number | null;
+            TpmsLastSeenPressureTimeRr?: number | null;
+            TpmsPressureFl?: number | null;
+            TpmsPressureFr?: number | null;
+            TpmsPressureRl?: number | null;
+            TpmsPressureRr?: number | null;
             TpmsSoftWarnings?: {
                 front_left: boolean;
                 front_right: boolean;
@@ -14458,37 +14540,13 @@ export type GetSseByVin_Responses = {
                 semi_rear_axle_left_2: boolean;
                 semi_rear_axle_right_2: boolean;
             } | null;
+            Trim?: string | null;
             ValetModeEnabled?: boolean | null;
+            VehicleName?: string | null;
+            VehicleSpeed?: number | null;
+            Version?: string | null;
             WheelType?: string | null;
             WiperHeatEnabled?: boolean | null;
-            LocatedAtHome?: number | null;
-            LocatedAtWork?: number | null;
-            LocatedAtFavorite?: number | null;
-            SettingDistanceUnit?: 'DistanceUnitUnknown' | 'DistanceUnitMiles' | 'DistanceUnitKilometers' | null;
-            SettingTemperatureUnit?: 'TemperatureUnitUnknown' | 'TemperatureUnitFahrenheit' | 'TemperatureUnitCelsius' | null;
-            Setting24HourTime?: boolean | null;
-            SettingTirePressureUnit?: 'PressureUnitUnknown' | 'PressureUnitPsi' | 'PressureUnitBar' | null;
-            SettingChargeUnit?: 'ChargeUnitUnknown' | 'ChargeUnitDistance' | 'ChargeUnitPercent' | null;
-            ClimateSeatCoolingFrontLeft?: number | null;
-            ClimateSeatCoolingFrontRight?: number | null;
-            LightsHazardsActive?: boolean | null;
-            LightsTurnSignal?: 'TurnSignalStateUnknown' | 'TurnSignalStateOff' | 'TurnSignalStateLeft' | 'TurnSignalStateRight' | 'TurnSignalStateBoth' | null;
-            LightsHighBeams?: boolean | null;
-            MediaPlaybackStatus?: 'MediaStatusUnknown' | 'MediaStatusStopped' | 'MediaStatusPlaying' | 'MediaStatusPaused' | null;
-            MediaPlaybackSource?: string | null;
-            MediaAudioVolume?: number | null;
-            MediaNowPlayingDuration?: number | null;
-            MediaNowPlayingElapsed?: number | null;
-            MediaNowPlayingArtist?: string | null;
-            MediaNowPlayingTitle?: string | null;
-            MediaNowPlayingAlbum?: string | null;
-            MediaNowPlayingStation?: string | null;
-            MediaAudioVolumeIncrement?: number | null;
-            MediaAudioVolumeMax?: number | null;
-            SunroofInstalled?: 'SunroofInstalledStateUnknown' | 'SunroofInstalledStateNotInstalled' | 'SunroofInstalledStateGen1Installed' | 'SunroofInstalledStateGen2Installed' | null;
-            SeatVentEnabled?: boolean | null;
-            RearDefrostEnabled?: boolean | null;
-            ChargeRateMilePerHour?: number | null;
         };
     } | {
         createdAt: string;
@@ -14548,457 +14606,12 @@ export type GetSseByVin_Responses = {
         isCache?: boolean;
         config: {
             fields: {
-                DriveRail?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargeState?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                BmsFullchargecomplete?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                VehicleSpeed?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                Odometer?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                PackVoltage?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                PackCurrent?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                Soc?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DCDCEnable?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                Gear?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                IsolationResistance?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                PedalPosition?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                BrakePedal?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiStateR?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiHeatsinkTR?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiAxleSpeedR?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiTorquemotor?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiStatorTempR?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiVBatR?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiMotorCurrentR?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                Location?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                GpsState?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                GpsHeading?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                NumBrickVoltageMax?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                BrickVoltageMax?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                NumBrickVoltageMin?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                BrickVoltageMin?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                NumModuleTempMax?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ModuleTempMax?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                NumModuleTempMin?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ModuleTempMin?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                RatedRange?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                Hvil?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DCChargingEnergyIn?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DCChargingPower?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
                 ACChargingEnergyIn?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
                 ACChargingPower?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargeLimitSoc?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                FastChargerPresent?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                EstBatteryRange?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                IdealBatteryRange?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                BatteryLevel?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                TimeToFullCharge?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ScheduledChargingStartTime?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ScheduledChargingPending?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ScheduledDepartureTime?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                PreconditioningEnabled?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ScheduledChargingMode?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargeAmps?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargeEnableRequest?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargerPhases?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargePortColdWeatherMode?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargeCurrentRequest?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargeCurrentRequestMax?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                BatteryHeaterOn?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                NotEnoughPowerToHeat?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SuperchargerSessionTripPlanner?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DoorState?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                Locked?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                FdWindow?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                FpWindow?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                RdWindow?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                RpWindow?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                VehicleName?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SentryMode?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SpeedLimitMode?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                CurrentLimitMph?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                Version?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                TpmsPressureFl?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                TpmsPressureFr?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                TpmsPressureRl?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                TpmsPressureRr?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTpmsPressureRe1L0?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTpmsPressureRe1L1?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTpmsPressureRe1R0?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTpmsPressureRe1R1?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTpmsPressureRe2L0?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTpmsPressureRe2L1?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTpmsPressureRe2R0?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTpmsPressureRe2R1?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                TpmsLastSeenPressureTimeFl?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                TpmsLastSeenPressureTimeFr?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                TpmsLastSeenPressureTimeRl?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                TpmsLastSeenPressureTimeRr?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                InsideTemp?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                OutsideTemp?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SeatHeaterLeft?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SeatHeaterRight?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SeatHeaterRearLeft?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SeatHeaterRearRight?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SeatHeaterRearCenter?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15013,172 +14626,7 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
-                DriverSeatBelt?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                PassengerSeatBelt?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DriverSeatOccupied?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckPassengerSeatFoldPosition?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LateralAcceleration?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LongitudinalAcceleration?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                CruiseSetSpeed?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LifetimeEnergyUsed?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LifetimeEnergyUsedDrive?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTractorParkBrakeStatus?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SemitruckTrailerParkBrakeStatus?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                BrakePedalPos?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                RouteLastUpdated?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                RouteLine?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MilesToArrival?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MinutesToArrival?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                OriginLocation?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DestinationLocation?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                CarType?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                Trim?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ExteriorColor?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                RoofColor?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargePort?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargePortLatch?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                GuestModeEnabled?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                PinToDriveEnabled?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                PairedPhoneKeyAndKeyFobQty?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                CruiseFollowDistance?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
                 AutomaticBlindSpotCamera?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                BlindSpotCollisionWarningChime?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SpeedLimitWarning?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ForwardCollisionWarning?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LaneDepartureAvoidance?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                EmergencyLaneDepartureAvoidance?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15188,172 +14636,47 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
-                LifetimeEnergyGainedRegen?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiStateF?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiStateREL?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiStateRER?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiHeatsinkTF?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiHeatsinkTREL?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiHeatsinkTRER?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiAxleSpeedF?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiAxleSpeedREL?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiAxleSpeedRER?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiSlaveTorqueCmd?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiTorqueActualR?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiTorqueActualF?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiTorqueActualREL?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiTorqueActualRER?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiStatorTempF?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiStatorTempREL?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiStatorTempRER?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiVBatF?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiVBatREL?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiVBatRER?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiMotorCurrentF?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiMotorCurrentREL?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                DiMotorCurrentRER?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                EnergyRemaining?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ServiceMode?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
                 BMSState?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
-                GuestModeMobileAccessState?: {
+                BatteryHeaterOn?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
-                DestinationName?: {
+                BatteryLevel?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
-                DiInverterTR?: {
+                BlindSpotCollisionWarningChime?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
-                DiInverterTF?: {
+                BmsFullchargecomplete?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
-                DiInverterTREL?: {
+                BrakePedal?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
-                DiInverterTRER?: {
+                BrakePedalPos?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
-                DetailedChargeState?: {
+                BrickVoltageMax?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                BrickVoltageMin?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15368,12 +14691,72 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                CarType?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 CenterDisplay?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                ChargeAmps?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargeCurrentRequest?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargeCurrentRequestMax?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargeEnableRequest?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargeLimitSoc?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargePort?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargePortColdWeatherMode?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 ChargePortDoorOpen?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargePortLatch?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargeRateMilePerHour?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargeState?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ChargerPhases?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15393,6 +14776,46 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                ClimateSeatCoolingFrontLeft?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ClimateSeatCoolingFrontRight?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                CruiseFollowDistance?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                CruiseSetSpeed?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                CurrentLimitMph?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DCChargingEnergyIn?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DCChargingPower?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DCDCEnable?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 DefrostForPreconditioning?: {
                     interval_seconds: number;
                     minimum_delta?: number;
@@ -15403,7 +14826,227 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                DestinationLocation?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DestinationName?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DetailedChargeState?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiAxleSpeedF?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiAxleSpeedR?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiAxleSpeedREL?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiAxleSpeedRER?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiHeatsinkTF?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiHeatsinkTR?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiHeatsinkTREL?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiHeatsinkTRER?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiInverterTF?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiInverterTR?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiInverterTREL?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiInverterTRER?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiMotorCurrentF?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiMotorCurrentR?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiMotorCurrentREL?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiMotorCurrentRER?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiSlaveTorqueCmd?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiStateF?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiStateR?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiStateREL?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiStateRER?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiStatorTempF?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiStatorTempR?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiStatorTempREL?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiStatorTempRER?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiTorqueActualF?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiTorqueActualR?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiTorqueActualREL?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiTorqueActualRER?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiTorquemotor?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiVBatF?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiVBatR?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiVBatREL?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DiVBatRER?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DoorState?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DriveRail?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DriverSeatBelt?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                DriverSeatOccupied?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 EfficiencyPackage?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                EmergencyLaneDepartureAvoidance?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                EnergyRemaining?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                EstBatteryRange?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15423,7 +15066,57 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                ExteriorColor?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                FastChargerPresent?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 FastChargerType?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                FdWindow?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ForwardCollisionWarning?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                FpWindow?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                Gear?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                GpsHeading?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                GpsState?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                GuestModeEnabled?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                GuestModeMobileAccessState?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15483,7 +15176,242 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                Hvil?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                IdealBatteryRange?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                InsideTemp?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                IsolationResistance?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LaneDepartureAvoidance?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LateralAcceleration?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LifetimeEnergyGainedRegen?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LifetimeEnergyUsed?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LifetimeEnergyUsedDrive?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LightsHazardsActive?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LightsHighBeams?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LightsTurnSignal?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LocatedAtFavorite?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LocatedAtHome?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LocatedAtWork?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                Location?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                Locked?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                LongitudinalAcceleration?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaAudioVolume?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaAudioVolumeIncrement?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaAudioVolumeMax?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaNowPlayingAlbum?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaNowPlayingArtist?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaNowPlayingDuration?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaNowPlayingElapsed?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaNowPlayingStation?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaNowPlayingTitle?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaPlaybackSource?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MediaPlaybackStatus?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MilesToArrival?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                MinutesToArrival?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ModuleTempMax?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ModuleTempMin?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                NotEnoughPowerToHeat?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                NumBrickVoltageMax?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                NumBrickVoltageMin?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                NumModuleTempMax?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                NumModuleTempMin?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                Odometer?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 OffroadLightbarPresent?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                OriginLocation?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                OutsideTemp?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                PackCurrent?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                PackVoltage?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                PairedPhoneKeyAndKeyFobQty?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                PassengerSeatBelt?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                PedalPosition?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                PinToDriveEnabled?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15513,6 +15441,26 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                PreconditioningEnabled?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                RatedRange?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                RdWindow?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                RearDefrostEnabled?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 RearDisplayHvacEnabled?: {
                     interval_seconds: number;
                     minimum_delta?: number;
@@ -15533,7 +15481,172 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                RoofColor?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                RouteLastUpdated?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                RouteLine?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 RouteTrafficMinutesDelay?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                RpWindow?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ScheduledChargingMode?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ScheduledChargingPending?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ScheduledChargingStartTime?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ScheduledDepartureTime?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SeatHeaterLeft?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SeatHeaterRearCenter?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SeatHeaterRearLeft?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SeatHeaterRearRight?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SeatHeaterRight?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SeatVentEnabled?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckPassengerSeatFoldPosition?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTpmsPressureRe1L0?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTpmsPressureRe1L1?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTpmsPressureRe1R0?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTpmsPressureRe1R1?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTpmsPressureRe2L0?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTpmsPressureRe2L1?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTpmsPressureRe2R0?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTpmsPressureRe2R1?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTractorParkBrakeStatus?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SemitruckTrailerParkBrakeStatus?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SentryMode?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                ServiceMode?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                Setting24HourTime?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SettingChargeUnit?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SettingDistanceUnit?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SettingTemperatureUnit?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SettingTirePressureUnit?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                Soc?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15563,6 +15676,31 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                SpeedLimitMode?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SpeedLimitWarning?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SunroofInstalled?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SuperchargerSessionTripPlanner?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                TimeToFullCharge?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 TonneauOpenPercent?: {
                     interval_seconds: number;
                     minimum_delta?: number;
@@ -15583,12 +15721,72 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                TpmsLastSeenPressureTimeFl?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                TpmsLastSeenPressureTimeFr?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                TpmsLastSeenPressureTimeRl?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                TpmsLastSeenPressureTimeRr?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                TpmsPressureFl?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                TpmsPressureFr?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                TpmsPressureRl?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                TpmsPressureRr?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 TpmsSoftWarnings?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                Trim?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 ValetModeEnabled?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                VehicleName?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                VehicleSpeed?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                Version?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15599,146 +15797,6 @@ export type GetSseByVin_Responses = {
                     resend_interval_seconds?: number;
                 };
                 WiperHeatEnabled?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LocatedAtHome?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LocatedAtWork?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LocatedAtFavorite?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SettingDistanceUnit?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SettingTemperatureUnit?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                Setting24HourTime?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SettingTirePressureUnit?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SettingChargeUnit?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ClimateSeatCoolingFrontLeft?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ClimateSeatCoolingFrontRight?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LightsHazardsActive?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LightsTurnSignal?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                LightsHighBeams?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaPlaybackStatus?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaPlaybackSource?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaAudioVolume?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaNowPlayingDuration?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaNowPlayingElapsed?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaNowPlayingArtist?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaNowPlayingTitle?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaNowPlayingAlbum?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaNowPlayingStation?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaAudioVolumeIncrement?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                MediaAudioVolumeMax?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SunroofInstalled?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                SeatVentEnabled?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                RearDefrostEnabled?: {
-                    interval_seconds: number;
-                    minimum_delta?: number;
-                    resend_interval_seconds?: number;
-                };
-                ChargeRateMilePerHour?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;

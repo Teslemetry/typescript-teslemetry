@@ -5,6 +5,7 @@ import {
   postApi1VehiclesFleetStatus,
   getApi1Vehicles,
   postApi1VehiclesInvitationsRedeem,
+  getFieldsJson,
 } from "./client/index.js";
 import { Teslemetry } from "./Teslemetry.js";
 import { TeslemetryChargingApi } from "./TeslemetryChargingApi.js";
@@ -63,6 +64,11 @@ export class TeslemetryApi {
       }
     });
     return { vehicles: this._vehicles, energySites: this._energySites };
+  }
+
+  public async fields() {
+    const { data } = await getFieldsJson({ client: this.root.client });
+    return data;
   }
 
   /**
