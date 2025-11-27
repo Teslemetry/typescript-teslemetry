@@ -2,9 +2,10 @@
   "name": "@teslemetry/node-red-contrib-teslemetry",
   "version": "1.0.0",
   "description": "Node-RED integration for Teslemetry",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && mkdir -p dist/nodes && cp src/nodes/*.html dist/nodes/",
     "tsc": "tsc"
   },
   "keywords": [
@@ -12,9 +13,19 @@
     "tesla",
     "teslemetry"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name": "Teslemetry",
+    "email": "hello@teslemetry.com",
+    "url": "https://teslemetry.com"
+  },
+  "license": "Apache-2.0",
   "dependencies": {
     "@teslemetry/api": "workspace:*"
+  },
+  "node-red": {
+    "nodes": {
+      "teslemetry-config": "dist/nodes/teslemetry-config.js",
+      "teslemetry-vehicle": "dist/nodes/teslemetry-vehicle.js"
+    }
   }
 }
