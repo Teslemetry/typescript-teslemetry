@@ -1,0 +1,70 @@
+# Teslemetry API Client for LLMs
+
+This file provides context for Large Language Models (LLMs) to understand and generate code using the `@teslemetry/api` package.
+
+## Package Overview
+- **Package:** `@teslemetry/api`
+- **Purpose:** Client for the Teslemetry API (Tesla proxy).
+- **Capabilities:** Vehicle control, state retrieval, energy site management, and real-time streaming (SSE).
+
+## Core Classes
+
+### `Teslemetry`
+The main entry point.
+- **Constructor:** `new Teslemetry(accessToken: string, region?: "na" | "eu")`
+- **Methods:**
+  - `getVehicle(vin: string)`: Returns `{ api: TeslemetryVehicleApi, sse: TeslemetryVehicleStream }`.
+  - `vehicle(vin: string)`: Returns `TeslemetryVehicleApi`.
+  - `energySite(siteId: number)`: Returns `TeslemetryEnergyApi`.
+  - `user`: Access `TeslemetryUserApi` (singleton).
+  - `charging`: Access `TeslemetryChargingApi` (singleton).
+  - `getRegion()`: Promis to resolve "na" or "eu".
+
+### `TeslemetryVehicleApi`
+Handles REST API calls for a specific vehicle.
+- **Usage:** `teslemetry.vehicle(vin)` or `teslemetry.getVehicle(vin).api`
+- **Key Methods:**
+  - `state()`: Get vehicle state.
+  - `vehicleData()`: Get comprehensive vehicle data.
+  - `flashLights()`, `honkHorn()`: Basic commands.
+  - `doorLock()`, `doorUnlock()`: Security commands.
+  - `autoConditioningStart()`, `autoConditioningStop()`: Climate control.
+  - `chargeStart()`, `chargeStop()`: Charging control.
+
+### `TeslemetryStream` & `TeslemetryVehicleStream`
+Handles Server-Sent Events (SSE) for real-time data.
+- **Usage:** `teslemetry.sse` (global) or `teslemetry.getVehicle(vin).sse` (vehicle-specific).
+- **Key Methods:**
+  - `connect()`: Start the SSE connection.
+  - `disconnect()`: Close the connection.
+  - `onSignal(signalName: string, callback)`: Subscribe to specific vehicle signals (e.g., "Speed", "PackCurrent").
+  - `onConnection(callback)`: Monitor connection state.
+
+## Code Examples
+
+### Basic Setup & Vehicle State
+```typescript
+import { Teslemetry } from "@teslemetry/api";
+
+const api = new Teslemetry(process.env.TOKEN);
+const vehicle = api.getVehicle("VIN123");
+
+// Get state
+const state = await vehicle.api.state();
+if (state.charge_state.charging_state === "Charging") {
+  console.log("Vehicle is charging");
+}
+```
+
+### Streaming Data
+```typescript
+const api = new Teslemetry(process.env.TOKEN);
+const vehicle = api.getVehicle("VIN123");
+
+// Listen for speed updates
+vehicle.sse.onSignal("Speed", (speed) => {
+  console.log(`Speed: ${speed}`);
+});
+
+await api.sse.connect();
+```
