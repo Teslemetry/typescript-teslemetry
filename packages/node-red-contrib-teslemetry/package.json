@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsdown src/nodes/*.ts --out-dir dist/nodes --format cjs --clean --bundle && cp src/nodes/*.html dist/nodes/",
-    "dev": "pnpm build && mkdir -p .node-red-home && cd .node-red-home && pnpm install .. && cd .. && node-red -u .node-red-home -p 1880",
+    "dev": "pnpm build && mkdir -p .node-red-home && cd .node-red-home && pnpm install .. && cd .. && node-red -u .node-red-home -s dev-settings.js -p 1880",
     "tsc": "tsc",
     "pack": "npm pack"
   },
@@ -27,7 +27,7 @@
   "node-red": {
     "nodes": {
       "teslemetry-config": "dist/nodes/teslemetry-config.cjs",
-      "command": "dist/nodes/command.cjs",
+      "teslemetry-vehicle-command": "dist/nodes/teslemetry-vehicle-command.cjs",
       "teslemetry-event": "dist/nodes/teslemetry-event.cjs",
       "teslemetry-signal": "dist/nodes/teslemetry-signal.cjs",
       "teslemetry-energy-command": "dist/nodes/teslemetry-energy-command.cjs"
