@@ -1,107 +1,115 @@
-import { Teslemetry } from '@teslemetry/api';
+import { Products, Teslemetry } from "@teslemetry/api";
 
 export interface TeslemetryConfigNodeDef {
-    id: string;
-    type: string;
-    name: string;
-    token: string;
+  id: string;
+  type: string;
+  name: string;
+  token: string;
 }
 
 export interface TeslemetryConfigNode {
-    id: string;
-    type: string;
-    name: string;
-    token: string;
+  id: string;
+  type: string;
+  name: string;
+  teslemetry: Teslemetry;
+  products: Products;
+  credentials: { token: string };
 }
 
 export default function (RED: any) {
-    function TeslemetryConfigNode(this: TeslemetryConfigNode, config: TeslemetryConfigNodeDef) {
-        RED.nodes.createNode(this, config);
-        this.token = config.token;
+  function TeslemetryConfigNode(
+    this: TeslemetryConfigNode,
+    config: TeslemetryConfigNodeDef,
+  ) {
+    RED.nodes.createNode(this, config);
+
+    if (this.credentials && this.credentials.token) {
+      this.teslemetry = new Teslemetry(this.credentials.token);
+      this.teslemetry
+        .createProducts()
+        .then((products) => (this.products = products));
     }
-    RED.nodes.registerType("teslemetry-config", TeslemetryConfigNode, {
-        credentials: {
-            token: { type: "password" }
-        }
+
+    this.on("close", (done: () => void) => {
+      if (this.teslemetry && this.teslemetry.sse) {
+        this.teslemetry.sse.disconnect();
+      }
+      done();
     });
+  }
+  RED.nodes.registerType("teslemetry-config", TeslemetryConfigNode, {
+    credentials: {
+      token: { type: "password" },
+    },
+  });
 
-    RED.httpAdmin.get('/teslemetry/vehicles', async (req: any, res: any) => {
-        const configNodeId = req.query.config;
-        
-        if (!configNodeId) {
-             res.status(400).send("Missing config node ID");
-             return;
-        }
+  RED.httpAdmin.get("/teslemetry/vehicles", async (req: any, res: any) => {
+    const configNodeId = req.query.config;
 
-        const configNode = RED.nodes.getNode(configNodeId) as TeslemetryConfigNode & { credentials: { token: string } };
+    if (!configNodeId) {
+      res.status(400).send("Missing config node ID");
+      return;
+    }
 
-        if (!configNode || !configNode.credentials || !configNode.credentials.token) {
-            res.status(400).send("Missing or invalid configuration");
-            return;
-        }
+    // Try to get the active node first
+    const configNode = RED.nodes.getNode(configNodeId) as TeslemetryConfigNode;
 
-        try {
-            const teslemetry = new Teslemetry(configNode.credentials.token);
-            const response = await teslemetry.api.vehicles();
-            // Handle both wrapped { response: [] } and direct array if API changes
-            // Based on user input, it seems to return { response: ... }
-            res.json(response.response || response);
-        } catch (err: any) {
-            res.status(500).send(err.message);
-        }
-    });
+    if (!configNode || !configNode.teslemetry) {
+      res.status(400).send("Missing config instance");
+      return;
+    }
 
-    RED.httpAdmin.get('/teslemetry/energy_sites', async (req: any, res: any) => {
-        const configNodeId = req.query.config;
-        
-        if (!configNodeId) {
-             res.status(400).send("Missing config node ID");
-             return;
-        }
+    const options = Object.entries(configNode.products.vehicles).map(
+      ([id, { name }]) => [id, name],
+    );
 
-        const configNode = RED.nodes.getNode(configNodeId) as TeslemetryConfigNode & { credentials: { token: string } };
+    res.json(options);
+  });
 
-        if (!configNode || !configNode.credentials || !configNode.credentials.token) {
-            res.status(400).send("Missing or invalid configuration");
-            return;
-        }
+  RED.httpAdmin.get("/teslemetry/energy_sites", async (req: any, res: any) => {
+    const configNodeId = req.query.config;
 
-        try {
-            const teslemetry = new Teslemetry(configNode.credentials.token);
-            const response = await teslemetry.api.products();
-            // Filter for energy sites
-            // API response structure for products is { response: [...], count: ... }
-            const products = response.response || [];
-            const sites = products.filter((p: any) => p.resource_type === "battery" || p.resource_type === "solar" || "energy_site_id" in p);
-            res.json(sites);
-        } catch (err: any) {
-            res.status(500).send(err.message);
-        }
-    });
+    if (!configNodeId) {
+      res.status(400).send("Missing config node ID");
+      return;
+    }
 
-    RED.httpAdmin.get('/teslemetry/fields', async (req: any, res: any) => {
-        const configNodeId = req.query.config;
-        
-        if (!configNodeId) {
-             res.status(400).send("Missing config node ID");
-             return;
-        }
+    // Try to get the active node first
+    const configNode = RED.nodes.getNode(configNodeId) as TeslemetryConfigNode;
 
-        const configNode = RED.nodes.getNode(configNodeId) as TeslemetryConfigNode & { credentials: { token: string } };
+    if (!configNode || !configNode.teslemetry) {
+      res.status(400).send("Missing config instance");
+      return;
+    }
 
-        if (!configNode || !configNode.credentials || !configNode.credentials.token) {
-            res.status(400).send("Missing or invalid configuration");
-            return;
-        }
+    const options = Object.entries(configNode.products.energySites).map(
+      ([id, { name }]) => [id, name],
+    );
 
-        try {
-            const teslemetry = new Teslemetry(configNode.credentials.token);
-            const data = await teslemetry.api.fields();
-            // The data object directly contains the field definitions as keys.
-            // We need to send only the keys (field names) to the client.
-            res.json(Object.keys(data)); 
-        } catch (err: any) {
-            res.status(500).send(err.message);
-        }
-    });
+    res.json(options);
+  });
+
+  RED.httpAdmin.get("/teslemetry/fields", async (req: any, res: any) => {
+    const { config, model } = req.query;
+
+    if (!config) {
+      res.status(400).send("Missing config node ID");
+      return;
+    }
+
+    const configNode = RED.nodes.getNode(config) as TeslemetryConfigNode;
+
+    if (!configNode || !configNode.teslemetry) {
+      res.status(400).send("Missing config instance");
+      return;
+    }
+
+    const fields = await configNode.teslemetry.api.fields();
+    const options = Object.entries(fields)
+      .filter(([_, { models }]) => {
+        return model && models ? models.includes(model) : true;
+      })
+      .map(([signal]) => signal);
+    res.json(options);
+  });
 }

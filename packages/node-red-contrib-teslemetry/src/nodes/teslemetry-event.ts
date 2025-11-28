@@ -1,64 +1,93 @@
-import { Teslemetry } from '@teslemetry/api';
-import { TeslemetryConfigNode } from './teslemetry-config';
+import { TeslemetryConfigNode } from "./teslemetry-config";
 
 export default function (RED: any) {
-    function TeslemetryEventNode(this: any, config: any) {
-        RED.nodes.createNode(this, config);
-        const node = this;
+  function TeslemetryEventNode(this: any, config: any) {
+    RED.nodes.createNode(this, config);
+    const node = this;
 
-        node.teslemetryConfig = config.teslemetryConfig;
-        node.vin = config.vin;
-        node.event = config.event || "all";
+    node.teslemetryConfig = config.teslemetryConfig;
+    node.vin = config.vin;
+    node.event = config.event || "all";
 
-        const teslemetryConfig = RED.nodes.getNode(node.teslemetryConfig) as TeslemetryConfigNode & { credentials: { token: string } };
+    const teslemetryConfig = RED.nodes.getNode(
+      node.teslemetryConfig,
+    ) as TeslemetryConfigNode;
 
-        if (teslemetryConfig) {
-            const token = teslemetryConfig.credentials?.token || teslemetryConfig.token;
-            const teslemetry = new Teslemetry(token);
+    if (teslemetryConfig && teslemetryConfig.teslemetry) {
+      const teslemetry = teslemetryConfig.teslemetry;
 
-            teslemetry.sse.connect();
+      // Ensure connection is active
+      teslemetry.sse.connect();
 
-            node.status({ fill: "yellow", shape: "ring", text: "connecting" });
+      node.status({ fill: "yellow", shape: "ring", text: "connecting" });
 
-            teslemetry.sse.onConnection((connected) => {
-                if (connected) {
-                    node.status({ fill: "green", shape: "dot", text: "connected" });
-                } else {
-                    node.status({ fill: "red", shape: "ring", text: "disconnected" });
-                }
-            });
+      const removeConnectionListener = teslemetry.sse.onConnection(
+        (connected) => {
+          if (connected) {
+            node.status({ fill: "green", shape: "dot", text: "connected" });
+          } else {
+            node.status({ fill: "red", shape: "ring", text: "disconnected" });
+          }
+        },
+      );
 
-            let cleanup: () => void;
+      // If already connected, update status
+      if (teslemetry.sse.connected) {
+        node.status({ fill: "green", shape: "dot", text: "connected" });
+      }
 
-            const callback = (event: any) => {
-                node.send({ payload: event, topic: node.event });
-            };
+      let cleanup: () => void;
 
-            // If VIN is provided, scope to vehicle. Otherwise generic.
-            const source = node.vin ? teslemetry.getVehicle(node.vin).sse : teslemetry.sse;
+      const callback = (event: any) => {
+        node.send({ payload: event, topic: node.event });
+      };
 
-            switch (node.event) {
-                case 'data': cleanup = source.onData(callback); break;
-                case 'state': cleanup = source.onState(callback); break;
-                case 'vehicle_data': cleanup = source.onVehicleData(callback); break;
-                case 'errors': cleanup = source.onErrors(callback); break;
-                case 'alerts': cleanup = source.onAlerts(callback); break;
-                case 'connectivity': cleanup = source.onConnectivity(callback); break;
-                case 'credits': cleanup = source.onCredits(callback); break;
-                case 'config': cleanup = source.onConfig(callback); break;
-                default: cleanup = source.on(callback); break;
-            }
+      // If VIN is provided, scope to vehicle. Otherwise generic.
+      const source = node.vin
+        ? teslemetry.sse.getVehicle(node.vin)
+        : teslemetry.sse;
 
-            node.on('close', function(done: any) {
-                if (cleanup) cleanup();
-                teslemetry.sse.disconnect();
-                done();
-            });
+      switch (node.event) {
+        case "data":
+          cleanup = source.onData(callback);
+          break;
+        case "state":
+          cleanup = source.onState(callback);
+          break;
+        case "vehicle_data":
+          cleanup = source.onVehicleData(callback);
+          break;
+        case "errors":
+          cleanup = source.onErrors(callback);
+          break;
+        case "alerts":
+          cleanup = source.onAlerts(callback);
+          break;
+        case "connectivity":
+          cleanup = source.onConnectivity(callback);
+          break;
+        case "credits":
+          cleanup = source.onCredits(callback);
+          break;
+        case "config":
+          cleanup = source.onConfig(callback);
+          break;
+        default:
+          cleanup = source.on(callback);
+          break;
+      }
 
-        } else {
-            node.status({ fill: "red", shape: "ring", text: "Config missing" });
-            node.error("No Teslemetry configuration found");
-        }
+      node.on("close", function (done: any) {
+        if (cleanup) cleanup();
+        if (removeConnectionListener) removeConnectionListener();
+        // Do NOT disconnect the main stream here, as other nodes might be using it.
+        // The config node handles the main stream lifecycle.
+        done();
+      });
+    } else {
+      node.status({ fill: "red", shape: "ring", text: "Config missing" });
+      node.error("No Teslemetry configuration found");
     }
-    RED.nodes.registerType("teslemetry-event", TeslemetryEventNode);
+  }
+  RED.nodes.registerType("teslemetry-event", TeslemetryEventNode);
 }

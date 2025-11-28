@@ -10,11 +10,10 @@ export default function (RED: any) {
         node.siteId = config.siteId;
         node.command = config.command;
 
-        const teslemetryConfig = RED.nodes.getNode(node.teslemetryConfig) as TeslemetryConfigNode & { credentials: { token: string } };
+        const teslemetryConfig = RED.nodes.getNode(node.teslemetryConfig) as TeslemetryConfigNode;
 
-        if (teslemetryConfig) {
-            const token = teslemetryConfig.credentials?.token || teslemetryConfig.token;
-            const teslemetry = new Teslemetry(token);
+        if (teslemetryConfig && teslemetryConfig.teslemetry) {
+            const teslemetry = teslemetryConfig.teslemetry;
 
             node.on('input', async function (msg: any, send: any, done: any) {
                 const siteId = node.siteId || msg.siteId;

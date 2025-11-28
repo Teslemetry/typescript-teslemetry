@@ -1,6 +1,7 @@
 <script type="text/javascript">
     RED.nodes.registerType("teslemetry-signal", {
         category: "Teslemetry Vehicle",
+        paletteLabel: "Signal",
         color: "#cc0000",
         defaults: {
             name: { value: "" },
@@ -32,21 +33,17 @@
                             const current = vinSelect.val() || node.vin;
                             vinSelect.empty();
                             if (data && data.length > 0) {
-                                data.forEach(function (v) {
+                                data.forEach(function ([id, name]) {
                                     vinSelect.append(
                                         '<option value="' +
-                                            v.vin +
+                                            id +
                                             '">' +
-                                            v.display_name +
+                                            name +
                                             " (" +
-                                            v.vin +
+                                            id +
                                             ")</option>",
                                     );
                                 });
-                            } else {
-                                vinSelect.append(
-                                    '<option value="">No vehicles found</option>',
-                                );
                             }
                             if (current) {
                                 vinSelect.val(current);
@@ -65,11 +62,14 @@
                         .done(function (data) {
                             const current = fieldSelect.val() || node.field;
                             fieldSelect.empty();
-                            fieldSelect.append('<option value="">From msg.field</option>');
                             if (data && data.length > 0) {
                                 data.forEach(function (f) {
                                     fieldSelect.append(
-                                        '<option value="' + f + '">' + f + '</option>',
+                                        '<option value="' +
+                                            f +
+                                            '">' +
+                                            f +
+                                            "</option>",
                                     );
                                 });
                             }
@@ -114,7 +114,7 @@
     <div class="form-row">
         <label for="node-input-field"><i class="fa fa-tag"></i> Field</label>
         <select id="node-input-field" style="width: 70%;">
-             <option value="">From msg.field</option>
+            <option value="">From msg.field</option>
         </select>
     </div>
 </script>

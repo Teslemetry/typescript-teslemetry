@@ -10,11 +10,10 @@ export default function (RED: any) {
         node.vin = config.vin;
         node.field = config.field;
 
-        const teslemetryConfig = RED.nodes.getNode(node.teslemetryConfig) as TeslemetryConfigNode & { credentials: { token: string } };
+        const teslemetryConfig = RED.nodes.getNode(node.teslemetryConfig) as TeslemetryConfigNode;
 
-        if (teslemetryConfig) {
-            const token = teslemetryConfig.credentials?.token || teslemetryConfig.token;
-            const teslemetry = new Teslemetry(token);
+        if (teslemetryConfig && teslemetryConfig.teslemetry) {
+            const teslemetry = teslemetryConfig.teslemetry;
 
             if (!node.vin) {
                 node.error("VIN is required for Signal node");
@@ -28,16 +27,21 @@ export default function (RED: any) {
                 return;
             }
 
+            // Ensure connection
             teslemetry.sse.connect();
             node.status({ fill: "yellow", shape: "ring", text: "connecting" });
 
-            teslemetry.sse.onConnection((connected) => {
+            const removeConnectionListener = teslemetry.sse.onConnection((connected) => {
                  if (connected) {
                     node.status({ fill: "green", shape: "dot", text: "connected" });
                 } else {
                     node.status({ fill: "red", shape: "ring", text: "disconnected" });
                 }
             });
+            
+             if (teslemetry.sse.connected) {
+                 node.status({ fill: "green", shape: "dot", text: "connected" });
+            }
 
             const vehicle = teslemetry.getVehicle(node.vin);
             
@@ -47,7 +51,7 @@ export default function (RED: any) {
 
             node.on('close', function(done: any) {
                 if (cleanup) cleanup();
-                teslemetry.sse.disconnect();
+                if (removeConnectionListener) removeConnectionListener();
                 done();
             });
 
