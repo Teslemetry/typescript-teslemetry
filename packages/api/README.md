@@ -1,18 +1,13 @@
-# Teslemetry TypeScript API
+# Teslemetry TypeScript SDK
 
 The official TypeScript/JavaScript client for the [Teslemetry](https://teslemetry.com) API.
 
-This library provides a convenient wrapper for interacting with Tesla vehicles and energy sites via the Teslemetry service, including support for standard API commands and real-time streaming data (Server-Sent Events).
+This library provides a strictly typed, easy-to-use wrapper for interacting with Tesla vehicles and energy sites. It supports standard API commands, state retrieval, and real-time streaming data via Server-Sent Events (SSE).
 
-Further information about each API method can be found in the [Teslemetry API Documentation](https://teslemetry.com/docs/api), and [Tesla Fleet API Documentation](https://developer.tesla.com/docs/fleet-api/endpoints/vehicle-commands).
+## 📚 Documentation
 
-## Features
-
-- 🚗 **Vehicle API**: Full control and state retrieval (lock/unlock, climate, charging, etc.).
-- ⚡ **Energy API**: Monitor and control Tesla Energy sites (Solar, Powerwall).
-- 📡 **Streaming (SSE)**: Real-time vehicle data streaming with `TeslemetryStream`.
-- 🌍 **Region Aware**: Automatic region detection and handling (NA/EU).
-- 🔒 **Type-Safe**: Built with TypeScript for full type inference and safety.
+- **[Teslemetry API Reference](https://teslemetry.com/docs/api)**: Detailed documentation for all API endpoints, parameters, and response values.
+- **[Tesla Fleet API](https://developer.tesla.com/docs/fleet-api)**: Official Tesla documentation for underlying vehicle commands and data.
 
 ## Installation
 
@@ -29,26 +24,26 @@ yarn add @teslemetry/api
 ```typescript
 import { Teslemetry } from "@teslemetry/api";
 
-const token = process.env.TESLEMETRY_ACCESS_TOKEN;
-const vin = process.env.TESLEMETRY_VIN;
+// Initialize with your access token
+const teslemetry = new Teslemetry(process.env.TESLEMETRY_ACCESS_TOKEN);
 
-const teslemetry = new Teslemetry(token);
-
-// Get a vehicle instance
+// Get a specific vehicle
+const vin = "5YJ...";
 const vehicle = teslemetry.getVehicle(vin);
 
-// API: Get vehicle state
-const {response} = await vehicle.api.state();
-console.log("State:", response.state);
+// 1. Get Vehicle State
+const state = await vehicle.api.state();
+console.log("Vehicle State:", state);
 
-// API: Send a command
+// 2. Send a Command (e.g., Flash Lights)
 await vehicle.api.flashLights();
 
-// Stream: Listen for real-time data
+// 3. Stream Real-time Data
 vehicle.sse.onSignal("Speed", (speed) => {
-  console.log(`Current Speed: ${speed}`);
+  console.log(`Current Speed: ${speed} mph`);
 });
 
+// Connect to the stream
 await teslemetry.sse.connect();
 ```
 
@@ -56,71 +51,120 @@ await teslemetry.sse.connect();
 
 ### Initialization
 
-Initialize the `Teslemetry` client with your access token. You can optionally specify a region ("na" or "eu"), otherwise it will be automatically detected.
+The `Teslemetry` class is the main entry point. It automatically handles region detection (NA/EU) upon the first request, or you can specify it manually.
 
 ```typescript
 import { Teslemetry } from "@teslemetry/api";
 
+// Automatic region detection (recommended)
 const teslemetry = new Teslemetry("YOUR_ACCESS_TOKEN");
-// or with specific region
-const teslemetryEu = new Teslemetry("YOUR_ACCESS_TOKEN", "eu");
+
+// Manual region specification
+const teslemetryEu = new Teslemetry("YOUR_ACCESS_TOKEN", { region: "eu" });
 ```
 
-### Vehicle Control
+### Vehicle API
 
-The `getVehicle(vin)` method returns an object containing both `api` and `sse` handlers for a specific vehicle.
+Use `getVehicle(vin)` to interact with a vehicle. This returns an object containing two specialized handlers:
+- `api`: for standard REST API calls (commands, state).
+- `sse`: for real-time streaming.
+
+#### Commands & State
+The `.api` property contains methods for all supported Tesla commands.
 
 ```typescript
-const myCar = teslemetry.getVehicle("VIN123456789");
+const vehicle = teslemetry.getVehicle("VIN...");
 
-// Get vehicle state
-const state = await myCar.api.state();
+// Get full vehicle data
+const data = await vehicle.api.vehicleData();
 
-// Commands
-await myCar.api.doorLock();
-await myCar.api.autoConditioningStart();
-await myCar.api.chargeStart();
+// Climate Control
+await vehicle.api.autoConditioningStart();
+await vehicle.api.setTemps(20, 20); // Driver, Passenger (Celsius)
+
+// Charging
+await vehicle.api.chargeStart();
+await vehicle.api.setChargeLimit(80);
+
+// Locking
+await vehicle.api.lockDoors();
 ```
 
-### Real-time Streaming (SSE)
+> **Note:** For a comprehensive list of all available methods and their parameters, please refer to the [Teslemetry API Docs](https://teslemetry.com/docs/api). The SDK methods map 1:1 with these endpoints.
 
-Teslemetry supports streaming vehicle data updates via Server-Sent Events.
+#### Real-time Streaming (SSE)
+The `.sse` property allows you to subscribe to specific vehicle signals.
 
 ```typescript
-const myCar = teslemetry.getVehicle("VIN123456789");
+// Subscribe to signals
+vehicle.sse.onSignal("PackCurrent", (val) => console.log("Current:", val));
+vehicle.sse.onSignal("ChargerVoltage", (val) => console.log("Voltage:", val));
 
-// Subscribe to specific signals
-myCar.sse.onSignal("PackCurrent", (val) => console.log("Current:", val));
-myCar.sse.onSignal("ChargerVoltage", (val) => console.log("Voltage:", val));
-
-// Handle connection status
+// Monitor connection status
 teslemetry.sse.onConnection((isConnected) => {
-  console.log(isConnected ? "Connected!" : "Disconnected");
+  console.log(isConnected ? "Stream Connected" : "Stream Disconnected");
 });
 
-// Start the stream
+// Start streaming (connects to the shared Teslemetry stream)
 await teslemetry.sse.connect();
 
 // Stop streaming
 teslemetry.sse.disconnect();
 ```
 
-### Energy Sites
+### Energy API
 
-Interact with Tesla Energy products.
+Interact with Tesla Energy sites (Solar, Powerwall, Wall Connector).
 
 ```typescript
+// Get an energy site instance by Site ID
 const site = teslemetry.energySite(12345);
-const data = await site.getSiteInfo();
+
+// Get site status and info
+const status = await site.getLiveStatus();
+const info = await site.getSiteInfo();
+
+// Control operations
+await site.setBackupReserve(20); // Set backup reserve to 20%
+await site.setOperationMode("autonomous");
 ```
 
-## Development
+### Account & Discovery
 
-To build the package locally:
+If you don't know your VINs or Site IDs, you can discover all products on your account.
 
-```bash
-pnpm install
-pnpm build
+```typescript
+// Fetch all vehicles and energy sites
+const products = await teslemetry.createProducts();
+
+// Access discovered vehicles
+for (const vin in products.vehicles) {
+  const vehicle = products.vehicles[vin];
+  console.log(`Found ${vehicle.name} (${vehicle.vin})`);
+  
+  // Use the API immediately
+  await vehicle.api.honkHorn();
+}
+
+// Access discovered energy sites
+for (const siteId in products.energySites) {
+  const site = products.energySites[siteId];
+  console.log(`Found Site: ${site.name} (${site.site})`);
+}
+```
+
+### Error Handling
+
+The SDK throws standard Javascript `Error` objects for configuration issues and specific errors for API failures. Streaming errors (like connection drops) are emitted via the stream error handler or specific exception classes.
+
+```typescript
+import { TeslemetryStreamConnectionError } from "@teslemetry/api";
+
+try {
+  await vehicle.api.wakeUp();
+} catch (error) {
+  console.error("Failed to wake up vehicle:", error);
+}
 ```
 
 ## License
