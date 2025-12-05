@@ -14231,7 +14231,9 @@ export type GetSseByVin_Data = {
          */
         vin: string;
     };
-    query?: never;
+    query?: {
+        cache?: boolean;
+    };
     url: '/sse/{vin}?';
 };
 

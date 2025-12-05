@@ -32,10 +32,16 @@ interface ListenerEntry {
   filters?: Record<string, any>;
 }
 
+export interface TeslemetryStreamOptions {
+  vin?: string;
+  cache?: boolean;
+}
+
 export class TeslemetryStream {
   private root: Teslemetry;
   public active: boolean = false;
   private vin: string | undefined;
+  private cache: boolean | undefined;
   public logger: Logger;
 
   private listeners: Map<EventType, Set<ListenerEntry>> = new Map();
@@ -45,9 +51,10 @@ export class TeslemetryStream {
   private controller: AbortController | null = null;
 
   // Constructor and basic setup
-  constructor(root: Teslemetry, vin?: string) {
+  constructor(root: Teslemetry, options?: TeslemetryStreamOptions) {
     this.root = root;
-    this.vin = vin;
+    this.vin = options?.vin;
+    this.cache = options?.cache;
     this.logger = root.logger;
     if (this.vin) {
       this.getVehicle(this.vin);
@@ -82,6 +89,9 @@ export class TeslemetryStream {
         const sse = await getSseByVin_({
           client: this.root.client,
           path: { vin: this.vin || "" },
+          query: {
+            cache: this.cache,
+          },
         });
 
         if ((sse as any).controller) {

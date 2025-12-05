@@ -1,13 +1,23 @@
-import { TeslemetryStream } from "./TeslemetryStream.js";
+import {
+  TeslemetryStream,
+  TeslemetryStreamOptions,
+} from "./TeslemetryStream.js";
 import { TeslemetryApi } from "./TeslemetryApi.js";
 import { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
 import { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
 import { TeslemetryUserApi } from "./TeslemetryUserApi.js";
 import { TeslemetryChargingApi } from "./TeslemetryChargingApi.js";
 import { Client, createClient } from "./client/client/index.js";
-import { getApiTest } from "./client/index.js";
+import { getApi1Products, getApiTest } from "./client/index.js";
 import { Logger, consoleLogger } from "./logger.js";
 import pkg from "../package.json" with { type: "json" };
+import type { Products } from "./const.js";
+
+interface TeslemetryOptions {
+  region?: "na" | "eu";
+  logger?: Logger;
+  stream?: TeslemetryStreamOptions;
+}
 
 export class Teslemetry {
   public client: Client;
@@ -19,13 +29,9 @@ export class Teslemetry {
   private _user: TeslemetryUserApi | null = null;
   private _charging: TeslemetryChargingApi | null = null;
 
-  constructor(
-    access_token: string,
-    region?: "na" | "eu",
-    logger: Logger = consoleLogger,
-  ) {
-    this.logger = logger;
-    if (region) this.region = region;
+  constructor(access_token: string, options?: TeslemetryOptions) {
+    this.logger = options?.logger || consoleLogger;
+    if (options?.region) this.region = options.region;
 
     // Initialize client with base URL
     this.client = createClient({
@@ -54,7 +60,7 @@ export class Teslemetry {
       return response;
     });
 
-    this.sse = new TeslemetryStream(this);
+    this.sse = new TeslemetryStream(this, options?.stream);
     this.api = new TeslemetryApi(this);
   }
 
@@ -78,6 +84,33 @@ export class Teslemetry {
     if (this.region) return this.region;
     const { response } = await getApiTest({ client: this.client });
     return response.headers.get("x-region") as "na" | "eu";
+  }
+
+  /**
+   * Creates API instances for all products (vehicles and energy sites) associated with the account.
+   * @returns A promise that resolves to an object containing vehicle and energy site names, API, and SSE instances.
+   */
+  public async createProducts() {
+    const { data } = await getApi1Products({ client: this.client });
+    const result: Products = { vehicles: {}, energySites: {} };
+    data.response?.forEach((product) => {
+      if (product.device_type === "vehicle") {
+        result.vehicles[product.vin] = {
+          name: product.display_name ?? useTeslaModel(product.vin),
+          vin: product.vin,
+          api: this.api.getVehicle(product.vin),
+          sse: this.sse.getVehicle(product.vin),
+        };
+      }
+      if (product.device_type === "energy") {
+        result.energySites[product.energy_site_id] = {
+          name: product.site_name ?? "Unnamed",
+          site: product.energy_site_id,
+          api: this.api.getEnergySite(product.energy_site_id),
+        };
+      }
+    });
+    return result;
   }
 
   /**
@@ -120,3 +153,15 @@ export class Teslemetry {
     return this._charging;
   }
 }
+
+const model_names = {
+  "3": "Model 3",
+  S: "Model S",
+  X: "Model X",
+  Y: "Model Y",
+  C: "Cybertruck",
+  T: "Semi",
+} as const;
+
+export const useTeslaModel = (vin: string) =>
+  model_names?.[vin[3] as keyof typeof model_names] ?? "Unknown";

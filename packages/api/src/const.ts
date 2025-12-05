@@ -3,6 +3,9 @@ import type {
   GetApiConfigByVinResponses,
   PatchApiConfigByVinData,
 } from "./client/types.gen.js";
+import type { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
+import type { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
+import type { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
 
 // Helper to extract members from the union
 type ExtractSse<T> = Extract<GetSseByVin_Response, T>;
@@ -24,3 +27,23 @@ export type FieldsRequest = NonNullable<
 >;
 
 export type Signals = keyof SseData["data"];
+
+export interface Products {
+  vehicles: Record<
+    string,
+    {
+      name: string;
+      vin: string;
+      api: TeslemetryVehicleApi;
+      sse: TeslemetryVehicleStream;
+    }
+  >;
+  energySites: Record<
+    string,
+    {
+      name: string;
+      site: number;
+      api: TeslemetryEnergyApi;
+    }
+  >;
+}
