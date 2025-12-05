@@ -38,8 +38,8 @@ const teslemetry = new Teslemetry(token);
 const vehicle = teslemetry.getVehicle(vin);
 
 // API: Get vehicle state
-const state = await vehicle.api.state();
-console.log("Battery Level:", state.charge_state.battery_level);
+const {response} = await vehicle.api.state();
+console.log("State:", response.state);
 
 // API: Send a command
 await vehicle.api.flashLights();
@@ -73,8 +73,8 @@ The `getVehicle(vin)` method returns an object containing both `api` and `sse` h
 ```typescript
 const myCar = teslemetry.getVehicle("VIN123456789");
 
-// Get detailed vehicle data
-const vehicleData = await myCar.api.vehicleData();
+// Get vehicle state
+const state = await myCar.api.state();
 
 // Commands
 await myCar.api.doorLock();
