@@ -1,6 +1,6 @@
 {
   "name": "@teslemetry/n8n-nodes-teslemetry",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "n8n.io integration for Teslemetry",
   "main": "dist/index.cjs",
   "scripts": {
@@ -17,6 +17,11 @@
   ],
   "author": "",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Teslemetry/typescript-teslemetry-stream"
+  },
+  "bugs": "https://github.com/Teslemetry/typescript-teslemetry-stream/issues/new?template=n8n_bug.yml",
   "publishConfig": {
     "access": "public"
   },

@@ -1,0 +1,23 @@
+name: 🕸️ n8n Node Bug Report
+description: Create a report for the @teslemetry/n8n-nodes-teslemetry package
+title: "[n8n] "
+labels: ["package: n8n", "bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe the bug you are experiencing with the n8n node.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: How can we reproduce this issue?
+    validations:
+      required: true

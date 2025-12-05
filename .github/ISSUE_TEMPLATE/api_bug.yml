@@ -1,0 +1,28 @@
+name: ⚡️ API Bug Report
+description: Create a report for the @teslemetry/api package
+title: "[API] "
+labels: ["package: api", "bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe the bug you are experiencing.
+      placeholder: I can't fetch vehicle data...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Import the library
+        2. Call `getVehicle`
+        3. Error occurs
+    validations:
+      required: true

@@ -7,8 +7,8 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsdown src/nodes/*.ts --out-dir dist/nodes --format cjs --clean --bundle && cp src/nodes/*.html dist/nodes/",
+    "validate": "node-red-dev validate",
+    "build": "tsdown && cp src/nodes/*.html dist/nodes/",
     "dev": "pnpm build && mkdir -p .node-red-home && cd .node-red-home && pnpm install .. && cd .. && node-red -u .node-red-home -s dev-settings.js -p 1880",
     "tsc": "tsc",
     "pack": "npm pack"
@@ -29,11 +29,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Teslemetry/node-red-contrib-teslemetry"
+    "url": "https://github.com/Teslemetry/typescript-teslemetry-stream"
   },
-  "bugs": {
-    "url": "https://github.com/Teslemetry/node-red-contrib-teslemetry/issues"
-  },
+  "bugs": "https://github.com/Teslemetry/typescript-teslemetry-stream/issues/new?template=node_red_bug.yml",
   "files": [
     "dist"
   ],
@@ -51,6 +49,7 @@
     "@teslemetry/api": "workspace:*",
     "@types/node-red": "^1.3.5",
     "node-red": "^4.1.1",
+    "node-red-dev": "^0.1.6",
     "tsdown": "^0.16.7"
   }
 }

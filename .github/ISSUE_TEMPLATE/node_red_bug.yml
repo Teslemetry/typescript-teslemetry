@@ -1,0 +1,23 @@
+name: 🔴 Node-RED Node Bug Report
+description: Create a report for the @teslemetry/node-red-contrib-teslemetry package
+title: "[Node-RED] "
+labels: ["package: node-red", "bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Please describe the bug you are experiencing with the Node-RED node.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: How can we reproduce this issue?
+    validations:
+      required: true

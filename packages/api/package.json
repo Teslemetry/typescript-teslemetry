@@ -37,6 +37,11 @@
     "url": "https://teslemetry.com"
   },
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Teslemetry/typescript-teslemetry-stream"
+  },
+  "bugs": "https://github.com/Teslemetry/typescript-teslemetry-stream/issues/new?template=api_bug.yml",
   "publishConfig": {
     "access": "public"
   },
