@@ -1,5 +1,5 @@
 import { Node, NodeAPI, NodeDef, NodeMessageInFlow } from "node-red";
-import { Teslemetry } from "packages/api/dist/index.cjs";
+import { Teslemetry } from "@teslemetry/api";
 import { instances } from "../shared";
 import { validateParameters, ValidationRules } from "../validation";
 

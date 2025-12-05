@@ -1,7 +1,7 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { TeslemetryConfigNode } from "./teslemetry-config";
 import { instances } from "../shared";
-import { Teslemetry } from "packages/api/dist/index.cjs";
+import { Teslemetry } from "@teslemetry/api";
 
 export interface TeslemetrySignalNodeDef extends NodeDef {
   teslemetryConfig: string;

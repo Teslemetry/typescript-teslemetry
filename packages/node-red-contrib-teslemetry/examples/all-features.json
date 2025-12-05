@@ -1,0 +1,148 @@
+[
+  {
+    "id": "config1",
+    "type": "teslemetry-config",
+    "name": "My Teslemetry",
+    "token": ""
+  },
+  {
+    "id": "inject_vehicle",
+    "type": "inject",
+    "z": "tab1",
+    "name": "Wake Up",
+    "props": [
+      { "p": "payload" }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 100,
+    "y": 100,
+    "wires": [["vehicle_cmd"]]
+  },
+  {
+    "id": "vehicle_cmd",
+    "type": "teslemetry-vehicle-command",
+    "z": "tab1",
+    "name": "",
+    "teslemetryConfig": "config1",
+    "vin": "VIN1234567890",
+    "command": "wakeUp",
+    "x": 300,
+    "y": 100,
+    "wires": [["debug_vehicle"]]
+  },
+  {
+    "id": "debug_vehicle",
+    "type": "debug",
+    "z": "tab1",
+    "name": "Vehicle Result",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "x": 500,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "inject_energy",
+    "type": "inject",
+    "z": "tab1",
+    "name": "Get Site Info",
+    "props": [
+      { "p": "payload" }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 100,
+    "y": 200,
+    "wires": [["energy_cmd"]]
+  },
+  {
+    "id": "energy_cmd",
+    "type": "teslemetry-energy-command",
+    "z": "tab1",
+    "name": "",
+    "teslemetryConfig": "config1",
+    "siteId": "12345",
+    "command": "getSiteInfo",
+    "x": 300,
+    "y": 200,
+    "wires": [["debug_energy"]]
+  },
+  {
+    "id": "debug_energy",
+    "type": "debug",
+    "z": "tab1",
+    "name": "Energy Result",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "x": 500,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "event_node",
+    "type": "teslemetry-event",
+    "z": "tab1",
+    "name": "",
+    "teslemetryConfig": "config1",
+    "vin": "VIN1234567890",
+    "event": "all",
+    "x": 300,
+    "y": 300,
+    "wires": [["debug_event"]]
+  },
+  {
+    "id": "debug_event",
+    "type": "debug",
+    "z": "tab1",
+    "name": "Event Data",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "x": 500,
+    "y": 300,
+    "wires": []
+  },
+  {
+    "id": "signal_node",
+    "type": "teslemetry-signal",
+    "z": "tab1",
+    "name": "",
+    "teslemetryConfig": "config1",
+    "vin": "VIN1234567890",
+    "field": "Odometer",
+    "x": 300,
+    "y": 400,
+    "wires": [["debug_signal"]]
+  },
+  {
+    "id": "debug_signal",
+    "type": "debug",
+    "z": "tab1",
+    "name": "Signal Data",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "x": 500,
+    "y": 400,
+    "wires": []
+  }
+]

@@ -1,4 +1,4 @@
-import { Products, Teslemetry } from "packages/api/dist/index.cjs";
+import { Products, Teslemetry } from "@teslemetry/api";
 
 export type Instance = {
   teslemetry: Teslemetry;

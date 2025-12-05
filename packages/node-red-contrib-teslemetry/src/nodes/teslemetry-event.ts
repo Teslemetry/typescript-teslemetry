@@ -1,5 +1,5 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
-import { SseEvent, Teslemetry } from "packages/api/dist/index.cjs";
+import { SseEvent, Teslemetry } from "@teslemetry/api";
 import { instances } from "../shared";
 
 export interface TeslemetryEventNodeDef extends NodeDef {
