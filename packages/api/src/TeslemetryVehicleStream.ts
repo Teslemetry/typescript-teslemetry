@@ -160,12 +160,6 @@ export class TeslemetryVehicleStream {
     });
   }
 
-  public onCredits(callback: (event: SseCredits) => void): () => void {
-    return this.stream.onCredits(callback, {
-      vin: this.vin,
-    });
-  }
-
   public onVehicleData(callback: (event: SseVehicleData) => void): () => void {
     return this.stream.onVehicleData(callback, {
       vin: this.vin,
