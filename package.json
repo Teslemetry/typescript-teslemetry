@@ -6,6 +6,11 @@
     "email": "hello@teslemetry.com",
     "url": "https://teslemetry.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Teslemetry/typescript-teslemetry-stream"
+  },
+  "bugs": "https://github.com/Teslemetry/typescript-teslemetry-stream/issues/new",
   "license": "Apache-2.0",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

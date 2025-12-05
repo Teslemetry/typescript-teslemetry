@@ -1,1 +1,2 @@
+This is a monorepo, the Teslemetry SDK (packages/api) and other packages that use the SDK.
 Do not write tests, documentation, or any actions that fall outside the scope of the prompt unless explicitly requested. Please make recommendations about next steps at the end of your response.
