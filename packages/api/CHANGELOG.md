@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.1.0
+
+### Minor Changes
+
+- Updated SDK documentation
+
 ## 0.0.2
 
 ### Patch Changes
