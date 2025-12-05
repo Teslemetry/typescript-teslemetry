@@ -6,7 +6,7 @@ This library provides a strictly typed, easy-to-use wrapper for interacting with
 
 ## 📚 Documentation
 
-- **[Teslemetry API Reference](https://teslemetry.com/docs/api)**: Detailed documentation for all API endpoints, parameters, and response values.
+- **[Teslemetry API Reference](https://api.teslemetry.com/docs)**: Detailed documentation for all API endpoints, parameters, and response values.
 - **[Tesla Fleet API](https://developer.tesla.com/docs/fleet-api)**: Official Tesla documentation for underlying vehicle commands and data.
 
 ## Installation
