@@ -40,6 +40,7 @@ export interface TeslemetryStreamOptions {
 export class TeslemetryStream {
   private root: Teslemetry;
   public active: boolean = false;
+  public connected: boolean = false;
   private vin: string | undefined;
   private cache: boolean | undefined;
   public logger: Logger;
@@ -48,7 +49,6 @@ export class TeslemetryStream {
   private _connectionListeners: Map<() => void, ConnectionListenerCallback> =
     new Map();
   private vehicles: Map<string, TeslemetryVehicleStream> = new Map();
-  private controller: AbortController | null = null;
 
   // Constructor and basic setup
   constructor(root: Teslemetry, options?: TeslemetryStreamOptions) {
@@ -66,11 +66,6 @@ export class TeslemetryStream {
       this.vehicles.set(vin, new TeslemetryVehicleStream(this.root, this, vin));
     }
     return this.vehicles.get(vin)!;
-  }
-
-  // Connection status and management
-  public get connected(): boolean {
-    return this.active;
   }
 
   public async connect(): Promise<void> {
@@ -94,12 +89,9 @@ export class TeslemetryStream {
           },
         });
 
-        if ((sse as any).controller) {
-          this.controller = (sse as any).controller;
-        }
-
         this.logger.info(`Connected to stream`);
         retries = 0;
+        this.connected = true;
         this._updateConnectionListeners(true);
 
         if (sse.stream) {
@@ -112,6 +104,8 @@ export class TeslemetryStream {
         if (!this.active) break;
 
         this.logger.error("SSE error:", error);
+
+        this.connected = false;
         this._updateConnectionListeners(false);
 
         retries++;
@@ -131,10 +125,6 @@ export class TeslemetryStream {
 
   public close(): void {
     this.active = false;
-    if (this.controller) {
-      this.controller.abort();
-      this.controller = null;
-    }
     this.logger.info(`Disconnecting from stream`);
     this._updateConnectionListeners(false);
   }
