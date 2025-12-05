@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.2.0
+
+### Minor Changes
+
+- 864dbb2: Public release
+
 ## 0.1.0
 
 ### Minor Changes
