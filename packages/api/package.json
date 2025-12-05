@@ -37,6 +37,9 @@
     "url": "https://teslemetry.com"
   },
   "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.88.0",
     "dotenv": "^17.2.3",

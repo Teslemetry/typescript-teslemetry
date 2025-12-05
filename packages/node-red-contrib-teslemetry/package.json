@@ -24,6 +24,9 @@
     "url": "https://teslemetry.com"
   },
   "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Teslemetry/node-red-contrib-teslemetry"
