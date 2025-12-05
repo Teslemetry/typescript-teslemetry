@@ -1,5 +1,11 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.1.1
+
+### Patch Changes
+
+- 16a577a: Improve Node-RED scorecard
+
 ## 0.1.0
 
 ### Minor Changes
