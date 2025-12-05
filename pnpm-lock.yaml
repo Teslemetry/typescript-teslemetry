@@ -49,12 +49,6 @@ importers:
         version: 0.16.7(typescript@5.9.3)
 
   packages/node-red-contrib-teslemetry:
-    dependencies:
-      packages:
-
-        specifier: link:..
-
-        version: link:..
     devDependencies:
       '@teslemetry/api':
         specifier: workspace:*
@@ -68,12 +62,6 @@ importers:
       tsdown:
         specifier: ^0.16.7
         version: 0.16.7(typescript@5.9.3)
-
-  packages/node-red-contrib-teslemetry/.node-red-home:
-    dependencies:
-      '@teslemetry/node-red-contrib-teslemetry':
-        specifier: link:..
-        version: link:..
 
 packages:
 
