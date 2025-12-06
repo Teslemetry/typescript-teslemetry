@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.2.1
+
+### Patch Changes
+
+- e427dde: Fix wake return type
+
 ## 0.2.0
 
 ### Minor Changes

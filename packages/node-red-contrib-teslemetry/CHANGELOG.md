@@ -1,5 +1,11 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.1.2
+
+### Patch Changes
+
+- e72beac: Improve typing and minor cleanup
+
 ## 0.1.1
 
 ### Patch Changes
