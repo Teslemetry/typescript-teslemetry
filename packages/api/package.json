@@ -43,7 +43,8 @@
   },
   "bugs": "https://github.com/Teslemetry/typescript-teslemetry-stream/issues/new?template=api_bug.yml",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.88.0",

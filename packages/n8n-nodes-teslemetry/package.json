@@ -23,7 +23,8 @@
   },
   "bugs": "https://github.com/Teslemetry/typescript-teslemetry-stream/issues/new?template=n8n_bug.yml",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "files": [
     "dist"
