@@ -150,6 +150,11 @@ export class TeslemetryVehicle implements INodeType {
 						value: 'triggerHomelink',
 						action: 'Trigger homelink',
 					},
+					{
+						name: 'Navigation Request',
+						value: 'navigationRequest',
+						action: 'Send a navigation request to the vehicle',
+					},
 				],
 				default: 'vehicleData',
 			},
@@ -283,6 +288,19 @@ export class TeslemetryVehicle implements INodeType {
 					},
 				},
 			},
+			{
+				displayName: 'Destination',
+				name: 'value',
+				type: 'string',
+				default: '',
+				required: true,
+				displayOptions: {
+					show: {
+						operation: ['navigationRequest'],
+					},
+				},
+				description: 'The destination address or coordinates to navigate to',
+			},
 		],
 	};
 
@@ -393,6 +411,10 @@ export class TeslemetryVehicle implements INodeType {
 						const lat = this.getNodeParameter('lat', itemIndex) as number;
 						const lon = this.getNodeParameter('lon', itemIndex) as number;
 						result = await vehicle.triggerHomelink(lat, lon);
+						break;
+					case 'navigationRequest':
+						const value = this.getNodeParameter('value', itemIndex) as string;
+						result = await vehicle.navigationRequest({ value });
 						break;
 					default:
 						throw new Error(`Unknown operation: ${operation}`);

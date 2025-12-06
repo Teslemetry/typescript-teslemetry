@@ -27,12 +27,47 @@ To use these nodes in your n8n instance, you would typically place them in the `
 ## Nodes
 
 ### Teslemetry Vehicle
-This node allows you to perform operations on your Tesla vehicles through the Teslemetry API.
+Perform operations on your Tesla vehicles.
 
-#### Operations:
-- **Get Vehicle Data**: Retrieves comprehensive data for a specified VIN.
+**Operations:**
+- **Get Vehicle Data**: Retrieves comprehensive data.
+- **Wake Up**: Wakes up the vehicle.
+- **Flash Lights**: Flashes the headlights.
+- **Honk Horn**: Honks the horn.
+- **Lock/Unlock Doors**: Controls door locks.
+- **Remote Start**: Enables keyless driving.
+- **Actuate Trunk**: Opens/Closes front or rear trunk.
+- **Climate Control**: Start/Stop HVAC, Set Temps, Seat Heaters, Steering Wheel Heater.
+- **Charging**: Start/Stop, Open/Close Port, Set Limit, Set Amps.
+- **Sentry Mode**: Enable/Disable Sentry Mode.
+- **Homelink**: Trigger Homelink.
+- **Navigation Request**: Send a destination to the vehicle navigation.
+
+### Teslemetry Energy
+Interact with Tesla Energy sites (Solar/Powerwall).
+
+**Operations:**
+- **Get Live Status**: Live power usage details.
+- **Get Site Info**: Configuration and site details.
+- **Set Backup Reserve**: Set the battery reserve percentage.
+- **Set Operation Mode**: Self Consumption, Backup, or Autonomous.
+- **Set Storm Mode**: Enable/Disable Storm Mode.
+- **Grid Import/Export**: Configure grid export rules.
+- **Off-Grid Reserve**: Set vehicle charging reserve for off-grid operation.
+
+### Teslemetry Trigger
+Trigger workflows based on real-time vehicle events via Server-Sent Events (SSE).
+
+**Event Types:**
+- **All Events**: Stream all events.
+- **Data**: Data updates.
+- **State**: State changes (online/asleep).
+- **Vehicle Data**: Full vehicle data snapshots.
+- **Alerts**: Vehicle alerts.
+- **Connectivity**: Connection status changes.
+- **Signal**: Trigger when a specific field (e.g., `speed`, `odometer`) changes value.
 
 ## Credentials
 
 ### Teslemetry API
-This credential stores your Teslemetry Access Token for authenticating API requests.
+Requires a Teslemetry Access Token.
