@@ -13154,15 +13154,27 @@ export type PostApi1VehiclesByVinCustomCommandPingData = {
     url: '/api/1/vehicles/{vin}/custom_command/ping';
 };
 
+export type PostApi1VehiclesByVinCustomCommandPingErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandPingError = PostApi1VehiclesByVinCustomCommandPingErrors[keyof PostApi1VehiclesByVinCustomCommandPingErrors];
+
 export type PostApi1VehiclesByVinCustomCommandPingResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13191,15 +13203,27 @@ export type PostApi1VehiclesByVinCustomCommandClosureData = {
     url: '/api/1/vehicles/{vin}/custom_command/closure';
 };
 
+export type PostApi1VehiclesByVinCustomCommandClosureErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandClosureError = PostApi1VehiclesByVinCustomCommandClosureErrors[keyof PostApi1VehiclesByVinCustomCommandClosureErrors];
+
 export type PostApi1VehiclesByVinCustomCommandClosureResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13229,15 +13253,27 @@ export type PostApi1VehiclesByVinCustomCommandSeatHeaterData = {
     url: '/api/1/vehicles/{vin}/custom_command/seat_heater';
 };
 
+export type PostApi1VehiclesByVinCustomCommandSeatHeaterErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandSeatHeaterError = PostApi1VehiclesByVinCustomCommandSeatHeaterErrors[keyof PostApi1VehiclesByVinCustomCommandSeatHeaterErrors];
+
 export type PostApi1VehiclesByVinCustomCommandSeatHeaterResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13261,15 +13297,27 @@ export type PostApi1VehiclesByVinCustomCommandChargeOnSolarData = {
     url: '/api/1/vehicles/{vin}/custom_command/charge_on_solar';
 };
 
+export type PostApi1VehiclesByVinCustomCommandChargeOnSolarErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandChargeOnSolarError = PostApi1VehiclesByVinCustomCommandChargeOnSolarErrors[keyof PostApi1VehiclesByVinCustomCommandChargeOnSolarErrors];
+
 export type PostApi1VehiclesByVinCustomCommandChargeOnSolarResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13289,15 +13337,27 @@ export type PostApi1VehiclesByVinCustomCommandDashcamSaveData = {
     url: '/api/1/vehicles/{vin}/custom_command/dashcam_save';
 };
 
+export type PostApi1VehiclesByVinCustomCommandDashcamSaveErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandDashcamSaveError = PostApi1VehiclesByVinCustomCommandDashcamSaveErrors[keyof PostApi1VehiclesByVinCustomCommandDashcamSaveErrors];
+
 export type PostApi1VehiclesByVinCustomCommandDashcamSaveResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13319,15 +13379,27 @@ export type PostApi1VehiclesByVinCustomCommandPlayVideoData = {
     url: '/api/1/vehicles/{vin}/custom_command/play_video';
 };
 
+export type PostApi1VehiclesByVinCustomCommandPlayVideoErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandPlayVideoError = PostApi1VehiclesByVinCustomCommandPlayVideoErrors[keyof PostApi1VehiclesByVinCustomCommandPlayVideoErrors];
+
 export type PostApi1VehiclesByVinCustomCommandPlayVideoResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13347,15 +13419,27 @@ export type PostApi1VehiclesByVinCustomCommandStopLightShowData = {
     url: '/api/1/vehicles/{vin}/custom_command/stop_light_show';
 };
 
+export type PostApi1VehiclesByVinCustomCommandStopLightShowErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandStopLightShowError = PostApi1VehiclesByVinCustomCommandStopLightShowErrors[keyof PostApi1VehiclesByVinCustomCommandStopLightShowErrors];
+
 export type PostApi1VehiclesByVinCustomCommandStopLightShowResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13392,15 +13476,27 @@ export type PostApi1VehiclesByVinCustomCommandStartLightShowData = {
     url: '/api/1/vehicles/{vin}/custom_command/start_light_show';
 };
 
+export type PostApi1VehiclesByVinCustomCommandStartLightShowErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandStartLightShowError = PostApi1VehiclesByVinCustomCommandStartLightShowErrors[keyof PostApi1VehiclesByVinCustomCommandStartLightShowErrors];
+
 export type PostApi1VehiclesByVinCustomCommandStartLightShowResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13425,15 +13521,27 @@ export type PostApi1VehiclesByVinCustomCommandClearPinToDriveData = {
     url: '/api/1/vehicles/{vin}/custom_command/clear_pin_to_drive';
 };
 
+export type PostApi1VehiclesByVinCustomCommandClearPinToDriveErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandClearPinToDriveError = PostApi1VehiclesByVinCustomCommandClearPinToDriveErrors[keyof PostApi1VehiclesByVinCustomCommandClearPinToDriveErrors];
+
 export type PostApi1VehiclesByVinCustomCommandClearPinToDriveResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13453,15 +13561,27 @@ export type PostApi1VehiclesByVinCustomCommandRemoveKeyData = {
     url: '/api/1/vehicles/{vin}/custom_command/remove_key';
 };
 
+export type PostApi1VehiclesByVinCustomCommandRemoveKeyErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': {
+        status?: number;
+        response?: null;
+        error?: string;
+        error_message?: string;
+    };
+};
+
+export type PostApi1VehiclesByVinCustomCommandRemoveKeyError = PostApi1VehiclesByVinCustomCommandRemoveKeyErrors[keyof PostApi1VehiclesByVinCustomCommandRemoveKeyErrors];
+
 export type PostApi1VehiclesByVinCustomCommandRemoveKeyResponses = {
     /**
      * Default Response
      */
     200: {
         response: {
-            result: boolean | {
-                [key: string]: unknown;
-            };
+            result: boolean;
             reason?: string;
         };
     };
@@ -13481,12 +13601,57 @@ export type WakeUpData = {
     url: '/api/1/vehicles/{vin}/wake_up';
 };
 
+export type WakeUpErrors = {
+    /**
+     * Default Response
+     */
+    402: {
+        status?: 402;
+        response?: null;
+        error: string;
+    };
+    /**
+     * Default Response
+     */
+    408: {
+        status?: 408;
+        response?: null;
+        error: string;
+    };
+};
+
+export type WakeUpError = WakeUpErrors[keyof WakeUpErrors];
+
 export type WakeUpResponses = {
     /**
      * Default Response
      */
-    200: unknown;
+    200: {
+        response?: {
+            id?: number;
+            vehicle_id?: number;
+            vin?: string;
+            color?: string | null;
+            access_type?: string;
+            display_name?: string | null;
+            option_codes?: string | null;
+            granular_access?: {
+                hide_private?: boolean;
+            };
+            tokens?: null;
+            state?: string;
+            in_service?: boolean;
+            id_s?: string;
+            calendar_enabled?: boolean;
+            api_version?: number;
+            backseat_token?: string | null;
+            backseat_token_updated_at?: string | null;
+            ble_autopair_enrolled?: boolean;
+        };
+    };
 };
+
+export type WakeUpResponse = WakeUpResponses[keyof WakeUpResponses];
 
 export type GetApi1DxVehiclesSubscriptionsEligibleData = {
     body?: never;
