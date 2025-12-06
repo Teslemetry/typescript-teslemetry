@@ -16,7 +16,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "changeset": "changeset",
     "release": "changeset version && git commit -am 'chore(release): ${{changeset.version}}' && changeset publish --public && git push --tags",
-    "ci:publish": "changeset publish",
+    "ci:publish": "changeset publish --provenance",
     "pack": "pnpm -r pack"
   },
   "packageManager": "pnpm@10.18.1",
