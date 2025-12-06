@@ -1,7 +1,8 @@
-import { Node, NodeAPI, NodeDef, NodeMessageInFlow } from "node-red";
-import { TeslemetryConfigNode } from "./teslemetry-config";
+import { Node, NodeAPI, NodeDef } from "node-red";
 import { instances } from "../shared";
 import { validateParameters, ValidationRules } from "../validation";
+import { Teslemetry } from "@teslemetry/api";
+import { Msg } from "../types";
 
 export interface TeslemetryVehicleCommandNodeDef extends NodeDef {
   teslemetryConfig: string;
@@ -33,9 +34,9 @@ export default function (RED: NodeAPI) {
       return;
     } else node.status({});
 
-    node.on("input", async function (msg: NodeMessageInFlow, send, done) {
-      const vin: string = node.vin || (msg.vin as string) || "";
-      const command: string = node.command || (msg.command as string) || "";
+    node.on("input", async function (msg: Msg, send, done) {
+      const vin: string = node.vin || msg.vin || "";
+      const command: string = node.command || msg.command || "";
       const vehicle = node.teslemetry!.api.getVehicle(vin);
 
       try {
@@ -48,7 +49,7 @@ export default function (RED: NodeAPI) {
 
         node.status({ fill: "blue", shape: "dot", text: "running command" });
 
-        let result: { response: any };
+        let result: { response?: any };
 
         switch (command) {
           case "vehicleData":
@@ -97,8 +98,8 @@ export default function (RED: NodeAPI) {
               },
             });
             result = await vehicle.setTemps(
-              (msg as any).driver_temp,
-              (msg as any).passenger_temp,
+              msg.driver_temp,
+              msg.passenger_temp,
             );
             break;
           case "setSeatHeater":
@@ -124,10 +125,7 @@ export default function (RED: NodeAPI) {
                 integer: true,
               },
             });
-            result = await vehicle.setSeatHeater(
-              (msg as any).seat,
-              (msg as any).level,
-            );
+            result = await vehicle.setSeatHeater(msg.seat, msg.level);
             break;
           case "setSteeringWheelHeaterOn":
             result = await vehicle.setSteeringWheelHeater(true);
@@ -152,7 +150,7 @@ export default function (RED: NodeAPI) {
               percent: { required: true, type: "number", min: 0, max: 100 },
             };
             validateParameters(msg, chargeLimitRules);
-            result = await vehicle.setChargeLimit((msg as any).percent);
+            result = await vehicle.setChargeLimit(msg.percent);
             break;
           case "setChargingAmps":
             validateParameters(msg, {
@@ -164,7 +162,7 @@ export default function (RED: NodeAPI) {
                 integer: true,
               },
             });
-            result = await vehicle.setChargingAmps((msg as any).amps);
+            result = await vehicle.setChargingAmps(msg.amps);
             break;
           case "setSentryModeOn":
             result = await vehicle.setSentryMode(true);
@@ -180,16 +178,16 @@ export default function (RED: NodeAPI) {
               lat: { required: true, type: "number", min: -90, max: 90 },
               lon: { required: true, type: "number", min: -180, max: 180 },
             });
-            result = await vehicle.triggerHomelink(
-              (msg as any).lat,
-              (msg as any).lon,
-            );
+            result = await vehicle.triggerHomelink(msg.lat, msg.lon);
             break;
           case "navigationRequest":
             validateParameters(msg, {
               value: { required: true, type: "string" },
             });
-            result = await vehicle.navigationRequest(msg);
+            result = await vehicle.navigationRequest({
+              locale: msg?.locale,
+              value: msg?.value,
+            });
             break;
           default:
             throw new Error(`Unknown command: ${command}`);

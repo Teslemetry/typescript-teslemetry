@@ -1,7 +1,8 @@
-import { Node, NodeAPI, NodeDef, NodeMessageInFlow } from "node-red";
+import { Node, NodeAPI, NodeDef } from "node-red";
 import { Teslemetry } from "@teslemetry/api";
 import { instances } from "../shared";
-import { validateParameters, ValidationRules } from "../validation";
+import { validateParameters } from "../validation";
+import { Msg } from "../types";
 
 export interface TeslemetryEnergyCommandNodeDef extends NodeDef {
   teslemetryConfig: string;
@@ -33,7 +34,7 @@ export default function (RED: NodeAPI) {
       return;
     } else node.status({});
 
-    node.on("input", async function (msg: NodeMessageInFlow, send, done) {
+    node.on("input", async function (msg: Msg, send, done) {
       const siteId: string = node.siteId || (msg.siteId as string) || "";
       const command: string = node.command || (msg.command as string) || "";
       const site = node.teslemetry!.api.getEnergySite(Number(siteId));
@@ -66,7 +67,7 @@ export default function (RED: NodeAPI) {
                 max: 100,
               },
             });
-            result = await site.setBackupReserve((msg as any).percentage);
+            result = await site.setBackupReserve(msg.percentage);
             break;
           case "setOperationModeSelfConsumption":
             result = await site.setOperationMode("self_consumption");
@@ -96,9 +97,7 @@ export default function (RED: NodeAPI) {
             validateParameters(msg, {
               percent: { required: true, type: "number", min: 0, max: 100 },
             });
-            result = await site.setOffGridVehicleChargingReserve(
-              (msg as any).percent,
-            );
+            result = await site.setOffGridVehicleChargingReserve(msg.percent);
             break;
           default:
             throw new Error(`Unknown command: ${command}`);

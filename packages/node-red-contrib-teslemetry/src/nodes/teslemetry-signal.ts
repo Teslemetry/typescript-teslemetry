@@ -1,5 +1,4 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
-import { TeslemetryConfigNode } from "./teslemetry-config";
 import { instances } from "../shared";
 import { Teslemetry } from "@teslemetry/api";
 
