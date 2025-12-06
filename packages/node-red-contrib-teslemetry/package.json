@@ -30,9 +30,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Teslemetry/typescript-teslemetry-stream"
+    "url": "https://github.com/Teslemetry/typescript-teslemetry"
   },
-  "bugs": "https://github.com/Teslemetry/typescript-teslemetry-stream/issues/new?template=node_red_bug.yml",
+  "bugs": "https://github.com/Teslemetry/typescript-teslemetry/issues/new?template=node_red_bug.yml",
   "files": [
     "dist"
   ],

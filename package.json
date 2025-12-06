@@ -8,9 +8,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Teslemetry/typescript-teslemetry-stream"
+    "url": "https://github.com/Teslemetry/typescript-teslemetry"
   },
-  "bugs": "https://github.com/Teslemetry/typescript-teslemetry-stream/issues/new",
+  "bugs": "https://github.com/Teslemetry/typescript-teslemetry/issues/new",
   "license": "Apache-2.0",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
