@@ -15,7 +15,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      id-token: write # Required for Trusted Publishing
+      id-token: write
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          registry-url: "https://registry.npmjs.org" # Required for Trusted Publishing
+          registry-url: "https://registry.npmjs.org"
           always-auth: true
           cache: "pnpm"
 
@@ -51,3 +51,44 @@ jobs:
           title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for specific package releases
+        id: check_releases
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          node -e '
+            const published = JSON.parse(process.env.PUBLISHED_PACKAGES || "[]");
+            const nodeRed = published.find(p => p.name === "@teslemetry/node-red-contrib-teslemetry");
+            const n8n = published.find(p => p.name === "@teslemetry/n8n-nodes-teslemetry");
+
+            if (nodeRed) {
+              console.log("Found Node-RED release: " + nodeRed.version);
+              require("fs").appendFileSync(process.env.GITHUB_OUTPUT, "node_red_version=" + nodeRed.version + "\n");
+            }
+            if (n8n) {
+              console.log("Found n8n release: " + n8n.version);
+              require("fs").appendFileSync(process.env.GITHUB_OUTPUT, "n8n_version=" + n8n.version + "\n");
+            }
+          '
+        env:
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+
+      - name: Discord Notification (Node-RED)
+        if: steps.check_releases.outputs.node_red_version
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_NODERED }}
+          VERSION: ${{ steps.check_releases.outputs.node_red_version }}
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d "{\"username\": \"Teslemetry Release\", \"content\": \"🚀 **New Release**\n**@teslemetry/node-red-contrib-teslemetry** version **$VERSION** is now available!\"}" \
+          $DISCORD_WEBHOOK
+
+      - name: Discord Notification (n8n)
+        if: steps.check_releases.outputs.n8n_version
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_N8N }}
+          VERSION: ${{ steps.check_releases.outputs.n8n_version }}
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d "{\"username\": \"Teslemetry Release\", \"content\": \"🚀 **New Release**\n**@teslemetry/n8n-nodes-teslemetry** version **$VERSION** is now available!\"}" \
+          $DISCORD_WEBHOOK

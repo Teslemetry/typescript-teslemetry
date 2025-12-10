@@ -6,9 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsdown src/index.ts --format cjs",
-    "dev": "pnpm build && mkdir -p .n8n-home/nodes && ln -sf $(pwd) .n8n-home/nodes/teslemetry && N8N_LOG_OUTPUT=console N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true N8N_USER_FOLDER=$(pwd)/.n8n-home pnpx n8n start",
+    "dev2": "pnpm build && mkdir -p .n8n-home/nodes && ln -sf $(pwd) .n8n-home/nodes/teslemetry && N8N_LOG_OUTPUT=console N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true N8N_USER_FOLDER=$(pwd)/.n8n-home ./node_modules/.bin/n8n start",
     "tsc": "tsc",
-    "pack": "npm pack"
+    "validate": "n8n-node lint",
+    "dev": "n8n-node dev"
   },
   "keywords": [
     "n8n",
@@ -38,8 +39,11 @@
     ]
   },
   "devDependencies": {
+    "@n8n/node-cli": "^0.17.0",
     "@teslemetry/api": "workspace:*",
+    "n8n": "^1.122.5",
     "n8n-workflow": "^1.119.1",
+    "sqlite3": "^5.1.7",
     "tsdown": "^0.16.7"
   }
 }
