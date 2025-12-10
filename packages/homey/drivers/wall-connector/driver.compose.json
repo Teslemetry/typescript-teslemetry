@@ -1,0 +1,20 @@
+{
+  "name": {
+    "en": "Tesla Wall Connector"
+  },
+  "class": "evcharger",
+  "capabilities": [
+    "evcharger_charging",
+    "evcharger_charging_state",
+    "meter_power",
+    "measure_power",
+    "measure_voltage"
+  ],
+  "platforms": ["local", "cloud"],
+  "connectivity": [],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  }
+}

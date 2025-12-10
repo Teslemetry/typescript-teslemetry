@@ -1,0 +1,14 @@
+{
+  "name": {
+    "en": "Tesla Vehicle"
+  },
+  "class": "car",
+  "capabilities": ["measure_battery", "locked", "measure_temperature"],
+  "platforms": ["local", "cloud"],
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices"
+    }
+  ]
+}

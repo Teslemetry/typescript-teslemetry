@@ -1,0 +1,14 @@
+{
+  "name": {
+    "en": "Tesla Powerwall"
+  },
+  "class": "battery",
+  "capabilities": ["measure_power", "measure_battery"],
+  "platforms": ["local", "cloud"],
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices"
+    }
+  ]
+}
