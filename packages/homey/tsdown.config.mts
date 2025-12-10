@@ -5,4 +5,5 @@ export default defineConfig({
   outDir: ".homeybuild",
   format: "esm",
   platform: "node",
+  external: ["homey"],
 });

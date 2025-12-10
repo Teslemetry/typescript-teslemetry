@@ -92,3 +92,56 @@ jobs:
           curl -H "Content-Type: application/json" \
           -d "{\"username\": \"Teslemetry Release\", \"content\": \"🚀 **New Release**\n**@teslemetry/n8n-nodes-teslemetry** version **$VERSION** is now available!\"}" \
           $DISCORD_WEBHOOK
+
+      - name: Check for Homey package release
+        id: check_homey
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          node -e '
+            const published = JSON.parse(process.env.PUBLISHED_PACKAGES || "[]");
+            const homey = published.find(p => p.name === "com.teslemetry");
+
+            if (homey) {
+              console.log("Found Homey package release: " + homey.version);
+              require("fs").appendFileSync(process.env.GITHUB_OUTPUT, "homey_version=" + homey.version + "\n");
+              require("fs").appendFileSync(process.env.GITHUB_OUTPUT, "should_publish_homey=true\n");
+            }
+          '
+        env:
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+
+      - name: Update Homey App Version
+        if: steps.check_homey.outputs.should_publish_homey == 'true'
+        working-directory: ./packages/homey
+        run: |
+          # Update .homeycompose/app.json version to match package.json
+          node -e '
+            const fs = require("fs");
+            const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            const appJson = JSON.parse(fs.readFileSync(".homeycompose/app.json", "utf8"));
+            appJson.version = packageJson.version;
+            fs.writeFileSync(".homeycompose/app.json", JSON.stringify(appJson, null, 2));
+          '
+
+      - name: Validate Homey App
+        if: steps.check_homey.outputs.should_publish_homey == 'true'
+        uses: athombv/github-action-homey-app-validate@master
+        with:
+          level: verified
+
+      - name: Publish Homey App
+        if: steps.check_homey.outputs.should_publish_homey == 'true'
+        uses: athombv/github-action-homey-app-publish@master
+        id: publish_homey
+        with:
+          personal_access_token: ${{ secrets.HOMEY_PAT }}
+
+      - name: Discord Notification (Homey)
+        if: steps.check_homey.outputs.homey_version
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_HOMEY }} # You'd need to add this secret
+          VERSION: ${{ steps.check_homey.outputs.homey_version }}
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d "{\"username\": \"Teslemetry Release\", \"content\": \"🏠 **New Homey App Release**\n**Teslemetry for Homey** version **$VERSION** is now available!\"}" \
+          $DISCORD_WEBHOOK || echo "Discord webhook not configured for Homey"
