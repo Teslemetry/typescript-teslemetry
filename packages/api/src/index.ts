@@ -8,3 +8,4 @@ export { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
 export { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
 export * from "./const.js";
 export * from "./exceptions.js";
+export type { EnergyDetails, VehicleDetails, Products } from "./const.js";

@@ -100,6 +100,7 @@ export class Teslemetry {
           vin: product.vin,
           api: this.api.getVehicle(product.vin),
           sse: this.sse.getVehicle(product.vin),
+          product,
         };
       }
       if (product.device_type === "energy") {
@@ -107,6 +108,7 @@ export class Teslemetry {
           name: product.site_name ?? "Unnamed",
           site: product.energy_site_id,
           api: this.api.getEnergySite(product.energy_site_id),
+          product,
         };
       }
     });
