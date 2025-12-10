@@ -3,16 +3,23 @@ import type TeslemetryApp from "../../app.js";
 import { Products, Teslemetry } from "@teslemetry/api";
 
 export default class VehicleDriver extends Homey.Driver {
-  vehicles: Products["vehicles"] = {};
-
-  async onInit(): Promise<void> {
-    const app = this.homey.app as TeslemetryApp;
-    if (!app.products) throw new Error("Products not initialized");
-    this.vehicles = app.products.vehicles;
-  }
-
   async onPairListDevices() {
-    return Object.values(this.vehicles).map((data) => ({
+    const app = this.homey.app as TeslemetryApp;
+
+    if (!app.isConfigured()) {
+      throw new Error(
+        "App not configured - please set up your Teslemetry access token in app settings",
+      );
+    }
+
+    const products = await app.getProducts();
+    if (!products) {
+      throw new Error(
+        "Failed to load vehicles - check your access token in app settings",
+      );
+    }
+
+    return Object.values(products.vehicles).map((data) => ({
       name: data.name,
       data,
     }));
