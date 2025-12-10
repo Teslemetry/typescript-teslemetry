@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.2.2
+
+### Patch Changes
+
+- 6ff4699: Fix some types
+
 ## 0.2.1
 
 ### Patch Changes
