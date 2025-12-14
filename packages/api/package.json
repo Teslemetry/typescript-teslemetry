@@ -1,6 +1,6 @@
 {
   "name": "@teslemetry/api",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "API client for Teslemetry",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",

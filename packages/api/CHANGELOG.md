@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.3.0
+
+### Minor Changes
+
+- e1447a5: Allow for dynamic (OAuth2) access tokens
+
 ## 0.2.2
 
 ### Patch Changes
