@@ -1,7 +1,7 @@
-import Homey from "homey";
 import type TeslemetryApp from "../../app.js";
+import TeslemetryDriver from "../../lib/TeslemetryDriver.js";
 
-export default class PowerwallDriver extends Homey.Driver {
+export default class PowerwallDriver extends TeslemetryDriver {
   async onPairListDevices() {
     const app = this.homey.app as TeslemetryApp;
 

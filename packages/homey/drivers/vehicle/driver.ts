@@ -1,33 +1,9 @@
-import Homey from "homey";
 import type TeslemetryApp from "../../app.js";
+import TeslemetryDriver from "../../lib/TeslemetryDriver.js";
 
-export default class VehicleDriver extends Homey.Driver {
+export default class VehicleDriver extends TeslemetryDriver {
   async onInit() {
     this.homey.log("Vehicle driver initialized");
-  }
-
-  async onPair(session: any) {
-    let codeVerifier: string;
-    const app = this.homey.app as TeslemetryApp;
-
-    session.setHandler("showView", async (viewId: string) => {
-      if (viewId === "login_oauth2") {
-        const pkce = app.oauth.generatePKCE();
-        codeVerifier = pkce.codeVerifier;
-        const state = Math.random().toString(36).substring(7);
-        const url = app.oauth.getAuthorizationUrl(state, pkce.codeChallenge);
-        session.emit("url", url);
-      }
-    });
-
-    session.setHandler("login", async (data: any) => {
-      await app.oauth.exchangeCodeForToken(data.code, codeVerifier);
-      return true;
-    });
-
-    session.setHandler("list_devices", async () => {
-      return this.onPairListDevices();
-    });
   }
 
   async onPairListDevices() {
