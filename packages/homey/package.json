@@ -8,7 +8,7 @@
     "tsc": "tsc",
     "build": "tsc",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
-    "dev": "homey app run",
+    "dev": "homey app run --link ../api",
     "validate": "homey app validate"
   },
   "dependencies": {
