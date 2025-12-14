@@ -13,7 +13,7 @@
     "validate": "homey app validate"
   },
   "dependencies": {
-    "@teslemetry/api": "^0.3.0",
+    "@teslemetry/api": "@workspace/api",
     "homey-oauth2app": "^3.7.2"
   },
   "devDependencies": {
