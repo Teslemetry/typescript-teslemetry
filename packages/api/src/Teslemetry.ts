@@ -29,7 +29,10 @@ export class Teslemetry {
   private _user: TeslemetryUserApi | null = null;
   private _charging: TeslemetryChargingApi | null = null;
 
-  constructor(access_token: string, options?: TeslemetryOptions) {
+  constructor(
+    access_token: string | (() => Promise<string>),
+    options?: TeslemetryOptions,
+  ) {
     this.logger = options?.logger || consoleLogger;
     if (options?.region) this.region = options.region;
 
