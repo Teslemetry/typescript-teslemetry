@@ -3,10 +3,7 @@ import path from "path";
 import process from "process";
 
 // Configuration
-const API_KEY =
-  process.env.GEMINI_API_KEY ||
-  process.env.GOOGLE_API_KEY ||
-  "AIzaSyDiKx0p57I2yH0GpiTH3xrJrwPRg2EN5gY";
+const API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 if (!API_KEY) {
   console.error("Error: GEMINI_API_KEY environment variable is not set.");
   process.exit(1);
