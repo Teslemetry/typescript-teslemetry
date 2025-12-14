@@ -1,65 +1,77 @@
 "use strict";
 
-import Homey from "homey";
+import { OAuth2App } from "homey-oauth2app";
 import { Products, Teslemetry } from "@teslemetry/api";
+import TeslemetryOAuth2Client from "./lib/TeslemetryOAuth2Client.js";
 
-export default class TeslemetryApp extends Homey.App {
+export default class TeslemetryApp extends OAuth2App {
+  // OAuth2App configuration
+  static OAUTH2_CLIENT = TeslemetryOAuth2Client;
+  static OAUTH2_DEBUG = true;
+  static OAUTH2_MULTI_SESSION = false;
+  static OAUTH2_DRIVERS = ["vehicle", "powerwall", "wall-connector"];
+
   teslemetry?: Teslemetry;
   products?: Products;
   private initializationPromise?: Promise<void>;
 
   /**
-   * onInit is called when the app is initialized.
+   * onOAuth2Init is called when the OAuth2App is initialized
    */
-  async onInit() {
-    this.homey.log("Teslemetry app initializing...");
+  async onOAuth2Init() {
+    this.homey.log("Teslemetry OAuth2 app initializing...");
 
-    // Register API routes for settings page
+    // Register API routes for testing (if needed for settings page)
     this.homey.api.on(
-      "test",
-      (
-        args: { token: string },
+      "test_oauth",
+      async (
+        args: { sessionId?: string },
         callback: (err: Error | null, result?: boolean) => void,
       ) => {
-        const teslemetry = new Teslemetry(args.token);
-        teslemetry.api
-          .test()
-          .then(({ response }) => {
-            callback(null, response);
-          })
-          .catch((error) => {
-            callback(null, false);
-          });
+        try {
+          const sessionId =
+            args.sessionId || this.getFirstSavedOAuth2SessionId();
+          if (!sessionId) {
+            callback(new Error("No OAuth2 session available"));
+            return;
+          }
+
+          const client = this.getOAuth2Client({ sessionId });
+
+          // Test with Teslemetry SDK using access token
+          const accessToken = await client.getAccessToken();
+          const teslemetry = new Teslemetry(accessToken);
+          const result = await teslemetry.api.test();
+          callback(null, !!result.response);
+        } catch (error) {
+          this.homey.error("OAuth test failed:", error);
+          callback(null, false);
+        }
       },
     );
 
-    // Listen for settings changes
-    this.homey.settings.on("set", (key: string) => {
-      if (key === "access_token") {
-        this.homey.log("Access token updated, reinitializing...");
-        this.reinitialize();
-      }
-    });
-
-    // Initialize the Teslemetry connection
+    // Initialize the Teslemetry SDK connection using OAuth2 token
     await this.initializeTeslemetry();
   }
 
   /**
-   * Initialize Teslemetry connection with current access token
+   * Initialize Teslemetry connection with OAuth2 token
    */
   private async initializeTeslemetry(): Promise<void> {
     try {
-      const accessToken = this.homey.settings.get("access_token") as string;
-
-      if (!accessToken) {
+      // Get the first available OAuth2 session
+      const sessionId = this.getFirstSavedOAuth2SessionId();
+      if (!sessionId) {
         this.homey.log(
-          "No access token configured. Please configure in app settings.",
+          "No OAuth2 session available. User needs to authenticate.",
         );
         return;
       }
 
-      this.homey.log("Initializing Teslemetry with access token...");
+      const client = this.getOAuth2Client({ sessionId });
+
+      this.homey.log("Initializing Teslemetry with OAuth2 token...");
+      const accessToken = await client.getAccessToken();
       this.teslemetry = new Teslemetry(accessToken);
       this.products = await this.teslemetry.createProducts();
 
@@ -78,7 +90,29 @@ export default class TeslemetryApp extends Homey.App {
   }
 
   /**
-   * Reinitialize the app when settings change
+   * Called when OAuth2 session is created or updated
+   */
+  async onOAuth2Saved({ sessionId }: { sessionId: string }) {
+    this.homey.log(`OAuth2 session saved: ${sessionId}`);
+    await this.reinitialize();
+  }
+
+  /**
+   * Called when OAuth2 session is deleted
+   */
+  async onOAuth2Deleted({ sessionId }: { sessionId: string }) {
+    this.homey.log(`OAuth2 session deleted: ${sessionId}`);
+
+    // Clean up Teslemetry connection
+    if (this.teslemetry) {
+      this.teslemetry.sse.close();
+      this.teslemetry = undefined;
+      this.products = undefined;
+    }
+  }
+
+  /**
+   * Reinitialize the app when OAuth2 session changes
    */
   private async reinitialize(): Promise<void> {
     // Prevent multiple simultaneous initializations
@@ -95,7 +129,7 @@ export default class TeslemetryApp extends Homey.App {
           this.products = undefined;
         }
 
-        // Initialize with new settings
+        // Initialize with new OAuth2 session
         await this.initializeTeslemetry();
       } catch (error) {
         this.homey.error("Failed to reinitialize:", error);
@@ -128,15 +162,41 @@ export default class TeslemetryApp extends Homey.App {
   }
 
   /**
-   * Check if the app is properly configured
+   * Check if the app is properly configured with OAuth2
    */
   isConfigured(): boolean {
-    const accessToken = this.homey.settings.get("access_token") as string;
-    return !!accessToken && !!this.teslemetry && !!this.products;
+    const sessionId = this.getFirstSavedOAuth2SessionId();
+    if (!sessionId) return false;
+
+    const session = this.getSavedOAuth2SessionBySessionId(sessionId);
+    return !!(session && session.token && this.teslemetry && this.products);
+  }
+
+  /**
+   * Get OAuth2 client for API calls
+   */
+  getOAuth2Client({
+    sessionId,
+  }: { sessionId?: string } = {}): TeslemetryOAuth2Client {
+    const actualSessionId = sessionId || this.getFirstSavedOAuth2SessionId();
+    if (!actualSessionId) {
+      throw new Error("No OAuth2 session available");
+    }
+    return super.getOAuth2Client({
+      sessionId: actualSessionId,
+    }) as TeslemetryOAuth2Client;
+  }
+
+  /**
+   * Get a token function for the Teslemetry SDK
+   */
+  getTokenFunction(sessionId?: string): () => Promise<string> {
+    const client = this.getOAuth2Client({ sessionId });
+    return () => client.getAccessToken();
   }
 
   async onUninit() {
-    this.homey.log("Teslemetry app shutting down...");
+    this.homey.log("Teslemetry OAuth2 app shutting down...");
 
     // Wait for any pending initialization to complete
     if (this.initializationPromise) {
