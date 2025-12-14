@@ -1,5 +1,6 @@
 import Homey from "homey";
 import crypto from "crypto";
+import { HomeyAPI } from "homey-api";
 
 export interface OAuth2Token {
   access_token: string;
@@ -18,10 +19,22 @@ export default class TeslemetryOAuth2Client {
 
   private homey;
   private token: OAuth2Token | null = null;
+  private name: string | null = null;
 
   constructor(app: Homey.App) {
     this.homey = app.homey;
     this.loadToken();
+    this.getName();
+  }
+
+  async getName(): Promise<string | null> {
+    if (!this.name) {
+      const api = await HomeyAPI.createAppAPI({
+        homey: this.homey,
+      });
+      this.name = await api.system.getSystemName();
+    }
+    return this.name;
   }
 
   private loadToken() {
@@ -68,7 +81,7 @@ export default class TeslemetryOAuth2Client {
       state: state,
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
-      name: this.homey.settings.get("name"),
+      name: this.name,
     });
 
     return `${TeslemetryOAuth2Client.AUTHORIZATION_URL}?${params.toString()}`;
@@ -84,7 +97,7 @@ export default class TeslemetryOAuth2Client {
       code: code,
       code_verifier: codeVerifier,
       redirect_uri: TeslemetryOAuth2Client.REDIRECT_URL,
-      name: this.homey.settings.get("name"),
+      name: this.name,
     };
 
     return this.requestToken(body);
@@ -99,7 +112,7 @@ export default class TeslemetryOAuth2Client {
       grant_type: "refresh_token",
       client_id: TeslemetryOAuth2Client.CLIENT_ID,
       refresh_token: this.token.refresh_token,
-      name: this.homey.settings.get("name"),
+      name: this.homey.settings.get("name") || "Homey",
     };
 
     return this.requestToken(body);
