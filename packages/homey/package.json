@@ -8,11 +8,11 @@
     "tsc": "tsc",
     "build": "tsc",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
-    "dev": "homey app run --link ../api",
+    "dev": "homey app run",
     "validate": "homey app validate"
   },
   "dependencies": {
-    "@teslemetry/api": "workspace:*"
+    "@teslemetry/api": "^0.2.0"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.8",
