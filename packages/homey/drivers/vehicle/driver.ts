@@ -1,30 +1,50 @@
-import { OAuth2Driver } from "homey-oauth2app";
+import Homey from "homey";
 import type TeslemetryApp from "../../app.js";
-import type TeslemetryOAuth2Client from "../../lib/TeslemetryOAuth2Client.js";
 
-export default class VehicleDriver extends OAuth2Driver {
-  async onOAuth2Init() {
-    this.homey.log("Vehicle driver initialized with OAuth2");
+export default class VehicleDriver extends Homey.Driver {
+  async onInit() {
+    this.homey.log("Vehicle driver initialized");
   }
 
-  async onPairListDevices({
-    oAuth2Client,
-  }: {
-    oAuth2Client: TeslemetryOAuth2Client;
-  }) {
+  async onPair(session: any) {
+    let codeVerifier: string;
+    const app = this.homey.app as TeslemetryApp;
+
+    session.setHandler("showView", async (viewId: string) => {
+      if (viewId === "login_oauth2") {
+        const pkce = app.oAuth2Client.generatePKCE();
+        codeVerifier = pkce.codeVerifier;
+        const state = Math.random().toString(36).substring(7);
+        const url = app.oAuth2Client.getAuthorizationUrl(state, pkce.codeChallenge);
+        session.emit("url", url);
+      }
+    });
+
+    session.setHandler("login", async (data: any) => {
+      await app.oAuth2Client.exchangeCodeForToken(data.code, codeVerifier);
+      return true;
+    });
+
+    session.setHandler("list_devices", async () => {
+      return this.onPairListDevices();
+    });
+  }
+
+  async onPairListDevices() {
     this.homey.log("Listing vehicles for pairing...");
+    const app = this.homey.app as TeslemetryApp;
 
     try {
-      // Get access token and use with Teslemetry SDK
-      const { Teslemetry } = await import("@teslemetry/api");
+      const products = await app.getProducts();
 
-      const accessToken = await oAuth2Client.getAccessToken();
-      const teslemetry = new Teslemetry(accessToken);
-      const products = await teslemetry.createProducts();
+      if (!products || !products.vehicles) {
+        this.homey.log("No vehicles found or products not loaded");
+        return [];
+      }
 
       const vehicles = Object.values(products.vehicles);
 
-      if (!vehicles || vehicles.length === 0) {
+      if (vehicles.length === 0) {
         this.homey.log("No vehicles found in Teslemetry account");
         return [];
       }

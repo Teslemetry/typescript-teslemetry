@@ -39,11 +39,8 @@ importers:
   packages/homey:
     dependencies:
       '@teslemetry/api':
-        specifier: '@workspace/api'
-        version: link:@workspace/api
-      homey-oauth2app:
-        specifier: ^3.7.2
-        version: 3.7.2(encoding@0.1.13)
+        specifier: workspace:*
+        version: link:../api
     devDependencies:
       '@tsconfig/node16':
         specifier: ^16.1.8
@@ -6529,9 +6526,6 @@ packages:
   homey-lib@2.42.1:
     resolution: {integrity: sha512-x2dRJGDRlFUVKwf2D9aAukQF1cgOIoD8JG8In3s+8Z3djEpFDKxXnJrPPdb0XLCipyLr7jA8F2CGVE1W7cW06A==}
     engines: {node: '>=12.13.0'}
-
-  homey-oauth2app@3.7.2:
-    resolution: {integrity: sha512-YznxcrHg2xqzPkggLkjCOiEKHETPCkCWFQHGuXDD/JltFebPA2QcNmoiWKacZqd7V6Fh7BLbJJGrVkuMXGstig==}
 
   homey@3.10.0:
     resolution: {integrity: sha512-GiCTMzYBuGku7A1zOjCmSQN4n5IBV5Urm6w6tobzHzuhc/WRFErcTewFpzPkbi4DLlwuPWZWiGn2DZEoYJ0qAQ==}
@@ -19803,12 +19797,6 @@ snapshots:
       image-size: 0.6.3
       semver: 5.7.2
       tinycolor2: 1.6.0
-
-  homey-oauth2app@3.7.2(encoding@0.1.13):
-    dependencies:
-      node-fetch: 2.7.0(encoding@0.1.13)
-    transitivePeerDependencies:
-      - encoding
 
   homey@3.10.0(encoding@0.1.13)(ws@8.18.3)(zod@3.25.67):
     dependencies:

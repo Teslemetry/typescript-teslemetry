@@ -1,6 +1,5 @@
 import Homey from "homey";
 import type TeslemetryApp from "../../app.js";
-import { Products } from "@teslemetry/api";
 
 export default class PowerwallDriver extends Homey.Driver {
   async onPairListDevices() {

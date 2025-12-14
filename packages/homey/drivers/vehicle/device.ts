@@ -1,16 +1,14 @@
-import { OAuth2Device } from "homey-oauth2app";
-import type TeslemetryOAuth2Client from "../../lib/TeslemetryOAuth2Client.js";
-import { Teslemetry, Products } from "@teslemetry/api";
+import Homey from "homey";
+import type TeslemetryApp from "../../app.js";
+import { Teslemetry } from "@teslemetry/api";
 
-export default class VehicleDevice extends OAuth2Device {
+export default class VehicleDevice extends Homey.Device {
   private updateInterval?: NodeJS.Timeout;
   private vin?: string;
   private vehicleId?: number;
-  private teslemetryInstance?: Teslemetry;
-  private oAuth2ClientRef?: TeslemetryOAuth2Client;
 
-  async onOAuth2Init() {
-    this.homey.log("Vehicle device initialized with OAuth2");
+  async onInit() {
+    this.homey.log("Vehicle device initialized");
 
     // Get vehicle data from device data
     const data = this.getData();
@@ -21,53 +19,11 @@ export default class VehicleDevice extends OAuth2Device {
       throw new Error("No VIN or vehicle ID found in device data");
     }
 
-    // Store OAuth2 client reference for token refresh
-    this.oAuth2ClientRef = this.oAuth2Client as TeslemetryOAuth2Client;
-
-    // Initialize Teslemetry
-    await this.initializeTeslemetry();
-
     // Set up periodic updates
     this.setupPeriodicUpdates();
 
     // Initial state update
     await this.updateVehicleState();
-  }
-
-  private async initializeTeslemetry() {
-    if (!this.oAuth2ClientRef) return;
-
-    try {
-      const accessToken = await this.oAuth2ClientRef.getAccessToken();
-      this.teslemetryInstance = new Teslemetry(accessToken);
-    } catch (error) {
-      this.homey.error("Failed to initialize Teslemetry:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get a fresh Teslemetry instance with current token
-   */
-  private async getTeslemetryInstance(): Promise<Teslemetry> {
-    if (!this.oAuth2ClientRef) {
-      throw new Error("OAuth2 client not available");
-    }
-
-    const accessToken = await this.oAuth2ClientRef.getAccessToken();
-    return new Teslemetry(accessToken);
-  }
-
-  async onOAuth2Deleted() {
-    this.homey.log("OAuth2 session deleted, cleaning up device");
-
-    if (this.updateInterval) {
-      clearInterval(this.updateInterval);
-      this.updateInterval = undefined;
-    }
-
-    this.teslemetryInstance = undefined;
-    this.oAuth2ClientRef = undefined;
   }
 
   private setupPeriodicUpdates() {
@@ -84,17 +40,20 @@ export default class VehicleDevice extends OAuth2Device {
     );
   }
 
+  private async getTeslemetry(): Promise<Teslemetry> {
+     const app = this.homey.app as TeslemetryApp;
+     const teslemetry = await app.getTeslemetry();
+     if (!teslemetry) {
+         throw new Error("Teslemetry not initialized");
+     }
+     return teslemetry;
+  }
+
   private async updateVehicleState() {
     if (!this.vehicleId) return;
 
     try {
-      // Get fresh Teslemetry instance with current token
-      let teslemetry = this.teslemetryInstance;
-      if (!teslemetry) {
-        teslemetry = await this.getTeslemetryInstance();
-        this.teslemetryInstance = teslemetry;
-      }
-
+      const teslemetry = await this.getTeslemetry();
       const vehicleApi = teslemetry.vehicle(this.vehicleId.toString());
       const vehicleData = await vehicleApi.vehicleData();
       const state = vehicleData.response;
@@ -137,14 +96,6 @@ export default class VehicleDevice extends OAuth2Device {
       }
 
       this.homey.error("Failed to update vehicle state:", error);
-
-      // Try to refresh token and retry once
-      try {
-        this.teslemetryInstance = await this.getTeslemetryInstance();
-        await this.updateVehicleState();
-      } catch (retryError) {
-        this.homey.error("Failed to update after token refresh:", retryError);
-      }
     }
   }
 
@@ -152,12 +103,7 @@ export default class VehicleDevice extends OAuth2Device {
     if (!this.vehicleId) return;
 
     try {
-      let teslemetry = this.teslemetryInstance;
-      if (!teslemetry) {
-        teslemetry = await this.getTeslemetryInstance();
-        this.teslemetryInstance = teslemetry;
-      }
-
+      const teslemetry = await this.getTeslemetry();
       const vehicleApi = teslemetry.vehicle(this.vehicleId.toString());
       await vehicleApi.wakeUp();
       this.homey.log("Vehicle wake command sent");
@@ -171,14 +117,9 @@ export default class VehicleDevice extends OAuth2Device {
   async lockVehicle() {
     if (!this.vehicleId) throw new Error("Vehicle not available");
 
-    let teslemetry = this.teslemetryInstance;
-    if (!teslemetry) {
-      teslemetry = await this.getTeslemetryInstance();
-      this.teslemetryInstance = teslemetry;
-    }
-
+    const teslemetry = await this.getTeslemetry();
     const vehicleApi = teslemetry.vehicle(this.vehicleId.toString());
-    await vehicleApi.command("door_lock");
+    await (vehicleApi as any).command("door_lock");
 
     // Update state after command
     setTimeout(() => this.updateVehicleState(), 2000);
@@ -187,14 +128,9 @@ export default class VehicleDevice extends OAuth2Device {
   async unlockVehicle() {
     if (!this.vehicleId) throw new Error("Vehicle not available");
 
-    let teslemetry = this.teslemetryInstance;
-    if (!teslemetry) {
-      teslemetry = await this.getTeslemetryInstance();
-      this.teslemetryInstance = teslemetry;
-    }
-
+    const teslemetry = await this.getTeslemetry();
     const vehicleApi = teslemetry.vehicle(this.vehicleId.toString());
-    await vehicleApi.command("door_unlock");
+    await (vehicleApi as any).command("door_unlock");
 
     // Update state after command
     setTimeout(() => this.updateVehicleState(), 2000);
@@ -203,14 +139,9 @@ export default class VehicleDevice extends OAuth2Device {
   async startCharging() {
     if (!this.vehicleId) throw new Error("Vehicle not available");
 
-    let teslemetry = this.teslemetryInstance;
-    if (!teslemetry) {
-      teslemetry = await this.getTeslemetryInstance();
-      this.teslemetryInstance = teslemetry;
-    }
-
+    const teslemetry = await this.getTeslemetry();
     const vehicleApi = teslemetry.vehicle(this.vehicleId.toString());
-    await vehicleApi.command("charge_start");
+    await (vehicleApi as any).command("charge_start");
 
     // Update state after command
     setTimeout(() => this.updateVehicleState(), 2000);
@@ -219,14 +150,9 @@ export default class VehicleDevice extends OAuth2Device {
   async stopCharging() {
     if (!this.vehicleId) throw new Error("Vehicle not available");
 
-    let teslemetry = this.teslemetryInstance;
-    if (!teslemetry) {
-      teslemetry = await this.getTeslemetryInstance();
-      this.teslemetryInstance = teslemetry;
-    }
-
+    const teslemetry = await this.getTeslemetry();
     const vehicleApi = teslemetry.vehicle(this.vehicleId.toString());
-    await vehicleApi.command("charge_stop");
+    await (vehicleApi as any).command("charge_stop");
 
     // Update state after command
     setTimeout(() => this.updateVehicleState(), 2000);
@@ -235,14 +161,9 @@ export default class VehicleDevice extends OAuth2Device {
   async setClimateOn() {
     if (!this.vehicleId) throw new Error("Vehicle not available");
 
-    let teslemetry = this.teslemetryInstance;
-    if (!teslemetry) {
-      teslemetry = await this.getTeslemetryInstance();
-      this.teslemetryInstance = teslemetry;
-    }
-
+    const teslemetry = await this.getTeslemetry();
     const vehicleApi = teslemetry.vehicle(this.vehicleId.toString());
-    await vehicleApi.command("auto_conditioning_start");
+    await (vehicleApi as any).command("auto_conditioning_start");
 
     // Update state after command
     setTimeout(() => this.updateVehicleState(), 2000);
@@ -251,14 +172,9 @@ export default class VehicleDevice extends OAuth2Device {
   async setClimateOff() {
     if (!this.vehicleId) throw new Error("Vehicle not available");
 
-    let teslemetry = this.teslemetryInstance;
-    if (!teslemetry) {
-      teslemetry = await this.getTeslemetryInstance();
-      this.teslemetryInstance = teslemetry;
-    }
-
+    const teslemetry = await this.getTeslemetry();
     const vehicleApi = teslemetry.vehicle(this.vehicleId.toString());
-    await vehicleApi.command("auto_conditioning_stop");
+    await (vehicleApi as any).command("auto_conditioning_stop");
 
     // Update state after command
     setTimeout(() => this.updateVehicleState(), 2000);
