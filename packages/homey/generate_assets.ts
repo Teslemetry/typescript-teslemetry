@@ -1,3 +1,4 @@
+
 import sharp from "sharp";
 import fs from "fs/promises";
 import path from "path";
@@ -30,7 +31,7 @@ interface ImageTask {
   prompt: string;
   outputDir: string;
   sizes: { name: string; width: number; height: number }[];
-  useReference?: boolean; // Only for Logo-based tasks (none here now, as App Images are scenes)
+  useReference?: boolean;
 }
 
 const tasks: ImageTask[] = [
@@ -84,16 +85,14 @@ const tasks: ImageTask[] = [
 ];
 
 async function generateAndSave() {
-  console.log("Starting asset generation (Refined Guidelines)...");
+  console.log("Starting asset generation (Conditional)...");
   console.log("Model:", GEMINI_MODEL);
 
   for (const dir of dirs) {
     await fs.mkdir(dir, { recursive: true });
   }
   
-  // Helper to copy icon.svg if missing (Placeholder logic)
-  // Note: Guidelines say "Don't re-use app icon for drivers", but we need a placeholder.
-  // We will log a warning that these should be replaced with unique SVGs.
+  // Helper to copy icon.svg if missing
   const driverAssetsDirs = [
       path.resolve("drivers/vehicle/assets"),
       path.resolve("drivers/powerwall/assets"),
@@ -113,7 +112,23 @@ async function generateAndSave() {
   }
 
   for (const task of tasks) {
-    console.log(`Processing: ${task.name}`);
+    // CHECK IF FILES EXIST
+    let allExist = true;
+    for (const size of task.sizes) {
+        try {
+            await fs.access(path.join(task.outputDir, size.name));
+        } catch {
+            allExist = false;
+            break;
+        }
+    }
+
+    if (allExist) {
+        console.log(`Skipping: ${task.name} (All files exist)`);
+        continue;
+    }
+
+    console.log(`Processing: ${task.name} (Files missing, regenerating...)`);
     try {
       let imageBuffer: Buffer | null = null;
       
@@ -121,7 +136,6 @@ async function generateAndSave() {
       const geminiParts: any[] = [{ text: "Generate an image of " + task.prompt }];
 
       try {
-          // console.log(`  - Fetching Gemini...`);
           // @ts-ignore
           const resp = await fetch(geminiUrl, {
              method: "POST",
@@ -171,11 +185,10 @@ async function generateAndSave() {
       if (imageBuffer) {
         for (const size of task.sizes) {
             const outputPath = path.join(task.outputDir, size.name);
-            // Always cover for scenes/objects to fill the requested dimension
             await sharp(imageBuffer)
             .resize(size.width, size.height, { fit: 'cover' }) 
             .toFile(outputPath);
-            console.log(`  - Saved: ${outputPath} (${size.width}x${size.height})`);
+            console.log(`  - Saved: ${outputPath}`);
         }
       } else {
           console.error("  - FAILED to create image for", task.name);
