@@ -12,16 +12,16 @@ export default class VehicleDriver extends Homey.Driver {
 
     session.setHandler("showView", async (viewId: string) => {
       if (viewId === "login_oauth2") {
-        const pkce = app.oAuth2Client.generatePKCE();
+        const pkce = app.oauth.generatePKCE();
         codeVerifier = pkce.codeVerifier;
         const state = Math.random().toString(36).substring(7);
-        const url = app.oAuth2Client.getAuthorizationUrl(state, pkce.codeChallenge);
+        const url = app.oauth.getAuthorizationUrl(state, pkce.codeChallenge);
         session.emit("url", url);
       }
     });
 
     session.setHandler("login", async (data: any) => {
-      await app.oAuth2Client.exchangeCodeForToken(data.code, codeVerifier);
+      await app.oauth.exchangeCodeForToken(data.code, codeVerifier);
       return true;
     });
 
