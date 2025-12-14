@@ -6,9 +6,8 @@
   "type": "module",
   "scripts": {
     "tsc": "tsc",
-    "build": "tsdown",
+    "build": "tsc",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
-    "start": "homey app run --skip-build",
     "dev": "homey app run",
     "validate": "homey app validate"
   },
