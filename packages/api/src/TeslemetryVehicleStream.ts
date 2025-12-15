@@ -1,5 +1,4 @@
-// src/TeslemetryVehicleStream.ts
-
+import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
 import { TeslemetryStream } from "./TeslemetryStream.js";
 import {
@@ -12,42 +11,96 @@ import type {
   FieldsResponse,
   SseConfig,
   SseData,
-  SseEvent,
   SseState,
   SseErrors,
   SseAlerts,
   SseConnectivity,
-  SseCredits,
   SseVehicleData,
   Signals,
 } from "./const.js";
 import { Logger } from "./logger.js";
 
-export class TeslemetryVehicleStream {
+type TeslemetryStreamEventMap = {
+  state: SseState;
+  data: SseData;
+  errors: SseErrors;
+  alerts: SseAlerts;
+  connectivity: SseConnectivity;
+  vehicle_data: SseVehicleData;
+  config: SseConfig;
+};
+
+// Base event emitter types
+export declare interface TeslemetryStream {
+  on<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this;
+
+  once<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this;
+
+  off<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this;
+
+  emit<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    data: TeslemetryStreamEventMap[K],
+  ): boolean;
+}
+
+// Data signal event emmiter types
+export declare interface TeslemetryVehicleStreamData extends EventEmitter {
+  on<T extends Signals>(
+    event: T,
+    listener: (event: Exclude<SseData["data"][T], undefined>) => void,
+  ): this;
+  once<T extends Signals>(
+    event: T,
+    listener: (event: Exclude<SseData["data"][T], undefined>) => void,
+  ): this;
+  off<T extends Signals>(
+    event: T,
+    listener: (event: Exclude<SseData["data"][T], undefined>) => void,
+  ): this;
+  emit<T extends Signals>(
+    event: T,
+    data: Exclude<SseData["data"][T], undefined>,
+  ): boolean;
+}
+
+export class TeslemetryVehicleStream extends EventEmitter {
   private root: Teslemetry;
-  private stream: TeslemetryStream;
   public vin: string;
   public fields: FieldsRequest = {}; // Allow updates from both requests, and responses
   private _pendingFields: FieldsRequest = {}; // Used for accumulating config changes before patching
   private _debounceTimeout: NodeJS.Timeout | null = null; // Debounce timeout for patchConfig
   public logger: Logger;
+  public data: TeslemetryVehicleStreamData;
 
-  constructor(root: Teslemetry, stream: TeslemetryStream, vin: string) {
+  constructor(root: Teslemetry, vin: string) {
+    if (root.sse.vehicles.has(vin)) {
+      throw new Error("Vehicle already exists");
+    }
+    super();
     this.root = root;
-    this.stream = stream;
     this.vin = vin;
-    this.logger = stream.logger;
+    this.logger = root.sse.logger;
+    this.data = new EventEmitter();
 
-    stream.onConfig(
-      (event) => {
-        this.fields = event.config.fields;
-      },
-      {
-        vin: this.vin,
-      },
-    );
+    root.sse.vehicles.set(vin, this);
+
+    // Keep field config up to date
+    this.on("config", (event) => {
+      this.fields = event.config.fields;
+    });
   }
 
+  /** Get the current configuration for the vehicle */
   public async getConfig(): Promise<void> {
     const { data, response } = await getApiConfigByVin({
       path: { vin: this.vin },
@@ -63,7 +116,8 @@ export class TeslemetryVehicleStream {
     }
   }
 
-  public updateFields(fields: FieldsRequest) {
+  /** Safely add field configuration to the vehicle */
+  public async updateFields(fields: FieldsRequest) {
     this._pendingFields = { ...this._pendingFields, ...fields };
 
     // Clear existing timeout if it exists
@@ -91,6 +145,7 @@ export class TeslemetryVehicleStream {
     }, 100);
   }
 
+  /** Modify the field configuration of the vehicle */
   public async patchConfig(fields: FieldsRequest) {
     const { data } = await patchApiConfigByVin({
       client: this.root.client,
@@ -100,6 +155,7 @@ export class TeslemetryVehicleStream {
     return data;
   }
 
+  /** Replace the field configuration of the vehicle */
   public async postConfig(fields: FieldsRequest): Promise<any> {
     const { data } = await postApiConfigByVin({
       client: this.root.client,
@@ -109,6 +165,12 @@ export class TeslemetryVehicleStream {
     return data;
   }
 
+  /**
+   * Add a field to the vehicles streaming configuration
+   * @param field Vehicle Signal
+   * @param interval
+   * @returns
+   */
   public async addField(field: Signals, interval?: number): Promise<void> {
     if (
       this.fields &&
@@ -127,61 +189,12 @@ export class TeslemetryVehicleStream {
     this.updateFields({ [field]: value } as FieldsRequest);
   }
 
-  // Event listeners (all pre-filtered by VIN)
-  public onState(callback: (event: SseState) => void): () => void {
-    return this.stream.onState(callback, {
-      vin: this.vin,
-    });
-  }
-
-  public onData(callback: (event: SseData) => void): () => void {
-    return this.stream.onData(callback, {
-      vin: this.vin,
-    });
-  }
-
-  public onErrors(callback: (event: SseErrors) => void): () => void {
-    return this.stream.onErrors(callback, {
-      vin: this.vin,
-    });
-  }
-
-  public onAlerts(callback: (event: SseAlerts) => void): () => void {
-    return this.stream.onAlerts(callback, {
-      vin: this.vin,
-    });
-  }
-
-  public onConnectivity(
-    callback: (event: SseConnectivity) => void,
-  ): () => void {
-    return this.stream.onConnectivity(callback, {
-      vin: this.vin,
-    });
-  }
-
-  public onVehicleData(callback: (event: SseVehicleData) => void): () => void {
-    return this.stream.onVehicleData(callback, {
-      vin: this.vin,
-    });
-  }
-
-  public onConfig(callback: (event: SseConfig) => void): () => void {
-    return this.stream.onConfig(callback, {
-      vin: this.vin,
-    });
-  }
-
-  // Legacy and generic methods
-  public on(callback: (value: SseEvent) => void): () => void {
-    return this.stream.on(
-      (event) => {
-        callback(event);
-      },
-      { vin: this.vin },
-    );
-  }
-
+  /**
+   * Helper to enable and listen for specific field signals
+   * @param field Vehicle field to listen for
+   * @param callback Callback function to handle signals
+   * @returns Off function to stop the listener
+   */
   public onSignal<T extends Signals>(
     field: T,
     callback: (value: Exclude<SseData["data"][T], undefined>) => void,
@@ -189,14 +202,12 @@ export class TeslemetryVehicleStream {
     this.addField(field).catch((error) => {
       this.logger.error(`Failed to add field ${field}:`, error);
     });
-    return this.stream.onData(
-      (event) => {
-        const value = event.data[field];
-        if (value !== undefined) {
-          callback(value as Exclude<SseData["data"][T], undefined>);
-        }
-      },
-      { vin: this.vin, data: { [field]: null } },
-    );
+    this.data.on(field, callback);
+    return () => this.data.off(field, callback);
+  }
+
+  public stop(): void {
+    this.removeAllListeners();
+    this.data.removeAllListeners();
   }
 }

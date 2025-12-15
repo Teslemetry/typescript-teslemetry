@@ -1,10 +1,10 @@
+import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
 import {
   // Vehicle Data
   getApi1VehiclesByVinVehicleData,
   getApi1VehiclesByVin,
   getApiRefreshByVin,
-  getApiImageByVin,
   getApiVehicleConfigByVin,
   getApiConfigByVin,
   patchApiConfigByVin,
@@ -133,42 +133,34 @@ import {
   postApi1VehiclesByVinCommandRemoteBoombox,
   postApi1VehiclesByVinCommandSunRoofControl,
   postApi1VehiclesByVinCommandUpcomingCalendarEntries,
+  // Response types
+  GetApi1VehiclesByVinResponse,
+  GetApi1VehiclesByVinVehicleDataResponse,
+  GetApiVehicleConfigByVinResponse,
+  GetApiConfigByVinResponse,
+  GetApi1VehiclesByVinMobileEnabledResponse,
+  GetApi1VehiclesByVinNearbyChargingSitesResponse,
+  GetApi1VehiclesByVinRecentAlertsResponse,
+  GetApi1VehiclesByVinReleaseNotesResponse,
+  GetApi1VehiclesByVinServiceDataResponse,
+  GetApi1VehiclesByVinFleetTelemetryConfigResponse,
+  GetApi1VehiclesByVinFleetTelemetryErrorsResponse,
+  GetApi1VehiclesByVinDriversResponse,
+  GetApi1VehiclesByVinInvitationsResponse,
 } from "./client/index.js";
 import {
-  PostApi1VehiclesByVinCommandSetChargeLimitData,
-  PostApi1VehiclesByVinCommandSetChargingAmpsData,
-  PostApi1VehiclesByVinCommandSetScheduledChargingData,
   PostApi1VehiclesByVinCommandSetScheduledDepartureData,
   PostApi1VehiclesByVinCommandAddChargeScheduleData,
-  PostApi1VehiclesByVinCommandRemoveChargeScheduleData,
   PostApi1VehiclesByVinCommandAddPreconditionScheduleData,
-  PostApi1VehiclesByVinCommandRemovePreconditionScheduleData,
   PostApi1VehiclesByVinCommandSetCabinOverheatProtectionData,
-  PostApi1VehiclesByVinCommandSetCopTempData,
-  PostApi1VehiclesByVinCommandSetSentryModeData,
-  PostApi1VehiclesByVinCommandSetValetModeData,
-  PostApi1VehiclesByVinCommandSetPinToDriveData,
-  PostApi1VehiclesByVinCommandSpeedLimitActivateData,
-  PostApi1VehiclesByVinCommandSpeedLimitDeactivateData,
-  PostApi1VehiclesByVinCommandSpeedLimitClearPinData,
-  PostApi1VehiclesByVinCommandSpeedLimitSetLimitData,
-  PostApi1VehiclesByVinCommandScheduleSoftwareUpdateData,
   PostApi1VehiclesByVinCommandNavigationRequestData,
   PostApi1VehiclesByVinCommandNavigationGpsRequestData,
   PostApi1VehiclesByVinCommandNavigationScRequestData,
   PostApi1VehiclesByVinCommandNavigationWaypointsRequestData,
-  DeleteApi1VehiclesByVinDriversData,
-  PostApi1VehiclesByVinInvitationsData,
   PostApi1VehiclesByVinCustomCommandClosureData,
   PostApi1VehiclesByVinCustomCommandSeatHeaterData,
-  PostApi1VehiclesByVinCustomCommandChargeOnSolarData,
-  PostApi1VehiclesByVinCustomCommandPlayVideoData,
-  PostApi1VehiclesByVinCustomCommandStartLightShowData,
-  PostApi1VehiclesByVinCustomCommandClearPinToDriveData,
   PatchApiConfigByVinData,
   PostApiConfigByVinData,
-  GetApi1VehiclesByVinFleetTelemetryErrorsData,
-  GetApi1VehiclesByVinInvitationsData,
   PostApi1VehiclesByVinCommandUpcomingCalendarEntriesData,
 } from "./client/types.gen.js";
 
@@ -201,24 +193,233 @@ const ALL_SEATS = {
 } as const;
 
 type VehicleDataEndpoints =
+  | "*"
   | "charge_state"
   | "climate_state"
   | "closures_state"
   | "drive_state"
   | "gui_settings"
   | "location_data"
-  | "charge_schedule_data"
-  | "preconditioning_schedule_data"
   | "vehicle_config"
-  | "vehicle_state";
+  | "vehicle_state"
+  | "vehicle_data_combo";
 
-export class TeslemetryVehicleApi {
+// TypeScript interface for event type safety
+export declare interface TeslemetryVehicleApi {
+  on(
+    event: "state",
+    listener: (data: GetApi1VehiclesByVinResponse) => void,
+  ): this;
+  on(
+    event: "vehicleData",
+    listener: (data: GetApi1VehiclesByVinVehicleDataResponse) => void,
+  ): this;
+  on(
+    event: "vehicleConfig",
+    listener: (data: GetApiVehicleConfigByVinResponse) => void,
+  ): this;
+  on(
+    event: "config",
+    listener: (data: GetApiConfigByVinResponse) => void,
+  ): this;
+  on(
+    event: "mobileEnabled",
+    listener: (data: GetApi1VehiclesByVinMobileEnabledResponse) => void,
+  ): this;
+  on(
+    event: "nearbyChargingSites",
+    listener: (data: GetApi1VehiclesByVinNearbyChargingSitesResponse) => void,
+  ): this;
+  on(
+    event: "recentAlerts",
+    listener: (data: GetApi1VehiclesByVinRecentAlertsResponse) => void,
+  ): this;
+  on(
+    event: "releaseNotes",
+    listener: (data: GetApi1VehiclesByVinReleaseNotesResponse) => void,
+  ): this;
+  on(
+    event: "serviceData",
+    listener: (data: GetApi1VehiclesByVinServiceDataResponse) => void,
+  ): this;
+  on(
+    event: "fleetTelemetryConfig",
+    listener: (data: GetApi1VehiclesByVinFleetTelemetryConfigResponse) => void,
+  ): this;
+  on(
+    event: "fleetTelemetryErrors",
+    listener: (data: GetApi1VehiclesByVinFleetTelemetryErrorsResponse) => void,
+  ): this;
+  on(
+    event: "drivers",
+    listener: (data: GetApi1VehiclesByVinDriversResponse) => void,
+  ): this;
+  on(
+    event: "invitations",
+    listener: (data: GetApi1VehiclesByVinInvitationsResponse) => void,
+  ): this;
+
+  off(
+    event: "state",
+    listener: (data: GetApi1VehiclesByVinResponse) => void,
+  ): this;
+  off(
+    event: "vehicleData",
+    listener: (data: GetApi1VehiclesByVinVehicleDataResponse) => void,
+  ): this;
+  off(
+    event: "vehicleConfig",
+    listener: (data: GetApiVehicleConfigByVinResponse) => void,
+  ): this;
+  off(
+    event: "config",
+    listener: (data: GetApiConfigByVinResponse) => void,
+  ): this;
+  off(
+    event: "mobileEnabled",
+    listener: (data: GetApi1VehiclesByVinMobileEnabledResponse) => void,
+  ): this;
+  off(
+    event: "nearbyChargingSites",
+    listener: (data: GetApi1VehiclesByVinNearbyChargingSitesResponse) => void,
+  ): this;
+  off(
+    event: "recentAlerts",
+    listener: (data: GetApi1VehiclesByVinRecentAlertsResponse) => void,
+  ): this;
+  off(
+    event: "releaseNotes",
+    listener: (data: GetApi1VehiclesByVinReleaseNotesResponse) => void,
+  ): this;
+  off(
+    event: "serviceData",
+    listener: (data: GetApi1VehiclesByVinServiceDataResponse) => void,
+  ): this;
+  off(
+    event: "fleetTelemetryConfig",
+    listener: (data: GetApi1VehiclesByVinFleetTelemetryConfigResponse) => void,
+  ): this;
+  off(
+    event: "fleetTelemetryErrors",
+    listener: (data: GetApi1VehiclesByVinFleetTelemetryErrorsResponse) => void,
+  ): this;
+  off(
+    event: "drivers",
+    listener: (data: GetApi1VehiclesByVinDriversResponse) => void,
+  ): this;
+  off(
+    event: "invitations",
+    listener: (data: GetApi1VehiclesByVinInvitationsResponse) => void,
+  ): this;
+
+  once(
+    event: "state",
+    listener: (data: GetApi1VehiclesByVinResponse) => void,
+  ): this;
+  once(
+    event: "vehicleData",
+    listener: (data: GetApi1VehiclesByVinVehicleDataResponse) => void,
+  ): this;
+  once(
+    event: "vehicleConfig",
+    listener: (data: GetApiVehicleConfigByVinResponse) => void,
+  ): this;
+  once(
+    event: "config",
+    listener: (data: GetApiConfigByVinResponse) => void,
+  ): this;
+  once(
+    event: "mobileEnabled",
+    listener: (data: GetApi1VehiclesByVinMobileEnabledResponse) => void,
+  ): this;
+  once(
+    event: "nearbyChargingSites",
+    listener: (data: GetApi1VehiclesByVinNearbyChargingSitesResponse) => void,
+  ): this;
+  once(
+    event: "recentAlerts",
+    listener: (data: GetApi1VehiclesByVinRecentAlertsResponse) => void,
+  ): this;
+  once(
+    event: "releaseNotes",
+    listener: (data: GetApi1VehiclesByVinReleaseNotesResponse) => void,
+  ): this;
+  once(
+    event: "serviceData",
+    listener: (data: GetApi1VehiclesByVinServiceDataResponse) => void,
+  ): this;
+  once(
+    event: "fleetTelemetryConfig",
+    listener: (data: GetApi1VehiclesByVinFleetTelemetryConfigResponse) => void,
+  ): this;
+  once(
+    event: "fleetTelemetryErrors",
+    listener: (data: GetApi1VehiclesByVinFleetTelemetryErrorsResponse) => void,
+  ): this;
+  once(
+    event: "drivers",
+    listener: (data: GetApi1VehiclesByVinDriversResponse) => void,
+  ): this;
+  once(
+    event: "invitations",
+    listener: (data: GetApi1VehiclesByVinInvitationsResponse) => void,
+  ): this;
+
+  emit(event: "state", data: GetApi1VehiclesByVinResponse): boolean;
+  emit(
+    event: "vehicleData",
+    data: GetApi1VehiclesByVinVehicleDataResponse,
+  ): boolean;
+  emit(event: "vehicleConfig", data: GetApiVehicleConfigByVinResponse): boolean;
+  emit(event: "config", data: GetApiConfigByVinResponse): boolean;
+  emit(
+    event: "mobileEnabled",
+    data: GetApi1VehiclesByVinMobileEnabledResponse,
+  ): boolean;
+  emit(
+    event: "nearbyChargingSites",
+    data: GetApi1VehiclesByVinNearbyChargingSitesResponse,
+  ): boolean;
+  emit(
+    event: "recentAlerts",
+    data: GetApi1VehiclesByVinRecentAlertsResponse,
+  ): boolean;
+  emit(
+    event: "releaseNotes",
+    data: GetApi1VehiclesByVinReleaseNotesResponse,
+  ): boolean;
+  emit(
+    event: "serviceData",
+    data: GetApi1VehiclesByVinServiceDataResponse,
+  ): boolean;
+  emit(
+    event: "fleetTelemetryConfig",
+    data: GetApi1VehiclesByVinFleetTelemetryConfigResponse,
+  ): boolean;
+  emit(
+    event: "fleetTelemetryErrors",
+    data: GetApi1VehiclesByVinFleetTelemetryErrorsResponse,
+  ): boolean;
+  emit(event: "drivers", data: GetApi1VehiclesByVinDriversResponse): boolean;
+  emit(
+    event: "invitations",
+    data: GetApi1VehiclesByVinInvitationsResponse,
+  ): boolean;
+}
+
+export class TeslemetryVehicleApi extends EventEmitter {
   private root: Teslemetry;
   public vin: string;
 
   constructor(root: Teslemetry, vin: string) {
+    if (root.api.vehicles.has(vin)) {
+      throw new Error("Vehicle already exists");
+    }
+    super();
     this.root = root;
     this.vin = vin;
+
+    root.api.vehicles.set(vin, this);
   }
 
   /**
@@ -230,6 +431,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("state", data);
     return data;
   }
 
@@ -255,6 +457,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("vehicleData", data);
     return data;
   }
 
@@ -271,18 +474,6 @@ export class TeslemetryVehicleApi {
   }
 
   /**
-   * Redirect to the Tesla Design Studio image of a vehicle
-   * @return Promise to an object with response containing redirect information
-   */
-  public async getImage() {
-    const { data } = await getApiImageByVin({
-      path: { vin: this.vin },
-      client: this.root.client,
-    });
-    return data;
-  }
-
-  /**
    * Get the saved vehicle config.
    * @return Promise to an object with response containing the vehicle configuration
    */
@@ -291,6 +482,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("vehicleConfig", data);
     return data;
   }
 
@@ -303,6 +495,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("config", data);
     return data;
   }
 
@@ -357,6 +550,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("mobileEnabled", data);
     return data;
   }
 
@@ -369,6 +563,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("nearbyChargingSites", data);
     return data;
   }
 
@@ -381,6 +576,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("recentAlerts", data);
     return data;
   }
 
@@ -393,6 +589,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("releaseNotes", data);
     return data;
   }
 
@@ -405,6 +602,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("serviceData", data);
     return data;
   }
 
@@ -444,6 +642,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("fleetTelemetryConfig", data);
     return data;
   }
 
@@ -468,6 +667,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("fleetTelemetryErrors", data);
     return data;
   }
 
@@ -1458,6 +1658,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("drivers", data);
     return data;
   }
 
@@ -1484,6 +1685,7 @@ export class TeslemetryVehicleApi {
       path: { vin: this.vin },
       client: this.root.client,
     });
+    this.emit("invitations", data);
     return data;
   }
 

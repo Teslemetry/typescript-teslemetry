@@ -15,8 +15,8 @@ import { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
 
 export class TeslemetryApi {
   private root: Teslemetry;
-  public _vehicles: Record<string, TeslemetryVehicleApi> = {};
-  public _energySites: Record<string, TeslemetryEnergyApi> = {};
+  public vehicles: Map<string, TeslemetryVehicleApi> = new Map();
+  public energySites: Map<number, TeslemetryEnergyApi> = new Map();
   public user: TeslemetryUserApi;
   public charging: TeslemetryChargingApi;
 
@@ -31,10 +31,10 @@ export class TeslemetryApi {
    * @returns The vehicle API instance for the specified VIN.
    */
   public getVehicle(vin: string) {
-    if (!this._vehicles[vin]) {
-      this._vehicles[vin] = new TeslemetryVehicleApi(this.root, vin);
+    if (!this.vehicles.has(vin)) {
+      new TeslemetryVehicleApi(this.root, vin);
     }
-    return this._vehicles[vin];
+    return this.vehicles.get(vin)!;
   }
 
   /**
@@ -43,10 +43,10 @@ export class TeslemetryApi {
    * @returns The energy site API instance for the specified ID.
    */
   public getEnergySite(id: number) {
-    if (!this._energySites[id]) {
-      this._energySites[id] = new TeslemetryEnergyApi(this.root, id);
+    if (!this.energySites.has(id)) {
+      new TeslemetryEnergyApi(this.root, id);
     }
-    return this._energySites[id];
+    return this.energySites.get(id)!;
   }
 
   /**
@@ -63,10 +63,10 @@ export class TeslemetryApi {
         this.getEnergySite(product.energy_site_id);
       }
     });
-    return { vehicles: this._vehicles, energySites: this._energySites };
+    return { vehicles: this.vehicles, energySites: this.energySites };
   }
 
-  public async fields() {
+  public async getFields() {
     const { data } = await getFieldsJson({ client: this.root.client });
     return data;
   }
@@ -76,7 +76,7 @@ export class TeslemetryApi {
    * @returns A promise that resolves to an object containing a `response` array and count.
    * Each item in the array is a product, which can be a vehicle or an energy site, and a `count` of the products.
    */
-  public async products() {
+  public async getProducts() {
     const { data } = await getApi1Products({ client: this.root.client });
     return data;
   }
@@ -95,7 +95,7 @@ export class TeslemetryApi {
    * @returns Promise to an object containing metadata about the account,
    * including user UID, region, scopes, and lists of vehicles and energy sites.
    */
-  public async metadata() {
+  public async getMetadata() {
     const { data } = await getApiMetadata({ client: this.root.client });
     return data;
   }
@@ -106,7 +106,7 @@ export class TeslemetryApi {
    * @returns Promise to an object containing lists of paired and unpaired VINs,
    * and detailed info for each vehicle.
    */
-  public async fleetStatus(vins: string[]) {
+  public async getFleetStatus(vins: string[]) {
     const { data } = await postApi1VehiclesFleetStatus({
       body: { vins },
       client: this.root.client,
@@ -119,7 +119,7 @@ export class TeslemetryApi {
    * @returns Promise to an object containing a list of vehicles,
    * pagination details, and a total count.
    */
-  public async vehicles() {
+  public async getVehicles() {
     const { data } = await getApi1Vehicles({ client: this.root.client });
     return data;
   }

@@ -58,9 +58,14 @@ export class TeslemetryEnergyApi extends EventEmitter {
   public siteId: number;
 
   constructor(root: Teslemetry, siteId: number) {
+    if (root.api.energySites.has(siteId)) {
+      throw new Error("Energy site already exists");
+    }
     super();
     this.root = root;
     this.siteId = siteId;
+
+    root.api.energySites.set(siteId, this);
   }
 
   /**
@@ -217,19 +222,5 @@ export class TeslemetryEnergyApi extends EventEmitter {
       client: this.root.client,
     });
     return data;
-  }
-
-  public onSiteInfo(
-    callback: (data: GetApi1EnergySitesByIdSiteInfoResponse) => void,
-  ): () => void {
-    this.on("siteInfo", callback);
-    return () => this.off("siteInfo", callback);
-  }
-
-  public onLiveStatus(
-    callback: (data: GetApi1EnergySitesByIdLiveStatusResponse) => void,
-  ): () => void {
-    this.on("liveStatus", callback);
-    return () => this.off("liveStatus", callback);
   }
 }

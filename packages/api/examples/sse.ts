@@ -9,7 +9,7 @@ const { TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN } = config().parsed as Record<
   string
 >;
 async function main() {
-  const teslemetry = new Teslemetry(TESLEMETRY_ACCESS_TOKEN, "na");
+  const teslemetry = new Teslemetry(TESLEMETRY_ACCESS_TOKEN, { region: "na" });
 
   const sonic = teslemetry.getVehicle(TESLEMETRY_VIN);
 
@@ -17,17 +17,15 @@ async function main() {
   const l1 = sonic.sse.onSignal("ChargerVoltage", (x) => {
     console.log(`BChargerVoltage:`, x);
   });
-  const l2 = sonic.sse.on((x) => {
-    //console.log(`Sonic:`, x);
+  const l2 = sonic.sse.on("connectivity", (x) => {
+    console.log(`Sonic:`, x);
   });
-  const l3 = teslemetry.sse.on((x) => {
-    //console.log(`Enervything:`, x);
+  const l3 = sonic.sse.data.on("VehicleSpeed", (x) => {
+    console.log(`VehicleSpeed:`, x);
   });
   // Listen for connection status changes
-  const l4 = teslemetry.sse.onConnection((connected: boolean) => {
-    console.log(
-      `Stream connection status: ${connected ? "Connected" : "Disconnected"}`,
-    );
+  const l4 = teslemetry.sse.on("connect", () => {
+    console.log(`Stream connection status: Connected`);
   });
 
   // Connect to the stream
@@ -40,9 +38,8 @@ async function main() {
   process.on("SIGINT", () => {
     console.log("Disconnecting from Teslemetry Stream...");
     l1();
-    l2();
-    l3();
-    l4();
+    teslemetry.sse.removeAllListeners();
+    sonic.sse.removeAllListeners();
     teslemetry.sse.disconnect();
     process.exit(0);
   });

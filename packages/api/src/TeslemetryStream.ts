@@ -1,3 +1,4 @@
+import { EventEmitter } from "events";
 import { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
 import {
   SseCredits,
@@ -9,49 +10,67 @@ import {
   SseConnectivity,
   SseVehicleData,
   SseConfig,
+  Signals,
 } from "./const.js";
 import { Teslemetry } from "./Teslemetry.js";
 import { Logger } from "./logger.js";
 import { getSseByVin_ } from "./client/sdk.gen.js";
-
-type ListenerCallback<T extends SseEvent = SseEvent> = (event: T) => void;
-type ConnectionListenerCallback = (connected: boolean) => void;
-type EventType =
-  | "state"
-  | "data"
-  | "errors"
-  | "alerts"
-  | "connectivity"
-  | "credits"
-  | "vehicle_data"
-  | "config"
-  | "all";
-
-interface ListenerEntry {
-  callback: (event: any) => void;
-  filters?: Record<string, any>;
-}
 
 export interface TeslemetryStreamOptions {
   vin?: string;
   cache?: boolean;
 }
 
-export class TeslemetryStream {
+// Interface for event type safety
+type TeslemetryStreamEventMap = {
+  state: SseState;
+  data: SseData;
+  errors: SseErrors;
+  alerts: SseAlerts;
+  connectivity: SseConnectivity;
+  credits: SseCredits;
+  vehicle_data: SseVehicleData;
+  config: SseConfig;
+  connect: void;
+  disconnect: void;
+};
+
+export declare interface TeslemetryStream {
+  on<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this;
+
+  once<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this;
+
+  off<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this;
+
+  emit<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    ...args: TeslemetryStreamEventMap[K] extends void
+      ? []
+      : [TeslemetryStreamEventMap[K]]
+  ): boolean;
+}
+
+export class TeslemetryStream extends EventEmitter {
   private root: Teslemetry;
   public active: boolean = false;
   public connected: boolean = false;
   private vin: string | undefined;
   private cache: boolean | undefined;
   public logger: Logger;
-
-  private listeners: Map<EventType, Set<ListenerEntry>> = new Map();
-  private _connectionListeners: Map<() => void, ConnectionListenerCallback> =
-    new Map();
-  private vehicles: Map<string, TeslemetryVehicleStream> = new Map();
+  public vehicles: Map<string, TeslemetryVehicleStream> = new Map();
 
   // Constructor and basic setup
   constructor(root: Teslemetry, options?: TeslemetryStreamOptions) {
+    super();
     this.root = root;
     this.vin = options?.vin;
     this.cache = options?.cache;
@@ -63,7 +82,7 @@ export class TeslemetryStream {
 
   public getVehicle(vin: string): TeslemetryVehicleStream {
     if (!this.vehicles.has(vin)) {
-      this.vehicles.set(vin, new TeslemetryVehicleStream(this.root, this, vin));
+      new TeslemetryVehicleStream(this.root, vin);
     }
     return this.vehicles.get(vin)!;
   }
@@ -92,7 +111,7 @@ export class TeslemetryStream {
         this.logger.info(`Connected to stream`);
         retries = 0;
         this.connected = true;
-        this._updateConnectionListeners(true);
+        this.emit("connect");
 
         if (sse.stream) {
           for await (const event of sse.stream) {
@@ -106,7 +125,7 @@ export class TeslemetryStream {
         this.logger.error("SSE error:", error);
 
         this.connected = false;
-        this._updateConnectionListeners(false);
+        this.emit("disconnect");
 
         retries++;
         const delay = Math.min(2 ** retries, 600) * 1000;
@@ -115,7 +134,7 @@ export class TeslemetryStream {
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
-    this._updateConnectionListeners(false);
+    this.emit("disconnect");
   }
 
   public disconnect(): void {
@@ -126,156 +145,65 @@ export class TeslemetryStream {
   public close(): void {
     this.active = false;
     this.logger.info(`Disconnecting from stream`);
-    this._updateConnectionListeners(false);
   }
 
-  // Connection listeners
-  public onConnection(callback: ConnectionListenerCallback): () => void {
-    const removeListener = () => {
-      this._connectionListeners.delete(removeListener);
-    };
-    this._connectionListeners.set(removeListener, callback);
-    return removeListener;
+  public parseCreatedAt(event: SseEvent): Date {
+    const [main, ns] = event.createdAt.split(".");
+    const date = new Date(main + "Z");
+    return new Date(date.getTime() + parseInt((ns || "000").substring(0, 3)));
   }
 
-  // Event listeners (typed by event type)
-  public onState(
-    callback: (event: SseState) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    return this._createListener("state", callback, filters);
-  }
-
-  public onData(
-    callback: (event: SseData) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    return this._createListener("data", callback, filters);
-  }
-
-  public onErrors(
-    callback: (event: SseErrors) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    return this._createListener("errors", callback, filters);
-  }
-
-  public onAlerts(
-    callback: (event: SseAlerts) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    return this._createListener("alerts", callback, filters);
-  }
-
-  public onConnectivity(
-    callback: (event: SseConnectivity) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    return this._createListener("connectivity", callback, filters);
-  }
-
-  public onCredits(
-    callback: (event: SseCredits) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    return this._createListener("credits", callback, filters);
-  }
-
-  public onVehicleData(
-    callback: (event: SseVehicleData) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    return this._createListener("vehicle_data", callback, filters);
-  }
-
-  public onConfig(
-    callback: (event: SseConfig) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    return this._createListener("config", callback, filters);
-  }
-
-  public on<T extends SseEvent>(
-    callback: (event: T) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    return this._createListener("all", callback, filters);
-  }
-
-  // Private methods
-  private _updateConnectionListeners(value: boolean): void {
-    for (const listener of this._connectionListeners.values()) {
-      listener(value);
-    }
-  }
-
-  private _createListener<T extends SseEvent>(
-    eventType: EventType,
-    callback: (event: T) => void,
-    filters?: Record<string, any>,
-  ): () => void {
-    const entry: ListenerEntry = { callback: callback as any, filters };
-
-    if (!this.listeners.has(eventType)) {
-      this.listeners.set(eventType, new Set());
-    }
-    this.listeners.get(eventType)!.add(entry);
-
-    return () => {
-      const set = this.listeners.get(eventType);
-      if (set) {
-        set.delete(entry);
-        if (set.size === 0) {
-          this.listeners.delete(eventType);
-        }
-      }
-    };
-  }
-
-  private _dispatch(event: any) {
-    // Add timestamp if missing (parse createdAt)
-    if (event.createdAt && !event.timestamp) {
-      const [main, ns] = event.createdAt.split(".");
-      const date = new Date(main + "Z");
-      event.timestamp =
-        date.getTime() + parseInt((ns || "000").substring(0, 3));
+  private _dispatch(event: SseEvent) {
+    if ("state" in event) {
+      this.emit("state", event);
+    } else if ("data" in event) {
+      this.emit("data", event);
+    } else if ("errors" in event) {
+      this.emit("errors", event);
+    } else if ("alerts" in event) {
+      this.emit("alerts", event);
+    } else if ("networkInterface" in event) {
+      this.emit("connectivity", event);
+    } else if ("credits" in event) {
+      this.emit("credits", event);
+    } else if ("vehicle_data" in event) {
+      this.emit("vehicle_data", event);
+    } else if ("config" in event) {
+      this.emit("config", event);
     }
 
-    // Always dispatch to 'all' listeners first
-    const allListeners = this.listeners.get("all");
-    if (allListeners) {
-      for (const entry of allListeners) {
-        if (recursiveMatch(entry.filters, event)) {
-          entry.callback(event);
-        }
-      }
-    }
-
-    // Then dispatch to specific event type listeners
-    let eventType: EventType | undefined;
-
-    if ("state" in event) eventType = "state";
-    else if ("data" in event) eventType = "data";
-    else if ("errors" in event) eventType = "errors";
-    else if ("alerts" in event) eventType = "alerts";
-    else if ("networkInterface" in event) eventType = "connectivity";
-    else if ("credits" in event) eventType = "credits";
-    else if ("vehicle_data" in event) eventType = "vehicle_data";
-    else if ("config" in event) eventType = "config";
-
-    if (eventType) {
-      const set = this.listeners.get(eventType);
-      if (set) {
-        for (const entry of set) {
-          if (recursiveMatch(entry.filters, event)) {
-            entry.callback(event);
-          }
-        }
+    const vehicle = this.vehicles.get(event.vin);
+    if (vehicle) {
+      if ("state" in event) {
+        vehicle.emit("state", event);
+      } else if ("data" in event) {
+        vehicle.emit("data", event);
+        // Emit each signal individually
+        (Object.keys(event.data) as Signals[]).forEach((key) => {
+          if (event.data[key] !== undefined)
+            vehicle.data.emit(key, event.data[key]);
+        });
+      } else if ("errors" in event) {
+        vehicle.emit("errors", event);
+      } else if ("alerts" in event) {
+        vehicle.emit("alerts", event);
+      } else if ("networkInterface" in event) {
+        vehicle.emit("connectivity", event);
+      } else if ("vehicle_data" in event) {
+        vehicle.emit("vehicle_data", event);
+      } else if ("config" in event) {
+        vehicle.emit("config", event);
       }
     }
   }
 }
 
+/**
+ * Recursively check if an event matches a filter.
+ * @param filter - The filter to match against.
+ * @param event - The event to match against.
+ * @returns True if the event matches the filter, false otherwise.
+ */
 function recursiveMatch(filter: any, event: any): boolean {
   if (filter === null || filter === undefined) {
     return true;
