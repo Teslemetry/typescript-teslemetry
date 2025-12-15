@@ -1,3 +1,4 @@
+import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
 import {
   postApi1EnergySitesByIdBackup,
@@ -9,13 +10,55 @@ import {
   postApi1EnergySitesByIdOperation,
   postApi1EnergySitesByIdStormMode,
   getApi1EnergySitesByIdTelemetryHistory,
+  GetApi1EnergySitesByIdSiteInfoResponse,
+  GetApi1EnergySitesByIdLiveStatusResponse,
 } from "./client/index.js";
 
-export class TeslemetryEnergyApi {
+// TypeScript interface for event type safety
+export declare interface TeslemetryEnergyApi {
+  on(
+    event: "siteInfo",
+    listener: (data: GetApi1EnergySitesByIdSiteInfoResponse) => void,
+  ): this;
+  on(
+    event: "liveStatus",
+    listener: (data: GetApi1EnergySitesByIdLiveStatusResponse) => void,
+  ): this;
+
+  off(
+    event: "siteInfo",
+    listener: (data: GetApi1EnergySitesByIdSiteInfoResponse) => void,
+  ): this;
+  off(
+    event: "liveStatus",
+    listener: (data: GetApi1EnergySitesByIdLiveStatusResponse) => void,
+  ): this;
+
+  once(
+    event: "siteInfo",
+    listener: (data: GetApi1EnergySitesByIdSiteInfoResponse) => void,
+  ): this;
+  once(
+    event: "liveStatus",
+    listener: (data: GetApi1EnergySitesByIdLiveStatusResponse) => void,
+  ): this;
+
+  emit(
+    event: "siteInfo",
+    data: GetApi1EnergySitesByIdSiteInfoResponse,
+  ): boolean;
+  emit(
+    event: "liveStatus",
+    data: GetApi1EnergySitesByIdLiveStatusResponse,
+  ): boolean;
+}
+
+export class TeslemetryEnergyApi extends EventEmitter {
   private root: Teslemetry;
   public siteId: number;
 
   constructor(root: Teslemetry, siteId: number) {
+    super();
     this.root = root;
     this.siteId = siteId;
   }
@@ -91,6 +134,7 @@ export class TeslemetryEnergyApi {
       path: { id: this.siteId },
       client: this.root.client,
     });
+    this.emit("liveStatus", data);
     return data;
   }
 
@@ -103,6 +147,7 @@ export class TeslemetryEnergyApi {
       path: { id: this.siteId },
       client: this.root.client,
     });
+    this.emit("siteInfo", data);
     return data;
   }
 
@@ -172,5 +217,19 @@ export class TeslemetryEnergyApi {
       client: this.root.client,
     });
     return data;
+  }
+
+  public onSiteInfo(
+    callback: (data: GetApi1EnergySitesByIdSiteInfoResponse) => void,
+  ): () => void {
+    this.on("siteInfo", callback);
+    return () => this.off("siteInfo", callback);
+  }
+
+  public onLiveStatus(
+    callback: (data: GetApi1EnergySitesByIdLiveStatusResponse) => void,
+  ): () => void {
+    this.on("liveStatus", callback);
+    return () => this.off("liveStatus", callback);
   }
 }
