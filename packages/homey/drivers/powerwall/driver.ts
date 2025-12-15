@@ -20,7 +20,9 @@ export default class PowerwallDriver extends TeslemetryDriver {
 
     return Object.values(products.energySites).map((data) => ({
       name: data.name,
-      data,
+      data: {
+        id: data.product.energy_site_id,
+      },
       energy: {
         batteries: [],
       },

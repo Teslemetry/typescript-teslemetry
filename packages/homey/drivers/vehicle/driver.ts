@@ -1,6 +1,25 @@
 import type TeslemetryApp from "../../app.js";
 import TeslemetryDriver from "../../lib/TeslemetryDriver.js";
 
+const model = (vin: string) => {
+  switch (vin[3]) {
+    case "3":
+      return "Model 3";
+    case "S":
+      return "Model S";
+    case "X":
+      return "Model X";
+    case "Y":
+      return "Model Y";
+    case "C":
+      return "Cybertruck";
+    case "T":
+      return "Semi";
+    default:
+      return "Unknown Model";
+  }
+};
+
 export default class VehicleDriver extends TeslemetryDriver {
   async onInit() {
     this.homey.log("Vehicle driver initialized");
@@ -18,25 +37,10 @@ export default class VehicleDriver extends TeslemetryDriver {
         return [];
       }
 
-      const vehicles = Object.values(products.vehicles);
-
-      if (vehicles.length === 0) {
-        this.homey.log("No vehicles found in Teslemetry account");
-        return [];
-      }
-
-      return vehicles.map((vehicle: any) => ({
-        name: vehicle.display_name || `Tesla ${vehicle.model || "Vehicle"}`,
+      return Object.values(products.vehicles).map((data) => ({
+        name: data.product.display_name || `Tesla ${model(data.vin)}`,
         data: {
-          id: vehicle.id,
-          vin: vehicle.vin,
-          vehicle_id: vehicle.vehicle_id,
-        },
-        store: {
-          model: vehicle.model,
-          year: vehicle.year,
-          color: vehicle.color,
-          state: vehicle.state,
+          vin: data.vin,
         },
       }));
     } catch (error) {

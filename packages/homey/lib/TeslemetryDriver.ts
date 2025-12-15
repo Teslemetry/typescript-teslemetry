@@ -12,11 +12,13 @@ export default class TeslemetryDriver extends Homey.Driver {
         codeVerifier = pkce.codeVerifier;
         const state = Math.random().toString(36).substring(7);
         const url = app.oauth.getAuthorizationUrl(state, pkce.codeChallenge);
+        console.log("My URL", url);
 
         const callback = await this.homey.cloud.createOAuth2Callback(url);
 
         callback
           .on("url", (url: string) => {
+            console.log("Homey URL", url);
             session.emit("url", url);
           })
           .on("code", async (code: string | Error) => {

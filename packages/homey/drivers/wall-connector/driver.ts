@@ -23,8 +23,8 @@ export default class WallConnectorDriver extends TeslemetryDriver {
         site.product.components?.wall_connectors?.map((data) => ({
           name: `${site.name} - ${data.device_id}`,
           data: {
-            data,
-            site,
+            site: site.product.energy_site_id,
+            id: data.device_id,
           },
         })) || [],
     );

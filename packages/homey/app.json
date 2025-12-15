@@ -4,15 +4,20 @@
   "version": "1.0.0",
   "compatibility": ">=12.4.5",
   "sdk": 3,
-  "platforms": ["local", "cloud"],
+  "platforms": [
+    "local",
+    "cloud"
+  ],
   "name": {
     "en": "Teslemetry"
   },
   "description": {
     "en": "Adds support for Tesla vehicles and energy products through Teslemetry"
   },
-  "category": ["energy"],
-  "permissions": ["homey:manager:api"],
+  "category": [
+    "energy"
+  ],
+  "permissions": [],
   "images": {
     "small": "/assets/images/small.png",
     "large": "/assets/images/large.png",
@@ -29,8 +34,14 @@
         "en": "Tesla Powerwall"
       },
       "class": "battery",
-      "capabilities": ["measure_power", "measure_battery"],
-      "platforms": ["local", "cloud"],
+      "capabilities": [
+        "measure_power",
+        "measure_battery"
+      ],
+      "platforms": [
+        "local",
+        "cloud"
+      ],
       "pair": [
         {
           "id": "login_oauth2",
@@ -61,8 +72,16 @@
         "en": "Tesla Vehicle"
       },
       "class": "car",
-      "capabilities": ["measure_battery", "locked", "measure_temperature"],
-      "platforms": ["local", "cloud"],
+      "capabilities": [
+        "measure_battery",
+        "locked",
+        "measure_temperature",
+        "thermostat_mode"
+      ],
+      "platforms": [
+        "local",
+        "cloud"
+      ],
       "pair": [
         {
           "id": "login_oauth2",
@@ -100,7 +119,10 @@
         "measure_power",
         "measure_voltage"
       ],
-      "platforms": ["local", "cloud"],
+      "platforms": [
+        "local",
+        "cloud"
+      ],
       "connectivity": [],
       "images": {
         "small": "/drivers/wall-connector/assets/images/small.png",

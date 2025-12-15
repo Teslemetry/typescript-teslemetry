@@ -3,7 +3,12 @@
     "en": "Tesla Vehicle"
   },
   "class": "car",
-  "capabilities": ["measure_battery", "locked", "measure_temperature"],
+  "capabilities": [
+    "measure_battery",
+    "locked",
+    "measure_temperature",
+    "thermostat_mode"
+  ],
   "platforms": ["local", "cloud"],
   "pair": [
     {

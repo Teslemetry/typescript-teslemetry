@@ -1,6 +1,5 @@
 import Homey from "homey";
 import crypto from "crypto";
-import { HomeyAPI } from "homey-api";
 
 export interface OAuth2Token {
   access_token: string;
@@ -19,22 +18,11 @@ export default class TeslemetryOAuth2Client {
 
   private homey;
   private token: OAuth2Token | null = null;
-  private name: string | null = null;
+  private requestPromise: Promise<OAuth2Token> | null = null;
 
   constructor(app: Homey.App) {
     this.homey = app.homey;
     this.loadToken();
-    this.getName();
-  }
-
-  async getName(): Promise<string | null> {
-    if (!this.name) {
-      const api = await HomeyAPI.createAppAPI({
-        homey: this.homey,
-      });
-      this.name = await api.system.getSystemName();
-    }
-    return this.name;
   }
 
   private loadToken() {
@@ -81,7 +69,6 @@ export default class TeslemetryOAuth2Client {
       state: state,
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
-      name: this.name,
     });
 
     return `${TeslemetryOAuth2Client.AUTHORIZATION_URL}?${params.toString()}`;
@@ -97,28 +84,38 @@ export default class TeslemetryOAuth2Client {
       code: code,
       code_verifier: codeVerifier,
       redirect_uri: TeslemetryOAuth2Client.REDIRECT_URL,
-      name: this.name,
     };
 
     return this.requestToken(body);
   }
 
+  /**
+   * Refresh the token using the refresh token
+   * @returns
+   */
   async refreshToken(): Promise<OAuth2Token> {
     if (!this.token?.refresh_token) {
       throw new Error("No refresh token available");
     }
-
     const body = {
       grant_type: "refresh_token",
       client_id: TeslemetryOAuth2Client.CLIENT_ID,
       refresh_token: this.token.refresh_token,
-      name: this.homey.settings.get("name") || "Homey",
     };
-
     return this.requestToken(body);
   }
 
+  /**
+   * Return the existing token request or create a new one
+   */
   private async requestToken(body: any): Promise<OAuth2Token> {
+    this.requestPromise ??= this._requestToken(body);
+    return this.requestPromise.finally(() => {
+      this.requestPromise = null;
+    });
+  }
+
+  private async _requestToken(body: any): Promise<OAuth2Token> {
     const response = await fetch(TeslemetryOAuth2Client.TOKEN_URL, {
       method: "POST",
       headers: {
@@ -160,9 +157,9 @@ export default class TeslemetryOAuth2Client {
       throw new Error("No OAuth2 token available");
     }
 
-    // Refresh if expiring in less than 5 minutes
-    if (this.token.expires_at && Date.now() + 300000 > this.token.expires_at) {
-      this.homey.log("Token expiring soon, refreshing...");
+    // Refresh if expiring in less than a minute
+    if (this.token.expires_at && Date.now() + 60_000 > this.token.expires_at) {
+      this.homey.log("Teslemetry token expiring soon, refreshing...");
       await this.refreshToken();
     }
 
