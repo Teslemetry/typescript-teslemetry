@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.4.0
+
+### Minor Changes
+
+- 5afef9b: Refactor to use native event emitters, and add emitters for API get requests.
+
 ## 0.3.0
 
 ### Minor Changes
