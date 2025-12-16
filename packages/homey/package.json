@@ -1,7 +1,7 @@
 {
   "name": "com.teslemetry",
   "description": "Adds support for Tesla vehicles and energy products through Teslemetry",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,7 @@
     "validate": "homey app validate"
   },
   "dependencies": {
-    "@teslemetry/api": "^0.3.0",
+    "@teslemetry/api": "^0.4.0",
     "homey-api": "^3.14.22"
   },
   "devDependencies": {
