@@ -1,6 +1,5 @@
 import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
-import { TeslemetryStream } from "./TeslemetryStream.js";
 import {
   getApiConfigByVin,
   patchApiConfigByVin,
@@ -31,7 +30,7 @@ type TeslemetryStreamEventMap = {
 };
 
 // Base event emitter types
-export declare interface TeslemetryStream {
+export declare interface TeslemetryVehicleStream {
   on<K extends keyof TeslemetryStreamEventMap>(
     event: K,
     listener: (data: TeslemetryStreamEventMap[K]) => void,
