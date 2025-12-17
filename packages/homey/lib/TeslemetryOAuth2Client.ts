@@ -91,7 +91,6 @@ export default class TeslemetryOAuth2Client {
 
   /**
    * Refresh the token using the refresh token
-   * @returns
    */
   async refreshToken(): Promise<OAuth2Token> {
     if (!this.token?.refresh_token) {

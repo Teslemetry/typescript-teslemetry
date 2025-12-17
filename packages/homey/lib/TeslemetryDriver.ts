@@ -8,17 +8,22 @@ export default class TeslemetryDriver extends Homey.Driver {
 
     session.setHandler("showView", async (viewId: string) => {
       if (viewId === "login_oauth2") {
+        // Check if we already have a valid OAuth token
+        if (app.oauth.hasValidToken()) {
+          this.log("Valid OAuth token already exists, skipping OAuth flow");
+          session.emit("authorized");
+          return;
+        }
+
         const pkce = app.oauth.generatePKCE();
         codeVerifier = pkce.codeVerifier;
         const state = Math.random().toString(36).substring(7);
         const url = app.oauth.getAuthorizationUrl(state, pkce.codeChallenge);
-        console.log("My URL", url);
 
         const callback = await this.homey.cloud.createOAuth2Callback(url);
 
         callback
           .on("url", (url: string) => {
-            console.log("Homey URL", url);
             session.emit("url", url);
           })
           .on("code", async (code: string | Error) => {
