@@ -38,12 +38,9 @@ importers:
 
   packages/homey:
     dependencies:
-      '@teslemetry/api':
-        specifier: ^0.3.0
-        version: 0.3.0
-      homey-api:
-        specifier: ^3.14.22
-        version: 3.14.22(encoding@0.1.13)
+      homey:
+        specifier: ^3.10.0
+        version: 3.10.0(encoding@0.1.13)(ws@8.18.3)(zod@3.25.67)
     devDependencies:
       '@google/genai':
         specifier: ^1.33.0
@@ -51,6 +48,9 @@ importers:
       '@google/generative-ai':
         specifier: ^0.24.1
         version: 0.24.1
+      '@teslemetry/api':
+        specifier: workspace:*
+        version: link:../api
       '@tsconfig/node16':
         specifier: ^16.1.8
         version: 16.1.8
@@ -63,18 +63,21 @@ importers:
       '@types/sharp':
         specifier: ^0.31.1
         version: 0.31.1
+      copyfiles:
+        specifier: ^2.4.1
+        version: 2.4.1
       eslint:
         specifier: ^7.32.0
         version: 7.32.0
       eslint-config-athom:
         specifier: ^3.1.5
         version: 3.1.5(eslint@7.32.0)
-      homey:
-        specifier: ^3.10.0
-        version: 3.10.0(encoding@0.1.13)(ws@8.18.3)(zod@3.25.67)
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
+      tsdown:
+        specifier: ^0.16.7
+        version: 0.16.7(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -3622,9 +3625,6 @@ packages:
   '@tediousjs/connection-string@0.5.0':
     resolution: {integrity: sha512-7qSgZbincDDDFyRweCIEvZULFAw5iz/DeunhvuxpL31nfntX3P4Yd4HkHBRg9H8CdqY1e5WFN1PZIz/REL9MVQ==}
 
-  '@teslemetry/api@0.3.0':
-    resolution: {integrity: sha512-zV2L9+XHFhXYx/UfdLqUMdWn2AiN2mN9Qq1iFbQVZd05nHaPVO13G43zltj0XgKc3Uz0KpVYUD0lCRFLS0nUFQ==}
-
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
 
@@ -5136,6 +5136,10 @@ packages:
   cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
+
+  copyfiles@2.4.1:
+    resolution: {integrity: sha512-fereAvAvxDrQDOXybk3Qu3dPbOoKoysFMWtkY3mv5BsL8//OSZVL5DCLYqgRfY5cWirgRzlC+WSrxp6Bo3eNZg==}
+    hasBin: true
 
   core-js@2.6.12:
     resolution: {integrity: sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==}
@@ -8428,6 +8432,9 @@ packages:
     resolution: {integrity: sha512-Us/Se1WtT0ylXgNFfyFSx4LElllVLJXQjWi2Xz17xWw7amDKO2MLtFnVp1WACy7GkVGs+oBlRopVNUzlrGSw1w==}
     engines: {node: '>=6.0.0'}
 
+  noms@0.0.0:
+    resolution: {integrity: sha512-lNDU9VJaOPxUmXcLb+HQFeUgQQPtMI24Gt6hgfuMHRJgMRHMF/qZ4HJD3GDru4sSw9IQl2jPjAYnQrdIeLbwow==}
+
   nopt@5.0.0:
     resolution: {integrity: sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ==}
     engines: {node: '>=6'}
@@ -9299,6 +9306,9 @@ packages:
   read@3.0.1:
     resolution: {integrity: sha512-SLBrDU/Srs/9EoWhU5GdbAoxG1GzpQHo/6qiGItaoLJ1thmYpcNIM1qISEUvyHBzfGlWIyd6p2DNi1oV1VmAuw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+
+  readable-stream@1.0.34:
+    resolution: {integrity: sha512-ok1qVCJuRkNmvebYikljxJA/UEsKwLl2nI1OmaqAu4/UE+h0wKCHok4XkL/gvi39OacXvw59RJUOFUkDib2rHg==}
 
   readable-stream@1.1.14:
     resolution: {integrity: sha512-+MeVjFf4L44XUkhM1eYbD8fyEsxcV81pqMSR5gblfcLCHfZvbrqy4/qYHE+/R5HoBUT11WV5O08Cr1n3YXkWVQ==}
@@ -10225,6 +10235,9 @@ packages:
   throat@2.0.2:
     resolution: {integrity: sha512-N3kcBj8Pn5SnHmxGwrFl2D7TkCimQZJ6jBaCJldUsKcY0mmZ+dj4uF2FZ7r1gyHLkRnISvmL7MbMPV1UADqKjQ==}
 
+  through2@2.0.5:
+    resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
+
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
 
@@ -10631,6 +10644,10 @@ packages:
     peerDependenciesMeta:
       synckit:
         optional: true
+
+  untildify@4.0.0:
+    resolution: {integrity: sha512-KK8xQ1mkzZeg9inewmFVDNkg3l5LUhoq9kN6iWYB/CC9YMG8HA+c1Q8HwDe6dEX7kErrEVNVBO3fWsVq5iDgtw==}
+    engines: {node: '>=8'}
 
   unzip-response@2.0.1:
     resolution: {integrity: sha512-N0XH6lqDtFH84JxptQoZYmloF4nzrQqqrAymNj+/gW60AO2AZgOcf4O/nUXJcYfyQkqvMo9lSupBZmmgvuVXlw==}
@@ -16210,8 +16227,6 @@ snapshots:
 
   '@tediousjs/connection-string@0.5.0': {}
 
-  '@teslemetry/api@0.3.0': {}
-
   '@tokenizer/token@0.3.0': {}
 
   '@tootallnate/once@1.1.2':
@@ -16508,7 +16523,7 @@ snapshots:
     dependencies:
       '@types/yargs-parser': 21.0.3
 
-  '@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@7.32.0)(typescript@5.9.3))(eslint@7.32.0)(typescript@4.9.5)':
+  '@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@7.32.0)(typescript@4.9.5))(eslint@7.32.0)(typescript@4.9.5)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
       '@typescript-eslint/parser': 6.21.0(eslint@7.32.0)(typescript@4.9.5)
@@ -17959,6 +17974,16 @@ snapshots:
 
   cookie@0.7.2: {}
 
+  copyfiles@2.4.1:
+    dependencies:
+      glob: 7.2.3
+      minimatch: 3.1.2
+      mkdirp: 1.0.4
+      noms: 0.0.0
+      through2: 2.0.5
+      untildify: 4.0.0
+      yargs: 16.2.0
+
   core-js@2.6.12: {}
 
   core-util-is@1.0.2: {}
@@ -18705,7 +18730,7 @@ snapshots:
 
   eslint-config-athom@3.1.5(eslint@7.32.0):
     dependencies:
-      '@typescript-eslint/eslint-plugin': 6.21.0(@typescript-eslint/parser@6.21.0(eslint@7.32.0)(typescript@5.9.3))(eslint@7.32.0)(typescript@4.9.5)
+      '@typescript-eslint/eslint-plugin': 6.21.0(@typescript-eslint/parser@6.21.0(eslint@7.32.0)(typescript@4.9.5))(eslint@7.32.0)(typescript@4.9.5)
       '@typescript-eslint/parser': 6.21.0(eslint@7.32.0)(typescript@4.9.5)
       eslint: 7.32.0
       eslint-config-airbnb-base: 14.2.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@7.32.0)(typescript@5.9.3))(eslint@7.32.0))(eslint@7.32.0)
@@ -22548,6 +22573,11 @@ snapshots:
 
   nodemailer@7.0.10: {}
 
+  noms@0.0.0:
+    dependencies:
+      inherits: 2.0.4
+      readable-stream: 1.0.34
+
   nopt@5.0.0:
     dependencies:
       abbrev: 1.1.1
@@ -23457,6 +23487,13 @@ snapshots:
   read@3.0.1:
     dependencies:
       mute-stream: 1.0.0
+
+  readable-stream@1.0.34:
+    dependencies:
+      core-util-is: 1.0.2
+      inherits: 2.0.4
+      isarray: 0.0.1
+      string_decoder: 0.10.31
 
   readable-stream@1.1.14:
     dependencies:
@@ -24718,6 +24755,11 @@ snapshots:
 
   throat@2.0.2: {}
 
+  through2@2.0.5:
+    dependencies:
+      readable-stream: 2.3.8
+      xtend: 4.0.2
+
   through@2.3.8: {}
 
   timed-out@4.0.1: {}
@@ -25114,6 +25156,8 @@ snapshots:
     dependencies:
       '@oxc-project/runtime': 0.96.0
       rolldown: 1.0.0-beta.51
+
+  untildify@4.0.0: {}
 
   unzip-response@2.0.1: {}
 

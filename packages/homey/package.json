@@ -6,25 +6,31 @@
   "type": "module",
   "scripts": {
     "tsc": "tsc",
-    "build": "tsc",
+    "build": "pnpm tsdown && pnpm compose && pnpm copy",
+    "dev": "pnpm build && homey app run -s",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
-    "dev": "homey app run",
-    "validate": "homey app validate"
+    "validate": "homey app validate -s",
+    "compose": "node compose.cjs",
+    "tsdown": "tsdown",
+    "copy": "copyfiles 'app.json' 'assets/**' 'drivers/**/*.png' '.homeybuild'",
+    "help": "homey app run help"
   },
   "dependencies": {
-    "@teslemetry/api": "^0.3.0"
   },
   "devDependencies": {
+    "homey": "^3.10.0",
     "@google/genai": "^1.33.0",
     "@google/generative-ai": "^0.24.1",
+    "@teslemetry/api": "workspace:*",
     "@tsconfig/node16": "^16.1.8",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^24.10.2",
     "@types/sharp": "^0.31.1",
+    "copyfiles": "^2.4.1",
     "eslint": "^7.32.0",
     "eslint-config-athom": "^3.1.5",
-    "homey": "^3.10.0",
     "sharp": "^0.34.5",
+    "tsdown": "^0.16.7",
     "typescript": "^5.9.3"
   }
 }

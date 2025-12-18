@@ -53,6 +53,6 @@ export default class VehicleDevice extends Homey.Device {
   }
 
   async onUninit() {
-    this.vehicle.sse.data.
+    this.vehicle.sse.data.removeAllListeners();
   }
 }
