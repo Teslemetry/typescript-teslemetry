@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.5.0
+
+### Minor Changes
+
+- 4331f87: Rework createProducts to use metadata instead, and add energy refresh system
+
 ## 0.4.0
 
 ### Minor Changes
