@@ -339,7 +339,7 @@ export type GetApiMetadataResponses = {
         /**
          * Dictionary of available energy sites
          */
-        energy_sites?: {
+        energy_sites: {
             [key: string]: {
                 /**
                  * Energy site name
@@ -351,7 +351,7 @@ export type GetApiMetadataResponses = {
         /**
          * Subscription details
          */
-        subscription?: {
+        subscription: {
             cycle?: string;
             start?: string;
             end?: string;
@@ -1521,6 +1521,14 @@ export type GetApiConfigByVinResponses = {
                 resend_interval_seconds?: number;
             };
             /**
+             * The total number of miles driven since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+             */
+            MilesSinceReset?: {
+                interval_seconds: number;
+                resend_interval_seconds?: number;
+                minimum_delta?: number;
+            };
+            /**
              * The miles until arriving at the navigation destination. If no navigation destination is set, Invalid will be returned. (Requires 2024.26)
              */
             MilesToArrival?: {
@@ -1871,6 +1879,14 @@ export type GetApiConfigByVinResponses = {
             SeatVentEnabled?: {
                 interval_seconds: number;
                 resend_interval_seconds?: number;
+            };
+            /**
+             * The total number of miles driven using Full Self-Driving since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+             */
+            SelfDrivingMilesSinceReset?: {
+                interval_seconds: number;
+                resend_interval_seconds?: number;
+                minimum_delta?: number;
             };
             /**
              * Status of the Semi passenger seat position. (Requires 2024.26)
@@ -3326,6 +3342,14 @@ export type PatchApiConfigByVinData = {
                 resend_interval_seconds?: number;
             } | null;
             /**
+             * The total number of miles driven since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+             */
+            MilesSinceReset?: {
+                interval_seconds: number;
+                resend_interval_seconds?: number;
+                minimum_delta?: number;
+            } | null;
+            /**
              * The miles until arriving at the navigation destination. If no navigation destination is set, Invalid will be returned. (Requires 2024.26)
              */
             MilesToArrival?: {
@@ -3676,6 +3700,14 @@ export type PatchApiConfigByVinData = {
             SeatVentEnabled?: {
                 interval_seconds: number;
                 resend_interval_seconds?: number;
+            } | null;
+            /**
+             * The total number of miles driven using Full Self-Driving since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+             */
+            SelfDrivingMilesSinceReset?: {
+                interval_seconds: number;
+                resend_interval_seconds?: number;
+                minimum_delta?: number;
             } | null;
             /**
              * Status of the Semi passenger seat position. (Requires 2024.26)
@@ -4058,8 +4090,18 @@ export type PatchApiConfigByVinErrors = {
     /**
      * Default Response
      */
+    400: {
+        status?: 400;
+        response?: null;
+        error: string;
+    };
+    /**
+     * Default Response
+     */
     default: unknown;
 };
+
+export type PatchApiConfigByVinError = PatchApiConfigByVinErrors[keyof PatchApiConfigByVinErrors];
 
 export type PatchApiConfigByVinResponses = {
     /**
@@ -5159,6 +5201,14 @@ export type PostApiConfigByVinData = {
                 resend_interval_seconds?: number;
             } | null;
             /**
+             * The total number of miles driven since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+             */
+            MilesSinceReset?: {
+                interval_seconds: number;
+                resend_interval_seconds?: number;
+                minimum_delta?: number;
+            } | null;
+            /**
              * The miles until arriving at the navigation destination. If no navigation destination is set, Invalid will be returned. (Requires 2024.26)
              */
             MilesToArrival?: {
@@ -5509,6 +5559,14 @@ export type PostApiConfigByVinData = {
             SeatVentEnabled?: {
                 interval_seconds: number;
                 resend_interval_seconds?: number;
+            } | null;
+            /**
+             * The total number of miles driven using Full Self-Driving since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+             */
+            SelfDrivingMilesSinceReset?: {
+                interval_seconds: number;
+                resend_interval_seconds?: number;
+                minimum_delta?: number;
             } | null;
             /**
              * Status of the Semi passenger seat position. (Requires 2024.26)
@@ -5891,8 +5949,18 @@ export type PostApiConfigByVinErrors = {
     /**
      * Default Response
      */
+    400: {
+        status?: 400;
+        response?: null;
+        error: string;
+    };
+    /**
+     * Default Response
+     */
     default: unknown;
 };
+
+export type PostApiConfigByVinError = PostApiConfigByVinErrors[keyof PostApiConfigByVinErrors];
 
 export type PostApiConfigByVinResponses = {
     /**
@@ -7245,6 +7313,14 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
                     resend_interval_seconds?: number;
                 };
                 /**
+                 * The total number of miles driven since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+                 */
+                MilesSinceReset?: {
+                    interval_seconds: number;
+                    resend_interval_seconds?: number;
+                    minimum_delta?: number;
+                };
+                /**
                  * The miles until arriving at the navigation destination. If no navigation destination is set, Invalid will be returned. (Requires 2024.26)
                  */
                 MilesToArrival?: {
@@ -7595,6 +7671,14 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
                 SeatVentEnabled?: {
                     interval_seconds: number;
                     resend_interval_seconds?: number;
+                };
+                /**
+                 * The total number of miles driven using Full Self-Driving since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+                 */
+                SelfDrivingMilesSinceReset?: {
+                    interval_seconds: number;
+                    resend_interval_seconds?: number;
+                    minimum_delta?: number;
                 };
                 /**
                  * Status of the Semi passenger seat position. (Requires 2024.26)
@@ -9120,6 +9204,14 @@ export type GetApi1VehiclesByVinFleetTelemetryConfigResponses = {
                         resend_interval_seconds?: number;
                     };
                     /**
+                     * The total number of miles driven since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+                     */
+                    MilesSinceReset?: {
+                        interval_seconds: number;
+                        resend_interval_seconds?: number;
+                        minimum_delta?: number;
+                    };
+                    /**
                      * The miles until arriving at the navigation destination. If no navigation destination is set, Invalid will be returned. (Requires 2024.26)
                      */
                     MilesToArrival?: {
@@ -9470,6 +9562,14 @@ export type GetApi1VehiclesByVinFleetTelemetryConfigResponses = {
                     SeatVentEnabled?: {
                         interval_seconds: number;
                         resend_interval_seconds?: number;
+                    };
+                    /**
+                     * The total number of miles driven using Full Self-Driving since the Self-Driving statistics were reset. A reset may occur for certain software updates, car computer replacement, factory reset, or other triggers. (Requires 2025.44.25.5)
+                     */
+                    SelfDrivingMilesSinceReset?: {
+                        interval_seconds: number;
+                        resend_interval_seconds?: number;
+                        minimum_delta?: number;
                     };
                     /**
                      * Status of the Semi passenger seat position. (Requires 2024.26)
@@ -14593,6 +14693,7 @@ export type GetSseByVin_Responses = {
             MediaNowPlayingTitle?: string | null;
             MediaPlaybackSource?: string | null;
             MediaPlaybackStatus?: 'MediaStatusUnknown' | 'MediaStatusStopped' | 'MediaStatusPlaying' | 'MediaStatusPaused' | null;
+            MilesSinceReset?: number | null;
             MilesToArrival?: number | null;
             MinutesToArrival?: number | null;
             ModuleTempMax?: number | null;
@@ -14643,6 +14744,7 @@ export type GetSseByVin_Responses = {
             SeatHeaterRearRight?: number | null;
             SeatHeaterRight?: number | null;
             SeatVentEnabled?: boolean | null;
+            SelfDrivingMilesSinceReset?: number | null;
             SemitruckPassengerSeatFoldPosition?: 'SeatFoldPositionUnknown' | 'SeatFoldPositionSNA' | 'SeatFoldPositionFaulted' | 'SeatFoldPositionNotConfigured' | 'SeatFoldPositionFolded' | 'SeatFoldPositionUnfolded' | null;
             SemitruckTpmsPressureRe1L0?: number | null;
             SemitruckTpmsPressureRe1L1?: number | null;
@@ -15488,6 +15590,11 @@ export type GetSseByVin_Responses = {
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
                 };
+                MilesSinceReset?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
                 MilesToArrival?: {
                     interval_seconds: number;
                     minimum_delta?: number;
@@ -15719,6 +15826,11 @@ export type GetSseByVin_Responses = {
                     resend_interval_seconds?: number;
                 };
                 SeatVentEnabled?: {
+                    interval_seconds: number;
+                    minimum_delta?: number;
+                    resend_interval_seconds?: number;
+                };
+                SelfDrivingMilesSinceReset?: {
                     interval_seconds: number;
                     minimum_delta?: number;
                     resend_interval_seconds?: number;
@@ -15982,7 +16094,7 @@ export type GetSseByVinByFieldData = {
          * Vehicle Identification Number
          */
         vin: string;
-        field: 'ACChargingEnergyIn' | 'ACChargingPower' | 'AutoSeatClimateLeft' | 'AutoSeatClimateRight' | 'AutomaticBlindSpotCamera' | 'AutomaticEmergencyBrakingOff' | 'BMSState' | 'BatteryHeaterOn' | 'BatteryLevel' | 'BlindSpotCollisionWarningChime' | 'BmsFullchargecomplete' | 'BrakePedal' | 'BrakePedalPos' | 'BrickVoltageMax' | 'BrickVoltageMin' | 'CabinOverheatProtectionMode' | 'CabinOverheatProtectionTemperatureLimit' | 'CarType' | 'CenterDisplay' | 'ChargeAmps' | 'ChargeCurrentRequest' | 'ChargeCurrentRequestMax' | 'ChargeEnableRequest' | 'ChargeLimitSoc' | 'ChargePort' | 'ChargePortColdWeatherMode' | 'ChargePortDoorOpen' | 'ChargePortLatch' | 'ChargeRateMilePerHour' | 'ChargeState' | 'ChargerPhases' | 'ChargerVoltage' | 'ChargingCableType' | 'ClimateKeeperMode' | 'ClimateSeatCoolingFrontLeft' | 'ClimateSeatCoolingFrontRight' | 'CruiseFollowDistance' | 'CruiseSetSpeed' | 'CurrentLimitMph' | 'DCChargingEnergyIn' | 'DCChargingPower' | 'DCDCEnable' | 'DefrostForPreconditioning' | 'DefrostMode' | 'DestinationLocation' | 'DestinationName' | 'DetailedChargeState' | 'DiAxleSpeedF' | 'DiAxleSpeedR' | 'DiAxleSpeedREL' | 'DiAxleSpeedRER' | 'DiHeatsinkTF' | 'DiHeatsinkTR' | 'DiHeatsinkTREL' | 'DiHeatsinkTRER' | 'DiInverterTF' | 'DiInverterTR' | 'DiInverterTREL' | 'DiInverterTRER' | 'DiMotorCurrentF' | 'DiMotorCurrentR' | 'DiMotorCurrentREL' | 'DiMotorCurrentRER' | 'DiSlaveTorqueCmd' | 'DiStateF' | 'DiStateR' | 'DiStateREL' | 'DiStateRER' | 'DiStatorTempF' | 'DiStatorTempR' | 'DiStatorTempREL' | 'DiStatorTempRER' | 'DiTorqueActualF' | 'DiTorqueActualR' | 'DiTorqueActualREL' | 'DiTorqueActualRER' | 'DiTorquemotor' | 'DiVBatF' | 'DiVBatR' | 'DiVBatREL' | 'DiVBatRER' | 'DoorState' | 'DriveRail' | 'DriverSeatBelt' | 'DriverSeatOccupied' | 'EfficiencyPackage' | 'EmergencyLaneDepartureAvoidance' | 'EnergyRemaining' | 'EstBatteryRange' | 'EstimatedHoursToChargeTermination' | 'EuropeVehicle' | 'ExpectedEnergyPercentAtTripArrival' | 'ExteriorColor' | 'FastChargerPresent' | 'FastChargerType' | 'FdWindow' | 'ForwardCollisionWarning' | 'FpWindow' | 'Gear' | 'GpsHeading' | 'GpsState' | 'GuestModeEnabled' | 'GuestModeMobileAccessState' | 'HomelinkDeviceCount' | 'HomelinkNearby' | 'HvacACEnabled' | 'HvacAutoMode' | 'HvacFanSpeed' | 'HvacFanStatus' | 'HvacLeftTemperatureRequest' | 'HvacPower' | 'HvacRightTemperatureRequest' | 'HvacSteeringWheelHeatAuto' | 'HvacSteeringWheelHeatLevel' | 'Hvil' | 'IdealBatteryRange' | 'InsideTemp' | 'IsolationResistance' | 'LaneDepartureAvoidance' | 'LateralAcceleration' | 'LifetimeEnergyGainedRegen' | 'LifetimeEnergyUsed' | 'LifetimeEnergyUsedDrive' | 'LightsHazardsActive' | 'LightsHighBeams' | 'LightsTurnSignal' | 'LocatedAtFavorite' | 'LocatedAtHome' | 'LocatedAtWork' | 'Location' | 'Locked' | 'LongitudinalAcceleration' | 'MediaAudioVolume' | 'MediaAudioVolumeIncrement' | 'MediaAudioVolumeMax' | 'MediaNowPlayingAlbum' | 'MediaNowPlayingArtist' | 'MediaNowPlayingDuration' | 'MediaNowPlayingElapsed' | 'MediaNowPlayingStation' | 'MediaNowPlayingTitle' | 'MediaPlaybackSource' | 'MediaPlaybackStatus' | 'MilesToArrival' | 'MinutesToArrival' | 'ModuleTempMax' | 'ModuleTempMin' | 'NotEnoughPowerToHeat' | 'NumBrickVoltageMax' | 'NumBrickVoltageMin' | 'NumModuleTempMax' | 'NumModuleTempMin' | 'Odometer' | 'OffroadLightbarPresent' | 'OriginLocation' | 'OutsideTemp' | 'PackCurrent' | 'PackVoltage' | 'PairedPhoneKeyAndKeyFobQty' | 'PassengerSeatBelt' | 'PedalPosition' | 'PinToDriveEnabled' | 'PowershareHoursLeft' | 'PowershareInstantaneousPowerKW' | 'PowershareStatus' | 'PowershareStopReason' | 'PowershareType' | 'PreconditioningEnabled' | 'RatedRange' | 'RdWindow' | 'RearDefrostEnabled' | 'RearDisplayHvacEnabled' | 'RearSeatHeaters' | 'RemoteStartEnabled' | 'RightHandDrive' | 'RoofColor' | 'RouteLastUpdated' | 'RouteLine' | 'RouteTrafficMinutesDelay' | 'RpWindow' | 'ScheduledChargingMode' | 'ScheduledChargingPending' | 'ScheduledChargingStartTime' | 'ScheduledDepartureTime' | 'SeatHeaterLeft' | 'SeatHeaterRearCenter' | 'SeatHeaterRearLeft' | 'SeatHeaterRearRight' | 'SeatHeaterRight' | 'SeatVentEnabled' | 'SemitruckPassengerSeatFoldPosition' | 'SemitruckTpmsPressureRe1L0' | 'SemitruckTpmsPressureRe1L1' | 'SemitruckTpmsPressureRe1R0' | 'SemitruckTpmsPressureRe1R1' | 'SemitruckTpmsPressureRe2L0' | 'SemitruckTpmsPressureRe2L1' | 'SemitruckTpmsPressureRe2R0' | 'SemitruckTpmsPressureRe2R1' | 'SemitruckTractorParkBrakeStatus' | 'SemitruckTrailerParkBrakeStatus' | 'SentryMode' | 'ServiceMode' | 'Setting24HourTime' | 'SettingChargeUnit' | 'SettingDistanceUnit' | 'SettingTemperatureUnit' | 'SettingTirePressureUnit' | 'Soc' | 'SoftwareUpdateDownloadPercentComplete' | 'SoftwareUpdateExpectedDurationMinutes' | 'SoftwareUpdateInstallationPercentComplete' | 'SoftwareUpdateScheduledStartTime' | 'SoftwareUpdateVersion' | 'SpeedLimitMode' | 'SpeedLimitWarning' | 'SunroofInstalled' | 'SuperchargerSessionTripPlanner' | 'TimeToFullCharge' | 'TonneauOpenPercent' | 'TonneauPosition' | 'TonneauTentMode' | 'TpmsHardWarnings' | 'TpmsLastSeenPressureTimeFl' | 'TpmsLastSeenPressureTimeFr' | 'TpmsLastSeenPressureTimeRl' | 'TpmsLastSeenPressureTimeRr' | 'TpmsPressureFl' | 'TpmsPressureFr' | 'TpmsPressureRl' | 'TpmsPressureRr' | 'TpmsSoftWarnings' | 'Trim' | 'ValetModeEnabled' | 'VehicleName' | 'VehicleSpeed' | 'Version' | 'WheelType' | 'WiperHeatEnabled';
+        field: 'ACChargingEnergyIn' | 'ACChargingPower' | 'AutoSeatClimateLeft' | 'AutoSeatClimateRight' | 'AutomaticBlindSpotCamera' | 'AutomaticEmergencyBrakingOff' | 'BMSState' | 'BatteryHeaterOn' | 'BatteryLevel' | 'BlindSpotCollisionWarningChime' | 'BmsFullchargecomplete' | 'BrakePedal' | 'BrakePedalPos' | 'BrickVoltageMax' | 'BrickVoltageMin' | 'CabinOverheatProtectionMode' | 'CabinOverheatProtectionTemperatureLimit' | 'CarType' | 'CenterDisplay' | 'ChargeAmps' | 'ChargeCurrentRequest' | 'ChargeCurrentRequestMax' | 'ChargeEnableRequest' | 'ChargeLimitSoc' | 'ChargePort' | 'ChargePortColdWeatherMode' | 'ChargePortDoorOpen' | 'ChargePortLatch' | 'ChargeRateMilePerHour' | 'ChargeState' | 'ChargerPhases' | 'ChargerVoltage' | 'ChargingCableType' | 'ClimateKeeperMode' | 'ClimateSeatCoolingFrontLeft' | 'ClimateSeatCoolingFrontRight' | 'CruiseFollowDistance' | 'CruiseSetSpeed' | 'CurrentLimitMph' | 'DCChargingEnergyIn' | 'DCChargingPower' | 'DCDCEnable' | 'DefrostForPreconditioning' | 'DefrostMode' | 'DestinationLocation' | 'DestinationName' | 'DetailedChargeState' | 'DiAxleSpeedF' | 'DiAxleSpeedR' | 'DiAxleSpeedREL' | 'DiAxleSpeedRER' | 'DiHeatsinkTF' | 'DiHeatsinkTR' | 'DiHeatsinkTREL' | 'DiHeatsinkTRER' | 'DiInverterTF' | 'DiInverterTR' | 'DiInverterTREL' | 'DiInverterTRER' | 'DiMotorCurrentF' | 'DiMotorCurrentR' | 'DiMotorCurrentREL' | 'DiMotorCurrentRER' | 'DiSlaveTorqueCmd' | 'DiStateF' | 'DiStateR' | 'DiStateREL' | 'DiStateRER' | 'DiStatorTempF' | 'DiStatorTempR' | 'DiStatorTempREL' | 'DiStatorTempRER' | 'DiTorqueActualF' | 'DiTorqueActualR' | 'DiTorqueActualREL' | 'DiTorqueActualRER' | 'DiTorquemotor' | 'DiVBatF' | 'DiVBatR' | 'DiVBatREL' | 'DiVBatRER' | 'DoorState' | 'DriveRail' | 'DriverSeatBelt' | 'DriverSeatOccupied' | 'EfficiencyPackage' | 'EmergencyLaneDepartureAvoidance' | 'EnergyRemaining' | 'EstBatteryRange' | 'EstimatedHoursToChargeTermination' | 'EuropeVehicle' | 'ExpectedEnergyPercentAtTripArrival' | 'ExteriorColor' | 'FastChargerPresent' | 'FastChargerType' | 'FdWindow' | 'ForwardCollisionWarning' | 'FpWindow' | 'Gear' | 'GpsHeading' | 'GpsState' | 'GuestModeEnabled' | 'GuestModeMobileAccessState' | 'HomelinkDeviceCount' | 'HomelinkNearby' | 'HvacACEnabled' | 'HvacAutoMode' | 'HvacFanSpeed' | 'HvacFanStatus' | 'HvacLeftTemperatureRequest' | 'HvacPower' | 'HvacRightTemperatureRequest' | 'HvacSteeringWheelHeatAuto' | 'HvacSteeringWheelHeatLevel' | 'Hvil' | 'IdealBatteryRange' | 'InsideTemp' | 'IsolationResistance' | 'LaneDepartureAvoidance' | 'LateralAcceleration' | 'LifetimeEnergyGainedRegen' | 'LifetimeEnergyUsed' | 'LifetimeEnergyUsedDrive' | 'LightsHazardsActive' | 'LightsHighBeams' | 'LightsTurnSignal' | 'LocatedAtFavorite' | 'LocatedAtHome' | 'LocatedAtWork' | 'Location' | 'Locked' | 'LongitudinalAcceleration' | 'MediaAudioVolume' | 'MediaAudioVolumeIncrement' | 'MediaAudioVolumeMax' | 'MediaNowPlayingAlbum' | 'MediaNowPlayingArtist' | 'MediaNowPlayingDuration' | 'MediaNowPlayingElapsed' | 'MediaNowPlayingStation' | 'MediaNowPlayingTitle' | 'MediaPlaybackSource' | 'MediaPlaybackStatus' | 'MilesSinceReset' | 'MilesToArrival' | 'MinutesToArrival' | 'ModuleTempMax' | 'ModuleTempMin' | 'NotEnoughPowerToHeat' | 'NumBrickVoltageMax' | 'NumBrickVoltageMin' | 'NumModuleTempMax' | 'NumModuleTempMin' | 'Odometer' | 'OffroadLightbarPresent' | 'OriginLocation' | 'OutsideTemp' | 'PackCurrent' | 'PackVoltage' | 'PairedPhoneKeyAndKeyFobQty' | 'PassengerSeatBelt' | 'PedalPosition' | 'PinToDriveEnabled' | 'PowershareHoursLeft' | 'PowershareInstantaneousPowerKW' | 'PowershareStatus' | 'PowershareStopReason' | 'PowershareType' | 'PreconditioningEnabled' | 'RatedRange' | 'RdWindow' | 'RearDefrostEnabled' | 'RearDisplayHvacEnabled' | 'RearSeatHeaters' | 'RemoteStartEnabled' | 'RightHandDrive' | 'RoofColor' | 'RouteLastUpdated' | 'RouteLine' | 'RouteTrafficMinutesDelay' | 'RpWindow' | 'ScheduledChargingMode' | 'ScheduledChargingPending' | 'ScheduledChargingStartTime' | 'ScheduledDepartureTime' | 'SeatHeaterLeft' | 'SeatHeaterRearCenter' | 'SeatHeaterRearLeft' | 'SeatHeaterRearRight' | 'SeatHeaterRight' | 'SeatVentEnabled' | 'SelfDrivingMilesSinceReset' | 'SemitruckPassengerSeatFoldPosition' | 'SemitruckTpmsPressureRe1L0' | 'SemitruckTpmsPressureRe1L1' | 'SemitruckTpmsPressureRe1R0' | 'SemitruckTpmsPressureRe1R1' | 'SemitruckTpmsPressureRe2L0' | 'SemitruckTpmsPressureRe2L1' | 'SemitruckTpmsPressureRe2R0' | 'SemitruckTpmsPressureRe2R1' | 'SemitruckTractorParkBrakeStatus' | 'SemitruckTrailerParkBrakeStatus' | 'SentryMode' | 'ServiceMode' | 'Setting24HourTime' | 'SettingChargeUnit' | 'SettingDistanceUnit' | 'SettingTemperatureUnit' | 'SettingTirePressureUnit' | 'Soc' | 'SoftwareUpdateDownloadPercentComplete' | 'SoftwareUpdateExpectedDurationMinutes' | 'SoftwareUpdateInstallationPercentComplete' | 'SoftwareUpdateScheduledStartTime' | 'SoftwareUpdateVersion' | 'SpeedLimitMode' | 'SpeedLimitWarning' | 'SunroofInstalled' | 'SuperchargerSessionTripPlanner' | 'TimeToFullCharge' | 'TonneauOpenPercent' | 'TonneauPosition' | 'TonneauTentMode' | 'TpmsHardWarnings' | 'TpmsLastSeenPressureTimeFl' | 'TpmsLastSeenPressureTimeFr' | 'TpmsLastSeenPressureTimeRl' | 'TpmsLastSeenPressureTimeRr' | 'TpmsPressureFl' | 'TpmsPressureFr' | 'TpmsPressureRl' | 'TpmsPressureRr' | 'TpmsSoftWarnings' | 'Trim' | 'ValetModeEnabled' | 'VehicleName' | 'VehicleSpeed' | 'Version' | 'WheelType' | 'WiperHeatEnabled';
     };
     query?: never;
     url: '/sse/{vin}/{field}';

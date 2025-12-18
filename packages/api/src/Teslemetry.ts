@@ -8,7 +8,7 @@ import { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
 import { TeslemetryUserApi } from "./TeslemetryUserApi.js";
 import { TeslemetryChargingApi } from "./TeslemetryChargingApi.js";
 import { Client, createClient } from "./client/client/index.js";
-import { getApi1Products, getApiTest } from "./client/index.js";
+import { getApiMetadata, getApiTest } from "./client/index.js";
 import { Logger, consoleLogger } from "./logger.js";
 import pkg from "../package.json" with { type: "json" };
 import type { Products } from "./const.js";
@@ -93,29 +93,38 @@ export class Teslemetry {
    * Creates API instances for all products (vehicles and energy sites) associated with the account.
    * @returns A promise that resolves to an object containing vehicle and energy site names, API, and SSE instances.
    */
-  public async createProducts() {
-    const { data } = await getApi1Products({ client: this.client });
-    const result: Products = { vehicles: {}, energySites: {} };
-    data.response?.forEach((product) => {
-      if (product.device_type === "vehicle") {
-        result.vehicles[product.vin] = {
-          name: product.display_name ?? useTeslaModel(product.vin),
-          vin: product.vin,
-          api: this.api.getVehicle(product.vin),
-          sse: this.sse.getVehicle(product.vin),
-          product,
-        };
-      }
-      if (product.device_type === "energy") {
-        result.energySites[product.energy_site_id] = {
-          name: product.site_name ?? "Unnamed",
-          site: product.energy_site_id,
-          api: this.api.getEnergySite(product.energy_site_id),
-          product,
-        };
-      }
-    });
-    return result;
+  public async createProducts(): Promise<Products> {
+    const { data } = await getApiMetadata({ client: this.client });
+
+    const vehicles = Object.fromEntries(
+      Object.entries(data.vehicles).map(([vin, metadata]) => [
+        vin,
+        {
+          name: metadata.name ?? useTeslaModel(vin),
+          vin,
+          api: this.api.getVehicle(vin),
+          sse: this.sse.getVehicle(vin),
+          metadata,
+        },
+      ]),
+    );
+
+    const energySites = Object.fromEntries(
+      Object.entries(data.energy_sites ?? {}).map(([id, metadata]) => {
+        const siteId = Number(id);
+        return [
+          id,
+          {
+            name: metadata.name ?? "Unnamed",
+            id: siteId,
+            api: this.api.getEnergySite(siteId),
+            metadata,
+          },
+        ];
+      }),
+    );
+
+    return { vehicles, energySites };
   }
 
   /**
