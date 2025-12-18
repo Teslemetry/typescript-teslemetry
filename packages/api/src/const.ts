@@ -2,7 +2,7 @@ import type {
   GetSseByVin_Response,
   GetApiConfigByVinResponses,
   PatchApiConfigByVinData,
-  GetApi1ProductsResponses,
+  GetApiMetadataResponses,
 } from "./client/types.gen.js";
 import type { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
 import type { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
@@ -30,28 +30,21 @@ export type FieldsRequest = NonNullable<
 export type Signals = keyof SseData["data"];
 
 // Extract specific product types from the API response
-type ProductsResponse = GetApi1ProductsResponses[200]["response"];
-type VehicleProduct = Extract<
-  ProductsResponse[number],
-  { device_type: "vehicle" }
->;
-type EnergyProduct = Extract<
-  ProductsResponse[number],
-  { device_type: "energy" }
->;
+type VehicleMetadata = GetApiMetadataResponses[200]["vehicles"][string];
+type EnergyMetadata = GetApiMetadataResponses[200]["energy_sites"][string];
 export interface VehicleDetails {
-  name: string;
   vin: string;
+  name: string;
   api: TeslemetryVehicleApi;
   sse: TeslemetryVehicleStream;
-  product: VehicleProduct;
+  metadata: VehicleMetadata;
 }
 
 export interface EnergyDetails {
+  id: number;
   name: string;
-  site: number;
   api: TeslemetryEnergyApi;
-  product: EnergyProduct;
+  metadata: EnergyMetadata;
 }
 
 export interface Products {

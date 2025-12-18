@@ -53,9 +53,24 @@ export declare interface TeslemetryEnergyApi {
   ): boolean;
 }
 
+type PollingEndpoints = "siteInfo" | "liveStatus";
+
 export class TeslemetryEnergyApi extends EventEmitter {
   private root: Teslemetry;
   public siteId: number;
+  public refreshDelay: number = 30_000;
+  private refreshInterval: {
+    [endpoint in PollingEndpoints]: NodeJS.Timeout | null;
+  } = {
+    siteInfo: null,
+    liveStatus: null,
+  };
+  private refreshClients: {
+    [endpoint in PollingEndpoints]: Set<symbol>;
+  } = {
+    siteInfo: new Set(),
+    liveStatus: new Set(),
+  };
 
   constructor(root: Teslemetry, siteId: number) {
     if (root.api.energySites.has(siteId)) {
@@ -222,5 +237,37 @@ export class TeslemetryEnergyApi extends EventEmitter {
       client: this.root.client,
     });
     return data;
+  }
+
+  requestPolling(endpoint: PollingEndpoints): () => void {
+    if (!this.refreshInterval[endpoint]) {
+      switch (endpoint) {
+        case "siteInfo":
+          this.refreshInterval[endpoint] = setInterval(() => {
+            this.getSiteInfo();
+          }, this.refreshDelay);
+          this.getSiteInfo();
+          break;
+        case "liveStatus":
+          this.refreshInterval[endpoint] = setInterval(() => {
+            this.getLiveStatus();
+          }, this.refreshDelay);
+          this.getLiveStatus();
+          break;
+        default:
+          throw new Error(`Invalid endpoint: ${endpoint}`);
+      }
+    }
+    const symbol = Symbol("refreshClient");
+    this.refreshClients[endpoint].add(symbol);
+    return () => {
+      this.refreshClients[endpoint].delete(symbol);
+      if (this.refreshClients[endpoint].size === 0) {
+        if (this.refreshInterval[endpoint]) {
+          clearInterval(this.refreshInterval[endpoint]);
+          this.refreshInterval[endpoint] = null;
+        }
+      }
+    };
   }
 }
