@@ -6,19 +6,19 @@
   "type": "module",
   "scripts": {
     "tsc": "tsc",
-    "build": "pnpm tsdown && pnpm compose && pnpm copy",
-    "dev": "pnpm build && homey app run -s",
+    "build": "pnpm tsdown && pnpm compose && jq 'del(.devDependencies, .scripts)' package.json > .homeybuild/package.json && pnpm copy && cd .homeybuild  && npm install homey",
+    "dev": "pnpm build && homey app run -s -l homey",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
     "validate": "homey app validate -s",
     "compose": "node compose.cjs",
     "tsdown": "tsdown",
-    "copy": "copyfiles 'app.json' 'assets/**' 'drivers/**/*.png' '.homeybuild'",
+    "copy": "copyfiles 'app.json' 'assets/**' 'locales/**' 'drivers/**/*.png' '.homeybuild'",
     "help": "homey app run help"
   },
   "dependencies": {
+    "homey": "^3.10.0"
   },
   "devDependencies": {
-    "homey": "^3.10.0",
     "@google/genai": "^1.33.0",
     "@google/generative-ai": "^0.24.1",
     "@teslemetry/api": "workspace:*",

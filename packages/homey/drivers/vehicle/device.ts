@@ -1,6 +1,6 @@
-import Homey from "homey";
 import type TeslemetryApp from "../../app.js";
 import { Signals, Teslemetry, VehicleDetails } from "@teslemetry/api";
+import TeslemetryDevice from "../../lib/TeslemetryDevice.js";
 
 interface Description {
   capability: string;
@@ -9,7 +9,7 @@ interface Description {
   set?: (value: any) => Promise<void>;
 }
 
-export default class VehicleDevice extends Homey.Device {
+export default class VehicleDevice extends TeslemetryDevice {
   private vehicle!: VehicleDetails;
   private active: Array<() => void> = [];
 

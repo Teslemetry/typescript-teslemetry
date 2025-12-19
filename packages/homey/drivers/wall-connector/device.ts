@@ -1,19 +1,18 @@
-import Homey from 'homey';
+import TeslemetryDevice from "../../lib/TeslemetryDevice.js";
 
-module.exports = class MyDevice extends Homey.Device {
-
+module.exports = class MyDevice extends TeslemetryDevice {
   /**
    * onInit is called when the device is initialized.
    */
   async onInit() {
-    this.log('MyDevice has been initialized');
+    this.log("MyDevice has been initialized");
   }
 
   /**
    * onAdded is called when the user adds the device, called just after pairing.
    */
   async onAdded() {
-    this.log('MyDevice has been added');
+    this.log("MyDevice has been added");
   }
 
   /**
@@ -29,8 +28,12 @@ module.exports = class MyDevice extends Homey.Device {
     newSettings,
     changedKeys,
   }: {
-    oldSettings: { [key: string]: boolean | string | number | undefined | null };
-    newSettings: { [key: string]: boolean | string | number | undefined | null };
+    oldSettings: {
+      [key: string]: boolean | string | number | undefined | null;
+    };
+    newSettings: {
+      [key: string]: boolean | string | number | undefined | null;
+    };
     changedKeys: string[];
   }): Promise<string | void> {
     this.log("MyDevice settings where changed");
@@ -42,14 +45,13 @@ module.exports = class MyDevice extends Homey.Device {
    * @param {string} name The new name
    */
   async onRenamed(name: string) {
-    this.log('MyDevice was renamed');
+    this.log("MyDevice was renamed");
   }
 
   /**
    * onDeleted is called when the user deleted the device.
    */
   async onDeleted() {
-    this.log('MyDevice has been deleted');
+    this.log("MyDevice has been deleted");
   }
-
 };
