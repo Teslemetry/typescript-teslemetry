@@ -1,6 +1,6 @@
 import { EnergyDetails, TeslemetryEnergyApi } from "@teslemetry/api";
 import TeslemetryApp from "../../app.js";
-import TeslemetryDevice from "../../lib/TeslemetryDevice.js";
+import { TeslemetryDevice } from "../../lib/TeslemetryDevice.js";
 
 export default class PowerwallDevice extends TeslemetryDevice {
   site!: EnergyDetails;

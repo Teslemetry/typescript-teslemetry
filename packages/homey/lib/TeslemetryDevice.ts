@@ -1,3 +1,5 @@
-import Device from "homey/lib/Device.js";
+import Homey from "homey";
 
-export default class TeslemetryDevice extends Device {}
+export class TeslemetryDevice extends Homey.Device {}
+
+export default TeslemetryDevice;

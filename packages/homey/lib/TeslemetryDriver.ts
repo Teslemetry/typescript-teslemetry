@@ -1,7 +1,7 @@
 import Homey from "homey";
 import type TeslemetryApp from "../app.js";
 
-export default class TeslemetryDriver extends Homey.Driver {
+export class TeslemetryDriver extends Homey.Driver {
   async onPair(session: any) {
     let codeVerifier: string;
     const app = this.homey.app as TeslemetryApp;
@@ -48,3 +48,5 @@ export default class TeslemetryDriver extends Homey.Driver {
     });
   }
 }
+
+export default TeslemetryDriver;

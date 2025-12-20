@@ -1,6 +1,6 @@
 import type TeslemetryApp from "../../app.js";
 import { Signals, Teslemetry, VehicleDetails } from "@teslemetry/api";
-import TeslemetryDevice from "../../lib/TeslemetryDevice.js";
+import { TeslemetryDevice } from "../../lib/TeslemetryDevice.js";
 
 interface Description {
   capability: string;

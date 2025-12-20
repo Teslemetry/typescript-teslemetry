@@ -1,5 +1,5 @@
 import type TeslemetryApp from "../../app.js";
-import TeslemetryDriver from "../../lib/TeslemetryDriver.js";
+import { TeslemetryDriver } from "../../lib/TeslemetryDriver.js";
 
 export default class PowerwallDriver extends TeslemetryDriver {
   async onPairListDevices() {

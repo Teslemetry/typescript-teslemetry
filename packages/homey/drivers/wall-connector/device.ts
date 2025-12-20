@@ -1,6 +1,6 @@
-import TeslemetryDevice from "../../lib/TeslemetryDevice.js";
+import { TeslemetryDevice } from "../../lib/TeslemetryDevice.js";
 
-module.exports = class MyDevice extends TeslemetryDevice {
+export default class MyDevice extends TeslemetryDevice {
   /**
    * onInit is called when the device is initialized.
    */
@@ -54,4 +54,4 @@ module.exports = class MyDevice extends TeslemetryDevice {
   async onDeleted() {
     this.log("MyDevice has been deleted");
   }
-};
+}
