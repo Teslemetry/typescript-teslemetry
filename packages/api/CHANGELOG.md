@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.5.1
+
+### Patch Changes
+
+- c082ab4: Added cache on listen
+
 ## 0.5.0
 
 ### Minor Changes
