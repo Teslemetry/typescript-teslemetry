@@ -6,13 +6,13 @@
   "type": "module",
   "scripts": {
     "tsc": "tsc",
-    "build": "pnpm tsdown && pnpm compose && jq 'del(.devDependencies, .scripts)' package.json > .homeybuild/package.json && pnpm copy && cd .homeybuild  && npm install homey",
+    "build": "pnpm tsdown && pnpm compose && jq 'del(.devDependencies, .scripts)' package.json > .homeybuild/package.json && pnpm copy",
     "dev": "pnpm build && homey app run -s -l homey",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
     "validate": "homey app validate -s",
     "compose": "node compose.cjs",
     "tsdown": "tsdown",
-    "copy": "copyfiles 'app.json' 'assets/**' 'locales/**' 'drivers/**/*.png' '.homeybuild'",
+    "copy": "copyfiles -aF 'app.json' 'assets/**' 'locales/**' 'drivers/**/*.png' '.homeybuild' && copyfiles -aFu 2 'node_modules/homey/assets/**' 'node_modules/homey/package.json' '.homeybuild/node_modules'",
     "help": "homey app run help"
   },
   "dependencies": {
