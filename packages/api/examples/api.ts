@@ -12,7 +12,12 @@ const { TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN } = config().parsed as Record<
 console.log({ TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN });
 
 async function main() {
-  const teslemetry = new Teslemetry(TESLEMETRY_ACCESS_TOKEN, "na");
+  const teslemetry = new Teslemetry(TESLEMETRY_ACCESS_TOKEN, {
+    region: "na",
+    stream: {
+      cache: true,
+    },
+  });
   await teslemetry.getRegion();
   await teslemetry.api.test();
 

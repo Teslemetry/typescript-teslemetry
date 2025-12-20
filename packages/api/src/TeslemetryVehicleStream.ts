@@ -99,6 +99,14 @@ export class TeslemetryVehicleStream extends EventEmitter {
     });
   }
 
+  public on<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this {
+    this.root.sse.sendCache(this.vin, event, listener);
+    return super.on(event, listener);
+  }
+
   /** Get the current configuration for the vehicle */
   public async getConfig(): Promise<void> {
     const { data, response } = await getApiConfigByVin({
@@ -201,6 +209,10 @@ export class TeslemetryVehicleStream extends EventEmitter {
     this.addField(field).catch((error) => {
       this.logger.error(`Failed to add field ${field}:`, error);
     });
+    const data = this.root.sse.cache?.[this.vin]?.data?.[field];
+    if (data !== undefined) {
+      callback(data as Exclude<SseData["data"][T], undefined>);
+    }
     this.data.on(field, callback);
     return () => this.data.off(field, callback);
   }

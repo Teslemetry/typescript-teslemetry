@@ -18,7 +18,12 @@ import { getSseByVin_ } from "./client/sdk.gen.js";
 
 export interface TeslemetryStreamOptions {
   vin?: string;
-  cache?: boolean;
+  cache?:
+    | boolean
+    | {
+        cloud: boolean;
+        local: boolean;
+      };
 }
 
 // Interface for event type safety
@@ -59,12 +64,26 @@ export declare interface TeslemetryStream {
   ): boolean;
 }
 
+interface VehicleCache {
+  state?: SseState["state"];
+  data?: SseData["data"];
+  alerts?: SseAlerts["alerts"];
+  errors?: SseErrors["errors"];
+  connectivity?: Partial<
+    Record<SseConnectivity["networkInterface"], SseConnectivity["status"]>
+  >;
+}
+
+type Cache = Record<string, VehicleCache>;
+
 export class TeslemetryStream extends EventEmitter {
   private root: Teslemetry;
   public active: boolean = false;
   public connected: boolean = false;
   private vin: string | undefined;
-  private cache: boolean | undefined;
+  public cache: Cache = {};
+  private cloudCache: boolean | undefined;
+  private localCache: boolean | undefined;
   public logger: Logger;
   public vehicles: Map<string, TeslemetryVehicleStream> = new Map();
 
@@ -73,11 +92,84 @@ export class TeslemetryStream extends EventEmitter {
     super();
     this.root = root;
     this.vin = options?.vin;
-    this.cache = options?.cache;
+    if (typeof options?.cache === "boolean") {
+      this.cloudCache = options.cache;
+      this.localCache = options.cache;
+    } else {
+      this.cloudCache = options?.cache?.cloud;
+      this.localCache = options?.cache?.local;
+    }
     this.logger = root.logger;
     if (this.vin) {
       this.getVehicle(this.vin);
     }
+    if (this.localCache) {
+      this.startLocalCache();
+    }
+  }
+
+  public sendCache<K extends keyof TeslemetryStreamEventMap>(
+    vin: string,
+    event: K,
+    listener: (data: any) => void,
+  ) {
+    if (this.cache) {
+      const vehicleCache = this.cache[vin];
+      if (event === "connectivity" && vehicleCache.connectivity) {
+        for (const networkInterface in vehicleCache.connectivity) {
+          const typedNetworkInterface =
+            networkInterface as SseConnectivity["networkInterface"];
+          const status = vehicleCache.connectivity[typedNetworkInterface];
+          if (status !== undefined) {
+            listener({
+              createdAt: new Date().toISOString(),
+              vin,
+              networkInterface: typedNetworkInterface,
+              status,
+              isCache: true,
+            } as any);
+          }
+        }
+      } else if (event === "state" && vehicleCache.state) {
+        listener({
+          createdAt: new Date().toISOString(),
+          vin,
+          state: vehicleCache.state,
+          isCache: true,
+        } satisfies SseState);
+      } else if (event === "data" && vehicleCache.data) {
+        listener({
+          createdAt: new Date().toISOString(),
+          vin,
+          data: vehicleCache.data,
+          isCache: true,
+        } satisfies SseData);
+      } else if (event === "errors" && vehicleCache.errors) {
+        listener({
+          createdAt: new Date().toISOString(),
+          vin,
+          errors: vehicleCache.errors,
+          isCache: true,
+        } satisfies SseErrors);
+      } else if (event === "alerts" && vehicleCache.alerts) {
+        listener({
+          createdAt: new Date().toISOString(),
+          vin,
+          alerts: vehicleCache.alerts,
+          isCache: true,
+        } satisfies SseAlerts);
+      }
+    }
+  }
+
+  public on<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this {
+    for (const vin in this.cache) {
+      this.sendCache(vin, event, listener);
+    }
+    return super.on(event, listener);
   }
 
   public getVehicle(vin: string): TeslemetryVehicleStream {
@@ -104,7 +196,7 @@ export class TeslemetryStream extends EventEmitter {
           client: this.root.client,
           path: { vin: this.vin || "" },
           query: {
-            cache: this.cache,
+            cache: this.cloudCache,
           },
         });
 
@@ -195,6 +287,55 @@ export class TeslemetryStream extends EventEmitter {
         vehicle.emit("config", event);
       }
     }
+  }
+
+  private cacheState(event: SseState): void {
+    this.cache[event.vin] ??= {};
+    this.cache[event.vin].state = event.state;
+  }
+
+  private cacheData(event: SseData): void {
+    this.cache[event.vin] ??= { data: {} };
+    this.cache[event.vin].data = {
+      ...this.cache[event.vin].data,
+      ...event.data,
+    };
+  }
+
+  private cacheErrors(event: SseErrors): void {
+    this.cache[event.vin] ??= {};
+    this.cache[event.vin].errors = event.errors;
+  }
+
+  private cacheAlerts(event: SseAlerts): void {
+    this.cache[event.vin] ??= {};
+    this.cache[event.vin].alerts = event.alerts;
+  }
+
+  private cacheConnectivity(event: SseConnectivity): void {
+    this.cache[event.vin] ??= {};
+    this.cache[event.vin].connectivity ??= {};
+    this.cache[event.vin].connectivity![event.networkInterface] = event.status;
+  }
+
+  public startLocalCache(): void {
+    this.localCache = true;
+    this.on("state", this.cacheState);
+    this.on("data", this.cacheData);
+    this.on("errors", this.cacheErrors);
+    this.on("alerts", this.cacheAlerts);
+    this.on("connectivity", this.cacheConnectivity);
+    this.logger.info(`Started local cache`);
+  }
+
+  public stopLocalCache(): void {
+    this.localCache = false;
+    this.off("state", this.cacheState);
+    this.off("data", this.cacheData);
+    this.off("errors", this.cacheErrors);
+    this.off("alerts", this.cacheAlerts);
+    this.off("connectivity", this.cacheConnectivity);
+    this.logger.info(`Stopped local cache`);
   }
 }
 
