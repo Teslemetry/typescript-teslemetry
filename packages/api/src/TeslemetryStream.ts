@@ -96,8 +96,8 @@ export class TeslemetryStream extends EventEmitter {
       this.cloudCache = options.cache;
       this.localCache = options.cache;
     } else {
-      this.cloudCache = options?.cache?.cloud;
-      this.localCache = options?.cache?.local;
+      this.cloudCache = options?.cache?.cloud ?? true;
+      this.localCache = options?.cache?.local ?? true;
     }
     this.logger = root.logger;
     if (this.vin) {

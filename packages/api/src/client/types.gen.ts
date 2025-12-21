@@ -14124,86 +14124,192 @@ export type GetApi1EnergySitesByIdSiteInfoResponses = {
      * Default Response
      */
     200: {
-        response?: {
-            id?: string;
+        response: {
+            id: string;
             site_name?: string;
-            site_number?: string;
             backup_reserve_percent?: number;
             default_real_mode?: string;
-            installation_date?: string;
-            user_settings?: {
-                go_off_grid_test_banner_enabled?: null | boolean;
-                storm_mode_enabled?: null | boolean;
-                powerwall_onboarding_settings_set?: null | boolean;
-                powerwall_tesla_electric_interested_in?: null | boolean;
-                vpp_tour_enabled?: null | boolean;
-                off_grid_vehicle_charging_enabled?: null | boolean;
+            installation_date: string;
+            user_settings: {
+                go_off_grid_test_banner_enabled: null | boolean;
+                storm_mode_enabled: null | boolean;
+                powerwall_onboarding_settings_set: null | boolean;
+                powerwall_tesla_electric_interested_in: null | boolean;
+                vpp_tour_enabled: null | boolean;
+                off_grid_vehicle_charging_enabled: null | boolean;
             };
-            components?: {
-                solar?: boolean;
+            components: {
+                solar: boolean;
                 solar_type?: string;
-                battery?: boolean;
-                grid?: boolean;
-                backup?: boolean;
-                gateway?: string;
-                load_meter?: boolean;
-                tou_capable?: boolean;
-                storm_mode_capable?: boolean;
-                off_grid_vehicle_charging_reserve_supported?: boolean;
-                vehicle_charging_performance_view_enabled?: boolean;
-                vehicle_charging_solar_offset_view_enabled?: boolean;
-                battery_solar_offset_view_enabled?: boolean;
-                energy_service_self_scheduling_enabled?: boolean;
-                wall_connectors?: Array<{
-                    device_id?: string;
-                    din?: string;
-                    serial_number?: string;
-                    part_number?: string;
-                    part_type?: number;
-                    part_name?: string;
-                    is_active?: boolean;
-                }>;
-                nbt_supported?: boolean;
-                system_alerts_enabled?: boolean;
-                rate_tariff_service_options?: {
-                    rate_plan_configured_by_rts?: boolean;
-                    rate_tariff_service_enabled?: boolean;
-                    request_export_tariff?: boolean;
-                    request_network_fees?: boolean;
-                };
+                battery: boolean;
+                grid: boolean;
+                backup: boolean;
+                gateway: string;
+                load_meter: boolean;
+                tou_capable: boolean;
+                storm_mode_capable: boolean;
+                off_grid_vehicle_charging_reserve_supported: boolean;
+                vehicle_charging_performance_view_enabled: boolean;
+                vehicle_charging_solar_offset_view_enabled: boolean;
+                battery_solar_offset_view_enabled: boolean;
                 solar_value_enabled?: boolean;
+                energy_value_header?: string;
+                energy_value_subheader?: string;
+                energy_service_self_scheduling_enabled: boolean;
+                show_battery_soe_graph?: boolean;
+                show_grid_import_battery_source_cards?: boolean;
                 set_islanding_mode_enabled?: boolean;
+                wifi_commissioning_enabled?: boolean;
+                backup_time_remaining_enabled?: boolean;
                 battery_type?: string;
                 configurable?: boolean;
+                grid_services_enabled?: boolean;
+                gateways?: Array<{
+                    device_id: string;
+                    din: string;
+                    serial_number: string;
+                    part_number: string;
+                    part_type: number;
+                    part_name: string;
+                    is_active: boolean;
+                    site_id: string;
+                    firmware_version: string;
+                    updated_datetime: string;
+                    leader_device_id?: string;
+                }>;
+                customer_preferred_export_rule?: string;
+                edit_setting_permission_to_export?: boolean;
+                edit_setting_grid_charging?: boolean;
+                edit_setting_energy_exports?: boolean;
+                system_alerts_enabled?: boolean;
+                service_mode_enabled?: boolean;
+                support_manual_backup?: boolean;
+                rate_tariff_service_options: {
+                    rate_plan_configured_by_rts: boolean;
+                    rate_tariff_service_enabled: boolean;
+                    request_export_tariff: boolean;
+                    request_network_fees: boolean;
+                };
+                wall_connectors?: Array<{
+                    device_id: string;
+                    din: string;
+                    serial_number: string;
+                    part_number: string;
+                    part_type: number;
+                    part_name: string;
+                    is_active: boolean;
+                }>;
+                net_meter_mode?: string;
+                batteries?: Array<{
+                    device_id: string;
+                    din: string;
+                    serial_number: string;
+                    part_number: string;
+                    part_type?: number;
+                    part_name?: string;
+                    nameplate_max_charge_power: number;
+                    nameplate_max_discharge_power: number;
+                    nameplate_energy: number;
+                    is_active: boolean;
+                }>;
+                non_export_configured?: boolean;
+                disallow_charge_from_grid_with_solar_installed?: boolean;
+                ITC_cliff?: number;
+                sunrun_options?: {
+                    my_home_info_deeplink_enabled: boolean;
+                    support_screen_deeplink_enabled: boolean;
+                };
+                inverters?: Array<{
+                    device_id: string;
+                    din: string;
+                    serial_number: string;
+                    part_number: string;
+                    part_type: number;
+                    part_name: string;
+                    is_active: boolean;
+                    site_id: string;
+                    firmware_version?: string;
+                }>;
+                nbt_supported?: boolean;
+                local_offline_monitoring_enabled?: boolean;
+                hide_time_of_use_card?: boolean;
             };
             version?: string;
             battery_count?: number;
+            /**
+             * See https://digitalassets-energy.tesla.com/raw/upload/app/fleet-api/example-tariff/PGE-EV2-A.json for example
+             */
+            tariff_content?: {
+                [key: string]: unknown;
+            };
             nameplate_power?: number;
-            nameplate_energy?: number;
             installation_time_zone?: string;
             max_site_meter_power_ac?: number;
             min_site_meter_power_ac?: number;
+            /**
+             * See https://digitalassets-energy.tesla.com/raw/upload/app/fleet-api/example-tariff/PGE-EV2-A.json for example
+             */
             tariff_content_v2?: {
-                name?: string;
-                utility?: string;
-                version?: number;
-                daily_charges?: Array<{
-                    name?: string;
+                [key: string]: unknown;
+            };
+            vpp_backup_reserve_percent?: number;
+            utility?: string;
+            island_config?: {
+                low_soe_limit?: number;
+                jump_start_soe_threshold?: number;
+                wait_for_solar_retry_soe?: number;
+                max_frequency_shift_hz?: number;
+                wait_for_solar_soe_threshold?: number;
+                microgrid_not_ok_timeout?: number;
+                manual_backup?: boolean;
+                neutral_balancer_type?: string;
+            };
+            vehicle_charging_settings?: {
+                evses: Array<{
+                    din: string;
+                    smart_charging?: {
+                        enable?: boolean;
+                        schedules?: Array<{
+                            time: string;
+                        }>;
+                        min_hours_charging?: number;
+                    };
+                    modbus_id?: number;
                 }>;
-                demand_charges?: {
-                    [key: string]: unknown;
-                };
-                energy_charges?: {
-                    [key: string]: unknown;
-                };
-                seasons?: {
-                    [key: string]: unknown;
-                };
-                sell_tariff?: {
-                    [key: string]: unknown;
+            };
+            nameplate_energy?: number;
+            off_grid_vehicle_charging_reserve_percent?: number;
+            tariff_id?: string;
+            site_number?: string;
+            time_zone_offset?: number;
+            app_settings?: {
+                live_status_local_refresh_s: number;
+            };
+            csip?: {
+                dcap_url: string;
+                device_certificate: string;
+                csip_australia: {
+                    national_meter_identifier: string;
                 };
             };
+            external_switch?: {
+                input_type: string;
+                control_behavior: string;
+            };
+            aggregation_program?: {
+                name: string;
+                description: string;
+                link_name: string;
+                link_url: string;
+            };
+            tesla_electric_billing_periods?: Array<{
+                start_time: string;
+                end_time: string;
+            }>;
         };
+        error?: string;
+        error_description?: string;
+        txid?: string;
     };
 };
 
