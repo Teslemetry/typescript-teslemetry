@@ -13,43 +13,31 @@ import {
   GetApi1EnergySitesByIdSiteInfoResponse,
   GetApi1EnergySitesByIdLiveStatusResponse,
 } from "./client/index.js";
+import { reuse } from "./reuse.js";
+
+// Interface for event type safety
+type TeslemetryEnergyEventMap = {
+  siteInfo: GetApi1EnergySitesByIdSiteInfoResponse;
+  liveStatus: GetApi1EnergySitesByIdLiveStatusResponse;
+};
 
 // TypeScript interface for event type safety
 export declare interface TeslemetryEnergyApi {
-  on(
-    event: "siteInfo",
-    listener: (data: GetApi1EnergySitesByIdSiteInfoResponse) => void,
+  on<K extends keyof TeslemetryEnergyEventMap>(
+    event: K,
+    listener: (data: TeslemetryEnergyEventMap[K]) => void,
   ): this;
-  on(
-    event: "liveStatus",
-    listener: (data: GetApi1EnergySitesByIdLiveStatusResponse) => void,
+  off<K extends keyof TeslemetryEnergyEventMap>(
+    event: K,
+    listener: (data: TeslemetryEnergyEventMap[K]) => void,
   ): this;
-
-  off(
-    event: "siteInfo",
-    listener: (data: GetApi1EnergySitesByIdSiteInfoResponse) => void,
+  once<K extends keyof TeslemetryEnergyEventMap>(
+    event: K,
+    listener: (data: TeslemetryEnergyEventMap[K]) => void,
   ): this;
-  off(
-    event: "liveStatus",
-    listener: (data: GetApi1EnergySitesByIdLiveStatusResponse) => void,
-  ): this;
-
-  once(
-    event: "siteInfo",
-    listener: (data: GetApi1EnergySitesByIdSiteInfoResponse) => void,
-  ): this;
-  once(
-    event: "liveStatus",
-    listener: (data: GetApi1EnergySitesByIdLiveStatusResponse) => void,
-  ): this;
-
-  emit(
-    event: "siteInfo",
-    data: GetApi1EnergySitesByIdSiteInfoResponse,
-  ): boolean;
-  emit(
-    event: "liveStatus",
-    data: GetApi1EnergySitesByIdLiveStatusResponse,
+  emit<K extends keyof TeslemetryEnergyEventMap>(
+    event: K,
+    data: TeslemetryEnergyEventMap[K],
   ): boolean;
 }
 
@@ -58,6 +46,13 @@ type PollingEndpoints = "siteInfo" | "liveStatus";
 export class TeslemetryEnergyApi extends EventEmitter {
   private root: Teslemetry;
   public siteId: number;
+  public cache: {
+    siteInfo: GetApi1EnergySitesByIdSiteInfoResponse | null;
+    liveStatus: GetApi1EnergySitesByIdLiveStatusResponse | null;
+  } = {
+    siteInfo: null,
+    liveStatus: null,
+  };
   public refreshDelay: number = 30_000;
   private refreshInterval: {
     [endpoint in PollingEndpoints]: NodeJS.Timeout | null;
@@ -81,6 +76,17 @@ export class TeslemetryEnergyApi extends EventEmitter {
     this.siteId = siteId;
 
     root.api.energySites.set(siteId, this);
+  }
+
+  public on<K extends keyof TeslemetryEnergyEventMap>(
+    event: K,
+    listener: (data: TeslemetryEnergyEventMap[K]) => void,
+  ): this {
+    const cached = this.cache[event];
+    if (cached) {
+      listener(cached as TeslemetryEnergyEventMap[K]);
+    }
+    return super.on(event, listener);
   }
 
   /**
@@ -145,30 +151,38 @@ export class TeslemetryEnergyApi extends EventEmitter {
     return data;
   }
 
+  private getLiveStatusReuse = reuse(1000);
   /**
    * Returns the live status of the site (power, state of energy, grid status, storm mode).
    * @return Promise to an object with response containing current live status of the energy site
    */
   public async getLiveStatus() {
-    const { data } = await getApi1EnergySitesByIdLiveStatus({
-      path: { id: this.siteId },
-      client: this.root.client,
+    return this.getLiveStatusReuse(async () => {
+      const { data } = await getApi1EnergySitesByIdLiveStatus({
+        path: { id: this.siteId },
+        client: this.root.client,
+      });
+      this.cache.liveStatus = data;
+      this.emit("liveStatus", data);
+      return data;
     });
-    this.emit("liveStatus", data);
-    return data;
   }
 
+  private getSiteInfoReuse = reuse(1000);
   /**
    * Returns information about the site. Things like assets (has solar, etc), settings (backup reserve, etc), and features (storm_mode_capable, etc).
    * @return Promise to an object with response containing detailed information about the energy site
    */
   public async getSiteInfo() {
-    const { data } = await getApi1EnergySitesByIdSiteInfo({
-      path: { id: this.siteId },
-      client: this.root.client,
+    return this.getSiteInfoReuse(async () => {
+      const { data } = await getApi1EnergySitesByIdSiteInfo({
+        path: { id: this.siteId },
+        client: this.root.client,
+      });
+      this.cache.siteInfo = data;
+      this.emit("siteInfo", data);
+      return data;
     });
-    this.emit("siteInfo", data);
-    return data;
   }
 
   /**
