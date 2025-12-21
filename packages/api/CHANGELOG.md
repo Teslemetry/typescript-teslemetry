@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.5.3
+
+### Patch Changes
+
+- 504efa2: Add energy cache and reuse
+
 ## 0.5.2
 
 ### Patch Changes
