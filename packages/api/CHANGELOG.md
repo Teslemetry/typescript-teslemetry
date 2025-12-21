@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.5.2
+
+### Patch Changes
+
+- 3fdbfc1: Updated site_info schema
+
 ## 0.5.1
 
 ### Patch Changes
