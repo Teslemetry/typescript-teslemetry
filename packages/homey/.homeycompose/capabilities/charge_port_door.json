@@ -1,0 +1,9 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Charge Port Door"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "toggle"
+}

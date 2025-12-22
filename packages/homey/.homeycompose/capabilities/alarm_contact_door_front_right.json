@@ -1,0 +1,9 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Door (Front Right)"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor"
+}

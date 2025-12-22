@@ -1,4 +1,4 @@
-import type Homey from "homey";
+import Homey from "homey";
 import crypto from "crypto";
 
 export interface OAuth2Token {

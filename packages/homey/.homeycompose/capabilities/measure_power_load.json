@@ -1,0 +1,12 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Load Power"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "units": {
+    "en": "W"
+  }
+}

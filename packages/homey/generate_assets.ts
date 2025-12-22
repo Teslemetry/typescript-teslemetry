@@ -19,7 +19,9 @@ const IMAGEN_MODEL = "imagen-3.0-generate-001";
 // Paths
 const ASSETS_DIR = path.resolve("assets/images");
 const DRIVER_VEHICLE_DIR = path.resolve("drivers/vehicle/assets/images");
-const DRIVER_POWERWALL_DIR = path.resolve("drivers/powerwall/assets/images");
+const DRIVER_ENERGY_SITE_DIR = path.resolve(
+  "drivers/energy-site/assets/images",
+);
 const DRIVER_WALL_CONNECTOR_DIR = path.resolve(
   "drivers/wall-connector/assets/images",
 );
@@ -30,7 +32,7 @@ const BRANDMARK_PATH = path.resolve("assets/Brandmark - ELECTRIC TIGHT.png");
 const dirs = [
   ASSETS_DIR,
   DRIVER_VEHICLE_DIR,
-  DRIVER_POWERWALL_DIR,
+  DRIVER_ENERGY_SITE_DIR,
   DRIVER_WALL_CONNECTOR_DIR,
 ];
 
@@ -61,11 +63,12 @@ const tasks: ImageTask[] = [
   // Driver Images
   // Guideline: White background, recognizable device.
   // Resolutions: Small 75x75, Large 500x500, XLarge 1000x1000 (Square 1:1)
+
   {
-    name: "Driver: Tesla Vehicle",
+    name: "Driver: Vehicle",
     prompt:
-      "A studio shot of a white Tesla Model 3 from a front 3/4 angle. Pure white background, soft studio lighting, sharp details, photorealistic. The car is isolated on white. No text.",
-    outputDir: DRIVER_VEHICLE_DIR,
+      "A square studio shot of a white 2025 Tesla Model Y (Juniper) from a front 3/4 angle, centered in the frame. Pure white background, soft studio lighting, sharp details, photorealistic. The SUV is isolated on white, composed for square format. No text.",
+    outputDir: path.join(DRIVER_VEHICLE_DIR),
     sizes: [
       { name: "small.png", width: 75, height: 75 },
       { name: "large.png", width: 500, height: 500 },
@@ -73,10 +76,10 @@ const tasks: ImageTask[] = [
     ],
   },
   {
-    name: "Driver: Tesla Powerwall",
+    name: "Driver: Energy Site",
     prompt:
-      "A studio shot of a Tesla Powerwall 2 battery unit. Pure white background. Front view, clean, minimalist, photorealistic. The unit is isolated on white. No text.",
-    outputDir: DRIVER_POWERWALL_DIR,
+      "A square studio shot of a Tesla Powerwall 3 battery unit, centered in the frame. Pure white background. Front view, clean, minimalist, photorealistic. The unit is isolated on white, composed for square format. No text.",
+    outputDir: path.join(DRIVER_ENERGY_SITE_DIR, "powerwall"),
     sizes: [
       { name: "small.png", width: 75, height: 75 },
       { name: "large.png", width: 500, height: 500 },
@@ -86,7 +89,7 @@ const tasks: ImageTask[] = [
   {
     name: "Driver: Tesla Wall Connector",
     prompt:
-      "A studio shot of a Tesla Wall Connector Gen 3. Pure white background. Front view showing the white glass faceplate and the charging cable coiled neatly. Photorealistic. Isolated on white. No text.",
+      "A square studio shot of a Tesla Wall Connector Gen 3, centered in the frame. Pure white background. Front view showing the white glass faceplate and the charging cable coiled neatly. Photorealistic. Isolated on white, composed for square format. No text.",
     outputDir: DRIVER_WALL_CONNECTOR_DIR,
     sizes: [
       { name: "small.png", width: 75, height: 75 },
@@ -104,10 +107,15 @@ async function generateAndSave() {
     await fs.mkdir(dir, { recursive: true });
   }
 
+  // Create all task output directories
+  for (const task of tasks) {
+    await fs.mkdir(task.outputDir, { recursive: true });
+  }
+
   // Helper to copy icon.svg if missing
   const driverAssetsDirs = [
     path.resolve("drivers/vehicle/assets"),
-    path.resolve("drivers/powerwall/assets"),
+    path.resolve("drivers/energy-site/assets"),
     path.resolve("drivers/wall-connector/assets"),
   ];
   for (const driverDir of driverAssetsDirs) {
@@ -210,6 +218,12 @@ async function generateAndSave() {
       }
 
       if (imageBuffer) {
+        // Save original image
+        const originalPath = path.join(task.outputDir, "original.png");
+        await fs.writeFile(originalPath, imageBuffer);
+        console.log(`  - Saved original: ${originalPath}`);
+
+        // Generate resized versions
         for (const size of task.sizes) {
           const outputPath = path.join(task.outputDir, size.name);
           await sharp(imageBuffer)

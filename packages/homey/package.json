@@ -12,24 +12,22 @@
     "validate": "homey app validate -s",
     "compose": "node compose.cjs",
     "tsdown": "tsdown",
-    "copy": "copyfiles -aF 'app.json' 'assets/**' 'locales/**' 'drivers/**/*.png' 'node_modules/**' '.homeybuild'",
+    "copy": "copyfiles -aF 'app.json' 'assets/**' 'locales/**' 'drivers/**/*.png' 'node_modules/homey/**' '.homeybuild'",
     "help": "homey app run help"
   },
   "dependencies": {},
   "devDependencies": {
-    "homey": "^3.10.0",
+    "@teslemetry/api": "workspace:*",
     "@google/genai": "^1.33.0",
     "@google/generative-ai": "^0.24.1",
-    "@teslemetry/api": "workspace:*",
     "@tsconfig/node16": "^16.1.8",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^24.10.2",
     "@types/sharp": "^0.31.1",
-    "copyfiles": "^2.4.1",
     "eslint": "^7.32.0",
     "eslint-config-athom": "^3.1.5",
+    "homey": "^3.10.0",
     "sharp": "^0.34.5",
-    "tsdown": "^0.16.7",
     "typescript": "^5.9.3"
   }
 }

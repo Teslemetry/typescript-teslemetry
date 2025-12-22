@@ -1,23 +1,12 @@
 import type TeslemetryApp from "../../app.js";
-import { TeslemetryDriver } from "../../lib/TeslemetryDriver.js";
+import TeslemetryDriver from "../../lib/TeslemetryDriver.js";
 
-const model = (vin: string) => {
-  switch (vin[3]) {
-    case "3":
-      return "Model 3";
-    case "S":
-      return "Model S";
-    case "X":
-      return "Model X";
-    case "Y":
-      return "Model Y";
-    case "C":
-      return "Cybertruck";
-    case "T":
-      return "Semi";
-    default:
-      return "Unknown Model";
-  }
+const icon: Record<string, { icon: string }> = {
+  "3": { icon: "model3.svg" },
+  Y: { icon: "modelY.svg" },
+  S: { icon: "modelS.svg" },
+  X: { icon: "modelX.svg" },
+  C: { icon: "cybertruck.svg" },
 };
 
 export default class VehicleDriver extends TeslemetryDriver {
@@ -37,12 +26,23 @@ export default class VehicleDriver extends TeslemetryDriver {
         return [];
       }
 
-      return Object.values(products.vehicles).map((data) => ({
-        name: data.product.display_name || `Tesla ${model(data.vin)}`,
-        data: {
-          vin: data.vin,
-        },
-      }));
+      // Only includes vehicles with a subscription, that support fleet telemetry, and are configured correctly
+      return Object.values(products.vehicles)
+        .filter(
+          ({ metadata }) =>
+            metadata.access && !!metadata.fleet_telemetry && !metadata.polling,
+        )
+        .map((data) => ({
+          name: data.name,
+          data: {
+            vin: data.vin,
+          },
+          capabilitiesOptions: {
+            frunk: { setable: data.metadata.config?.can_actuate_trunks },
+            trunk: { setable: data.metadata.config?.can_actuate_trunks },
+          },
+          ...icon?.[data.vin[3]],
+        }));
     } catch (error) {
       this.homey.error("Failed to list vehicles:", error);
       throw new Error(

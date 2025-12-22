@@ -1,0 +1,29 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Operation Mode"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "values": [
+    {
+      "id": "self_consumption",
+      "title": {
+        "en": "Self Consumption"
+      }
+    },
+    {
+      "id": "backup",
+      "title": {
+        "en": "Backup"
+      }
+    },
+    {
+      "id": "autonomous",
+      "title": {
+        "en": "Autonomous"
+      }
+    }
+  ]
+}

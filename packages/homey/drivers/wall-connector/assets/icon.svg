@@ -1,5 +1,8 @@
-<svg viewBox="0 0 960 960" xmlns="http://www.w3.org/2000/svg">
-  <path fill="#000000" d="M680 160H280a80 80 0 0 0-80 80v560a80 80 0 0 0 80 80h400a80 80 0 0 0 80-80V240a80 80 0 0 0-80-80zM480 760a80 80 0 1 1 0-160 80 80 0 0 1 0 160z"/>
-  <path fill="#000000" d="M760 240c0 132.5-107.5 240-240 240s-240-107.5-240-240c0-44.2 35.8-80 80-80h320c44.2 0 80 35.8 80 80z"/>
-  <path fill="#000000" d="M720 560c0 110.5-89.5 200-200 200s-200-89.5-200-200c0-22.1 17.9-40 40-40h320c22.1 0 40 17.9 40 40z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960">
+  <rect x="360" y="100" width="240" height="460" rx="70" stroke="black" stroke-width="40" fill="none" />
+  <path d="M540 500 c 150 0 150 340 -60 340 s -240 -150 -240 -280" stroke="black" stroke-width="40" stroke-linecap="round" fill="none" />
+  <path d="M240 560 v -80" stroke="black" stroke-width="40" stroke-linecap="round" fill="none" />
+  <path d="M480 200 v 220" stroke="black" stroke-width="20" stroke-linecap="round" fill="none" />
+  <path d="M240 520 h -30" stroke="black" stroke-width="20" stroke-linecap="round" fill="none" />
+  <path d="M430 160 h 100" stroke="black" stroke-width="10" stroke-linecap="round" fill="none" />
 </svg>

@@ -9,6 +9,12 @@ export default class TeslemetryApp extends Homey.App {
   public teslemetry?: Teslemetry;
   public products?: Products;
   private initializationPromise?: Promise<void>;
+  private logger = {
+    info: (...args: unknown[]) => this.log(...args),
+    error: (...args: unknown[]) => this.error(...args),
+    warn: (...args: unknown[]) => this.log(...args),
+    debug: (...args: unknown[]) => this.log(...args),
+  };
 
   /**
    * onInit is called when the app is initialized
@@ -65,8 +71,15 @@ export default class TeslemetryApp extends Homey.App {
       }
 
       this.log("Initializing Teslemetry with OAuth2 token...");
-      this.teslemetry = new Teslemetry(this.oauth.getAccessToken);
+      this.teslemetry = new Teslemetry(this.oauth.getAccessToken, {
+        logger: this.logger,
+        stream: {
+          cache: true,
+        },
+      });
       this.products = await this.teslemetry.createProducts();
+
+      this.teslemetry.sse.connect();
 
       const vehicleCount = Object.keys(this.products.vehicles).length;
       const energyCount = Object.keys(this.products.energySites).length;

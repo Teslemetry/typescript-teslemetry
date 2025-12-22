@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960">
+  <!-- Main Body Outline -->
+  <path d="M160,720 C160,780 300,840 480,820 L860,680 C900,660 920,620 900,560 C840,440 720,320 500,320 C320,320 180,480 160,720 Z" stroke="black" stroke-width="40" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+  
+  <!-- Front Right Tire -->
+  <path d="M280,815 C280,845 420,835 420,805" stroke="black" stroke-width="40" fill="none" stroke-linecap="round"/>
+  
+  <!-- Rear Right Tire -->
+  <path d="M760,695 C760,720 860,705 860,675" stroke="black" stroke-width="40" fill="none" stroke-linecap="round"/>
+  
+  <!-- Windshield and Windows Detail -->
+  <path d="M210,670 C320,600 440,460 470,340 L720,380 L850,540 L520,610 Z" stroke="black" stroke-width="20" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+  
+  <!-- Side Window Pillar -->
+  <path d="M520,610 L470,340" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
+  
+  <!-- Front Bumper/Hood Shut Line -->
+  <path d="M210,670 L520,610 L880,550" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
+  
+  <!-- Headlights -->
+  <path d="M190,695 Q250,675 310,710" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
+  <path d="M490,760 Q550,740 610,750" stroke="black" stroke-width="20" fill="none" stroke-linecap="round"/>
+  
+  <!-- Door Handles (Minor Detail) -->
+  <path d="M600,600 L650,590" stroke="black" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <path d="M730,570 L780,560" stroke="black" stroke-width="10" fill="none" stroke-linecap="round"/>
+  
+  <!-- Lower Front Intake -->
+  <path d="M300,780 L450,765" stroke="black" stroke-width="10" fill="none" stroke-linecap="round"/>
+</svg>

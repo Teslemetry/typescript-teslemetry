@@ -1,10 +1,16 @@
 {
   "name": {
-    "en": "Tesla Powerwall"
+    "en": "Tesla Energy Site"
   },
+  "capabilities": [],
+  "connectivity": ["cloud"],
   "class": "battery",
-  "capabilities": ["measure_power", "measure_battery"],
-  "platforms": ["local", "cloud"],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "platforms": ["local"],
   "pair": [
     {
       "id": "login_oauth2",

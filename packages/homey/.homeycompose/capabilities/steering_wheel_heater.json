@@ -1,0 +1,29 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Steering Wheel Heater"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "values": [
+    {
+      "id": "0",
+      "title": {
+        "en": "Off"
+      }
+    },
+    {
+      "id": "1",
+      "title": {
+        "en": "Low"
+      }
+    },
+    {
+      "id": "3",
+      "title": {
+        "en": "High"
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "type": "string",
+  "title": {
+    "en": "Connected Vehicle"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/icon.svg"
+}

@@ -1,9 +1,10 @@
 {
   "id": "com.teslemetry",
-  "version": "1.0.0",
+  "brandColor": "#3D6DB5",
+  "version": "0.0.3",
   "compatibility": ">=12.4.5",
   "sdk": 3,
-  "platforms": ["local", "cloud"],
+  "platforms": ["local"],
   "name": {
     "en": "Teslemetry"
   },
@@ -20,5 +21,11 @@
   "author": {
     "name": "Teslemetry",
     "email": "hello@teslemetry.com"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/teslemetry/homey/issues"
+  },
+  "source": "https://github.com/teslemetry/homey",
+  "homepage": "https://teslemetry.com",
+  "support": "mailto:support@teslemetry.com"
 }

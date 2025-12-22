@@ -1,0 +1,9 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Storm Watch Active"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor"
+}

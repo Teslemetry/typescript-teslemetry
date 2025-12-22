@@ -1,57 +1,78 @@
-import { TeslemetryDevice } from "../../lib/TeslemetryDevice.js";
+import { EnergyDetails } from "@teslemetry/api";
+import TeslemetryDevice from "../../lib/TeslemetryDevice.js";
 
-export default class MyDevice extends TeslemetryDevice {
+export default class WallConnecter extends TeslemetryDevice {
+  site!: EnergyDetails;
+  din!: string;
+  pollingCleanup!: Array<() => void>;
+
   /**
    * onInit is called when the device is initialized.
    */
   async onInit() {
-    this.log("MyDevice has been initialized");
+    try {
+      const site = this.homey.app.products?.energySites?.[this.getData().site];
+      if (!site) throw new Error("No site found");
+      this.site = site;
+    } catch (e) {
+      this.log("Failed to initialize Wall Connector device");
+      this.error(e);
+      return;
+    }
+    this.din = this.getData().din;
+
+    this.pollingCleanup = [this.site.api.requestPolling("liveStatus")];
+
+    this.site.api.on("liveStatus", ({ response }) => {
+      // Get specific Wall Connector
+      const data = response?.wall_connectors?.find(
+        ({ din }) => this.din === din,
+      );
+
+      if (!data) return;
+
+      // Power
+      this.update("measure_power", data.wall_connector_power);
+
+      // State
+      this.update(
+        "evcharger_charging_state",
+        this.mapWallConnectorState(data.wall_connector_state),
+      );
+
+      // Connected Vehicle
+      this.update("connected_vehicle", this.findVin(data.vin));
+    });
   }
 
   /**
-   * onAdded is called when the user adds the device, called just after pairing.
+   * Map Tesla Wall Connector state (numerical) to Homey evcharger_charging_state (enum)
+   * @param state - Numerical state from wall_connector_state
+   * @returns The corresponding evcharger_charging_state enum value
    */
-  async onAdded() {
-    this.log("MyDevice has been added");
+  private mapWallConnectorState(state: number): string {
+    switch (state) {
+      case 1:
+        return "plugged_in_charging";
+      case 2:
+        return "plugged_out";
+      case 3:
+        return "plugged_in";
+      case 4:
+        return "plugged_in_paused";
+      default:
+        this.log(`Unknown wall_connector_state: ${state}`);
+        return "plugged_out";
+    }
   }
 
-  /**
-   * onSettings is called when the user updates the device's settings.
-   * @param {object} event the onSettings event data
-   * @param {object} event.oldSettings The old settings object
-   * @param {object} event.newSettings The new settings object
-   * @param {string[]} event.changedKeys An array of keys changed since the previous version
-   * @returns {Promise<string|void>} return a custom message that will be displayed
-   */
-  async onSettings({
-    oldSettings,
-    newSettings,
-    changedKeys,
-  }: {
-    oldSettings: {
-      [key: string]: boolean | string | number | undefined | null;
-    };
-    newSettings: {
-      [key: string]: boolean | string | number | undefined | null;
-    };
-    changedKeys: string[];
-  }): Promise<string | void> {
-    this.log("MyDevice settings where changed");
+  private findVin(vin: string | undefined): string {
+    if (!vin) return "disconnected";
+    const vehicle = this.homey.app.products?.vehicles[vin];
+    return vehicle ? vehicle.name : vin;
   }
 
-  /**
-   * onRenamed is called when the user updates the device's name.
-   * This method can be used this to synchronise the name to the device.
-   * @param {string} name The new name
-   */
-  async onRenamed(name: string) {
-    this.log("MyDevice was renamed");
-  }
-
-  /**
-   * onDeleted is called when the user deleted the device.
-   */
-  async onDeleted() {
-    this.log("MyDevice has been deleted");
+  async onUninit(): Promise<void> {
+    this.pollingCleanup.forEach((stop) => stop());
   }
 }

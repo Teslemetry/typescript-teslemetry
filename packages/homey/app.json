@@ -1,12 +1,12 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.teslemetry",
-  "version": "1.0.0",
+  "brandColor": "#3D6DB5",
+  "version": "0.0.3",
   "compatibility": ">=12.4.5",
   "sdk": 3,
   "platforms": [
-    "local",
-    "cloud"
+    "local"
   ],
   "name": {
     "en": "Teslemetry"
@@ -27,20 +27,30 @@
     "name": "Teslemetry",
     "email": "hello@teslemetry.com"
   },
+  "bugs": {
+    "url": "https://github.com/teslemetry/homey/issues"
+  },
+  "source": "https://github.com/teslemetry/homey",
+  "homepage": "https://teslemetry.com",
+  "support": "mailto:support@teslemetry.com",
   "esm": true,
   "drivers": [
     {
       "name": {
-        "en": "Tesla Powerwall"
+        "en": "Tesla Energy Site"
       },
-      "class": "battery",
-      "capabilities": [
-        "measure_power",
-        "measure_battery"
-      ],
-      "platforms": [
-        "local",
+      "capabilities": [],
+      "connectivity": [
         "cloud"
+      ],
+      "class": "battery",
+      "images": {
+        "small": "/drivers/energy-site/assets/images/small.png",
+        "large": "/drivers/energy-site/assets/images/large.png",
+        "xlarge": "/drivers/energy-site/assets/images/xlarge.png"
+      },
+      "platforms": [
+        "local"
       ],
       "pair": [
         {
@@ -65,7 +75,7 @@
           "template": "login_oauth2"
         }
       ],
-      "id": "powerwall"
+      "id": "energy-site"
     },
     {
       "name": {
@@ -74,13 +84,51 @@
       "class": "car",
       "capabilities": [
         "measure_battery",
+        "measure_range",
+        "measure_temperature.inside",
+        "measure_temperature.outside",
         "locked",
-        "measure_temperature",
-        "thermostat_mode"
+        "charge_port_door",
+        "thermostat_mode",
+        "charge_state",
+        "meter_power",
+        "measure_power",
+        "measure_voltage",
+        "measure_current",
+        "sentry_mode",
+        "defrost_mode",
+        "steering_wheel_heater",
+        "seat_heater_front_left",
+        "seat_heater_front_right",
+        "charge_port_latch",
+        "frunk",
+        "trunk",
+        "target_temperature.inside",
+        "windowcoverings_state",
+        "alarm_motion",
+        "alarm_contact_door_front_left",
+        "alarm_contact_door_front_right",
+        "alarm_contact_door_rear_left",
+        "alarm_contact_door_rear_right",
+        "button_flash_lights",
+        "button_honk_horn",
+        "button_keyless_driving",
+        "button_homelink",
+        "button_wake_up"
       ],
-      "platforms": [
-        "local",
+      "connectivity": [
         "cloud"
+      ],
+      "energy": {
+        "electricCar": true
+      },
+      "images": {
+        "small": "/drivers/vehicle/assets/images/small.png",
+        "large": "/drivers/vehicle/assets/images/large.png",
+        "xlarge": "/drivers/vehicle/assets/images/xlarge.png"
+      },
+      "platforms": [
+        "local"
       ],
       "pair": [
         {
@@ -113,23 +161,509 @@
       },
       "class": "evcharger",
       "capabilities": [
-        "evcharger_charging",
         "evcharger_charging_state",
-        "meter_power",
         "measure_power",
-        "measure_voltage"
+        "connected_vehicle"
       ],
-      "platforms": [
-        "local",
+      "connectivity": [
         "cloud"
       ],
-      "connectivity": [],
+      "energy": {
+        "evCharger": true
+      },
+      "platforms": [
+        "local"
+      ],
       "images": {
         "small": "/drivers/wall-connector/assets/images/small.png",
         "large": "/drivers/wall-connector/assets/images/large.png",
         "xlarge": "/drivers/wall-connector/assets/images/xlarge.png"
       },
+      "pair": [
+        {
+          "id": "login_oauth2",
+          "template": "login_oauth2"
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "repair": [
+        {
+          "id": "login_oauth2",
+          "template": "login_oauth2"
+        }
+      ],
       "id": "wall-connector"
     }
-  ]
+  ],
+  "capabilities": {
+    "alarm_contact_door_front_left": {
+      "type": "boolean",
+      "title": {
+        "en": "Door (Front Left)"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
+    },
+    "alarm_contact_door_front_right": {
+      "type": "boolean",
+      "title": {
+        "en": "Door (Front Right)"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
+    },
+    "alarm_contact_door_rear_left": {
+      "type": "boolean",
+      "title": {
+        "en": "Door (Rear Left)"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
+    },
+    "alarm_contact_door_rear_right": {
+      "type": "boolean",
+      "title": {
+        "en": "Door (Rear Right)"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
+    },
+    "alarm_island_status": {
+      "type": "boolean",
+      "title": {
+        "en": "Island Status"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "titleTrue": {
+        "en": "Disconnected"
+      },
+      "titleFalse": {
+        "en": "Connected"
+      }
+    },
+    "alarm_off_grid": {
+      "type": "boolean",
+      "title": {
+        "en": "Grid Status"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "titleTrue": {
+        "en": "On Grid"
+      },
+      "titleFalse": {
+        "en": "Off Grid"
+      }
+    },
+    "alarm_storm_watch_active": {
+      "type": "boolean",
+      "title": {
+        "en": "Storm Watch Active"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor"
+    },
+    "allow_export": {
+      "type": "enum",
+      "title": {
+        "en": "Allow Export"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "battery_ok",
+          "title": {
+            "en": "Battery and Solar"
+          }
+        },
+        {
+          "id": "pv_only",
+          "title": {
+            "en": "Solar Only"
+          }
+        },
+        {
+          "id": "never",
+          "title": {
+            "en": "Never"
+          }
+        }
+      ]
+    },
+    "backup_reserve": {
+      "type": "number",
+      "title": {
+        "en": "Backup Reserve"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "slider",
+      "units": {
+        "en": "%"
+      },
+      "min": 0,
+      "max": 1,
+      "decimals": 2,
+      "step": 0.01
+    },
+    "button_flash_lights": {
+      "type": "boolean",
+      "title": {
+        "en": "Flash Lights"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button"
+    },
+    "button_homelink": {
+      "type": "boolean",
+      "title": {
+        "en": "HomeLink"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button"
+    },
+    "button_honk_horn": {
+      "type": "boolean",
+      "title": {
+        "en": "Honk Horn"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button"
+    },
+    "button_keyless_driving": {
+      "type": "boolean",
+      "title": {
+        "en": "Keyless Driving"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button"
+    },
+    "button_wake_up": {
+      "type": "boolean",
+      "title": {
+        "en": "Wake Up"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button"
+    },
+    "charge_from_grid": {
+      "type": "boolean",
+      "title": {
+        "en": "Charge From Grid"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
+    },
+    "charge_port_door": {
+      "type": "boolean",
+      "title": {
+        "en": "Charge Port Door"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
+    },
+    "charge_port_latch": {
+      "type": "boolean",
+      "title": {
+        "en": "Charge Port Latch"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
+    },
+    "charge_state": {
+      "type": "boolean",
+      "title": {
+        "en": "Charging"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
+    },
+    "connected_vehicle": {
+      "type": "string",
+      "title": {
+        "en": "Connected Vehicle"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icon.svg"
+    },
+    "defrost_mode": {
+      "type": "boolean",
+      "title": {
+        "en": "Defrost"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
+    },
+    "frunk": {
+      "type": "boolean",
+      "title": {
+        "en": "Frunk"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
+    },
+    "measure_power_battery": {
+      "type": "number",
+      "title": {
+        "en": "Battery Power"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "units": {
+        "en": "W"
+      }
+    },
+    "measure_power_grid": {
+      "type": "number",
+      "title": {
+        "en": "Grid Power"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "units": {
+        "en": "W"
+      }
+    },
+    "measure_power_load": {
+      "type": "number",
+      "title": {
+        "en": "Load Power"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "units": {
+        "en": "W"
+      }
+    },
+    "measure_power_solar": {
+      "type": "number",
+      "title": {
+        "en": "Solar Power"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "units": {
+        "en": "W"
+      },
+      "icon": "/assets/capabilities/solar.svg"
+    },
+    "measure_range": {
+      "type": "number",
+      "title": {
+        "en": "Range"
+      },
+      "units": {
+        "en": "km"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capabilities/range.svg"
+    },
+    "measure_temperature_outside": {
+      "type": "number",
+      "title": {
+        "en": "Outside Temperature"
+      },
+      "units": {
+        "en": "°C"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capabilities/temperature.svg"
+    },
+    "operation_mode": {
+      "type": "enum",
+      "title": {
+        "en": "Operation Mode"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "self_consumption",
+          "title": {
+            "en": "Self Consumption"
+          }
+        },
+        {
+          "id": "backup",
+          "title": {
+            "en": "Backup"
+          }
+        },
+        {
+          "id": "autonomous",
+          "title": {
+            "en": "Autonomous"
+          }
+        }
+      ]
+    },
+    "seat_heater_front_left": {
+      "type": "enum",
+      "title": {
+        "en": "Seat Heater (Front Left)"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "Off"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "Low"
+          }
+        },
+        {
+          "id": "2",
+          "title": {
+            "en": "Medium"
+          }
+        },
+        {
+          "id": "3",
+          "title": {
+            "en": "High"
+          }
+        }
+      ]
+    },
+    "seat_heater_front_right": {
+      "type": "enum",
+      "title": {
+        "en": "Seat Heater (Front Right)"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "Off"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "Low"
+          }
+        },
+        {
+          "id": "2",
+          "title": {
+            "en": "Medium"
+          }
+        },
+        {
+          "id": "3",
+          "title": {
+            "en": "High"
+          }
+        }
+      ]
+    },
+    "sentry_mode": {
+      "type": "boolean",
+      "title": {
+        "en": "Sentry Mode"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
+    },
+    "steering_wheel_heater": {
+      "type": "enum",
+      "title": {
+        "en": "Steering Wheel Heater"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "picker",
+      "values": [
+        {
+          "id": "0",
+          "title": {
+            "en": "Off"
+          }
+        },
+        {
+          "id": "1",
+          "title": {
+            "en": "Low"
+          }
+        },
+        {
+          "id": "3",
+          "title": {
+            "en": "High"
+          }
+        }
+      ]
+    },
+    "storm_watch": {
+      "type": "boolean",
+      "title": {
+        "en": "Storm Watch"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
+    },
+    "trunk": {
+      "type": "boolean",
+      "title": {
+        "en": "Trunk"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "toggle"
+    }
+  }
 }

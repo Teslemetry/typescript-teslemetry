@@ -5,11 +5,48 @@
   "class": "car",
   "capabilities": [
     "measure_battery",
+    "measure_range",
+    "measure_temperature.inside",
+    "measure_temperature.outside",
     "locked",
-    "measure_temperature",
-    "thermostat_mode"
+    "charge_port_door",
+    "thermostat_mode",
+    "charge_state",
+    "meter_power",
+    "measure_power",
+    "measure_voltage",
+    "measure_current",
+    "sentry_mode",
+    "defrost_mode",
+    "steering_wheel_heater",
+    "seat_heater_front_left",
+    "seat_heater_front_right",
+    "charge_port_latch",
+    "frunk",
+    "trunk",
+    "target_temperature.inside",
+    "windowcoverings_state",
+    "alarm_motion",
+    "alarm_contact_door_front_left",
+    "alarm_contact_door_front_right",
+    "alarm_contact_door_rear_left",
+    "alarm_contact_door_rear_right",
+    "button_flash_lights",
+    "button_honk_horn",
+    "button_keyless_driving",
+    "button_homelink",
+    "button_wake_up"
   ],
-  "platforms": ["local", "cloud"],
+  "connectivity": ["cloud"],
+  "energy": {
+    "electricCar": true
+  },
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "platforms": ["local"],
   "pair": [
     {
       "id": "login_oauth2",

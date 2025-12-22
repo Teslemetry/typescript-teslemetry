@@ -1,24 +1,29 @@
 import Homey from "homey";
 import type TeslemetryApp from "../app.js";
 
-export class TeslemetryDriver extends Homey.Driver {
+export default class TeslemetryDriver extends Homey.Driver {
+  declare homey: Homey.Device["homey"] & {
+    app: TeslemetryApp;
+  };
+
   async onPair(session: any) {
     let codeVerifier: string;
-    const app = this.homey.app as TeslemetryApp;
-
     session.setHandler("showView", async (viewId: string) => {
       if (viewId === "login_oauth2") {
         // Check if we already have a valid OAuth token
-        if (app.oauth.hasValidToken()) {
+        if (this.homey.app.oauth.hasValidToken()) {
           this.log("Valid OAuth token already exists, skipping OAuth flow");
           session.emit("authorized");
           return;
         }
 
-        const pkce = app.oauth.generatePKCE();
+        const pkce = this.homey.app.oauth.generatePKCE();
         codeVerifier = pkce.codeVerifier;
         const state = Math.random().toString(36).substring(7);
-        const url = app.oauth.getAuthorizationUrl(state, pkce.codeChallenge);
+        const url = this.homey.app.oauth.getAuthorizationUrl(
+          state,
+          pkce.codeChallenge,
+        );
 
         const callback = await this.homey.cloud.createOAuth2Callback(url);
 
@@ -33,7 +38,10 @@ export class TeslemetryDriver extends Homey.Driver {
             }
 
             try {
-              await app.oauth.exchangeCodeForToken(code, codeVerifier);
+              await this.homey.app.oauth.exchangeCodeForToken(
+                code,
+                codeVerifier,
+              );
               session.emit("authorized");
             } catch (err: any) {
               this.error(err);
@@ -48,5 +56,3 @@ export class TeslemetryDriver extends Homey.Driver {
     });
   }
 }
-
-export default TeslemetryDriver;

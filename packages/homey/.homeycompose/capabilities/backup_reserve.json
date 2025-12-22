@@ -1,0 +1,16 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Backup Reserve"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "slider",
+  "units": {
+    "en": "%"
+  },
+  "min": 0,
+  "max": 1,
+  "decimals": 2,
+  "step": 0.01
+}

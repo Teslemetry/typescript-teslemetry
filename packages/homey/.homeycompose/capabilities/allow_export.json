@@ -1,0 +1,29 @@
+{
+  "type": "enum",
+  "title": {
+    "en": "Allow Export"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "picker",
+  "values": [
+    {
+      "id": "battery_ok",
+      "title": {
+        "en": "Battery and Solar"
+      }
+    },
+    {
+      "id": "pv_only",
+      "title": {
+        "en": "Solar Only"
+      }
+    },
+    {
+      "id": "never",
+      "title": {
+        "en": "Never"
+      }
+    }
+  ]
+}

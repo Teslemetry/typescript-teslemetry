@@ -1,0 +1,9 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "Charging"
+  },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "toggle"
+}
