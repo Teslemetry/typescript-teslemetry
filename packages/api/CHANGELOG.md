@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.5.4
+
+### Patch Changes
+
+- 41d70db: Updated SSE types
+
 ## 0.5.3
 
 ### Patch Changes
