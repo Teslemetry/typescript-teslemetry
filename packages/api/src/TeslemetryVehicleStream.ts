@@ -18,6 +18,7 @@ import type {
   Signals,
 } from "./const.js";
 import { Logger } from "./logger.js";
+import { VehicleCache } from "./TeslemetryStream.js";
 
 type TeslemetryStreamEventMap = {
   state: SseState;
@@ -97,6 +98,10 @@ export class TeslemetryVehicleStream extends EventEmitter {
     this.on("config", (event) => {
       this.fields = event.config.fields;
     });
+  }
+
+  get cache(): VehicleCache {
+    return this.root.sse.cache[this.vin] ?? {};
   }
 
   public on<K extends keyof TeslemetryStreamEventMap>(
