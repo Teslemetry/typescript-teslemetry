@@ -14011,24 +14011,33 @@ export type GetApi1EnergySitesByIdLiveStatusData = {
     url: '/api/1/energy_sites/{id}/live_status';
 };
 
+export type GetApi1EnergySitesByIdLiveStatusErrors = {
+    /**
+     * Default Response
+     */
+    404: {
+        response: null;
+        error: string;
+        error_description: string;
+        txid: string;
+    };
+};
+
+export type GetApi1EnergySitesByIdLiveStatusError = GetApi1EnergySitesByIdLiveStatusErrors[keyof GetApi1EnergySitesByIdLiveStatusErrors];
+
 export type GetApi1EnergySitesByIdLiveStatusResponses = {
     /**
      * Default Response
      */
     200: {
-        response?: {
+        response: {
             solar_power?: number;
-            energy_left?: number;
-            total_pack_energy?: number;
             percentage_charged?: number;
-            backup_capable?: boolean;
             battery_power?: number;
             load_power?: number;
-            grid_status?: string;
+            grid_status?: 'Active' | 'Inactive' | 'Unknown';
             grid_power?: number;
             generator_power?: number;
-            island_status?: string;
-            storm_mode_active?: boolean;
             wall_connectors?: Array<{
                 din: string;
                 vin?: string;
@@ -14038,7 +14047,17 @@ export type GetApi1EnergySitesByIdLiveStatusResponses = {
                 ocpp_status?: number;
                 powershare_session_state?: number;
             }>;
+            island_status?: 'on_grid' | 'island_status_unknown' | 'off_grid_intentional' | 'off_grid_unintentional';
+            storm_mode_active?: boolean;
             timestamp: string;
+            storm_mode_states?: Array<{
+                watch_event_id: string;
+                start_time: string;
+                end_time: string;
+                storm_type: string;
+                opted_out?: boolean;
+            }>;
+            battery_breaker_open?: boolean;
         };
     };
 };
@@ -14118,6 +14137,29 @@ export type GetApi1EnergySitesByIdSiteInfoData = {
     query?: never;
     url: '/api/1/energy_sites/{id}/site_info';
 };
+
+export type GetApi1EnergySitesByIdSiteInfoErrors = {
+    /**
+     * Default Response
+     */
+    404: {
+        response: null;
+        error: string;
+        error_description: string;
+        txid: string;
+    };
+    /**
+     * Default Response
+     */
+    500: {
+        response: null;
+        error: string;
+        error_description: string;
+        txid: string;
+    };
+};
+
+export type GetApi1EnergySitesByIdSiteInfoError = GetApi1EnergySitesByIdSiteInfoErrors[keyof GetApi1EnergySitesByIdSiteInfoErrors];
 
 export type GetApi1EnergySitesByIdSiteInfoResponses = {
     /**
@@ -14213,7 +14255,7 @@ export type GetApi1EnergySitesByIdSiteInfoResponses = {
                     is_active: boolean;
                 }>;
                 non_export_configured?: boolean;
-                disallow_charge_from_grid_with_solar_installed?: boolean;
+                disallow_charge_from_grid_with_solar_installed?: true;
                 ITC_cliff?: number;
                 sunrun_options?: {
                     my_home_info_deeplink_enabled: boolean;
@@ -14653,8 +14695,8 @@ export type GetSseByVin_Responses = {
             BatteryHeaterOn?: boolean | null;
             BatteryLevel?: number | null;
             BlindSpotCollisionWarningChime?: boolean | null;
-            BmsFullchargecomplete?: number | null;
-            BrakePedal?: number | null;
+            BmsFullchargecomplete?: boolean | null;
+            BrakePedal?: boolean | null;
             BrakePedalPos?: number | null;
             BrickVoltageMax?: number | null;
             BrickVoltageMin?: number | null;
@@ -14668,11 +14710,11 @@ export type GetSseByVin_Responses = {
             ChargeEnableRequest?: number | null;
             ChargeLimitSoc?: boolean | null;
             ChargePort?: 'ChargePortUnknown' | 'ChargePortUS' | 'ChargePortEU' | 'ChargePortGB' | 'ChargePortCCS' | null;
-            ChargePortColdWeatherMode?: number | null;
-            ChargePortDoorOpen?: number | null;
+            ChargePortColdWeatherMode?: boolean | null;
+            ChargePortDoorOpen?: boolean | null;
             ChargePortLatch?: 'ChargePortLatchUnknown' | 'ChargePortLatchSNA' | 'ChargePortLatchDisengaged' | 'ChargePortLatchEngaged' | 'ChargePortLatchBlocking' | null;
             ChargeRateMilePerHour?: number | null;
-            ChargeState?: 'ChargeStateUnknown' | 'ChargeStateDisconnected' | 'ChargeStateNoPower' | 'ChargeStateStarting' | 'ChargeStateCharging' | 'ChargeStateComplete' | 'ChargeStateStopped' | null;
+            ChargeState?: 'Idle' | 'ClearFaults' | 'Enable' | 'QualifyLineConfig' | 'Shutdown' | 'SystemConfig' | null;
             ChargerPhases?: number | null;
             ChargerVoltage?: number | null;
             ChargingCableType?: 'CableTypeUnknown' | 'CableTypeIEC' | 'CableTypeSAE' | 'CableTypeGB_AC' | 'CableTypeGB_DC' | 'CableTypeSNA' | null;
@@ -14681,10 +14723,10 @@ export type GetSseByVin_Responses = {
             ClimateSeatCoolingFrontRight?: number | null;
             CruiseFollowDistance?: 'FollowDistanceUnknown' | 'FollowDistance1' | 'FollowDistance2' | 'FollowDistance3' | 'FollowDistance4' | 'FollowDistance5' | 'FollowDistance6' | 'FollowDistance7' | null;
             CruiseSetSpeed?: number | null;
-            CurrentLimitMph?: boolean | null;
+            CurrentLimitMph?: number | null;
             DCChargingEnergyIn?: number | null;
             DCChargingPower?: number | null;
-            DCDCEnable?: number | null;
+            DCDCEnable?: boolean | null;
             DefrostForPreconditioning?: number | null;
             DefrostMode?: 'DefrostModeStateUnknown' | 'DefrostModeStateOff' | 'DefrostModeStateNormal' | 'DefrostModeStateMax' | 'DefrostModeStateAutoDefog' | null;
             DestinationLocation?: {
@@ -14753,7 +14795,7 @@ export type GetSseByVin_Responses = {
             FpWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
             Gear?: 'ShiftStateUnknown' | 'ShiftStateInvalid' | 'ShiftStateP' | 'ShiftStateR' | 'ShiftStateN' | 'ShiftStateD' | 'ShiftStateSNA' | null;
             GpsHeading?: number | null;
-            GpsState?: number | null;
+            GpsState?: boolean | null;
             GuestModeEnabled?: boolean | null;
             GuestModeMobileAccessState?: 'GuestModeMobileAccessUnknown' | 'GuestModeMobileAccessInit' | 'GuestModeMobileAccessNotAuthenticated' | 'GuestModeMobileAccessAuthenticated' | 'GuestModeMobileAccessAbortedDriving' | 'GuestModeMobileAccessAbortedUsingRemoteStart' | 'GuestModeMobileAccessAbortedUsingBLEKeys' | 'GuestModeMobileAccessAbortedValetMode' | 'GuestModeMobileAccessAbortedGuestModeOff' | 'GuestModeMobileAccessAbortedDriveAuthTimeExceeded' | 'GuestModeMobileAccessAbortedNoDataReceived' | 'GuestModeMobileAccessRequestingFromMothership' | 'GuestModeMobileAccessRequestingFromAuthD' | 'GuestModeMobileAccessAbortedFetchFailed' | 'GuestModeMobileAccessAbortedBadDataReceived' | 'GuestModeMobileAccessShowingQRCode' | 'GuestModeMobileAccessSwipedAway' | 'GuestModeMobileAccessDismissedQRCodeExpired' | 'GuestModeMobileAccessSucceededPairedNewBLEKey' | null;
             HomelinkDeviceCount?: number | null;
@@ -14837,7 +14879,7 @@ export type GetSseByVin_Responses = {
             RightHandDrive?: boolean | null;
             RoofColor?: string | null;
             RouteLastUpdated?: number | null;
-            RouteLine?: number | null;
+            RouteLine?: string | null;
             RouteTrafficMinutesDelay?: number | null;
             RpWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
             ScheduledChargingMode?: 'ScheduledChargingModeUnknown' | 'ScheduledChargingModeOff' | 'ScheduledChargingModeStartAt' | 'ScheduledChargingModeDepartBy' | null;
@@ -14876,7 +14918,7 @@ export type GetSseByVin_Responses = {
             SoftwareUpdateScheduledStartTime?: number | null;
             SoftwareUpdateVersion?: string | null;
             SpeedLimitMode?: 'SpeedAssistLevelUnknown' | 'SpeedAssistLevelNone' | 'SpeedAssistLevelDisplay' | 'SpeedAssistLevelChime' | null;
-            SpeedLimitWarning?: boolean | null;
+            SpeedLimitWarning?: 'SpeedAssistLevelUnknown' | 'SpeedAssistLevelNone' | 'SpeedAssistLevelDisplay' | 'SpeedAssistLevelChime' | null;
             SunroofInstalled?: 'SunroofInstalledStateUnknown' | 'SunroofInstalledStateNotInstalled' | 'SunroofInstalledStateGen1Installed' | 'SunroofInstalledStateGen2Installed' | null;
             SuperchargerSessionTripPlanner?: boolean | null;
             TimeToFullCharge?: number | null;
