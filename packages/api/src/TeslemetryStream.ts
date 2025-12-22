@@ -64,7 +64,7 @@ export declare interface TeslemetryStream {
   ): boolean;
 }
 
-interface VehicleCache {
+export interface VehicleCache {
   state?: SseState["state"];
   data?: SseData["data"];
   alerts?: SseAlerts["alerts"];
