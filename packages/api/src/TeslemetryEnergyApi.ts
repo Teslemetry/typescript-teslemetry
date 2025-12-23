@@ -41,7 +41,11 @@ export declare interface TeslemetryEnergyApi {
   ): boolean;
 }
 
-type PollingEndpoints = "siteInfo" | "liveStatus";
+type PollingEndpoints =
+  | "siteInfo"
+  | "liveStatus"
+  | "backupHistory"
+  | "energyHistory";
 
 export class TeslemetryEnergyApi extends EventEmitter {
   private root: Teslemetry;
@@ -59,12 +63,16 @@ export class TeslemetryEnergyApi extends EventEmitter {
   } = {
     siteInfo: null,
     liveStatus: null,
+    backupHistory: null,
+    energyHistory: null,
   };
   private refreshClients: {
     [endpoint in PollingEndpoints]: Set<symbol>;
   } = {
     siteInfo: new Set(),
     liveStatus: new Set(),
+    backupHistory: new Set(),
+    energyHistory: new Set(),
   };
 
   constructor(root: Teslemetry, siteId: number) {
@@ -107,22 +115,49 @@ export class TeslemetryEnergyApi extends EventEmitter {
    * Returns the backup (off-grid) event history of the site or the energy measurements of the site, aggregated to the requested period.
    * @param kind Type of history to retrieve
    * @param period Aggregation period
-   * @param start_date Start date for the data range
-   * @param end_date End date for the data range
+   * @param start_date Start date for the data range, defaults to start of today
+   * @param end_date End date for the data range, defaults to end of today
+   * @param time_zone IANA Time zone for the data range
    * @return Promise to an object with response containing backup event history or energy measurements aggregated by period
    */
   public async getCalendarHistory(
     kind: "backup" | "energy",
     period: "day" | "week" | "month" | "year",
-    start_date: string,
-    end_date: string,
+    start_date?: Date,
+    end_date?: Date,
+    time_zone?: string,
   ) {
+    // Default to today midnight to midnight in local timezone
+    const now = new Date();
+    const defaultStartDate = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0,
+      0,
+    );
+    const defaultEndDate = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      59,
+      999,
+    );
+
+    const actualStartDate = start_date ?? defaultStartDate;
+    const actualEndDate = end_date ?? defaultEndDate;
+
     const { data } = await getApi1EnergySitesByIdCalendarHistory({
       query: {
         kind,
         period,
-        start_date,
-        end_date,
+        start_date: actualStartDate.toISOString().replace(/\.\d{3}Z$/, "Z"),
+        end_date: actualEndDate.toISOString().replace(/\.\d{3}Z$/, "Z"),
+        time_zone,
       },
       path: { id: this.siteId },
       client: this.root.client,
@@ -267,6 +302,18 @@ export class TeslemetryEnergyApi extends EventEmitter {
             this.getLiveStatus();
           }, this.refreshDelay);
           this.getLiveStatus();
+          break;
+        case "backupHistory":
+          this.refreshInterval[endpoint] = setInterval(() => {
+            this.getCalendarHistory("backup", "day");
+          }, this.refreshDelay);
+          this.getBackupHistory();
+          break;
+        case "energyHistory":
+          this.refreshInterval[endpoint] = setInterval(() => {
+            this.getEnergyHistory();
+          }, this.refreshDelay);
+          this.getEnergyHistory();
           break;
         default:
           throw new Error(`Invalid endpoint: ${endpoint}`);
