@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "tsc": "tsc",
-    "build": "pnpm tsdown && pnpm compose && jq 'del(.devDependencies, .scripts)' package.json > .homeybuild/package.json && pnpm copy",
+    "buildy": "pnpm tsdown && pnpm compose && jq 'del(.devDependencies, .scripts)' package.json > .homeybuild/package.json && pnpm copy",
     "dev": "pnpm build && homey app run -s",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
     "validate": "homey app validate -s",
