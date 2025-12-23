@@ -1,5 +1,12 @@
 # @teslemetry/api
 
+## 0.5.5
+
+### Patch Changes
+
+- 51f1009: Fixed reuse type
+- 28ec7a5: Add cache prop to the vehicle stream
+
 ## 0.5.4
 
 ### Patch Changes
