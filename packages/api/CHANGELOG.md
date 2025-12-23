@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.5.6
+
+### Patch Changes
+
+- eb0401e: Improve getCalendarHistory in Energy API
+
 ## 0.5.5
 
 ### Patch Changes
