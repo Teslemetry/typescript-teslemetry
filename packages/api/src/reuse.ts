@@ -1,7 +1,7 @@
 export const reuse = (linger: number = 0) => {
   let promise: Promise<any> | null = null;
 
-  return async <U>(func: () => Promise<U>) => {
+  return async <U>(func: () => Promise<U>): Promise<U> => {
     if (promise) return promise;
     try {
       promise = func();
