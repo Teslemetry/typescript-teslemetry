@@ -26,8 +26,8 @@ export class Teslemetry {
   public sse: TeslemetryStream;
   public api: TeslemetryApi;
   public logger: Logger;
-  private _user: TeslemetryUserApi | null = null;
-  private _charging: TeslemetryChargingApi | null = null;
+  public user: TeslemetryUserApi;
+  public charging: TeslemetryChargingApi;
 
   constructor(
     access_token: string | (() => Promise<string>),
@@ -65,6 +65,8 @@ export class Teslemetry {
 
     this.sse = new TeslemetryStream(this, options?.stream);
     this.api = new TeslemetryApi(this);
+    this.user = new TeslemetryUserApi(this);
+    this.charging = new TeslemetryChargingApi(this);
   }
 
   /**
@@ -94,7 +96,10 @@ export class Teslemetry {
    * @returns A promise that resolves to an object containing vehicle and energy site names, API, and SSE instances.
    */
   public async createProducts(): Promise<Products> {
-    const { data } = await getApiMetadata({ client: this.client });
+    const { data } = await getApiMetadata({
+      client: this.client,
+      throwOnError: true,
+    });
 
     const vehicles = Object.fromEntries(
       Object.entries(data.vehicles).map(([vin, metadata]) => [
@@ -143,28 +148,6 @@ export class Teslemetry {
    */
   public energySite(siteId: number): TeslemetryEnergyApi {
     return new TeslemetryEnergyApi(this, siteId);
-  }
-
-  /**
-   * Get the user API instance (singleton).
-   * @returns TeslemetryUserApi instance
-   */
-  public get user(): TeslemetryUserApi {
-    if (!this._user) {
-      this._user = new TeslemetryUserApi(this);
-    }
-    return this._user;
-  }
-
-  /**
-   * Get the charging API instance (singleton).
-   * @returns TeslemetryChargingApi instance
-   */
-  public get charging(): TeslemetryChargingApi {
-    if (!this._charging) {
-      this._charging = new TeslemetryChargingApi(this);
-    }
-    return this._charging;
   }
 }
 
