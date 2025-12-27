@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.0
+
+### Minor Changes
+
+- d6211a7: createProducts now throws on error, such as a lack of subscription. User and Charging are automatically created now.
+
 ## 0.5.6
 
 ### Patch Changes
