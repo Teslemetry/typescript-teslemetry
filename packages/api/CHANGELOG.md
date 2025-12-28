@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.1
+
+### Patch Changes
+
+- 6838cdd: Add throwOnError option but default to true.
+
 ## 0.6.0
 
 ### Minor Changes
