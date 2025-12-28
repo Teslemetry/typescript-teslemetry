@@ -17,6 +17,7 @@ interface TeslemetryOptions {
   region?: "na" | "eu";
   logger?: Logger;
   stream?: TeslemetryStreamOptions;
+  throwOnError?: boolean;
 }
 
 export class Teslemetry {
@@ -43,6 +44,7 @@ export class Teslemetry {
       headers: {
         "X-Library": `typescript teslemetry ${pkg.version}`,
       },
+      throwOnError: options?.throwOnError ?? true,
     });
 
     // Log requests and update region
