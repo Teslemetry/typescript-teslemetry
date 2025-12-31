@@ -204,206 +204,40 @@ type VehicleDataEndpoints =
   | "vehicle_state"
   | "vehicle_data_combo";
 
+// Interface for event type safety
+type TeslemetryVehicleEventMap = {
+  state: GetApi1VehiclesByVinResponse;
+  vehicleData: GetApi1VehiclesByVinVehicleDataResponse;
+  vehicleConfig: GetApiVehicleConfigByVinResponse;
+  config: GetApiConfigByVinResponse;
+  mobileEnabled: GetApi1VehiclesByVinMobileEnabledResponse;
+  nearbyChargingSites: GetApi1VehiclesByVinNearbyChargingSitesResponse;
+  recentAlerts: GetApi1VehiclesByVinRecentAlertsResponse;
+  releaseNotes: GetApi1VehiclesByVinReleaseNotesResponse;
+  serviceData: GetApi1VehiclesByVinServiceDataResponse;
+  fleetTelemetryConfig: GetApi1VehiclesByVinFleetTelemetryConfigResponse;
+  fleetTelemetryErrors: GetApi1VehiclesByVinFleetTelemetryErrorsResponse;
+  drivers: GetApi1VehiclesByVinDriversResponse;
+  invitations: GetApi1VehiclesByVinInvitationsResponse;
+};
+
 // TypeScript interface for event type safety
 export declare interface TeslemetryVehicleApi {
-  on(
-    event: "state",
-    listener: (data: GetApi1VehiclesByVinResponse) => void,
+  on<K extends keyof TeslemetryVehicleEventMap>(
+    event: K,
+    listener: (data: TeslemetryVehicleEventMap[K]) => void,
   ): this;
-  on(
-    event: "vehicleData",
-    listener: (data: GetApi1VehiclesByVinVehicleDataResponse) => void,
+  off<K extends keyof TeslemetryVehicleEventMap>(
+    event: K,
+    listener: (data: TeslemetryVehicleEventMap[K]) => void,
   ): this;
-  on(
-    event: "vehicleConfig",
-    listener: (data: GetApiVehicleConfigByVinResponse) => void,
+  once<K extends keyof TeslemetryVehicleEventMap>(
+    event: K,
+    listener: (data: TeslemetryVehicleEventMap[K]) => void,
   ): this;
-  on(
-    event: "config",
-    listener: (data: GetApiConfigByVinResponse) => void,
-  ): this;
-  on(
-    event: "mobileEnabled",
-    listener: (data: GetApi1VehiclesByVinMobileEnabledResponse) => void,
-  ): this;
-  on(
-    event: "nearbyChargingSites",
-    listener: (data: GetApi1VehiclesByVinNearbyChargingSitesResponse) => void,
-  ): this;
-  on(
-    event: "recentAlerts",
-    listener: (data: GetApi1VehiclesByVinRecentAlertsResponse) => void,
-  ): this;
-  on(
-    event: "releaseNotes",
-    listener: (data: GetApi1VehiclesByVinReleaseNotesResponse) => void,
-  ): this;
-  on(
-    event: "serviceData",
-    listener: (data: GetApi1VehiclesByVinServiceDataResponse) => void,
-  ): this;
-  on(
-    event: "fleetTelemetryConfig",
-    listener: (data: GetApi1VehiclesByVinFleetTelemetryConfigResponse) => void,
-  ): this;
-  on(
-    event: "fleetTelemetryErrors",
-    listener: (data: GetApi1VehiclesByVinFleetTelemetryErrorsResponse) => void,
-  ): this;
-  on(
-    event: "drivers",
-    listener: (data: GetApi1VehiclesByVinDriversResponse) => void,
-  ): this;
-  on(
-    event: "invitations",
-    listener: (data: GetApi1VehiclesByVinInvitationsResponse) => void,
-  ): this;
-
-  off(
-    event: "state",
-    listener: (data: GetApi1VehiclesByVinResponse) => void,
-  ): this;
-  off(
-    event: "vehicleData",
-    listener: (data: GetApi1VehiclesByVinVehicleDataResponse) => void,
-  ): this;
-  off(
-    event: "vehicleConfig",
-    listener: (data: GetApiVehicleConfigByVinResponse) => void,
-  ): this;
-  off(
-    event: "config",
-    listener: (data: GetApiConfigByVinResponse) => void,
-  ): this;
-  off(
-    event: "mobileEnabled",
-    listener: (data: GetApi1VehiclesByVinMobileEnabledResponse) => void,
-  ): this;
-  off(
-    event: "nearbyChargingSites",
-    listener: (data: GetApi1VehiclesByVinNearbyChargingSitesResponse) => void,
-  ): this;
-  off(
-    event: "recentAlerts",
-    listener: (data: GetApi1VehiclesByVinRecentAlertsResponse) => void,
-  ): this;
-  off(
-    event: "releaseNotes",
-    listener: (data: GetApi1VehiclesByVinReleaseNotesResponse) => void,
-  ): this;
-  off(
-    event: "serviceData",
-    listener: (data: GetApi1VehiclesByVinServiceDataResponse) => void,
-  ): this;
-  off(
-    event: "fleetTelemetryConfig",
-    listener: (data: GetApi1VehiclesByVinFleetTelemetryConfigResponse) => void,
-  ): this;
-  off(
-    event: "fleetTelemetryErrors",
-    listener: (data: GetApi1VehiclesByVinFleetTelemetryErrorsResponse) => void,
-  ): this;
-  off(
-    event: "drivers",
-    listener: (data: GetApi1VehiclesByVinDriversResponse) => void,
-  ): this;
-  off(
-    event: "invitations",
-    listener: (data: GetApi1VehiclesByVinInvitationsResponse) => void,
-  ): this;
-
-  once(
-    event: "state",
-    listener: (data: GetApi1VehiclesByVinResponse) => void,
-  ): this;
-  once(
-    event: "vehicleData",
-    listener: (data: GetApi1VehiclesByVinVehicleDataResponse) => void,
-  ): this;
-  once(
-    event: "vehicleConfig",
-    listener: (data: GetApiVehicleConfigByVinResponse) => void,
-  ): this;
-  once(
-    event: "config",
-    listener: (data: GetApiConfigByVinResponse) => void,
-  ): this;
-  once(
-    event: "mobileEnabled",
-    listener: (data: GetApi1VehiclesByVinMobileEnabledResponse) => void,
-  ): this;
-  once(
-    event: "nearbyChargingSites",
-    listener: (data: GetApi1VehiclesByVinNearbyChargingSitesResponse) => void,
-  ): this;
-  once(
-    event: "recentAlerts",
-    listener: (data: GetApi1VehiclesByVinRecentAlertsResponse) => void,
-  ): this;
-  once(
-    event: "releaseNotes",
-    listener: (data: GetApi1VehiclesByVinReleaseNotesResponse) => void,
-  ): this;
-  once(
-    event: "serviceData",
-    listener: (data: GetApi1VehiclesByVinServiceDataResponse) => void,
-  ): this;
-  once(
-    event: "fleetTelemetryConfig",
-    listener: (data: GetApi1VehiclesByVinFleetTelemetryConfigResponse) => void,
-  ): this;
-  once(
-    event: "fleetTelemetryErrors",
-    listener: (data: GetApi1VehiclesByVinFleetTelemetryErrorsResponse) => void,
-  ): this;
-  once(
-    event: "drivers",
-    listener: (data: GetApi1VehiclesByVinDriversResponse) => void,
-  ): this;
-  once(
-    event: "invitations",
-    listener: (data: GetApi1VehiclesByVinInvitationsResponse) => void,
-  ): this;
-
-  emit(event: "state", data: GetApi1VehiclesByVinResponse): boolean;
-  emit(
-    event: "vehicleData",
-    data: GetApi1VehiclesByVinVehicleDataResponse,
-  ): boolean;
-  emit(event: "vehicleConfig", data: GetApiVehicleConfigByVinResponse): boolean;
-  emit(event: "config", data: GetApiConfigByVinResponse): boolean;
-  emit(
-    event: "mobileEnabled",
-    data: GetApi1VehiclesByVinMobileEnabledResponse,
-  ): boolean;
-  emit(
-    event: "nearbyChargingSites",
-    data: GetApi1VehiclesByVinNearbyChargingSitesResponse,
-  ): boolean;
-  emit(
-    event: "recentAlerts",
-    data: GetApi1VehiclesByVinRecentAlertsResponse,
-  ): boolean;
-  emit(
-    event: "releaseNotes",
-    data: GetApi1VehiclesByVinReleaseNotesResponse,
-  ): boolean;
-  emit(
-    event: "serviceData",
-    data: GetApi1VehiclesByVinServiceDataResponse,
-  ): boolean;
-  emit(
-    event: "fleetTelemetryConfig",
-    data: GetApi1VehiclesByVinFleetTelemetryConfigResponse,
-  ): boolean;
-  emit(
-    event: "fleetTelemetryErrors",
-    data: GetApi1VehiclesByVinFleetTelemetryErrorsResponse,
-  ): boolean;
-  emit(event: "drivers", data: GetApi1VehiclesByVinDriversResponse): boolean;
-  emit(
-    event: "invitations",
-    data: GetApi1VehiclesByVinInvitationsResponse,
+  emit<K extends keyof TeslemetryVehicleEventMap>(
+    event: K,
+    data: TeslemetryVehicleEventMap[K],
   ): boolean;
 }
 
