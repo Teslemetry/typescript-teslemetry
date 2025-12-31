@@ -14,6 +14,7 @@ import {
   GetApi1EnergySitesByIdLiveStatusResponse,
 } from "./client/index.js";
 import { reuse } from "./reuse.js";
+import { scheduler } from "./scheduler.js";
 
 // Interface for event type safety
 type TeslemetryEnergyEventMap = {
@@ -58,8 +59,8 @@ export class TeslemetryEnergyApi extends EventEmitter {
     liveStatus: null,
   };
   public refreshDelay: number = 30_000;
-  private refreshInterval: {
-    [endpoint in PollingEndpoints]: NodeJS.Timeout | null;
+  private refreshIntervals: {
+    [endpoint in PollingEndpoints]: (() => void) | null;
   } = {
     siteInfo: null,
     liveStatus: null,
@@ -289,31 +290,47 @@ export class TeslemetryEnergyApi extends EventEmitter {
   }
 
   requestPolling(endpoint: PollingEndpoints): () => void {
-    if (!this.refreshInterval[endpoint]) {
+    if (!this.refreshIntervals[endpoint]) {
       switch (endpoint) {
-        case "siteInfo":
-          this.refreshInterval[endpoint] = setInterval(() => {
-            this.getSiteInfo();
+        case "siteInfo": {
+          const intervalHandle = setInterval(() => {
+            this.getSiteInfo().catch(this.root.logger.warn);
           }, this.refreshDelay);
-          this.getSiteInfo();
+          this.refreshIntervals[endpoint] = () => clearInterval(intervalHandle);
+          this.getSiteInfo().catch(this.root.logger.warn);
           break;
-        case "liveStatus":
-          this.refreshInterval[endpoint] = setInterval(() => {
-            this.getLiveStatus();
+        }
+        case "liveStatus": {
+          const intervalHandle = setInterval(() => {
+            this.getLiveStatus().catch(this.root.logger.warn);
           }, this.refreshDelay);
-          this.getLiveStatus();
+          this.refreshIntervals[endpoint] = () => clearInterval(intervalHandle);
+          this.getLiveStatus().catch(this.root.logger.warn);
           break;
+        }
         case "backupHistory":
-          this.refreshInterval[endpoint] = setInterval(() => {
-            this.getCalendarHistory("backup", "day");
-          }, this.refreshDelay);
-          this.getBackupHistory();
+          // Schedule 30 seconds after each 5-minute mark aligned to clock time
+          this.refreshIntervals[endpoint] = scheduler(
+            () => {
+              this.getCalendarHistory("backup", "day").catch(
+                this.root.logger.warn,
+              );
+            },
+            300_000,
+            30_000,
+          );
           break;
         case "energyHistory":
-          this.refreshInterval[endpoint] = setInterval(() => {
-            this.getEnergyHistory();
-          }, this.refreshDelay);
-          this.getEnergyHistory();
+          // Schedule 30 seconds after each 5-minute mark aligned to clock time
+          this.refreshIntervals[endpoint] = scheduler(
+            () => {
+              this.getCalendarHistory("energy", "day").catch(
+                this.root.logger.warn,
+              );
+            },
+            300_000,
+            30_000,
+          );
           break;
         default:
           throw new Error(`Invalid endpoint: ${endpoint}`);
@@ -324,9 +341,9 @@ export class TeslemetryEnergyApi extends EventEmitter {
     return () => {
       this.refreshClients[endpoint].delete(symbol);
       if (this.refreshClients[endpoint].size === 0) {
-        if (this.refreshInterval[endpoint]) {
-          clearInterval(this.refreshInterval[endpoint]);
-          this.refreshInterval[endpoint] = null;
+        if (this.refreshIntervals[endpoint]) {
+          this.refreshIntervals[endpoint]();
+          this.refreshIntervals[endpoint] = null;
         }
       }
     };
