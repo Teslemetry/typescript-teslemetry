@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.2
+
+### Patch Changes
+
+- 410733e: Added error handling to scheduled energy API calls, and added event emitters to other classes
+
 ## 0.6.1
 
 ### Patch Changes
