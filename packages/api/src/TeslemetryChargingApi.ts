@@ -1,3 +1,4 @@
+import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
 import {
   getApi1DxChargingHistory,
@@ -9,10 +10,38 @@ import {
   GetApi1DxChargingSessionsData,
 } from "./client/types.gen.js";
 
-export class TeslemetryChargingApi {
+// Interface for event type safety
+type TeslemetryChargingEventMap = {
+  chargingHistory: unknown;
+  invoice: unknown;
+  chargingSessions: unknown;
+};
+
+// TypeScript interface for event type safety
+export declare interface TeslemetryChargingApi {
+  on<K extends keyof TeslemetryChargingEventMap>(
+    event: K,
+    listener: (data: TeslemetryChargingEventMap[K]) => void,
+  ): this;
+  off<K extends keyof TeslemetryChargingEventMap>(
+    event: K,
+    listener: (data: TeslemetryChargingEventMap[K]) => void,
+  ): this;
+  once<K extends keyof TeslemetryChargingEventMap>(
+    event: K,
+    listener: (data: TeslemetryChargingEventMap[K]) => void,
+  ): this;
+  emit<K extends keyof TeslemetryChargingEventMap>(
+    event: K,
+    data: TeslemetryChargingEventMap[K],
+  ): boolean;
+}
+
+export class TeslemetryChargingApi extends EventEmitter {
   private root: Teslemetry;
 
   constructor(root: Teslemetry) {
+    super();
     this.root = root;
   }
 
@@ -35,6 +64,7 @@ export class TeslemetryChargingApi {
       query,
       client: this.root.client,
     });
+    this.emit("chargingHistory", data);
     return data;
   }
 
@@ -48,6 +78,7 @@ export class TeslemetryChargingApi {
       path: { id },
       client: this.root.client,
     });
+    this.emit("invoice", data);
     return data;
   }
 
@@ -68,6 +99,7 @@ export class TeslemetryChargingApi {
       query,
       client: this.root.client,
     });
+    this.emit("chargingSessions", data);
     return data;
   }
 }

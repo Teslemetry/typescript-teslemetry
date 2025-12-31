@@ -1,15 +1,49 @@
+import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
 import {
   getApi1UsersFeatureConfig,
   getApi1UsersMe,
   getApi1UsersOrders,
   getApi1UsersRegion,
+  GetApi1UsersFeatureConfigResponse,
+  GetApi1UsersMeResponse,
+  GetApi1UsersOrdersResponse,
+  GetApi1UsersRegionResponse,
 } from "./client/index.js";
 
-export class TeslemetryUserApi {
+// Interface for event type safety
+type TeslemetryUserEventMap = {
+  featureConfig: GetApi1UsersFeatureConfigResponse;
+  me: GetApi1UsersMeResponse;
+  orders: GetApi1UsersOrdersResponse;
+  region: GetApi1UsersRegionResponse;
+};
+
+// TypeScript interface for event type safety
+export declare interface TeslemetryUserApi {
+  on<K extends keyof TeslemetryUserEventMap>(
+    event: K,
+    listener: (data: TeslemetryUserEventMap[K]) => void,
+  ): this;
+  off<K extends keyof TeslemetryUserEventMap>(
+    event: K,
+    listener: (data: TeslemetryUserEventMap[K]) => void,
+  ): this;
+  once<K extends keyof TeslemetryUserEventMap>(
+    event: K,
+    listener: (data: TeslemetryUserEventMap[K]) => void,
+  ): this;
+  emit<K extends keyof TeslemetryUserEventMap>(
+    event: K,
+    data: TeslemetryUserEventMap[K],
+  ): boolean;
+}
+
+export class TeslemetryUserApi extends EventEmitter {
   private root: Teslemetry;
 
   constructor(root: Teslemetry) {
+    super();
     this.root = root;
   }
 
@@ -21,6 +55,7 @@ export class TeslemetryUserApi {
     const { data } = await getApi1UsersFeatureConfig({
       client: this.root.client,
     });
+    this.emit("featureConfig", data);
     return data;
   }
 
@@ -30,6 +65,7 @@ export class TeslemetryUserApi {
    */
   public async getMe() {
     const { data } = await getApi1UsersMe({ client: this.root.client });
+    this.emit("me", data);
     return data;
   }
 
@@ -39,6 +75,7 @@ export class TeslemetryUserApi {
    */
   public async getOrders() {
     const { data } = await getApi1UsersOrders({ client: this.root.client });
+    this.emit("orders", data);
     return data;
   }
 
@@ -48,6 +85,7 @@ export class TeslemetryUserApi {
    */
   public async getRegion() {
     const { data } = await getApi1UsersRegion({ client: this.root.client });
+    this.emit("region", data);
     return data;
   }
 }
