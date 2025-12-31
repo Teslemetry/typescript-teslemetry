@@ -296,7 +296,7 @@ export type GetApiMetadataResponses = {
                 /**
                  * Vehicle physical configuration aspects
                  */
-                config?: {
+                config: {
                     /**
                      * Whether the vehicle can accept navigation requests
                      */
