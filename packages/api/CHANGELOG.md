@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.7
+
+### Patch Changes
+
+- e887196: Allow dates to be undefined and excluded from the API calls.
+
 ## 0.6.6
 
 ### Patch Changes
