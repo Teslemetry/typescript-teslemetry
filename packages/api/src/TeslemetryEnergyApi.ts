@@ -49,6 +49,9 @@ export type EnergyHistoryResponse = {
     total_events?: number;
   };
 };
+export type EnergyHistorySummary = Partial<
+  Omit<EnergyHistoryEvent, "timestamp">
+>;
 
 // Interface for event type safety
 type TeslemetryEnergyEventMap = {
@@ -77,6 +80,7 @@ export declare interface TeslemetryEnergyApi {
     event: K,
     data: TeslemetryEnergyEventMap[K],
   ): boolean;
+  listenerCount<K extends keyof TeslemetryEnergyEventMap>(event: K): number;
 }
 
 type PollingEndpoints = keyof TeslemetryEnergyEventMap;
@@ -338,7 +342,7 @@ export class TeslemetryEnergyApi extends EventEmitter {
     return data;
   }
 
-  requestPolling(endpoint: PollingEndpoints): () => void {
+  public requestPolling(endpoint: PollingEndpoints): () => void {
     if (!this.refreshIntervals[endpoint]) {
       switch (endpoint) {
         case "siteInfo": {
@@ -361,9 +365,14 @@ export class TeslemetryEnergyApi extends EventEmitter {
           // Schedule 30 seconds after each 5-minute mark aligned to clock time
           this.refreshIntervals[endpoint] = scheduler(
             () => {
-              this.getCalendarHistory("backup", "day").catch(
-                this.root.logger.warn,
-              );
+              if (this.listenerCount("backupHistory")) {
+                this.getCalendarHistory("backup", "day")
+                  .then((backupHistory) => {
+                    if (backupHistory)
+                      this.emit("backupHistory", backupHistory);
+                  })
+                  .catch(this.root.logger.warn);
+              }
             },
             300_000,
             20_000 + Math.round(10_000 * Math.random()),
@@ -373,9 +382,14 @@ export class TeslemetryEnergyApi extends EventEmitter {
           // Schedule 30 seconds after each 5-minute mark aligned to clock time
           this.refreshIntervals[endpoint] = scheduler(
             () => {
-              this.getCalendarHistory("energy", "day").catch(
-                this.root.logger.warn,
-              );
+              if (this.listenerCount("energyHistory")) {
+                this.getCalendarHistory("energy", "day")
+                  .then((energyHistory) => {
+                    if (energyHistory)
+                      this.emit("energyHistory", energyHistory);
+                  })
+                  .catch(this.root.logger.warn);
+              }
             },
             300_000,
             20_000 + Math.round(10_000 * Math.random()),
@@ -385,7 +399,14 @@ export class TeslemetryEnergyApi extends EventEmitter {
           // Schedule 30 seconds after each 5-minute mark aligned to clock time
           this.refreshIntervals[endpoint] = scheduler(
             () => {
-              this.getTelemetryHistory("day").catch(this.root.logger.warn);
+              if (this.listenerCount("chargeHistory")) {
+                this.getTelemetryHistory("day")
+                  .then((chargeHistory) => {
+                    if (chargeHistory)
+                      this.emit("chargeHistory", chargeHistory);
+                  })
+                  .catch(this.root.logger.warn);
+              }
             },
             300_000,
             20_000 + Math.round(10_000 * Math.random()),
@@ -406,5 +427,33 @@ export class TeslemetryEnergyApi extends EventEmitter {
         }
       }
     };
+  }
+
+  /**
+   * Sum energy history entries to find the total energy usage of each type.
+   * @param energyHistory
+   */
+  public sumEnergyHistory(
+    energyHistory: EnergyHistoryResponse,
+  ): EnergyHistorySummary {
+    const summary: EnergyHistorySummary = {};
+
+    if (!energyHistory?.response?.events) {
+      return summary;
+    }
+
+    for (const event of energyHistory.response.events) {
+      for (const [key, value] of Object.entries(event)) {
+        if (key === "timestamp") continue;
+
+        if (typeof value === "number") {
+          const typedKey = key as keyof Omit<EnergyHistoryEvent, "timestamp">;
+          const currentValue = summary[typedKey] as number | undefined;
+          summary[typedKey] = (currentValue ?? 0) + value;
+        }
+      }
+    }
+
+    return summary;
   }
 }
