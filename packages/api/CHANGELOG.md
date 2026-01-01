@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.3
+
+### Patch Changes
+
+- 06d4767: Add more energy API to schedule, and also add better typing with overloads to getCalendarHistory
+
 ## 0.6.2
 
 ### Patch Changes
