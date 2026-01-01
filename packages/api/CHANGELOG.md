@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.6
+
+### Patch Changes
+
+- b7c2726: Fix types for calandarHistory
+
 ## 0.6.5
 
 ### Patch Changes
