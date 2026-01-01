@@ -19,39 +19,19 @@ import {
 import { reuse } from "./reuse.js";
 import { scheduler } from "./scheduler.js";
 
-// Derive event types from the calendar history response union type
-type CalendarHistoryEvents = NonNullable<
-  NonNullable<
-    GetApi1EnergySitesByIdCalendarHistoryResponse["response"]
-  >["events"]
->[number];
-
 // Extract specific event types based on discriminating properties
-export type BackupHistoryEvent = Extract<
-  CalendarHistoryEvents,
-  { duration?: number }
->;
-export type EnergyHistoryEvent = Exclude<
-  CalendarHistoryEvents,
-  { duration?: number }
->;
-
 export type BackupHistoryResponse = {
-  response?: {
-    events?: BackupHistoryEvent[];
-    total_events?: number;
-  };
+  response: Extract<
+    GetApi1EnergySitesByIdCalendarHistoryResponse["response"],
+    { events?: any }
+  >;
 };
-
 export type EnergyHistoryResponse = {
-  response?: {
-    events?: EnergyHistoryEvent[];
-    total_events?: number;
-  };
+  response: Extract<
+    GetApi1EnergySitesByIdCalendarHistoryResponse["response"],
+    { time_series?: any }
+  >;
 };
-export type EnergyHistorySummary = Partial<
-  Omit<EnergyHistoryEvent, "timestamp">
->;
 
 // Interface for event type safety
 type TeslemetryEnergyEventMap = {
@@ -432,33 +412,5 @@ export class TeslemetryEnergyApi extends EventEmitter {
         }
       }
     };
-  }
-
-  /**
-   * Sum energy history entries to find the total energy usage of each type.
-   * @param energyHistory
-   */
-  public sumEnergyHistory(
-    energyHistory: EnergyHistoryResponse,
-  ): EnergyHistorySummary {
-    const summary: EnergyHistorySummary = {};
-
-    if (!energyHistory?.response?.events) {
-      return summary;
-    }
-
-    for (const event of energyHistory.response.events) {
-      for (const [key, value] of Object.entries(event)) {
-        if (key === "timestamp") continue;
-
-        if (typeof value === "number") {
-          const typedKey = key as keyof Omit<EnergyHistoryEvent, "timestamp">;
-          const currentValue = summary[typedKey] as number | undefined;
-          summary[typedKey] = (currentValue ?? 0) + value;
-        }
-      }
-    }
-
-    return summary;
   }
 }

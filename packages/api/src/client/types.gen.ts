@@ -20202,28 +20202,41 @@ export type GetApi1EnergySitesByIdCalendarHistoryResponses = {
      * Default Response
      */
     200: {
-        response?: {
+        response?: null | {
+            serial_number: string;
+            period: 'day' | 'week' | 'month' | 'year' | 'lifetime';
+            installation_time_zone?: string;
+            time_series?: Array<{
+                timestamp: string;
+                solar_energy_exported: number;
+                generator_energy_exported: number;
+                grid_energy_imported: number;
+                grid_services_energy_imported: number;
+                grid_services_energy_exported: number;
+                grid_energy_exported_from_solar: number;
+                grid_energy_exported_from_generator: number;
+                grid_energy_exported_from_battery: number;
+                battery_energy_exported: number;
+                battery_energy_imported_from_grid: number;
+                battery_energy_imported_from_solar: number;
+                battery_energy_imported_from_generator: number;
+                consumer_energy_imported_from_grid: number;
+                consumer_energy_imported_from_solar: number;
+                consumer_energy_imported_from_battery: number;
+                consumer_energy_imported_from_generator: number;
+                raw_timestamp?: string;
+                total_home_usage?: number;
+                total_battery_discharge?: number;
+                total_grid_energy_exported?: number;
+                total_battery_charge?: number;
+                total_solar_generation?: number;
+            }>;
+            SmartBreakerEnergyLogs?: null;
+            time_zone_offset?: number;
+        } | {
             events?: Array<{
-                timestamp?: string;
-                duration?: number;
-            } | {
-                timestamp?: string;
-                solar_energy_exported?: number;
-                generator_energy_exported?: number;
-                grid_energy_imported?: number;
-                grid_services_energy_imported?: number;
-                grid_services_energy_exported?: number;
-                grid_energy_exported_from_solar?: number;
-                grid_energy_exported_from_generator?: number;
-                grid_energy_exported_from_battery?: number;
-                battery_energy_exported?: number;
-                battery_energy_imported_from_grid?: number;
-                battery_energy_imported_from_solar?: number;
-                battery_energy_imported_from_generator?: number;
-                consumer_energy_imported_from_grid?: number;
-                consumer_energy_imported_from_solar?: number;
-                consumer_energy_imported_from_battery?: number;
-                consumer_energy_imported_from_generator?: number;
+                timestamp: string;
+                duration: number;
             }>;
             total_events?: number;
         };
