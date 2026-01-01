@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.5
+
+### Patch Changes
+
+- 3ecc77d: Cache and refresh history endpoints
+
 ## 0.6.4
 
 ### Patch Changes
