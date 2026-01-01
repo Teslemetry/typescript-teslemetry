@@ -89,15 +89,17 @@ export class TeslemetryEnergyApi extends EventEmitter {
   private root: Teslemetry;
   public siteId: number;
   public cache: {
-    siteInfo: GetApi1EnergySitesByIdSiteInfoResponse | null;
-    liveStatus: GetApi1EnergySitesByIdLiveStatusResponse | null;
+    [K in PollingEndpoints]: TeslemetryEnergyEventMap[K] | null;
   } = {
     siteInfo: null,
     liveStatus: null,
+    backupHistory: null,
+    energyHistory: null,
+    chargeHistory: null,
   };
   public refreshDelay: number = 30_000;
   private refreshIntervals: {
-    [endpoint in PollingEndpoints]: (() => void) | null;
+    [K in PollingEndpoints]: (() => void) | null;
   } = {
     siteInfo: null,
     liveStatus: null,
@@ -106,7 +108,7 @@ export class TeslemetryEnergyApi extends EventEmitter {
     chargeHistory: null,
   };
   private refreshClients: {
-    [endpoint in PollingEndpoints]: Set<symbol>;
+    [K in PollingEndpoints]: Set<symbol>;
   } = {
     siteInfo: new Set(),
     liveStatus: new Set(),
@@ -130,9 +132,9 @@ export class TeslemetryEnergyApi extends EventEmitter {
     event: K,
     listener: (data: TeslemetryEnergyEventMap[K]) => void,
   ): this {
-    const cached = this.cache[event as keyof typeof this.cache];
+    const cached = this.cache[event];
     if (cached) {
-      listener(cached as TeslemetryEnergyEventMap[K]);
+      listener(cached);
     }
 
     return super.on(event, listener);
@@ -342,6 +344,34 @@ export class TeslemetryEnergyApi extends EventEmitter {
     return data;
   }
 
+  private async refreshBackupHistory(): Promise<void> {
+    const backupHistory = await this.getCalendarHistory("backup", "day");
+    if (backupHistory) {
+      this.cache.backupHistory = backupHistory;
+      this.emit("backupHistory", backupHistory);
+    }
+  }
+
+  private async refreshEnergyHistory(): Promise<void> {
+    const energyHistory = await this.getCalendarHistory("energy", "day");
+    if (energyHistory) {
+      this.cache.energyHistory = energyHistory;
+      this.emit("energyHistory", energyHistory);
+    }
+  }
+
+  private async refreshChargeHistory(): Promise<void> {
+    const chargeHistory = await this.getTelemetryHistory();
+    if (chargeHistory) {
+      this.cache.chargeHistory = chargeHistory;
+      this.emit("chargeHistory", chargeHistory);
+    }
+  }
+
+  /**
+   * Request a polling endpoint be refreshed, cached, and emitted regularly
+   * @param endpoint
+   */
   public requestPolling(endpoint: PollingEndpoints): () => void {
     if (!this.refreshIntervals[endpoint]) {
       switch (endpoint) {
@@ -364,54 +394,29 @@ export class TeslemetryEnergyApi extends EventEmitter {
         case "backupHistory":
           // Schedule 30 seconds after each 5-minute mark aligned to clock time
           this.refreshIntervals[endpoint] = scheduler(
-            () => {
-              if (this.listenerCount("backupHistory")) {
-                this.getCalendarHistory("backup", "day")
-                  .then((backupHistory) => {
-                    if (backupHistory)
-                      this.emit("backupHistory", backupHistory);
-                  })
-                  .catch(this.root.logger.warn);
-              }
-            },
+            () => this.refreshBackupHistory().catch(this.root.logger.warn),
             300_000,
             20_000 + Math.round(10_000 * Math.random()),
           );
+          this.refreshBackupHistory().catch(this.root.logger.warn);
           break;
         case "energyHistory":
           // Schedule 30 seconds after each 5-minute mark aligned to clock time
           this.refreshIntervals[endpoint] = scheduler(
-            () => {
-              if (this.listenerCount("energyHistory")) {
-                this.getCalendarHistory("energy", "day")
-                  .then((energyHistory) => {
-                    if (energyHistory)
-                      this.emit("energyHistory", energyHistory);
-                  })
-                  .catch(this.root.logger.warn);
-              }
-            },
+            () => this.refreshEnergyHistory().catch(this.root.logger.warn),
             300_000,
             20_000 + Math.round(10_000 * Math.random()),
           );
+          this.refreshEnergyHistory().catch(this.root.logger.warn);
           break;
-        case "chargeHistory":
-          // Schedule 30 seconds after each 5-minute mark aligned to clock time
-          this.refreshIntervals[endpoint] = scheduler(
-            () => {
-              if (this.listenerCount("chargeHistory")) {
-                this.getTelemetryHistory("day")
-                  .then((chargeHistory) => {
-                    if (chargeHistory)
-                      this.emit("chargeHistory", chargeHistory);
-                  })
-                  .catch(this.root.logger.warn);
-              }
-            },
-            300_000,
-            20_000 + Math.round(10_000 * Math.random()),
-          );
+        case "chargeHistory": {
+          const intervalHandle = setInterval(() => {
+            this.refreshChargeHistory().catch(this.root.logger.warn);
+          }, this.refreshDelay);
+          this.refreshIntervals[endpoint] = () => clearInterval(intervalHandle);
+          this.refreshChargeHistory().catch(this.root.logger.warn);
           break;
+        }
         default:
           throw new Error(`Invalid endpoint: ${endpoint}`);
       }
