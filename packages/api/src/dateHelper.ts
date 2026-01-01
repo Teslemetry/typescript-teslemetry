@@ -1,7 +1,7 @@
 /**
  * Input type for date parameters - can be a string (used as-is), Date object, or undefined
  */
-export type DateInput = string | Date | undefined;
+export type DateInput = string | Date;
 
 /**
  * Converts a Date object to ISO string format without milliseconds
@@ -18,15 +18,7 @@ function formatDate(date: Date): string {
  */
 function getStartOfToday(): Date {
   const now = new Date();
-  return new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    0,
-    0,
-    0,
-    0,
-  );
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
 }
 
 /**
@@ -47,26 +39,6 @@ function getEndOfToday(): Date {
 }
 
 /**
- * Normalizes a date input to an ISO string format suitable for API calls.
- * - If input is a string, it is returned as-is
- * - If input is a Date, it is converted to ISO string without milliseconds
- * - If input is undefined, the default date is used and converted
- *
- * @param input The date input (string, Date, or undefined)
- * @param defaultDate The default Date to use if input is undefined
- * @returns Formatted date string
- */
-export function normalizeDateInput(input: DateInput, defaultDate: Date): string {
-  if (typeof input === "string") {
-    return input;
-  }
-  if (input instanceof Date) {
-    return formatDate(input);
-  }
-  return formatDate(defaultDate);
-}
-
-/**
  * Processes start_date and end_date inputs for API calls.
  * Handles string (taken as-is), Date (formatted), or undefined (defaults to today).
  *
@@ -74,12 +46,15 @@ export function normalizeDateInput(input: DateInput, defaultDate: Date): string 
  * @param end_date The end date input
  * @returns Object with formatted start_date and end_date strings
  */
-export function processDateRange(
-  start_date: DateInput,
-  end_date: DateInput,
-): { start_date: string; end_date: string } {
-  return {
-    start_date: normalizeDateInput(start_date, getStartOfToday()),
-    end_date: normalizeDateInput(end_date, getEndOfToday()),
-  };
+export function processDateRange(start_date?: DateInput, end_date?: DateInput) {
+  const output: { start_date?: string; end_date?: string } = {};
+  if (start_date) {
+    output.start_date =
+      start_date instanceof Date ? formatDate(start_date) : start_date;
+  }
+  if (end_date) {
+    output.end_date =
+      end_date instanceof Date ? formatDate(end_date) : end_date;
+  }
+  return output;
 }
