@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.4
+
+### Patch Changes
+
+- 5cce64e: Add emit to history data polling, and add sumEnergyHistory helper
+
 ## 0.6.3
 
 ### Patch Changes
