@@ -1,6 +1,7 @@
 // src/index.ts
 
 export { Teslemetry } from "./Teslemetry.js";
+export type { DateInput } from "./dateHelper.js";
 export { TeslemetryStream } from "./TeslemetryStream.js";
 export { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
 export { TeslemetryApi } from "./TeslemetryApi.js";

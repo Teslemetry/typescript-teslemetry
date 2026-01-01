@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
+import { processDateRange, DateInput } from "./dateHelper.js";
 import {
   postApi1EnergySitesByIdBackup,
   getApi1EnergySitesByIdCalendarHistory,
@@ -12,14 +13,50 @@ import {
   getApi1EnergySitesByIdTelemetryHistory,
   GetApi1EnergySitesByIdSiteInfoResponse,
   GetApi1EnergySitesByIdLiveStatusResponse,
+  GetApi1EnergySitesByIdCalendarHistoryResponse,
+  GetApi1EnergySitesByIdTelemetryHistoryResponse,
 } from "./client/index.js";
 import { reuse } from "./reuse.js";
 import { scheduler } from "./scheduler.js";
+
+// Derive event types from the calendar history response union type
+type CalendarHistoryEvents = NonNullable<
+  NonNullable<
+    GetApi1EnergySitesByIdCalendarHistoryResponse["response"]
+  >["events"]
+>[number];
+
+// Extract specific event types based on discriminating properties
+export type BackupHistoryEvent = Extract<
+  CalendarHistoryEvents,
+  { duration?: number }
+>;
+export type EnergyHistoryEvent = Exclude<
+  CalendarHistoryEvents,
+  { duration?: number }
+>;
+
+export type BackupHistoryResponse = {
+  response?: {
+    events?: BackupHistoryEvent[];
+    total_events?: number;
+  };
+};
+
+export type EnergyHistoryResponse = {
+  response?: {
+    events?: EnergyHistoryEvent[];
+    total_events?: number;
+  };
+};
 
 // Interface for event type safety
 type TeslemetryEnergyEventMap = {
   siteInfo: GetApi1EnergySitesByIdSiteInfoResponse;
   liveStatus: GetApi1EnergySitesByIdLiveStatusResponse;
+  backupHistory: BackupHistoryResponse;
+  energyHistory: EnergyHistoryResponse;
+  chargeHistory: GetApi1EnergySitesByIdTelemetryHistoryResponse;
 };
 
 // TypeScript interface for event type safety
@@ -42,11 +79,7 @@ export declare interface TeslemetryEnergyApi {
   ): boolean;
 }
 
-type PollingEndpoints =
-  | "siteInfo"
-  | "liveStatus"
-  | "backupHistory"
-  | "energyHistory";
+type PollingEndpoints = keyof TeslemetryEnergyEventMap;
 
 export class TeslemetryEnergyApi extends EventEmitter {
   private root: Teslemetry;
@@ -66,6 +99,7 @@ export class TeslemetryEnergyApi extends EventEmitter {
     liveStatus: null,
     backupHistory: null,
     energyHistory: null,
+    chargeHistory: null,
   };
   private refreshClients: {
     [endpoint in PollingEndpoints]: Set<symbol>;
@@ -74,6 +108,7 @@ export class TeslemetryEnergyApi extends EventEmitter {
     liveStatus: new Set(),
     backupHistory: new Set(),
     energyHistory: new Set(),
+    chargeHistory: new Set(),
   };
 
   constructor(root: Teslemetry, siteId: number) {
@@ -91,10 +126,11 @@ export class TeslemetryEnergyApi extends EventEmitter {
     event: K,
     listener: (data: TeslemetryEnergyEventMap[K]) => void,
   ): this {
-    const cached = this.cache[event];
+    const cached = this.cache[event as keyof typeof this.cache];
     if (cached) {
       listener(cached as TeslemetryEnergyEventMap[K]);
     }
+
     return super.on(event, listener);
   }
 
@@ -113,57 +149,66 @@ export class TeslemetryEnergyApi extends EventEmitter {
   }
 
   /**
+   * Returns the backup (off-grid) event history of the site, aggregated to the requested period.
+   * @param kind Type of history to retrieve - "backup"
+   * @param period Aggregation period
+   * @param start_date Start date for the data range (string, Date, or undefined - defaults to start of today)
+   * @param end_date End date for the data range (string, Date, or undefined - defaults to end of today)
+   * @param time_zone IANA Time zone for the data range
+   * @return Promise to an object with response containing backup event history
+   */
+  public async getCalendarHistory(
+    kind: "backup",
+    period: "day" | "week" | "month" | "year",
+    start_date?: DateInput,
+    end_date?: DateInput,
+    time_zone?: string,
+  ): Promise<BackupHistoryResponse | undefined>;
+
+  /**
+   * Returns the energy measurements of the site, aggregated to the requested period.
+   * @param kind Type of history to retrieve - "energy"
+   * @param period Aggregation period
+   * @param start_date Start date for the data range (string, Date, or undefined - defaults to start of today)
+   * @param end_date End date for the data range (string, Date, or undefined - defaults to end of today)
+   * @param time_zone IANA Time zone for the data range
+   * @return Promise to an object with response containing energy measurements aggregated by period
+   */
+  public async getCalendarHistory(
+    kind: "energy",
+    period: "day" | "week" | "month" | "year",
+    start_date?: DateInput,
+    end_date?: DateInput,
+    time_zone?: string,
+  ): Promise<EnergyHistoryResponse | undefined>;
+
+  /**
    * Returns the backup (off-grid) event history of the site or the energy measurements of the site, aggregated to the requested period.
    * @param kind Type of history to retrieve
    * @param period Aggregation period
-   * @param start_date Start date for the data range, defaults to start of today
-   * @param end_date End date for the data range, defaults to end of today
+   * @param start_date Start date for the data range (string, Date, or undefined - defaults to start of today)
+   * @param end_date End date for the data range (string, Date, or undefined - defaults to end of today)
    * @param time_zone IANA Time zone for the data range
    * @return Promise to an object with response containing backup event history or energy measurements aggregated by period
    */
   public async getCalendarHistory(
     kind: "backup" | "energy",
     period: "day" | "week" | "month" | "year",
-    start_date?: Date,
-    end_date?: Date,
+    start_date?: DateInput,
+    end_date?: DateInput,
     time_zone?: string,
-  ) {
-    // Default to today midnight to midnight in local timezone
-    const now = new Date();
-    const defaultStartDate = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      0,
-      0,
-      0,
-      0,
-    );
-    const defaultEndDate = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      23,
-      59,
-      59,
-      999,
-    );
-
-    const actualStartDate = start_date ?? defaultStartDate;
-    const actualEndDate = end_date ?? defaultEndDate;
-
+  ): Promise<BackupHistoryResponse | EnergyHistoryResponse | undefined> {
     const { data } = await getApi1EnergySitesByIdCalendarHistory({
       query: {
         kind,
         period,
-        start_date: actualStartDate.toISOString().replace(/\.\d{3}Z$/, "Z"),
-        end_date: actualEndDate.toISOString().replace(/\.\d{3}Z$/, "Z"),
+        ...processDateRange(start_date, end_date),
         time_zone,
       },
       path: { id: this.siteId },
       client: this.root.client,
     });
-    return data;
+    return data as BackupHistoryResponse | EnergyHistoryResponse | undefined;
   }
 
   /**
@@ -271,18 +316,22 @@ export class TeslemetryEnergyApi extends EventEmitter {
 
   /**
    * Returns the charging history of a wall connector.
-   * @param start_date Start date for the telemetry data
-   * @param end_date End date for the telemetry data
+   * @param start_date Start date for the telemetry data (string, Date, or undefined - defaults to start of today)
+   * @param end_date End date for the telemetry data (string, Date, or undefined - defaults to end of today)
    * @param time_zone Optional timezone for the data
    * @return Promise to an object with response containing charging history data from wall connectors
    */
   public async getTelemetryHistory(
-    start_date: string,
-    end_date: string,
+    start_date?: DateInput,
+    end_date?: DateInput,
     time_zone?: string,
   ) {
     const { data } = await getApi1EnergySitesByIdTelemetryHistory({
-      query: { kind: "charge", start_date, end_date, time_zone },
+      query: {
+        kind: "charge",
+        ...processDateRange(start_date, end_date),
+        time_zone,
+      },
       path: { id: this.siteId },
       client: this.root.client,
     });
@@ -317,7 +366,7 @@ export class TeslemetryEnergyApi extends EventEmitter {
               );
             },
             300_000,
-            30_000,
+            20_000 + Math.round(10_000 * Math.random()),
           );
           break;
         case "energyHistory":
@@ -329,7 +378,17 @@ export class TeslemetryEnergyApi extends EventEmitter {
               );
             },
             300_000,
-            30_000,
+            20_000 + Math.round(10_000 * Math.random()),
+          );
+          break;
+        case "chargeHistory":
+          // Schedule 30 seconds after each 5-minute mark aligned to clock time
+          this.refreshIntervals[endpoint] = scheduler(
+            () => {
+              this.getTelemetryHistory("day").catch(this.root.logger.warn);
+            },
+            300_000,
+            20_000 + Math.round(10_000 * Math.random()),
           );
           break;
         default:
