@@ -16,7 +16,7 @@ function formatDate(date: Date): string {
  * Gets the start of today (midnight) in local timezone
  * @returns Date object set to today at 00:00:00.000
  */
-function getStartOfToday(): Date {
+export function getStartOfToday(): Date {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
 }
@@ -25,16 +25,16 @@ function getStartOfToday(): Date {
  * Gets the end of today (23:59:59.999) in local timezone
  * @returns Date object set to today at 23:59:59.999
  */
-function getEndOfToday(): Date {
+export function getEndOfToday(): Date {
   const now = new Date();
   return new Date(
     now.getFullYear(),
     now.getMonth(),
-    now.getDate(),
-    23,
-    59,
-    59,
-    999,
+    now.getDate() + 1,
+    0,
+    0,
+    0,
+    0,
   );
 }
 
@@ -46,7 +46,16 @@ function getEndOfToday(): Date {
  * @param end_date The end date input
  * @returns Object with formatted start_date and end_date strings
  */
-export function processDateRange(start_date?: DateInput, end_date?: DateInput) {
+export function processDateRange<
+  S extends DateInput | undefined,
+  E extends DateInput | undefined,
+>(
+  start_date?: S,
+  end_date?: E,
+): {
+  start_date: S extends DateInput ? string : undefined;
+  end_date: E extends DateInput ? string : undefined;
+} {
   const output: { start_date?: string; end_date?: string } = {};
   if (start_date) {
     output.start_date =
@@ -56,5 +65,8 @@ export function processDateRange(start_date?: DateInput, end_date?: DateInput) {
     output.end_date =
       end_date instanceof Date ? formatDate(end_date) : end_date;
   }
-  return output;
+  return output as {
+    start_date: S extends DateInput ? string : undefined;
+    end_date: E extends DateInput ? string : undefined;
+  };
 }

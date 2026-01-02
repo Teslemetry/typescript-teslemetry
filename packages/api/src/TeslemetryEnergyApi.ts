@@ -1,6 +1,11 @@
 import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
-import { processDateRange, DateInput } from "./dateHelper.js";
+import {
+  processDateRange,
+  DateInput,
+  getStartOfToday,
+  getEndOfToday,
+} from "./dateHelper.js";
 import {
   postApi1EnergySitesByIdBackup,
   getApi1EnergySitesByIdCalendarHistory,
@@ -315,7 +320,10 @@ export class TeslemetryEnergyApi extends EventEmitter {
     const { data } = await getApi1EnergySitesByIdTelemetryHistory({
       query: {
         kind: "charge",
-        ...processDateRange(start_date, end_date),
+        ...processDateRange(
+          start_date ?? getStartOfToday(),
+          end_date ?? getEndOfToday(),
+        ),
         time_zone,
       },
       path: { id: this.siteId },
