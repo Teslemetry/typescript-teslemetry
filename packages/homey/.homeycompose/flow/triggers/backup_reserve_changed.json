@@ -1,0 +1,20 @@
+{
+  "title": {
+    "en": "Backup reserve changed"
+  },
+  "hint": {
+    "en": "This card triggers when the backup reserve percentage changes."
+  },
+  "tokens": [
+    {
+      "name": "backup_reserve",
+      "type": "number",
+      "title": {
+        "en": "Reserve"
+      },
+      "example": {
+        "en": "20"
+      }
+    }
+  ]
+}

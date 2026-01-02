@@ -1,0 +1,20 @@
+{
+  "title": {
+    "en": "Operation mode changed"
+  },
+  "hint": {
+    "en": "This card triggers when the operation mode changes."
+  },
+  "tokens": [
+    {
+      "name": "operation_mode",
+      "type": "string",
+      "title": {
+        "en": "Mode"
+      },
+      "example": {
+        "en": "Self Consumption"
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["app.ts", "drivers/*/*.ts"],
+  entry: ["app.ts", "api.ts", "drivers/*/*.ts"],
   outDir: ".homeybuild",
   external: ["homey"],
   format: ["esm"],

@@ -53,6 +53,43 @@ importers:
         version: 5.9.3
 
   packages/homey:
+    dependencies:
+      homey:
+        specifier: ^3.12.0
+        version: 3.12.0(encoding@0.1.13)(ws@8.18.3)(zod@3.25.67)
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+    devDependencies:
+      '@teslemetry/api':
+        specifier: ^0.6.7
+        version: 0.6.7
+      '@tsconfig/node16':
+        specifier: ^16.1.8
+        version: 16.1.8
+      '@types/homey':
+        specifier: npm:homey-apps-sdk-v3-types@^0.3.12
+        version: homey-apps-sdk-v3-types@0.3.12
+      '@types/node':
+        specifier: ^24.10.2
+        version: 24.10.2
+      copyfiles:
+        specifier: ^2.4.1
+        version: 2.4.1
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-athom:
+        specifier: ^3.1.5
+        version: 3.1.5(eslint@7.32.0)
+      tsdown:
+        specifier: ^0.16.7
+        version: 0.16.7(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/homey2:
     devDependencies:
       '@google/genai':
         specifier: ^1.33.0
@@ -83,7 +120,7 @@ importers:
         version: 3.1.5(eslint@7.32.0)
       homey:
         specifier: ^3.10.0
-        version: 3.10.0(encoding@0.1.13)(ws@8.18.3)(zod@3.25.67)
+        version: 3.12.0(encoding@0.1.13)(ws@8.18.3)(zod@3.25.67)
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
@@ -3707,6 +3744,9 @@ packages:
   '@tediousjs/connection-string@0.5.0':
     resolution: {integrity: sha512-7qSgZbincDDDFyRweCIEvZULFAw5iz/DeunhvuxpL31nfntX3P4Yd4HkHBRg9H8CdqY1e5WFN1PZIz/REL9MVQ==}
 
+  '@teslemetry/api@0.6.7':
+    resolution: {integrity: sha512-jpwVDnpnL3yEBCn/OmqVEV+B6gikfeJ0sgh9WcELQR//gzMg37Zh0RTSwRZ8Vhy2b6WXp7jdxyw4nfKFlSsA2w==}
+
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
 
@@ -5295,6 +5335,10 @@ packages:
   cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
+
+  copyfiles@2.4.1:
+    resolution: {integrity: sha512-fereAvAvxDrQDOXybk3Qu3dPbOoKoysFMWtkY3mv5BsL8//OSZVL5DCLYqgRfY5cWirgRzlC+WSrxp6Bo3eNZg==}
+    hasBin: true
 
   core-js@2.6.12:
     resolution: {integrity: sha512-Kb2wC0fvsWfQrgk8HU5lW6U/Lcs8+9aaYcy4ZFc6DDlo4nZ7n70dEgE5rtR0oG6ufKDUnrwfWL1mXR5ljDatrQ==}
@@ -6944,12 +6988,12 @@ packages:
   homey-apps-sdk-v3-types@0.3.12:
     resolution: {integrity: sha512-xr275VoF7FAiTi6PzElqHWpuGgSBY9hZFZsKeCTA4rluopf8sVk6zUPa+giSRSTiTrN3N3QjmHD5lUoNVwYd4g==}
 
-  homey-lib@2.42.1:
-    resolution: {integrity: sha512-x2dRJGDRlFUVKwf2D9aAukQF1cgOIoD8JG8In3s+8Z3djEpFDKxXnJrPPdb0XLCipyLr7jA8F2CGVE1W7cW06A==}
+  homey-lib@2.44.0:
+    resolution: {integrity: sha512-eIrz89BT5W6QDJ32/sX93q4Ggr1B8yMrMHkc8lCDQzlDMEEv9y1h8H6aIKSYxl4lRdY9Cvgz+IiZbk9FBgAfNw==}
     engines: {node: '>=12.13.0'}
 
-  homey@3.10.0:
-    resolution: {integrity: sha512-GiCTMzYBuGku7A1zOjCmSQN4n5IBV5Urm6w6tobzHzuhc/WRFErcTewFpzPkbi4DLlwuPWZWiGn2DZEoYJ0qAQ==}
+  homey@3.12.0:
+    resolution: {integrity: sha512-ZBSFJO3GR19ZHNGoIOpDxOQkqE6Yb52cSq0QQMT1tx1SkVY2hTzftRdxrAwWaZflwsINIGJYSbaOFO0Y4g1xng==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -8733,6 +8777,9 @@ packages:
     resolution: {integrity: sha512-Us/Se1WtT0ylXgNFfyFSx4LElllVLJXQjWi2Xz17xWw7amDKO2MLtFnVp1WACy7GkVGs+oBlRopVNUzlrGSw1w==}
     engines: {node: '>=6.0.0'}
 
+  noms@0.0.0:
+    resolution: {integrity: sha512-lNDU9VJaOPxUmXcLb+HQFeUgQQPtMI24Gt6hgfuMHRJgMRHMF/qZ4HJD3GDru4sSw9IQl2jPjAYnQrdIeLbwow==}
+
   nopt@5.0.0:
     resolution: {integrity: sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ==}
     engines: {node: '>=6'}
@@ -9638,6 +9685,9 @@ packages:
   read@3.0.1:
     resolution: {integrity: sha512-SLBrDU/Srs/9EoWhU5GdbAoxG1GzpQHo/6qiGItaoLJ1thmYpcNIM1qISEUvyHBzfGlWIyd6p2DNi1oV1VmAuw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+
+  readable-stream@1.0.34:
+    resolution: {integrity: sha512-ok1qVCJuRkNmvebYikljxJA/UEsKwLl2nI1OmaqAu4/UE+h0wKCHok4XkL/gvi39OacXvw59RJUOFUkDib2rHg==}
 
   readable-stream@1.1.14:
     resolution: {integrity: sha512-+MeVjFf4L44XUkhM1eYbD8fyEsxcV81pqMSR5gblfcLCHfZvbrqy4/qYHE+/R5HoBUT11WV5O08Cr1n3YXkWVQ==}
@@ -10591,6 +10641,9 @@ packages:
   throat@2.0.2:
     resolution: {integrity: sha512-N3kcBj8Pn5SnHmxGwrFl2D7TkCimQZJ6jBaCJldUsKcY0mmZ+dj4uF2FZ7r1gyHLkRnISvmL7MbMPV1UADqKjQ==}
 
+  through2@2.0.5:
+    resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
+
   through@2.3.8:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
 
@@ -11003,6 +11056,10 @@ packages:
     peerDependenciesMeta:
       synckit:
         optional: true
+
+  untildify@4.0.0:
+    resolution: {integrity: sha512-KK8xQ1mkzZeg9inewmFVDNkg3l5LUhoq9kN6iWYB/CC9YMG8HA+c1Q8HwDe6dEX7kErrEVNVBO3fWsVq5iDgtw==}
+    engines: {node: '>=8'}
 
   unzip-response@2.0.1:
     resolution: {integrity: sha512-N0XH6lqDtFH84JxptQoZYmloF4nzrQqqrAymNj+/gW60AO2AZgOcf4O/nUXJcYfyQkqvMo9lSupBZmmgvuVXlw==}
@@ -16660,6 +16717,8 @@ snapshots:
 
   '@tediousjs/connection-string@0.5.0': {}
 
+  '@teslemetry/api@0.6.7': {}
+
   '@tokenizer/token@0.3.0': {}
 
   '@tootallnate/once@1.1.2':
@@ -18498,6 +18557,16 @@ snapshots:
   cookie@0.7.1: {}
 
   cookie@0.7.2: {}
+
+  copyfiles@2.4.1:
+    dependencies:
+      glob: 7.2.3
+      minimatch: 3.1.2
+      mkdirp: 1.0.4
+      noms: 0.0.0
+      through2: 2.0.5
+      untildify: 4.0.0
+      yargs: 16.2.0
 
   core-js@2.6.12: {}
 
@@ -20726,7 +20795,7 @@ snapshots:
     dependencies:
       '@types/node': 14.18.63
 
-  homey-lib@2.42.1:
+  homey-lib@2.44.0:
     dependencies:
       ajv: 6.12.6
       buffer: 6.0.3
@@ -20734,7 +20803,7 @@ snapshots:
       semver: 5.7.2
       tinycolor2: 1.6.0
 
-  homey@3.10.0(encoding@0.1.13)(ws@8.18.3)(zod@3.25.67):
+  homey@3.12.0(encoding@0.1.13)(ws@8.18.3)(zod@3.25.67):
     dependencies:
       cli-table: 0.3.11
       colors: 1.4.0
@@ -20747,7 +20816,7 @@ snapshots:
       fs-extra: 10.1.0
       get-port: 5.1.1
       homey-api: 3.14.22(encoding@0.1.13)
-      homey-lib: 2.42.1
+      homey-lib: 2.44.0
       ignore-walk: 3.0.4
       inquirer: 8.1.2
       is-wsl: 2.2.0
@@ -23293,6 +23362,11 @@ snapshots:
 
   nodemailer@7.0.10: {}
 
+  noms@0.0.0:
+    dependencies:
+      inherits: 2.0.4
+      readable-stream: 1.0.34
+
   nopt@5.0.0:
     dependencies:
       abbrev: 1.1.1
@@ -24258,6 +24332,13 @@ snapshots:
   read@3.0.1:
     dependencies:
       mute-stream: 1.0.0
+
+  readable-stream@1.0.34:
+    dependencies:
+      core-util-is: 1.0.2
+      inherits: 2.0.4
+      isarray: 0.0.1
+      string_decoder: 0.10.31
 
   readable-stream@1.1.14:
     dependencies:
@@ -25558,6 +25639,11 @@ snapshots:
 
   throat@2.0.2: {}
 
+  through2@2.0.5:
+    dependencies:
+      readable-stream: 2.3.8
+      xtend: 4.0.2
+
   through@2.3.8: {}
 
   thunky@1.1.0: {}
@@ -25958,6 +26044,8 @@ snapshots:
     dependencies:
       '@oxc-project/runtime': 0.96.0
       rolldown: 1.0.0-beta.51
+
+  untildify@4.0.0: {}
 
   unzip-response@2.0.1: {}
 

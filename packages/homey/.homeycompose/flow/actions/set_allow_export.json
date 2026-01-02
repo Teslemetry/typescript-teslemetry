@@ -1,0 +1,45 @@
+{
+  "title": {
+    "en": "Set allow export"
+  },
+  "titleFormatted": {
+    "en": "Set allow export to [[mode]] on [[device]]"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "capabilities=allow_export",
+      "title": {
+        "en": "Device"
+      }
+    },
+    {
+      "type": "dropdown",
+      "name": "mode",
+      "title": {
+        "en": "Mode"
+      },
+      "values": [
+        {
+          "id": "battery_ok",
+          "label": {
+            "en": "Battery and Solar"
+          }
+        },
+        {
+          "id": "pv_only",
+          "label": {
+            "en": "Solar Only"
+          }
+        },
+        {
+          "id": "never",
+          "label": {
+            "en": "Never"
+          }
+        }
+      ]
+    }
+  ]
+}

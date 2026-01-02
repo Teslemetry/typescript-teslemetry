@@ -10,22 +10,15 @@ const icon: Record<string, { icon: string }> = {
 };
 
 export default class VehicleDriver extends TeslemetryDriver {
-  async onInit() {
-    this.homey.log("Vehicle driver initialized");
-  }
-
   async onPairListDevices() {
-    this.homey.log("Listing vehicles for pairing...");
-    const app = this.homey.app as TeslemetryApp;
+    const products = await this.homey.app.getProducts();
+    if (!products) {
+      throw new Error(
+        "Failed to load products. Please restart the pairing process",
+      );
+    }
 
     try {
-      const products = await app.getProducts();
-
-      if (!products || !products.vehicles) {
-        this.homey.log("No vehicles found or products not loaded");
-        return [];
-      }
-
       // Only includes vehicles with a subscription, that support fleet telemetry, and are configured correctly
       return Object.values(products.vehicles)
         .filter(

@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "Wake up vehicle"
+  },
+  "titleFormatted": {
+    "en": "Wake up [[device]]"
+  },
+  "hint": {
+    "en": "Wake up the vehicle from sleep mode."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "capabilities=button_wake_up",
+      "title": {
+        "en": "Device"
+      }
+    }
+  ]
+}

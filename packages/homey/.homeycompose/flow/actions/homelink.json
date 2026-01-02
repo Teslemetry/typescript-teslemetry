@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "Trigger HomeLink"
+  },
+  "titleFormatted": {
+    "en": "Trigger HomeLink on [[device]]"
+  },
+  "hint": {
+    "en": "This card triggers the HomeLink garage door opener."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "capabilities=button_homelink",
+      "title": {
+        "en": "Device"
+      }
+    }
+  ]
+}

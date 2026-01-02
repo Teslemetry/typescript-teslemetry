@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "Flash lights"
+  },
+  "titleFormatted": {
+    "en": "Flash lights on [[device]]"
+  },
+  "hint": {
+    "en": "Flash the vehicle's lights."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "capabilities=button_flash_lights",
+      "title": {
+        "en": "Device"
+      }
+    }
+  ]
+}

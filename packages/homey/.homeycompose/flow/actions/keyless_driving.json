@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "Start keyless driving"
+  },
+  "titleFormatted": {
+    "en": "Start keyless driving on [[device]]"
+  },
+  "hint": {
+    "en": "Enable keyless driving for the vehicle."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "capabilities=button_keyless_driving",
+      "title": {
+        "en": "Device"
+      }
+    }
+  ]
+}

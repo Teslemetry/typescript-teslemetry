@@ -1,0 +1,45 @@
+{
+  "title": {
+    "en": "Set operation mode"
+  },
+  "titleFormatted": {
+    "en": "Set operation mode of [[device]] to [[mode]]"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "capabilities=operation_mode",
+      "title": {
+        "en": "Device"
+      }
+    },
+    {
+      "type": "dropdown",
+      "name": "mode",
+      "title": {
+        "en": "Mode"
+      },
+      "values": [
+        {
+          "id": "self_consumption",
+          "label": {
+            "en": "Self Consumption"
+          }
+        },
+        {
+          "id": "backup",
+          "label": {
+            "en": "Backup"
+          }
+        },
+        {
+          "id": "autonomous",
+          "label": {
+            "en": "Autonomous"
+          }
+        }
+      ]
+    }
+  ]
+}

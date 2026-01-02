@@ -1,0 +1,24 @@
+{
+  "name": {
+    "en": "Powerwall"
+  },
+  "class": "battery",
+  "$extends": ["teslemetry"],
+  "capabilities": [
+    "measure_battery",
+    "measure_power",
+    "operation_mode",
+    "backup_reserve",
+    "charge_from_grid",
+    "allow_export",
+    "storm_watch",
+    "alarm_storm_watch_active",
+    "meter_power.imported",
+    "meter_power.exported"
+  ],
+  "energy": {
+    "homeBattery": true,
+    "meterPowerImportedCapability": "meter_power.imported",
+    "meterPowerExportedCapability": "meter_power.exported"
+  }
+}

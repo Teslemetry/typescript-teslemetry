@@ -3,11 +3,15 @@
     "en": "Tesla Vehicle"
   },
   "class": "car",
+  "$extends": ["teslemetry"],
+  "energy": {
+    "electricCar": true
+  },
   "capabilities": [
     "measure_battery",
     "measure_range",
-    "measure_temperature.inside",
-    "measure_temperature.outside",
+    "measure_temperature",
+    "measure_temperature_outside",
     "locked",
     "charge_port_door",
     "thermostat_mode",
@@ -24,8 +28,8 @@
     "charge_port_latch",
     "frunk",
     "trunk",
-    "target_temperature.inside",
-    "windowcoverings_state",
+    "target_temperature",
+    "windowcoverings_closed",
     "alarm_motion",
     "alarm_contact_door_front_left",
     "alarm_contact_door_front_right",
@@ -36,38 +40,5 @@
     "button_keyless_driving",
     "button_homelink",
     "button_wake_up"
-  ],
-  "connectivity": ["cloud"],
-  "energy": {
-    "electricCar": true
-  },
-  "images": {
-    "small": "{{driverAssetsPath}}/images/small.png",
-    "large": "{{driverAssetsPath}}/images/large.png",
-    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
-  },
-  "platforms": ["local"],
-  "pair": [
-    {
-      "id": "login_oauth2",
-      "template": "login_oauth2"
-    },
-    {
-      "id": "list_devices",
-      "template": "list_devices",
-      "navigation": {
-        "next": "add_devices"
-      }
-    },
-    {
-      "id": "add_devices",
-      "template": "add_devices"
-    }
-  ],
-  "repair": [
-    {
-      "id": "login_oauth2",
-      "template": "login_oauth2"
-    }
   ]
 }

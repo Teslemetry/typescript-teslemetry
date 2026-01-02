@@ -1,0 +1,20 @@
+{
+  "title": {
+    "en": "Allow export changed"
+  },
+  "hint": {
+    "en": "This card triggers when the export setting changes."
+  },
+  "tokens": [
+    {
+      "name": "allow_export",
+      "type": "string",
+      "title": {
+        "en": "Mode"
+      },
+      "example": {
+        "en": "Battery and Solar"
+      }
+    }
+  ]
+}

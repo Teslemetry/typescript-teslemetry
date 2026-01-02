@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "Honk horn"
+  },
+  "titleFormatted": {
+    "en": "Honk horn on [[device]]"
+  },
+  "hint": {
+    "en": "This card triggers the vehicle's horn."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "capabilities=button_honk_horn",
+      "title": {
+        "en": "Device"
+      }
+    }
+  ]
+}

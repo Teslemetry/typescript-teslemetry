@@ -1,0 +1,20 @@
+{
+  "title": {
+    "en": "Steering wheel heater changed"
+  },
+  "hint": {
+    "en": "This card triggers when the steering wheel heater level changes."
+  },
+  "tokens": [
+    {
+      "name": "steering_wheel_heater",
+      "type": "string",
+      "title": {
+        "en": "Level"
+      },
+      "example": {
+        "en": "High"
+      }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": {
+    "en": "Energy Gateway"
+  },
+  "class": "sensor",
+  "$extends": ["teslemetry"],
+  "capabilities": [
+    "measure_power",
+    "measure_power_load",
+    "alarm_off_grid",
+    "alarm_island_status",
+    "meter_power.imported",
+    "meter_power.exported"
+  ],
+  "energy": {
+    "cumulative": true,
+    "meterPowerImportedCapability": "meter_power.imported",
+    "meterPowerExportedCapability": "meter_power.exported"
+  }
+}

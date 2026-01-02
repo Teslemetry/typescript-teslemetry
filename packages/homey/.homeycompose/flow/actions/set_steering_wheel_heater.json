@@ -1,0 +1,45 @@
+{
+  "title": {
+    "en": "Set steering wheel heater"
+  },
+  "titleFormatted": {
+    "en": "Set [[device]] steering wheel heater to [[level]]"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "capabilities=steering_wheel_heater",
+      "title": {
+        "en": "Device"
+      }
+    },
+    {
+      "type": "dropdown",
+      "name": "level",
+      "title": {
+        "en": "Level"
+      },
+      "values": [
+        {
+          "id": "0",
+          "label": {
+            "en": "Off"
+          }
+        },
+        {
+          "id": "1",
+          "label": {
+            "en": "Low"
+          }
+        },
+        {
+          "id": "3",
+          "label": {
+            "en": "High"
+          }
+        }
+      ]
+    }
+  ]
+}

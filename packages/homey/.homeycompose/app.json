@@ -1,7 +1,17 @@
 {
   "id": "com.teslemetry",
+  "api": {
+    "getOAuthStatus": {
+      "method": "GET",
+      "path": "/oauth/status"
+    },
+    "deleteOAuthToken": {
+      "method": "DELETE",
+      "path": "/oauth/token"
+    }
+  },
   "brandColor": "#3D6DB5",
-  "version": "0.0.3",
+  "version": "0.0.7",
   "compatibility": ">=12.4.5",
   "sdk": 3,
   "platforms": ["local"],

@@ -1,0 +1,12 @@
+{
+  "name": {
+    "en": "Solar Panel"
+  },
+  "class": "solarpanel",
+  "$extends": ["teslemetry"],
+  "capabilities": ["measure_power", "meter_power"],
+  "energy": {
+    "homeBattery": true,
+    "meterPowerExportedCapability": "meter_power"
+  }
+}

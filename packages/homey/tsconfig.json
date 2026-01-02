@@ -5,7 +5,7 @@
     "outDir": ".homeybuild/",
     "typeRoots": ["./node_modules/@types", "./@types"],
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
   },
-  "include": ["app.ts", "drivers/**/*"]
+  "include": ["app.ts", "api.ts", "drivers/**/*"],
 }

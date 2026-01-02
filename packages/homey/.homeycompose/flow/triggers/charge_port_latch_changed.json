@@ -1,0 +1,17 @@
+{
+  "title": {
+    "en": "Charge port latch changed"
+  },
+  "hint": {
+    "en": "This card triggers when the charge port latch engages or disengages."
+  },
+  "tokens": [
+    {
+      "name": "charge_port_latch",
+      "type": "boolean",
+      "title": {
+        "en": "Latched"
+      }
+    }
+  ]
+}
