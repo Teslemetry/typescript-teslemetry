@@ -4,21 +4,39 @@
   },
   "class": "battery",
   "$extends": ["teslemetry"],
+  "uiQuickAction": false,
   "capabilities": [
     "measure_battery",
     "measure_power",
     "operation_mode",
     "backup_reserve",
-    "charge_from_grid",
+    "onoff.charge_grid",
     "allow_export",
-    "storm_watch",
-    "alarm_storm_watch_active",
-    "meter_power.imported",
-    "meter_power.exported"
+    "onoff.storm",
+    "alarm_generic.storm",
+    "meter_power.charged",
+    "meter_power.discharged"
   ],
+  "capabilitiesOptions": {
+    "meter_power.charged": {
+      "title": { "en": "Charged Energy" }
+    },
+    "meter_power.discharged": {
+      "title": { "en": "Discharged Energy" }
+    },
+    "onoff.charge_grid": {
+      "title": { "en": "Charge From Grid" }
+    },
+    "onoff.storm": {
+      "title": { "en": "Storm Watch" }
+    },
+    "alarm_generic.storm": {
+      "title": { "en": "Storm Watch Active" }
+    }
+  },
   "energy": {
     "homeBattery": true,
-    "meterPowerImportedCapability": "meter_power.imported",
-    "meterPowerExportedCapability": "meter_power.exported"
+    "meterPowerImportedCapability": "meter_power.charged",
+    "meterPowerExportedCapability": "meter_power.discharged"
   }
 }

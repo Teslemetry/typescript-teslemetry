@@ -1,9 +1,0 @@
-{
-  "type": "boolean",
-  "title": {
-    "en": "Charge From Grid"
-  },
-  "getable": true,
-  "setable": true,
-  "uiComponent": "toggle"
-}

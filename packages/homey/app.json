@@ -43,7 +43,6 @@
   "source": "https://github.com/teslemetry/homey",
   "homepage": "https://teslemetry.com",
   "support": "mailto:support@teslemetry.com",
-  "esm": true,
   "flow": {
     "triggers": [
       {
@@ -90,300 +89,6 @@
       },
       {
         "title": {
-          "en": "Charge from grid changed"
-        },
-        "hint": {
-          "en": "This card triggers when charge from grid turns on or off."
-        },
-        "tokens": [
-          {
-            "name": "charge_from_grid",
-            "type": "boolean",
-            "title": {
-              "en": "Enabled"
-            }
-          }
-        ],
-        "id": "charge_from_grid_changed"
-      },
-      {
-        "title": {
-          "en": "Charge port door changed"
-        },
-        "hint": {
-          "en": "This card triggers when the charge port door opens or closes."
-        },
-        "tokens": [
-          {
-            "name": "charge_port_door",
-            "type": "boolean",
-            "title": {
-              "en": "Open"
-            }
-          }
-        ],
-        "id": "charge_port_door_changed"
-      },
-      {
-        "title": {
-          "en": "Charge port latch changed"
-        },
-        "hint": {
-          "en": "This card triggers when the charge port latch engages or disengages."
-        },
-        "tokens": [
-          {
-            "name": "charge_port_latch",
-            "type": "boolean",
-            "title": {
-              "en": "Latched"
-            }
-          }
-        ],
-        "id": "charge_port_latch_changed"
-      },
-      {
-        "title": {
-          "en": "Charging state changed"
-        },
-        "hint": {
-          "en": "This card triggers when the vehicle starts or stops charging."
-        },
-        "tokens": [
-          {
-            "name": "charge_state",
-            "type": "boolean",
-            "title": {
-              "en": "Charging"
-            }
-          }
-        ],
-        "id": "charge_state_changed"
-      },
-      {
-        "title": {
-          "en": "Defrost mode changed"
-        },
-        "hint": {
-          "en": "This card triggers when defrost mode turns on or off."
-        },
-        "tokens": [
-          {
-            "name": "defrost_mode",
-            "type": "boolean",
-            "title": {
-              "en": "Enabled"
-            }
-          }
-        ],
-        "id": "defrost_mode_changed"
-      },
-      {
-        "title": {
-          "en": "Front left door changed"
-        },
-        "titleFormatted": {
-          "en": "Front left door of [[device]] changed"
-        },
-        "hint": {
-          "en": "This card triggers when the front left door opens or closes."
-        },
-        "tokens": [
-          {
-            "name": "alarm_contact_door_front_left",
-            "type": "boolean",
-            "title": {
-              "en": "Open"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_contact_door_front_left",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "door_front_left_changed"
-      },
-      {
-        "title": {
-          "en": "Front right door changed"
-        },
-        "titleFormatted": {
-          "en": "Front right door [[device]] changed"
-        },
-        "hint": {
-          "en": "This card triggers when the front right door opens or closes."
-        },
-        "tokens": [
-          {
-            "name": "alarm_contact_door_front_right",
-            "type": "boolean",
-            "title": {
-              "en": "Open"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_contact_door_front_right",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "door_front_right_changed"
-      },
-      {
-        "title": {
-          "en": "Rear left door changed"
-        },
-        "titleFormatted": {
-          "en": "[[device]] rear left door changed"
-        },
-        "hint": {
-          "en": "This card triggers when the rear left door opens or closes."
-        },
-        "tokens": [
-          {
-            "name": "alarm_contact_door_rear_left",
-            "type": "boolean",
-            "title": {
-              "en": "Open"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_contact_door_rear_left",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "door_rear_left_changed"
-      },
-      {
-        "title": {
-          "en": "Rear right door changed"
-        },
-        "titleFormatted": {
-          "en": "Rear right door changed of [[device]]"
-        },
-        "hint": {
-          "en": "This card triggers when the rear right door opens or closes."
-        },
-        "tokens": [
-          {
-            "name": "alarm_contact_door_rear_right",
-            "type": "boolean",
-            "title": {
-              "en": "Open"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_contact_door_rear_right",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "door_rear_right_changed"
-      },
-      {
-        "title": {
-          "en": "Frunk changed"
-        },
-        "hint": {
-          "en": "This card triggers when the frunk opens or closes."
-        },
-        "tokens": [
-          {
-            "name": "frunk",
-            "type": "boolean",
-            "title": {
-              "en": "Open"
-            }
-          }
-        ],
-        "id": "frunk_changed"
-      },
-      {
-        "title": {
-          "en": "Grid status changed"
-        },
-        "titleFormatted": {
-          "en": "Grid status changed on [[device]]"
-        },
-        "hint": {
-          "en": "This card triggers when the grid status changes."
-        },
-        "tokens": [
-          {
-            "name": "alarm_off_grid",
-            "type": "boolean",
-            "title": {
-              "en": "On Grid"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_off_grid",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "grid_status_changed"
-      },
-      {
-        "title": {
-          "en": "Island status changed"
-        },
-        "titleFormatted": {
-          "en": "Island status changed on [[device]]"
-        },
-        "hint": {
-          "en": "This card triggers when the grid connection status changes."
-        },
-        "tokens": [
-          {
-            "name": "alarm_island_status",
-            "type": "boolean",
-            "title": {
-              "en": "Disconnected"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_island_status",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "island_status_changed"
-      },
-      {
-        "title": {
           "en": "Operation mode changed"
         },
         "hint": {
@@ -405,66 +110,6 @@
       },
       {
         "title": {
-          "en": "Front left seat heater changed"
-        },
-        "hint": {
-          "en": "This card triggers when the front left seat heater level changes."
-        },
-        "tokens": [
-          {
-            "name": "seat_heater_front_left",
-            "type": "string",
-            "title": {
-              "en": "Level"
-            },
-            "example": {
-              "en": "High"
-            }
-          }
-        ],
-        "id": "seat_heater_front_left_changed"
-      },
-      {
-        "title": {
-          "en": "Front right seat heater changed"
-        },
-        "hint": {
-          "en": "This card triggers when the front right seat heater level changes."
-        },
-        "tokens": [
-          {
-            "name": "seat_heater_front_right",
-            "type": "string",
-            "title": {
-              "en": "Level"
-            },
-            "example": {
-              "en": "High"
-            }
-          }
-        ],
-        "id": "seat_heater_front_right_changed"
-      },
-      {
-        "title": {
-          "en": "Sentry mode changed"
-        },
-        "hint": {
-          "en": "This card triggers when sentry mode turns on or off."
-        },
-        "tokens": [
-          {
-            "name": "sentry_mode",
-            "type": "boolean",
-            "title": {
-              "en": "Enabled"
-            }
-          }
-        ],
-        "id": "sentry_mode_changed"
-      },
-      {
-        "title": {
           "en": "Steering wheel heater changed"
         },
         "hint": {
@@ -483,427 +128,6 @@
           }
         ],
         "id": "steering_wheel_heater_changed"
-      },
-      {
-        "title": {
-          "en": "Storm watch active changed"
-        },
-        "titleFormatted": {
-          "en": "Storm watch active changed on [[device]]"
-        },
-        "hint": {
-          "en": "This card triggers when storm watch becomes active or inactive."
-        },
-        "tokens": [
-          {
-            "name": "alarm_storm_watch_active",
-            "type": "boolean",
-            "title": {
-              "en": "Active"
-            }
-          }
-        ],
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_storm_watch_active",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "storm_watch_active_changed"
-      },
-      {
-        "title": {
-          "en": "Storm watch changed"
-        },
-        "hint": {
-          "en": "This card triggers when storm watch turns on or off."
-        },
-        "tokens": [
-          {
-            "name": "storm_watch",
-            "type": "boolean",
-            "title": {
-              "en": "Enabled"
-            }
-          }
-        ],
-        "id": "storm_watch_changed"
-      },
-      {
-        "title": {
-          "en": "Trunk changed"
-        },
-        "hint": {
-          "en": "This card triggers when the trunk opens or closes."
-        },
-        "tokens": [
-          {
-            "name": "trunk",
-            "type": "boolean",
-            "title": {
-              "en": "Open"
-            }
-          }
-        ],
-        "id": "trunk_changed"
-      }
-    ],
-    "conditions": [
-      {
-        "title": {
-          "en": "Charge from grid is !{{enabled|disabled}}"
-        },
-        "titleFormatted": {
-          "en": "Charge from grid is !{{enabled|disabled}} on [[device]]"
-        },
-        "hint": {
-          "en": "This card checks if charging from grid is enabled or disabled."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=charge_from_grid",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "charge_from_grid_is_enabled"
-      },
-      {
-        "title": {
-          "en": "Charge port door is !{{open|closed}}"
-        },
-        "titleFormatted": {
-          "en": "Charge port door of [[device]] is !{{open|closed}}"
-        },
-        "hint": {
-          "en": "This card checks if the charge port door is open or closed."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=charge_port_door",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "charge_port_door_is_open"
-      },
-      {
-        "title": {
-          "en": "Charge port latch is !{{locked|unlocked}}"
-        },
-        "titleFormatted": {
-          "en": "Charge port latch of [[device]] is !{{locked|unlocked}}"
-        },
-        "hint": {
-          "en": "This card checks if the charge port latch is locked or unlocked."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=charge_port_latch",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "charge_port_latch_is_locked"
-      },
-      {
-        "title": {
-          "en": "Defrost is !{{on|off}}"
-        },
-        "titleFormatted": {
-          "en": "[[device]] defrost is !{{on|off}}"
-        },
-        "hint": {
-          "en": "This card checks if defrost mode is on or off."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=defrost_mode",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "defrost_mode_is_on"
-      },
-      {
-        "title": {
-          "en": "Door (front left) is !{{open|closed}}"
-        },
-        "titleFormatted": {
-          "en": "[[device]] door (front left) is !{{open|closed}}"
-        },
-        "hint": {
-          "en": "This card checks if the front left door is open or closed."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_contact_door_front_left",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "door_front_left_is_open"
-      },
-      {
-        "title": {
-          "en": "Door (front right) is !{{open|closed}}"
-        },
-        "titleFormatted": {
-          "en": "[[device]] door (front right) is !{{open|closed}}"
-        },
-        "hint": {
-          "en": "This card checks if the front right door is open or closed."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_contact_door_front_right",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "door_front_right_is_open"
-      },
-      {
-        "title": {
-          "en": "Door (rear left) is !{{open|closed}}"
-        },
-        "titleFormatted": {
-          "en": "[[device]] door (rear left) is !{{open|closed}}"
-        },
-        "hint": {
-          "en": "This card checks if the rear left door is open or closed."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_contact_door_rear_left",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "door_rear_left_is_open"
-      },
-      {
-        "title": {
-          "en": "Door (rear right) is !{{open|closed}}"
-        },
-        "titleFormatted": {
-          "en": "Door (rear right) of [[device]] is !{{open|closed}}"
-        },
-        "hint": {
-          "en": "This card checks if the rear right door is open or closed."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_contact_door_rear_right",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "door_rear_right_is_open"
-      },
-      {
-        "title": {
-          "en": "Frunk is !{{open|closed}}"
-        },
-        "titleFormatted": {
-          "en": "[[device]] frunk is !{{open|closed}}"
-        },
-        "hint": {
-          "en": "This card checks if the frunk is open or closed."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=frunk",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "frunk_is_open"
-      },
-      {
-        "title": {
-          "en": "Is !{{charging|not charging}}"
-        },
-        "titleFormatted": {
-          "en": "[[device]] is !{{charging|not charging}}"
-        },
-        "hint": {
-          "en": "This card checks if the vehicle is currently charging."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=charge_state",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "is_charging"
-      },
-      {
-        "title": {
-          "en": "Is !{{off grid|on grid}}"
-        },
-        "titleFormatted": {
-          "en": "[[device]] is !{{off grid|on grid}}"
-        },
-        "hint": {
-          "en": "This card checks if the system is off grid or on grid."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_off_grid",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "is_off_grid"
-      },
-      {
-        "title": {
-          "en": "Island status is !{{disconnected|connected}}"
-        },
-        "titleFormatted": {
-          "en": "Island status of [[device]] is !{{disconnected|connected}}"
-        },
-        "hint": {
-          "en": "This card checks if the system is disconnected from the grid (island mode)."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_island_status",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "island_status_is_disconnected"
-      },
-      {
-        "title": {
-          "en": "Sentry mode is !{{on|off}}"
-        },
-        "titleFormatted": {
-          "en": "[[device]] sentry mode is !{{on|off}}"
-        },
-        "hint": {
-          "en": "This card checks if sentry mode is on or off."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=sentry_mode",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "sentry_mode_is_on"
-      },
-      {
-        "title": {
-          "en": "Storm watch is !{{active|inactive}}"
-        },
-        "titleFormatted": {
-          "en": "Storm watch is !{{active|inactive}} on [[device]]"
-        },
-        "hint": {
-          "en": "This card checks if storm watch is currently active."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=alarm_storm_watch_active",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "storm_watch_is_active"
-      },
-      {
-        "title": {
-          "en": "Storm watch is !{{enabled|disabled}}"
-        },
-        "titleFormatted": {
-          "en": "Storm watch is !{{enabled|disabled}} on [[device]]"
-        },
-        "hint": {
-          "en": "This card checks if storm watch is enabled or disabled."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=storm_watch",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "storm_watch_is_enabled"
-      },
-      {
-        "title": {
-          "en": "Trunk is !{{open|closed}}"
-        },
-        "titleFormatted": {
-          "en": "[[device]] trunk is !{{open|closed}}"
-        },
-        "hint": {
-          "en": "This card checks if the trunk is open or closed."
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=trunk",
-            "title": {
-              "en": "Device"
-            }
-          }
-        ],
-        "id": "trunk_is_open"
       }
     ],
     "actions": [
@@ -921,7 +145,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "capabilities=button_flash_lights",
+            "filter": "capabilities=button.flash",
             "title": {
               "en": "Device"
             }
@@ -943,7 +167,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "capabilities=button_homelink",
+            "filter": "capabilities=button.homelink",
             "title": {
               "en": "Device"
             }
@@ -965,7 +189,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "capabilities=button_honk_horn",
+            "filter": "capabilities=button.honk",
             "title": {
               "en": "Device"
             }
@@ -987,7 +211,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "capabilities=button_keyless_driving",
+            "filter": "capabilities=button.keyless",
             "title": {
               "en": "Device"
             }
@@ -1075,246 +299,6 @@
       },
       {
         "title": {
-          "en": "Set charge from grid"
-        },
-        "titleFormatted": {
-          "en": "Set [[device]] charge from grid [[state]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=charge_from_grid",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "On"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Off"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_charge_from_grid"
-      },
-      {
-        "title": {
-          "en": "Set charge port door"
-        },
-        "titleFormatted": {
-          "en": "Set [[device]] charge port door [[state]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=charge_port_door",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "Open"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Close"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_charge_port_door"
-      },
-      {
-        "title": {
-          "en": "Set charge port latch"
-        },
-        "titleFormatted": {
-          "en": "Set charge port latch [[state]] on [[device]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=charge_port_latch",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "Lock"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Unlock"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_charge_port_latch"
-      },
-      {
-        "title": {
-          "en": "Set charging state"
-        },
-        "titleFormatted": {
-          "en": "Set charging [[state]] on [[device]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=charge_state",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "Start charging"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Stop charging"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_charge_state"
-      },
-      {
-        "title": {
-          "en": "Set defrost mode"
-        },
-        "titleFormatted": {
-          "en": "Set defrost mode [[state]] on [[device]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=defrost_mode",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "On"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Off"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_defrost_mode"
-      },
-      {
-        "title": {
-          "en": "Set frunk"
-        },
-        "titleFormatted": {
-          "en": "Set [[device]] frunk [[state]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=frunk",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "Open"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Close"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_frunk"
-      },
-      {
-        "title": {
           "en": "Set operation mode"
         },
         "titleFormatted": {
@@ -1358,150 +342,6 @@
           }
         ],
         "id": "set_operation_mode"
-      },
-      {
-        "title": {
-          "en": "Set seat heater (front left)"
-        },
-        "titleFormatted": {
-          "en": "Set [[device]] seat heater (front left) to [[level]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=seat_heater_front_left",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "level",
-            "title": {
-              "en": "Level"
-            },
-            "values": [
-              {
-                "id": "0",
-                "label": {
-                  "en": "Off"
-                }
-              },
-              {
-                "id": "1",
-                "label": {
-                  "en": "Low"
-                }
-              },
-              {
-                "id": "2",
-                "label": {
-                  "en": "Medium"
-                }
-              },
-              {
-                "id": "3",
-                "label": {
-                  "en": "High"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_seat_heater_front_left"
-      },
-      {
-        "title": {
-          "en": "Set seat heater (front right)"
-        },
-        "titleFormatted": {
-          "en": "Set [[device]] seat heater (front right) to [[level]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=seat_heater_front_right",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "level",
-            "title": {
-              "en": "Level"
-            },
-            "values": [
-              {
-                "id": "0",
-                "label": {
-                  "en": "Off"
-                }
-              },
-              {
-                "id": "1",
-                "label": {
-                  "en": "Low"
-                }
-              },
-              {
-                "id": "2",
-                "label": {
-                  "en": "Medium"
-                }
-              },
-              {
-                "id": "3",
-                "label": {
-                  "en": "High"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_seat_heater_front_right"
-      },
-      {
-        "title": {
-          "en": "Set sentry mode"
-        },
-        "titleFormatted": {
-          "en": "Set sentry mode [[state]] on [[device]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=sentry_mode",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "On"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Off"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_sentry_mode"
       },
       {
         "title": {
@@ -1551,86 +391,6 @@
       },
       {
         "title": {
-          "en": "Set storm watch"
-        },
-        "titleFormatted": {
-          "en": "Set storm watch [[state]] on [[device]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=storm_watch",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "On"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Off"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_storm_watch"
-      },
-      {
-        "title": {
-          "en": "Set trunk"
-        },
-        "titleFormatted": {
-          "en": "Set [[device]] trunk [[state]]"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "capabilities=trunk",
-            "title": {
-              "en": "Device"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "state",
-            "title": {
-              "en": "State"
-            },
-            "values": [
-              {
-                "id": "true",
-                "label": {
-                  "en": "Open"
-                }
-              },
-              {
-                "id": "false",
-                "label": {
-                  "en": "Close"
-                }
-              }
-            ]
-          }
-        ],
-        "id": "set_trunk"
-      },
-      {
-        "title": {
           "en": "Wake up vehicle"
         },
         "titleFormatted": {
@@ -1643,7 +403,7 @@
           {
             "type": "device",
             "name": "device",
-            "filter": "capabilities=button_wake_up",
+            "filter": "capabilities=button.wakeup",
             "title": {
               "en": "Device"
             }
@@ -1686,29 +446,71 @@
       "repair": [
         {
           "id": "login_oauth2",
-          "template": "login_oauth2"
+          "template": "login_oauth2",
+          "navigation": {
+            "next": "list_devices"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
         }
       ],
       "name": {
         "en": "Powerwall"
       },
       "class": "battery",
+      "uiQuickAction": false,
       "capabilities": [
         "measure_battery",
         "measure_power",
         "operation_mode",
         "backup_reserve",
-        "charge_from_grid",
+        "onoff.charge_grid",
         "allow_export",
-        "storm_watch",
-        "alarm_storm_watch_active",
-        "meter_power.imported",
-        "meter_power.exported"
+        "onoff.storm",
+        "alarm_generic.storm",
+        "meter_power.charged",
+        "meter_power.discharged"
       ],
+      "capabilitiesOptions": {
+        "meter_power.charged": {
+          "title": {
+            "en": "Charged Energy"
+          }
+        },
+        "meter_power.discharged": {
+          "title": {
+            "en": "Discharged Energy"
+          }
+        },
+        "onoff.charge_grid": {
+          "title": {
+            "en": "Charge From Grid"
+          }
+        },
+        "onoff.storm": {
+          "title": {
+            "en": "Storm Watch"
+          }
+        },
+        "alarm_generic.storm": {
+          "title": {
+            "en": "Storm Watch Active"
+          }
+        }
+      },
       "energy": {
         "homeBattery": true,
-        "meterPowerImportedCapability": "meter_power.imported",
-        "meterPowerExportedCapability": "meter_power.exported"
+        "meterPowerImportedCapability": "meter_power.charged",
+        "meterPowerExportedCapability": "meter_power.discharged"
       },
       "id": "battery"
     },
@@ -1744,25 +546,78 @@
       "repair": [
         {
           "id": "login_oauth2",
-          "template": "login_oauth2"
+          "template": "login_oauth2",
+          "navigation": {
+            "next": "list_devices"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
         }
       ],
       "name": {
         "en": "Energy Gateway"
       },
       "class": "sensor",
+      "uiQuickAction": false,
       "capabilities": [
-        "measure_power",
-        "measure_power_load",
-        "alarm_off_grid",
-        "alarm_island_status",
+        "measure_power.grid",
+        "measure_power.load",
+        "alarm_generic.off_grid",
+        "alarm_generic.island",
         "meter_power.imported",
         "meter_power.exported"
       ],
+      "capabilitiesOptions": {
+        "meter_power.imported": {
+          "title": {
+            "en": "Imported Energy"
+          }
+        },
+        "meter_power.exported": {
+          "title": {
+            "en": "Exported Energy"
+          }
+        },
+        "measure_power.grid": {
+          "title": {
+            "en": "Grid Power"
+          },
+          "units": {
+            "en": "W"
+          }
+        },
+        "measure_power.load": {
+          "title": {
+            "en": "Load Power"
+          },
+          "units": {
+            "en": "W"
+          }
+        },
+        "alarm_generic.off_grid": {
+          "title": {
+            "en": "Grid Status"
+          }
+        },
+        "alarm_generic.island": {
+          "title": {
+            "en": "Island Status"
+          }
+        }
+      },
       "energy": {
         "cumulative": true,
-        "meterPowerImportedCapability": "meter_power.imported",
-        "meterPowerExportedCapability": "meter_power.exported"
+        "cumulativeImportedCapability": "meter_power.imported",
+        "cumulativeExportedCapability": "meter_power.exported"
       },
       "id": "gateway"
     },
@@ -1798,19 +653,33 @@
       "repair": [
         {
           "id": "login_oauth2",
-          "template": "login_oauth2"
+          "template": "login_oauth2",
+          "navigation": {
+            "next": "list_devices"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
         }
       ],
       "name": {
         "en": "Solar Panel"
       },
       "class": "solarpanel",
+      "uiQuickAction": false,
       "capabilities": [
         "measure_power",
         "meter_power"
       ],
       "energy": {
-        "homeBattery": true,
         "meterPowerExportedCapability": "meter_power"
       },
       "id": "solar"
@@ -1847,50 +716,217 @@
       "repair": [
         {
           "id": "login_oauth2",
-          "template": "login_oauth2"
+          "template": "login_oauth2",
+          "navigation": {
+            "next": "list_devices"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
         }
       ],
       "name": {
         "en": "Tesla Vehicle"
       },
       "class": "car",
+      "uiQuickAction": false,
       "energy": {
         "electricCar": true
       },
       "capabilities": [
         "measure_battery",
-        "measure_range",
+        "measure_distance.range",
         "measure_temperature",
-        "measure_temperature_outside",
+        "measure_temperature.outside",
         "locked",
-        "charge_port_door",
+        "onoff.charge_port",
         "thermostat_mode",
-        "charge_state",
+        "evcharger_charging",
         "meter_power",
         "measure_power",
         "measure_voltage",
         "measure_current",
-        "sentry_mode",
-        "defrost_mode",
+        "onoff.sentry",
         "steering_wheel_heater",
-        "seat_heater_front_left",
-        "seat_heater_front_right",
-        "charge_port_latch",
-        "frunk",
-        "trunk",
+        "seat_heater.front_left",
+        "seat_heater.front_right",
+        "locked.charge_latch",
+        "onoff.frunk",
+        "onoff.trunk",
         "target_temperature",
         "windowcoverings_closed",
         "alarm_motion",
-        "alarm_contact_door_front_left",
-        "alarm_contact_door_front_right",
-        "alarm_contact_door_rear_left",
-        "alarm_contact_door_rear_right",
-        "button_flash_lights",
-        "button_honk_horn",
-        "button_keyless_driving",
-        "button_homelink",
-        "button_wake_up"
+        "alarm_contact.fl",
+        "alarm_contact.fr",
+        "alarm_contact.rl",
+        "alarm_contact.rr",
+        "button.flash",
+        "button.honk",
+        "button.keyless",
+        "button.homelink",
+        "button.wakeup"
       ],
+      "capabilitiesOptions": {
+        "measure_distance.range": {
+          "title": {
+            "en": "Range"
+          },
+          "units": {
+            "en": "km"
+          }
+        },
+        "measure_temperature.outside": {
+          "title": {
+            "en": "Outside Temperature"
+          }
+        },
+        "onoff.charge_port": {
+          "title": {
+            "en": "Charge Port Door"
+          }
+        },
+        "evcharger_charging": {
+          "title": {
+            "en": "Charging"
+          }
+        },
+        "onoff.sentry": {
+          "title": {
+            "en": "Sentry Mode"
+          }
+        },
+        "onoff.defrost": {
+          "title": {
+            "en": "Defrost"
+          }
+        },
+        "locked.charge_latch": {
+          "title": {
+            "en": "Charge Port Latch"
+          }
+        },
+        "seat_heater.front_left": {
+          "title": {
+            "en": "Seat Heater (Front Left)"
+          }
+        },
+        "seat_heater.front_right": {
+          "title": {
+            "en": "Seat Heater (Front Right)"
+          }
+        },
+        "onoff.frunk": {
+          "title": {
+            "en": "Frunk"
+          }
+        },
+        "onoff.trunk": {
+          "title": {
+            "en": "Trunk"
+          }
+        },
+        "alarm_contact.fl": {
+          "title": {
+            "en": "Door (Front Left)"
+          }
+        },
+        "alarm_contact.fr": {
+          "title": {
+            "en": "Door (Front Right)"
+          }
+        },
+        "alarm_contact.rl": {
+          "title": {
+            "en": "Door (Rear Left)"
+          }
+        },
+        "alarm_contact.rr": {
+          "title": {
+            "en": "Door (Rear Right)"
+          }
+        },
+        "button.flash": {
+          "title": {
+            "en": "Flash Lights"
+          }
+        },
+        "button.honk": {
+          "title": {
+            "en": "Honk Horn"
+          }
+        },
+        "button.keyless": {
+          "title": {
+            "en": "Keyless Driving"
+          }
+        },
+        "button.homelink": {
+          "title": {
+            "en": "HomeLink"
+          }
+        },
+        "button.wakeup": {
+          "title": {
+            "en": "Wake Up"
+          }
+        },
+        "windowcoverings_closed": {
+          "title": {
+            "en": "Windows"
+          }
+        },
+        "thermostat_mode": {
+          "title": {
+            "en": "Climate"
+          },
+          "values": [
+            {
+              "id": "off",
+              "title": {
+                "en": "Off"
+              }
+            },
+            {
+              "id": "auto",
+              "title": {
+                "en": "Automatic"
+              }
+            },
+            {
+              "id": "defrost",
+              "title": {
+                "en": "Defrost"
+              }
+            },
+            {
+              "id": "keep_mode",
+              "title": {
+                "en": "Keep Mode"
+              }
+            },
+            {
+              "id": "dog_mode",
+              "title": {
+                "en": "Dog Mode"
+              }
+            },
+            {
+              "id": "camp_mode",
+              "title": {
+                "en": "Camp Mode"
+              }
+            }
+          ]
+        }
+      },
       "id": "vehicle"
     },
     {
@@ -1925,16 +961,32 @@
       "repair": [
         {
           "id": "login_oauth2",
-          "template": "login_oauth2"
+          "template": "login_oauth2",
+          "navigation": {
+            "next": "list_devices"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
         }
       ],
       "name": {
         "en": "Tesla Wall Connector"
       },
       "class": "evcharger",
+      "uiQuickAction": false,
       "capabilities": [
         "evcharger_charging_state",
         "measure_power",
+        "meter_power",
         "connected_vehicle"
       ],
       "energy": {
@@ -1945,81 +997,6 @@
     }
   ],
   "capabilities": {
-    "alarm_contact_door_front_left": {
-      "type": "boolean",
-      "title": {
-        "en": "Door (Front Left)"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor"
-    },
-    "alarm_contact_door_front_right": {
-      "type": "boolean",
-      "title": {
-        "en": "Door (Front Right)"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor"
-    },
-    "alarm_contact_door_rear_left": {
-      "type": "boolean",
-      "title": {
-        "en": "Door (Rear Left)"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor"
-    },
-    "alarm_contact_door_rear_right": {
-      "type": "boolean",
-      "title": {
-        "en": "Door (Rear Right)"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor"
-    },
-    "alarm_island_status": {
-      "type": "boolean",
-      "title": {
-        "en": "Island Status"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "titleTrue": {
-        "en": "Disconnected"
-      },
-      "titleFalse": {
-        "en": "Connected"
-      }
-    },
-    "alarm_off_grid": {
-      "type": "boolean",
-      "title": {
-        "en": "Grid Status"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "titleTrue": {
-        "en": "On Grid"
-      },
-      "titleFalse": {
-        "en": "Off Grid"
-      }
-    },
-    "alarm_storm_watch_active": {
-      "type": "boolean",
-      "title": {
-        "en": "Storm Watch Active"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor"
-    },
     "allow_export": {
       "type": "enum",
       "title": {
@@ -2065,87 +1042,6 @@
       "decimals": 2,
       "step": 0.01
     },
-    "button_flash_lights": {
-      "type": "boolean",
-      "title": {
-        "en": "Flash Lights"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "button"
-    },
-    "button_homelink": {
-      "type": "boolean",
-      "title": {
-        "en": "HomeLink"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "button"
-    },
-    "button_honk_horn": {
-      "type": "boolean",
-      "title": {
-        "en": "Honk Horn"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "button"
-    },
-    "button_keyless_driving": {
-      "type": "boolean",
-      "title": {
-        "en": "Keyless Driving"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "button"
-    },
-    "button_wake_up": {
-      "type": "boolean",
-      "title": {
-        "en": "Wake Up"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "button"
-    },
-    "charge_from_grid": {
-      "type": "boolean",
-      "title": {
-        "en": "Charge From Grid"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle"
-    },
-    "charge_port_door": {
-      "type": "boolean",
-      "title": {
-        "en": "Charge Port Door"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle"
-    },
-    "charge_port_latch": {
-      "type": "boolean",
-      "title": {
-        "en": "Charge Port Latch"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle"
-    },
-    "charge_state": {
-      "type": "boolean",
-      "title": {
-        "en": "Charging"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle"
-    },
     "connected_vehicle": {
       "type": "string",
       "title": {
@@ -2155,99 +1051,6 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/icon.svg"
-    },
-    "defrost_mode": {
-      "type": "boolean",
-      "title": {
-        "en": "Defrost"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle"
-    },
-    "frunk": {
-      "type": "boolean",
-      "title": {
-        "en": "Frunk"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle"
-    },
-    "measure_power_battery": {
-      "type": "number",
-      "title": {
-        "en": "Battery Power"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "units": {
-        "en": "W"
-      }
-    },
-    "measure_power_grid": {
-      "type": "number",
-      "title": {
-        "en": "Grid Power"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "units": {
-        "en": "W"
-      }
-    },
-    "measure_power_load": {
-      "type": "number",
-      "title": {
-        "en": "Load Power"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "units": {
-        "en": "W"
-      }
-    },
-    "measure_power_solar": {
-      "type": "number",
-      "title": {
-        "en": "Solar Power"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "units": {
-        "en": "W"
-      },
-      "icon": "/assets/capabilities/solar.svg"
-    },
-    "measure_range": {
-      "type": "number",
-      "title": {
-        "en": "Range"
-      },
-      "units": {
-        "en": "km"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/capabilities/range.svg"
-    },
-    "measure_temperature_outside": {
-      "type": "number",
-      "title": {
-        "en": "Outside Temperature"
-      },
-      "units": {
-        "en": "°C"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/capabilities/temperature.svg"
     },
     "operation_mode": {
       "type": "enum",
@@ -2278,10 +1081,10 @@
         }
       ]
     },
-    "seat_heater_front_left": {
+    "seat_heater": {
       "type": "enum",
       "title": {
-        "en": "Seat Heater (Front Left)"
+        "en": "Seat Heater"
       },
       "getable": true,
       "setable": true,
@@ -2312,50 +1115,6 @@
           }
         }
       ]
-    },
-    "seat_heater_front_right": {
-      "type": "enum",
-      "title": {
-        "en": "Seat Heater (Front Right)"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "picker",
-      "values": [
-        {
-          "id": "0",
-          "title": {
-            "en": "Off"
-          }
-        },
-        {
-          "id": "1",
-          "title": {
-            "en": "Low"
-          }
-        },
-        {
-          "id": "2",
-          "title": {
-            "en": "Medium"
-          }
-        },
-        {
-          "id": "3",
-          "title": {
-            "en": "High"
-          }
-        }
-      ]
-    },
-    "sentry_mode": {
-      "type": "boolean",
-      "title": {
-        "en": "Sentry Mode"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle"
     },
     "steering_wheel_heater": {
       "type": "enum",
@@ -2385,24 +1144,6 @@
           }
         }
       ]
-    },
-    "storm_watch": {
-      "type": "boolean",
-      "title": {
-        "en": "Storm Watch"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle"
-    },
-    "trunk": {
-      "type": "boolean",
-      "title": {
-        "en": "Trunk"
-      },
-      "getable": true,
-      "setable": true,
-      "uiComponent": "toggle"
     }
   }
 }

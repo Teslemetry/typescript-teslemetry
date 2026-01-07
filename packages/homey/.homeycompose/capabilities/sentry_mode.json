@@ -1,9 +1,0 @@
-{
-  "type": "boolean",
-  "title": {
-    "en": "Sentry Mode"
-  },
-  "getable": true,
-  "setable": true,
-  "uiComponent": "toggle"
-}

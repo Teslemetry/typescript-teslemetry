@@ -12,7 +12,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "capabilities=button_keyless_driving",
+      "filter": "capabilities=button.keyless",
       "title": {
         "en": "Device"
       }

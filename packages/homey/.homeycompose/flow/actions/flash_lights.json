@@ -12,7 +12,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "capabilities=button_flash_lights",
+      "filter": "capabilities=button.flash",
       "title": {
         "en": "Device"
       }

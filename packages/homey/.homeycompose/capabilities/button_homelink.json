@@ -1,9 +1,0 @@
-{
-  "type": "boolean",
-  "title": {
-    "en": "HomeLink"
-  },
-  "getable": true,
-  "setable": true,
-  "uiComponent": "button"
-}

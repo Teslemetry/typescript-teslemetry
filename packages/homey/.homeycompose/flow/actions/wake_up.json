@@ -12,7 +12,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "capabilities=button_wake_up",
+      "filter": "capabilities=button.wakeup",
       "title": {
         "en": "Device"
       }

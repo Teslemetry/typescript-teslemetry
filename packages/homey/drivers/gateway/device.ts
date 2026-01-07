@@ -35,11 +35,14 @@ export default class GatewayDevice extends TeslemetryDevice {
       const data = liveStatus?.response;
       if (!data) return;
 
-      this.update("measure_power", data.grid_power);
-      this.update("measure_power_load", data.load_power);
-      this.update("alarm_off_grid", gridStatusMap.get(data.grid_status));
+      this.update("measure_power.grid", data.grid_power);
+      this.update("measure_power.load", data.load_power);
       this.update(
-        "alarm_island_status",
+        "alarm_generic.off_grid",
+        gridStatusMap.get(data.grid_status),
+      );
+      this.update(
+        "alarm_generic.island",
         islandStatusMap.get(data.island_status),
       );
     });
@@ -47,28 +50,30 @@ export default class GatewayDevice extends TeslemetryDevice {
     this.site.api.on("energyHistory", async (energyHistory) => {
       if (!energyHistory.response?.time_series?.length) return;
 
-      let imported = 0;
-      let exported = 0;
+      let imported: number | null = null;
+      let exported: number | null = null;
 
       for (const event of energyHistory.response.time_series) {
         if (
           event.grid_energy_imported !== undefined &&
           event.grid_energy_imported !== null
         ) {
+          //@ts-expect-error
           imported += event.grid_energy_imported;
         }
         if (
           event.total_grid_energy_exported !== undefined &&
           event.total_grid_energy_exported !== null
         ) {
+          //@ts-expect-error
           exported += event.total_grid_energy_exported;
         }
       }
 
-      if (imported) this.update("meter_power.imported", imported);
-      if (exported) this.update("meter_power.exported", exported);
-
-      this.log(`Imported: ${imported}, Exported: ${exported}`);
+      if (imported !== null)
+        this.update("meter_power.imported", imported / 1000);
+      if (exported !== null)
+        this.update("meter_power.exported", exported / 1000);
     });
   }
 

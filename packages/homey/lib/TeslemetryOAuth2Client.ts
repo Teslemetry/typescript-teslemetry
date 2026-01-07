@@ -165,7 +165,6 @@ export default class TeslemetryOAuth2Client {
 
     // Refresh if expiring in less than a minute
     if (this.token.expires_at && Date.now() + 60_000 > this.token.expires_at) {
-      this.app.log("Teslemetry token expiring soon, refreshing...");
       await this.refreshToken();
     }
 

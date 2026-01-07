@@ -1,9 +1,0 @@
-{
-  "type": "boolean",
-  "title": {
-    "en": "Defrost"
-  },
-  "getable": true,
-  "setable": true,
-  "uiComponent": "toggle"
-}

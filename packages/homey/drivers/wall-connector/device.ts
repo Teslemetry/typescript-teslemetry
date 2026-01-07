@@ -23,7 +23,10 @@ export default class WallConnecter extends TeslemetryDevice {
     }
     this.din = this.getData().din;
 
-    this.pollingCleanup = [this.site.api.requestPolling("liveStatus")];
+    this.pollingCleanup = [
+      this.site.api.requestPolling("liveStatus"),
+      this.site.api.requestPolling("chargeHistory"),
+    ];
 
     this.site.api.on("liveStatus", ({ response }) => {
       // Get specific Wall Connector
@@ -47,22 +50,25 @@ export default class WallConnecter extends TeslemetryDevice {
     });
 
     this.site.api.on("chargeHistory", async (energyHistory) => {
+      this.log(energyHistory);
       if (!energyHistory.response?.time_series?.length) return;
 
-      let charged = 0;
+      let charged: number | null = null;
 
       for (const event of energyHistory.response.time_series) {
+        this.log(event);
         if (
           event.energy_added_wh !== undefined &&
           event.energy_added_wh !== null
         ) {
+          // @ts-expect-error
           charged += event.energy_added_wh;
         }
       }
 
-      if (charged) this.update("meter_power", charged);
+      this.log(charged);
 
-      this.log(`Charged: ${charged}`);
+      if (charged !== null) this.update("meter_power", charged / 1000);
     });
   }
 
@@ -71,7 +77,7 @@ export default class WallConnecter extends TeslemetryDevice {
    * @param state - Numerical state from wall_connector_state
    * @returns The corresponding evcharger_charging_state enum value
    */
-  private mapWallConnectorState(state: number): string {
+  private mapWallConnectorState(state: number): string | undefined {
     switch (state) {
       case 1:
         return "plugged_in_charging";
@@ -83,7 +89,7 @@ export default class WallConnecter extends TeslemetryDevice {
         return "plugged_in_paused";
       default:
         this.log(`Unknown wall_connector_state: ${state}`);
-        return "plugged_out";
+        return undefined;
     }
   }
 

@@ -33,7 +33,7 @@ export default class PowerwallDevice extends TeslemetryDevice {
         "measure_power",
         data.battery_power !== undefined ? data.battery_power * -1 : undefined,
       );
-      this.update("alarm_storm_watch_active", data.storm_mode_active);
+      this.update("alarm_generic.storm", data.storm_mode_active);
     });
 
     this.site.api.on("siteInfo", async (siteInfo) => {
@@ -55,39 +55,39 @@ export default class PowerwallDevice extends TeslemetryDevice {
           : "battery_ok",
       );
       this.update(
-        "charge_from_grid",
+        "onoff.charge_grid",
         // When this is missing, its allowed
         !data.components.disallow_charge_from_grid_with_solar_installed,
       );
-      this.update("storm_watch", data.user_settings.storm_mode_enabled);
+      this.update("onoff.storm", data.user_settings.storm_mode_enabled);
     });
 
     this.site.api.on("energyHistory", async (energyHistory) => {
-      this.log(energyHistory);
       if (!energyHistory.response?.time_series?.length) return;
 
-      let imported = 0;
-      let exported = 0;
+      let charged: number | null = null;
+      let discharged: number | null = null;
 
       for (const event of energyHistory.response.time_series) {
         if (
           event.total_battery_charge !== undefined &&
           event.total_battery_charge !== null
         ) {
-          imported += event.total_battery_charge;
+          //@ts-expect-error
+          charged += event.total_battery_charge;
         }
         if (
           event.total_battery_discharge !== undefined &&
           event.total_battery_discharge !== null
         ) {
-          exported += event.total_battery_discharge;
+          //@ts-expect-error
+          discharged += event.total_battery_discharge;
         }
       }
 
-      if (imported) this.update("meter_power.imported", imported);
-      if (exported) this.update("meter_power.exported", exported);
-
-      this.log(`Imported: ${imported}, Exported: ${exported}`);
+      if (charged !== null) this.update("meter_power.charged", charged / 1000);
+      if (discharged !== null)
+        this.update("meter_power.discharged", discharged / 1000);
     });
 
     // Register capability listeners
@@ -103,7 +103,7 @@ export default class PowerwallDevice extends TeslemetryDevice {
     this.registerCapabilityListener("allow_export", async (value) => {
       this.log(`Setting allow export to ${value}`);
       await this.site.api
-        .gridImportExport(value, this.getCapabilityValue("charge_from_grid"))
+        .gridImportExport(value, this.getCapabilityValue("onoff.charge_grid"))
         .catch(this.handleApiError);
     });
 
@@ -112,7 +112,7 @@ export default class PowerwallDevice extends TeslemetryDevice {
       await this.site.api.setOperationMode(value).catch(this.handleApiError);
     });
 
-    this.registerCapabilityListener("charge_from_grid", async (value) => {
+    this.registerCapabilityListener("onoff.charge_grid", async (value) => {
       // When this is missing, its allowed
       this.log(`Setting charge from grid to ${!value}`);
       await this.site.api
@@ -120,7 +120,7 @@ export default class PowerwallDevice extends TeslemetryDevice {
         .catch(this.handleApiError);
     });
 
-    this.registerCapabilityListener("storm_watch", async (value) => {
+    this.registerCapabilityListener("onoff.storm", async (value) => {
       await this.site.api.setStormMode(value).catch(this.handleApiError);
     });
   }

@@ -12,7 +12,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "capabilities=button_honk_horn",
+      "filter": "capabilities=button.honk",
       "title": {
         "en": "Device"
       }

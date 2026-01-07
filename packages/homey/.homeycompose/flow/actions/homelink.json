@@ -12,7 +12,7 @@
     {
       "type": "device",
       "name": "device",
-      "filter": "capabilities=button_homelink",
+      "filter": "capabilities=button.homelink",
       "title": {
         "en": "Device"
       }

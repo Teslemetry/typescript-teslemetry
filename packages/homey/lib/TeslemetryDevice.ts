@@ -17,19 +17,35 @@ export default class TeslemetryDevice extends Homey.Device {
     const driverCapabilities = this.driver.manifest.capabilities || [];
     const deviceCapabilities = this.getCapabilities();
 
-    // Add missing capabilities
-    for (const capability of driverCapabilities) {
-      if (!deviceCapabilities.includes(capability)) {
-        this.log(`Adding capability ${capability}`);
-        await this.addCapability(capability);
-      }
-    }
-
     // Remove extra capabilities
     for (const capability of deviceCapabilities) {
       if (!driverCapabilities.includes(capability)) {
         this.log(`Removing capability ${capability}`);
-        await this.removeCapability(capability);
+        await this.removeCapability(capability).catch((e) => {
+          if (e.statusCode === 404) {
+            this.log(
+              `Could not remove capability ${capability} as it wasn't found`,
+            );
+          } else {
+            this.error(e);
+          }
+        });
+      }
+    }
+
+    // Add missing capabilities
+    for (const capability of driverCapabilities) {
+      if (!deviceCapabilities.includes(capability)) {
+        this.log(`Adding capability ${capability}`);
+        await this.addCapability(capability).catch((e) => {
+          if (e.statusCode === 404) {
+            this.log(
+              `Could not add capability ${capability} as it wasn't found`,
+            );
+          } else {
+            this.error(e);
+          }
+        });
       }
     }
   }
@@ -49,13 +65,22 @@ export default class TeslemetryDevice extends Homey.Device {
     if (typeof value === "function") value = value();
     // Check if value is undefined
     if (value === undefined) {
-      this.log(`Capability ${capability} value is undefined`);
       return;
     }
     // Set the capability value
     //this.log(`Setting capability ${capability} to ${value}`);
     return this.setCapabilityValue(capability, value).catch(this.error);
   }
+
+  protected handleApiResponse = ({ response }: { response: any }): void => {
+    if (response.result === false) {
+      throw {
+        response: null,
+        error: "command_failed",
+        error_description: response.reason,
+      };
+    }
+  };
 
   protected handleApiError = ({
     error,

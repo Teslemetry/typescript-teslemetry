@@ -1,7 +1,7 @@
 {
   "type": "enum",
   "title": {
-    "en": "Seat Heater (Front Right)"
+    "en": "Seat Heater"
   },
   "getable": true,
   "setable": true,

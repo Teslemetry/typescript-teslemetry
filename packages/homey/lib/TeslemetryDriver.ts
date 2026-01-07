@@ -1,5 +1,6 @@
 import Homey from "homey";
 import type TeslemetryApp from "../app.js";
+import TeslemetryDevice from "./TeslemetryDevice.js";
 
 export default class TeslemetryDriver extends Homey.Driver {
   declare homey: Homey.Device["homey"] & {
@@ -20,17 +21,30 @@ export default class TeslemetryDriver extends Homey.Driver {
     });
 
     session.setHandler("list_devices", async () => {
-      return (this as any).onPairListDevices();
+      return this.onPairListDevices();
     });
   }
 
   async onRepair(session: any, device: Homey.Device) {
+    if (device instanceof TeslemetryDevice) {
+      this.log(`Repair: Syncing capabilities for device ${device.getName()}`);
+      await device.ensureCapabilities();
+    }
+
     session.setHandler("showView", async (viewId: string) => {
       if (viewId === "login_oauth2") {
-        await this.handleOAuth2Login(session, () => {
-          device.setAvailable().catch(this.error);
-        });
+        if (this.homey.app.oauth.hasValidToken()) {
+          this.log("Valid OAuth token already exists, skipping OAuth flow");
+          session.emit("authorized");
+          return;
+        }
+
+        await this.handleOAuth2Login(session);
       }
+    });
+
+    session.setHandler("list_devices", async () => {
+      return (this as any).onPairListDevices();
     });
   }
 

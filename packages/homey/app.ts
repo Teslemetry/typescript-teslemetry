@@ -1,5 +1,5 @@
-import sourceMapSupport from "source-map-support";
-sourceMapSupport.install();
+//import sourceMapSupport from "source-map-support";
+//sourceMapSupport.install();
 
 import Homey from "homey";
 import { Products, Teslemetry } from "@teslemetry/api";
