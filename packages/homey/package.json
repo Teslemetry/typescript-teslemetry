@@ -17,7 +17,8 @@
     "app:validate": "homey app validate --level verified",
     "app:publish": "pnpm build && homey app publish -s",
     "homey": "homey",
-    "tsdown": "tsdown"
+    "tsdown": "tsdown",
+    "size": "du -sh .homeybuild"
   },
   "dependencies": {},
   "devDependencies": {
