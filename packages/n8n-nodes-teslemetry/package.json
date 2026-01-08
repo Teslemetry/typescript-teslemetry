@@ -1,8 +1,11 @@
 {
   "name": "@teslemetry/n8n-nodes-teslemetry",
   "version": "0.1.0",
-  "description": "n8n.io integration for Teslemetry",
+  "description": "n8n nodes for controlling Tesla vehicles and energy sites via Teslemetry API",
   "main": "dist/index.cjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsdown src/index.ts --format cjs",
@@ -13,10 +16,20 @@
   },
   "keywords": [
     "n8n",
+    "n8n-community-node-package",
     "tesla",
-    "teslemetry"
+    "teslemetry",
+    "automation",
+    "vehicle",
+    "energy",
+    "powerwall",
+    "iot"
   ],
-  "author": "",
+  "author": {
+    "name": "Teslemetry",
+    "email": "hello@teslemetry.com",
+    "url": "https://teslemetry.com"
+  },
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
