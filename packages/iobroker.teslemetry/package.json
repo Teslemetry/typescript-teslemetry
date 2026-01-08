@@ -1,0 +1,70 @@
+{
+  "name": "iobroker.teslemetry",
+  "version": "0.1.0",
+  "description": "ioBroker adapter for Tesla vehicle and energy site control via Teslemetry",
+  "author": {
+    "name": "Teslemetry",
+    "email": "hello@teslemetry.com"
+  },
+  "homepage": "https://github.com/Teslemetry/typescript-teslemetry",
+  "license": "Apache-2.0",
+  "keywords": [
+    "iobroker",
+    "tesla",
+    "teslemetry",
+    "smart-home",
+    "vehicle",
+    "energy",
+    "powerwall",
+    "iot"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Teslemetry/typescript-teslemetry.git",
+    "directory": "packages/iobroker.teslemetry"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
+  "scripts": {
+    "build": "tsdown src/main.ts lib/*.ts --format cjs --target node20 --clean --outDir build",
+    "watch": "tsdown src/main.ts lib/*.ts --format cjs --target node20 --watch --outDir build",
+    "test": "mocha --config test/.mocharc.json",
+    "coverage": "nyc npm test",
+    "lint": "eslint src/**/*.ts lib/**/*.ts",
+    "check": "tsc --noEmit"
+  },
+  "main": "build/src/main.cjs",
+  "files": [
+    "admin/",
+    "build/",
+    "docs/",
+    "io-package.json",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.3.0",
+    "@teslemetry/api": "workspace:*"
+  },
+  "devDependencies": {
+    "@iobroker/testing": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1",
+    "chai": "^4.5.0",
+    "eslint": "^9.18.0",
+    "mocha": "^10.8.2",
+    "nyc": "^17.1.0",
+    "tsdown": "^0.16.7",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
