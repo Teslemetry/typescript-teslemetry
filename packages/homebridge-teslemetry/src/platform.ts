@@ -15,9 +15,10 @@ import type {
   Service,
 } from "homebridge";
 
-import { Teslemetry, type Products, type VehicleDetails } from "@teslemetry/api";
+import { Teslemetry, type Products, type VehicleDetails, type EnergyDetails } from "@teslemetry/api";
 import { PLATFORM_NAME, PLUGIN_NAME, type TeslemetryPlatformConfig } from "./settings.js";
 import { VehicleAccessory } from "./vehicle.js";
+import { EnergyAccessory } from "./energy.js";
 
 /**
  * TeslemetryPlatform
@@ -35,6 +36,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
   // Accessory management
   private readonly accessories: PlatformAccessory[] = [];
   private readonly vehicleAccessories: Map<string, VehicleAccessory> = new Map();
+  private readonly energyAccessories: Map<number, EnergyAccessory> = new Map();
 
   constructor(
     public readonly log: Logging,
@@ -123,9 +125,18 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
         this.registerVehicle(vehicle);
       }
 
-      // Energy sites will be implemented in Phase 3
-      if (energySiteIds.length > 0) {
-        this.log.info("Energy site support coming in a future update!");
+      // Register energy sites
+      for (const siteIdStr of energySiteIds) {
+        const siteId = parseInt(siteIdStr, 10);
+
+        // Check if energy site should be ignored
+        if (this.config.ignoreEnergySites?.includes(siteId)) {
+          this.log.info(`Ignoring energy site ${siteId} (configured in ignore list)`);
+          continue;
+        }
+
+        const site = this.products.energySites[siteIdStr];
+        this.registerEnergySite(site);
       }
     } catch (error) {
       this.log.error("Failed to discover devices:", error);
@@ -203,6 +214,57 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     }
 
     this.log.info(`✓ Vehicle registered: ${displayName} (${vehicle.vin})`);
+  }
+
+  /**
+   * Register an energy site as a HomeKit accessory
+   */
+  private registerEnergySite(site: EnergyDetails): void {
+    const uuid = this.api.hap.uuid.generate(`energy-${site.id}`);
+    const displayName = this.config.prefixName !== false
+      ? site.name
+      : site.name.replace(/^.+? /, ""); // Remove "FirstName's " prefix if prefixName is false
+
+    // Check if accessory already exists in cache
+    const existingAccessory = this.accessories.find(acc => acc.UUID === uuid);
+
+    if (existingAccessory) {
+      // Restore existing accessory
+      this.log.info("Restoring energy site from cache:", displayName);
+
+      // Update accessory context with latest site details
+      existingAccessory.context.site = {
+        id: site.id,
+        name: site.name,
+      };
+
+      // Initialize EnergyAccessory with services
+      const energyAccessory = new EnergyAccessory(this, existingAccessory, site);
+      this.energyAccessories.set(site.id, energyAccessory);
+
+      this.api.updatePlatformAccessories([existingAccessory]);
+    } else {
+      // Create new accessory
+      this.log.info("Adding new energy site:", displayName);
+
+      const accessory = new this.api.platformAccessory(displayName, uuid);
+
+      // Store site info in context
+      accessory.context.site = {
+        id: site.id,
+        name: site.name,
+      };
+
+      // Initialize EnergyAccessory with services
+      const energyAccessory = new EnergyAccessory(this, accessory, site);
+      this.energyAccessories.set(site.id, energyAccessory);
+
+      // Register the accessory
+      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      this.accessories.push(accessory);
+    }
+
+    this.log.info(`✓ Energy site registered: ${displayName} (ID: ${site.id})`);
   }
 
   /**
