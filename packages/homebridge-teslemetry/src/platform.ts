@@ -17,6 +17,7 @@ import type {
 
 import { Teslemetry, type Products, type VehicleDetails } from "@teslemetry/api";
 import { PLATFORM_NAME, PLUGIN_NAME, type TeslemetryPlatformConfig } from "./settings.js";
+import { VehicleAccessory } from "./vehicle.js";
 
 /**
  * TeslemetryPlatform
@@ -33,6 +34,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
 
   // Accessory management
   private readonly accessories: PlatformAccessory[] = [];
+  private readonly vehicleAccessories: Map<string, VehicleAccessory> = new Map();
 
   constructor(
     public readonly log: Logging,
@@ -174,8 +176,9 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
         name: vehicle.name,
       };
 
-      // TODO: Phase 2 - Initialize VehicleAccessory with services
-      // new VehicleAccessory(this, existingAccessory, vehicle);
+      // Initialize VehicleAccessory with services
+      const vehicleAccessory = new VehicleAccessory(this, existingAccessory, vehicle);
+      this.vehicleAccessories.set(vehicle.vin, vehicleAccessory);
 
       this.api.updatePlatformAccessories([existingAccessory]);
     } else {
@@ -190,8 +193,9 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
         name: vehicle.name,
       };
 
-      // TODO: Phase 2 - Initialize VehicleAccessory with services
-      // new VehicleAccessory(this, accessory, vehicle);
+      // Initialize VehicleAccessory with services
+      const vehicleAccessory = new VehicleAccessory(this, accessory, vehicle);
+      this.vehicleAccessories.set(vehicle.vin, vehicleAccessory);
 
       // Register the accessory
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
