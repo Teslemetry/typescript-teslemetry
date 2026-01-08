@@ -1,0 +1,15 @@
+node_modules/
+src/
+lib/
+test/
+.github/
+.vscode/
+*.ts
+!*.d.ts
+tsconfig.json
+.gitignore
+.eslintrc.json
+.nyc_output/
+coverage/
+*.log
+*.tgz

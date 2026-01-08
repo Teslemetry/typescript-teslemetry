@@ -1,0 +1,102 @@
+{
+  "common": {
+    "name": "teslemetry",
+    "version": "0.1.0",
+    "news": {
+      "0.1.0": {
+        "en": "Initial release",
+        "de": "Erstveröffentlichung"
+      }
+    },
+    "title": "Teslemetry",
+    "titleLang": {
+      "en": "Teslemetry",
+      "de": "Teslemetry"
+    },
+    "desc": {
+      "en": "Control Tesla vehicles and energy sites via Teslemetry API",
+      "de": "Steuerung von Tesla-Fahrzeugen und Energieanlagen über Teslemetry API"
+    },
+    "authors": [
+      "Teslemetry <hello@teslemetry.com>"
+    ],
+    "keywords": [
+      "tesla",
+      "vehicle",
+      "energy",
+      "powerwall",
+      "solar",
+      "iot",
+      "smart home"
+    ],
+    "license": "Apache-2.0",
+    "platform": "Javascript/Node.js",
+    "main": "build/src/main.cjs",
+    "icon": "teslemetry.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/Teslemetry/typescript-teslemetry/main/packages/iobroker.teslemetry/admin/teslemetry.png",
+    "readme": "https://github.com/Teslemetry/typescript-teslemetry/blob/main/packages/iobroker.teslemetry/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "iot-systems",
+    "compact": true,
+    "connectionType": "cloud",
+    "dataSource": "poll",
+    "tier": 3,
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=5.0.0"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=6.0.0"
+      }
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "Apache-2.0"
+    }
+  },
+  "native": {
+    "accessToken": "",
+    "region": "auto",
+    "pollInterval": 60,
+    "enableStreaming": true,
+    "selectedVehicles": [],
+    "selectedEnergySites": []
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Information",
+          "de": "Information"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": {
+          "en": "Connected to Teslemetry",
+          "de": "Verbunden mit Teslemetry"
+        },
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
+}
