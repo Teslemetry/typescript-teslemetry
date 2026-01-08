@@ -47,6 +47,7 @@ export class TeslemetryTrigger implements INodeType {
 					{ name: 'Data', value: 'data' },
 					{ name: 'State', value: 'state' },
 					{ name: 'Vehicle Data', value: 'vehicle_data' },
+					{ name: 'Errors', value: 'errors' },
 					{ name: 'Alerts', value: 'alerts' },
 					{ name: 'Connectivity', value: 'connectivity' },
 					{ name: 'Credits', value: 'credits' },
@@ -147,6 +148,9 @@ export class TeslemetryTrigger implements INodeType {
 					break;
 				case 'vehicle_data':
 					cleanup = sse.onVehicleData(callback, { vin: vinParam });
+					break;
+				case 'errors':
+					cleanup = sse.onErrors(callback, { vin: vinParam });
 					break;
 				case 'alerts':
 					cleanup = sse.onAlerts(callback, { vin: vinParam });

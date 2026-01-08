@@ -1,0 +1,9 @@
+node_modules/
+build/
+dist/
+*.tgz
+.DS_Store
+Thumbs.db
+.nyc_output/
+coverage/
+*.log

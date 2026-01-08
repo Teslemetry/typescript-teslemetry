@@ -1,28 +1,52 @@
 # n8n Teslemetry Integration
 
-n8n nodes for interacting with Tesla vehicles and energy sites via [Teslemetry](https://teslemetry.com).
+[![npm version](https://img.shields.io/npm/v/@teslemetry/n8n-nodes-teslemetry.svg)](https://www.npmjs.com/package/@teslemetry/n8n-nodes-teslemetry)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+n8n community nodes for controlling Tesla vehicles and energy sites via the [Teslemetry](https://teslemetry.com) API.
+
+## Features
+
+- 🚗 **Vehicle Control**: Lock/unlock, climate, charging, navigation, and more
+- ⚡ **Energy Management**: Monitor and control Powerwall and Solar systems
+- 📡 **Real-Time Events**: Trigger workflows based on vehicle state changes
+- 🔄 **Full API Coverage**: Access all Teslemetry API features
 
 ## Installation
 
-To use these nodes in your n8n instance, you would typically place them in the `.n8n/nodes` directory or install them as a local package.
+### Community Nodes Installation (Recommended)
 
-### Local Development Installation
+1. In your n8n instance, go to **Settings** → **Community Nodes**
+2. Search for `@teslemetry/n8n-nodes-teslemetry`
+3. Click **Install**
+4. Restart n8n
 
-1.  Clone this repository.
-2.  Build the n8n nodes package:
-    ```bash
-    cd packages/n8n-nodes-teslemetry
-    npm install
-    npm run build
-    ```
-3.  Link the package to your n8n instance. Depending on your n8n setup, this might involve:
-    ```bash
-    cd /path/to/your/n8n/installation
-    npm install /path/to/this/repository/packages/n8n-nodes-teslemetry
-    # or if using pnpm workspace
-    pnpm link /path/to/this/repository/packages/n8n-nodes-teslemetry
-    ```
-    Then restart your n8n instance.
+### Manual Installation
+
+```bash
+npm install @teslemetry/n8n-nodes-teslemetry
+```
+
+For self-hosted n8n instances, you can also install via:
+
+```bash
+cd ~/.n8n/nodes
+npm install @teslemetry/n8n-nodes-teslemetry
+```
+
+Then restart your n8n instance.
+
+## Prerequisites
+
+1. **Teslemetry Account**: Sign up at [teslemetry.com](https://teslemetry.com)
+2. **Access Token**: Generate an API access token from your Teslemetry dashboard
+3. **Tesla Virtual Key**: Configure virtual key access for your vehicle(s)
+
+## Configuration
+
+1. In n8n, add a new credential of type **Teslemetry API**
+2. Enter your Teslemetry access token
+3. Save the credential
 
 ## Nodes
 
@@ -59,15 +83,58 @@ Interact with Tesla Energy sites (Solar/Powerwall).
 Trigger workflows based on real-time vehicle events via Server-Sent Events (SSE).
 
 **Event Types:**
-- **All Events**: Stream all events.
-- **Data**: Data updates.
-- **State**: State changes (online/asleep).
-- **Vehicle Data**: Full vehicle data snapshots.
-- **Alerts**: Vehicle alerts.
-- **Connectivity**: Connection status changes.
-- **Signal**: Trigger when a specific field (e.g., `speed`, `odometer`) changes value.
+- **All Events**: Stream all events
+- **Data**: Real-time telemetry data updates
+- **State**: State changes (online/asleep/charging)
+- **Vehicle Data**: Full vehicle data snapshots
+- **Errors**: Vehicle error events
+- **Alerts**: Vehicle alerts and notifications
+- **Connectivity**: Connection status changes
+- **Credits**: API credit usage updates
+- **Config**: Configuration changes
+- **Signal**: Monitor specific fields (e.g., `speed`, `odometer`, `battery_level`)
 
-## Credentials
+## Usage Examples
 
-### Teslemetry API
-Requires a Teslemetry Access Token.
+### Example 1: Lock Vehicle When Leaving Home
+
+1. Add a **Teslemetry Vehicle** node
+2. Select your vehicle VIN
+3. Choose operation: **Lock Doors**
+4. Trigger this workflow based on your location or schedule
+
+### Example 2: Start Climate Control Before Departure
+
+1. Add a **Schedule Trigger** for your departure time
+2. Add a **Teslemetry Vehicle** node
+3. Select operation: **Start HVAC**
+4. Set desired temperatures
+
+### Example 3: Monitor Charging Status
+
+1. Add a **Teslemetry Trigger** node
+2. Set event type to **Data**
+3. Filter for charging-related updates
+4. Send notifications when charging completes
+
+### Example 4: Alert on Low Battery
+
+1. Add a **Teslemetry Trigger** node
+2. Set event type to **Signal**
+3. Select signal: `battery_level`
+4. Add an **IF** node to check if battery < 20%
+5. Send notification via email/SMS
+
+## Resources
+
+- **Teslemetry Documentation**: https://teslemetry.com/docs
+- **API Reference**: https://developer.teslemetry.com
+- **Support**: https://github.com/Teslemetry/typescript-teslemetry/issues
+
+## License
+
+Apache-2.0 License - see [LICENSE](LICENSE) file for details
+
+## Contributing
+
+Contributions are welcome! Please see the [main repository](https://github.com/Teslemetry/typescript-teslemetry) for contribution guidelines.
