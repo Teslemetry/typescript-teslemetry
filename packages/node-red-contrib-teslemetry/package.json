@@ -1,7 +1,7 @@
 {
   "name": "@teslemetry/node-red-contrib-teslemetry",
   "version": "0.1.2",
-  "description": "Node-RED integration for Teslemetry",
+  "description": "Node-RED nodes for controlling Tesla vehicles and energy sites via Teslemetry API",
   "main": "dist/index.cjs",
   "engines": {
     "node": ">=18.0.0"
@@ -16,7 +16,14 @@
   "keywords": [
     "node-red",
     "tesla",
-    "teslemetry"
+    "teslemetry",
+    "automation",
+    "vehicle",
+    "energy",
+    "powerwall",
+    "solar",
+    "iot",
+    "smart-home"
   ],
   "author": {
     "name": "Teslemetry",
