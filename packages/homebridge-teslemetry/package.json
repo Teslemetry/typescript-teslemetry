@@ -1,0 +1,52 @@
+{
+  "name": "@teslemetry/homebridge-teslemetry",
+  "displayName": "Homebridge Teslemetry",
+  "version": "0.1.0",
+  "description": "Teslemetry integration for Homebridge with real-time streaming support",
+  "author": "Teslemetry",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Teslemetry/typescript-teslemetry.git",
+    "directory": "packages/homebridge-teslemetry"
+  },
+  "bugs": {
+    "url": "https://github.com/Teslemetry/typescript-teslemetry/issues"
+  },
+  "main": "dist/index.cjs",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "homebridge": "^1.8.0 || ^2.0.0-beta.0"
+  },
+  "scripts": {
+    "build": "tsdown --format cjs",
+    "watch": "tsdown --format cjs --watch",
+    "tsc": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "tesla",
+    "teslemetry",
+    "streaming",
+    "vehicle",
+    "smart-home",
+    "iot"
+  ],
+  "dependencies": {
+    "@teslemetry/api": "workspace:*"
+  },
+  "devDependencies": {
+    "homebridge": "^1.8.0",
+    "tsdown": "^0.16.7",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "homebridge": "^1.8.0 || ^2.0.0-beta.0"
+  },
+  "files": [
+    "dist",
+    "config.schema.json"
+  ]
+}
