@@ -1,0 +1,98 @@
+{
+  "pluginAlias": "Teslemetry",
+  "pluginType": "platform",
+  "singular": true,
+  "headerDisplay": "Teslemetry platform plugin for Homebridge with real-time streaming support. Create an access token at [teslemetry.com](https://teslemetry.com).",
+  "footerDisplay": "For support and documentation, visit [GitHub](https://github.com/Teslemetry/typescript-teslemetry/tree/main/packages/homebridge-teslemetry).",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Platform Name",
+        "type": "string",
+        "default": "Teslemetry",
+        "required": false,
+        "description": "The name for this platform instance"
+      },
+      "accessToken": {
+        "title": "Teslemetry Access Token",
+        "type": "string",
+        "required": true,
+        "description": "Your Teslemetry API access token from teslemetry.com"
+      },
+      "prefixName": {
+        "title": "Prefix Accessory Names",
+        "type": "boolean",
+        "default": true,
+        "required": false,
+        "description": "Prefix accessory names with vehicle/site name for easier identification"
+      },
+      "latitude": {
+        "title": "Latitude",
+        "type": "number",
+        "required": false,
+        "description": "Latitude for Homelink activation (required for Homelink service)"
+      },
+      "longitude": {
+        "title": "Longitude",
+        "type": "number",
+        "required": false,
+        "description": "Longitude for Homelink activation (required for Homelink service)"
+      },
+      "ignoreVehicles": {
+        "title": "Ignore Vehicles",
+        "type": "array",
+        "required": false,
+        "description": "List of vehicle VINs to ignore",
+        "items": {
+          "type": "string",
+          "title": "VIN",
+          "description": "Vehicle Identification Number"
+        }
+      },
+      "ignoreEnergySites": {
+        "title": "Ignore Energy Sites",
+        "type": "array",
+        "required": false,
+        "description": "List of energy site IDs to ignore",
+        "items": {
+          "type": "number",
+          "title": "Site ID",
+          "description": "Energy site identifier"
+        }
+      }
+    },
+    "required": ["accessToken"]
+  },
+  "layout": [
+    {
+      "type": "fieldset",
+      "title": "Authentication",
+      "expandable": false,
+      "items": ["accessToken"]
+    },
+    {
+      "type": "fieldset",
+      "title": "General Settings",
+      "expandable": true,
+      "expanded": false,
+      "items": ["name", "prefixName"]
+    },
+    {
+      "type": "fieldset",
+      "title": "Homelink Location",
+      "expandable": true,
+      "expanded": false,
+      "description": "Configure location for Homelink activation",
+      "items": ["latitude", "longitude"]
+    },
+    {
+      "type": "fieldset",
+      "title": "Filters",
+      "expandable": true,
+      "expanded": false,
+      "description": "Optionally ignore specific vehicles or energy sites",
+      "items": ["ignoreVehicles", "ignoreEnergySites"]
+    }
+  ]
+}
