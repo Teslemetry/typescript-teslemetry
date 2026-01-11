@@ -1,5 +1,12 @@
 # @teslemetry/api
 
+## 0.6.8
+
+### Patch Changes
+
+- 818f55a: Updated client types, and increaed fields debounce
+- 1fb55c4: Fix getApi1EnergySitesByIdTelemetryHistory date inputs
+
 ## 0.6.7
 
 ### Patch Changes

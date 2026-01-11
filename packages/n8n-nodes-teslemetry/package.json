@@ -1,6 +1,6 @@
 {
   "name": "@teslemetry/n8n-nodes-teslemetry",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "n8n nodes for controlling Tesla vehicles and energy sites via Teslemetry API",
   "main": "dist/index.cjs",
   "engines": {
