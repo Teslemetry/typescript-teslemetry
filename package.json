@@ -13,6 +13,7 @@
   "bugs": "https://github.com/Teslemetry/typescript-teslemetry/issues/new",
   "license": "Apache-2.0",
   "scripts": {
+    "build": "pnpm -r build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "changeset": "changeset",
     "release": "changeset version && git commit -am 'chore(release): ${{changeset.version}}' && changeset publish --public && git push --tags",
