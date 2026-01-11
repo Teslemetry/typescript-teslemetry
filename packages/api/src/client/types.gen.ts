@@ -1411,14 +1411,14 @@ export type GetApiConfigByVinResponses = {
                 resend_interval_seconds?: number;
             };
             /**
-             * If the vehicle is located at the active driver profile’s saved home location. (Requires 2024.44.32)
+             * If the vehicle is located at the active driver profile's saved home location. (Requires 2024.44.32)
              */
             LocatedAtHome?: {
                 interval_seconds: number;
                 resend_interval_seconds?: number;
             };
             /**
-             * If the vehicle is located at the active driver profile’s saved work location. (Requires 2024.44.32)
+             * If the vehicle is located at the active driver profile's saved work location. (Requires 2024.44.32)
              */
             LocatedAtWork?: {
                 interval_seconds: number;
@@ -3232,14 +3232,14 @@ export type PatchApiConfigByVinData = {
                 resend_interval_seconds?: number;
             } | null;
             /**
-             * If the vehicle is located at the active driver profile’s saved home location. (Requires 2024.44.32)
+             * If the vehicle is located at the active driver profile's saved home location. (Requires 2024.44.32)
              */
             LocatedAtHome?: {
                 interval_seconds: number;
                 resend_interval_seconds?: number;
             } | null;
             /**
-             * If the vehicle is located at the active driver profile’s saved work location. (Requires 2024.44.32)
+             * If the vehicle is located at the active driver profile's saved work location. (Requires 2024.44.32)
              */
             LocatedAtWork?: {
                 interval_seconds: number;
@@ -5081,14 +5081,14 @@ export type PostApiConfigByVinData = {
                 resend_interval_seconds?: number;
             } | null;
             /**
-             * If the vehicle is located at the active driver profile’s saved home location. (Requires 2024.44.32)
+             * If the vehicle is located at the active driver profile's saved home location. (Requires 2024.44.32)
              */
             LocatedAtHome?: {
                 interval_seconds: number;
                 resend_interval_seconds?: number;
             } | null;
             /**
-             * If the vehicle is located at the active driver profile’s saved work location. (Requires 2024.44.32)
+             * If the vehicle is located at the active driver profile's saved work location. (Requires 2024.44.32)
              */
             LocatedAtWork?: {
                 interval_seconds: number;
@@ -7194,14 +7194,14 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
                     resend_interval_seconds?: number;
                 };
                 /**
-                 * If the vehicle is located at the active driver profile’s saved home location. (Requires 2024.44.32)
+                 * If the vehicle is located at the active driver profile's saved home location. (Requires 2024.44.32)
                  */
                 LocatedAtHome?: {
                     interval_seconds: number;
                     resend_interval_seconds?: number;
                 };
                 /**
-                 * If the vehicle is located at the active driver profile’s saved work location. (Requires 2024.44.32)
+                 * If the vehicle is located at the active driver profile's saved work location. (Requires 2024.44.32)
                  */
                 LocatedAtWork?: {
                     interval_seconds: number;
@@ -9085,14 +9085,14 @@ export type GetApi1VehiclesByVinFleetTelemetryConfigResponses = {
                         resend_interval_seconds?: number;
                     };
                     /**
-                     * If the vehicle is located at the active driver profile’s saved home location. (Requires 2024.44.32)
+                     * If the vehicle is located at the active driver profile's saved home location. (Requires 2024.44.32)
                      */
                     LocatedAtHome?: {
                         interval_seconds: number;
                         resend_interval_seconds?: number;
                     };
                     /**
-                     * If the vehicle is located at the active driver profile’s saved work location. (Requires 2024.44.32)
+                     * If the vehicle is located at the active driver profile's saved work location. (Requires 2024.44.32)
                      */
                     LocatedAtWork?: {
                         interval_seconds: number;
@@ -14516,8 +14516,8 @@ export type GetSseByVin_Responses = {
             ChargeAmps?: number | null;
             ChargeCurrentRequest?: number | null;
             ChargeCurrentRequestMax?: number | null;
-            ChargeEnableRequest?: number | null;
-            ChargeLimitSoc?: boolean | null;
+            ChargeEnableRequest?: boolean | null;
+            ChargeLimitSoc?: number | null;
             ChargePort?: 'ChargePortUnknown' | 'ChargePortUS' | 'ChargePortEU' | 'ChargePortGB' | 'ChargePortCCS' | null;
             ChargePortColdWeatherMode?: boolean | null;
             ChargePortDoorOpen?: boolean | null;
@@ -14536,7 +14536,7 @@ export type GetSseByVin_Responses = {
             DCChargingEnergyIn?: number | null;
             DCChargingPower?: number | null;
             DCDCEnable?: boolean | null;
-            DefrostForPreconditioning?: number | null;
+            DefrostForPreconditioning?: boolean | null;
             DefrostMode?: 'DefrostModeStateUnknown' | 'DefrostModeStateOff' | 'DefrostModeStateNormal' | 'DefrostModeStateMax' | 'DefrostModeStateAutoDefog' | null;
             DestinationLocation?: {
                 latitude: number;
@@ -14586,15 +14586,15 @@ export type GetSseByVin_Responses = {
                 TrunkFront: boolean;
                 TrunkRear: boolean;
             } | null;
-            DriveRail?: number | null;
+            DriveRail?: boolean | null;
             DriverSeatBelt?: 'BuckleStatusUnknown' | 'BuckleStatusUnlatched' | 'BuckleStatusLatched' | 'BuckleStatusFaulted' | null;
             DriverSeatOccupied?: boolean | null;
-            EfficiencyPackage?: number | null;
-            EmergencyLaneDepartureAvoidance?: number | null;
+            EfficiencyPackage?: string | null;
+            EmergencyLaneDepartureAvoidance?: boolean | null;
             EnergyRemaining?: number | null;
             EstBatteryRange?: number | null;
             EstimatedHoursToChargeTermination?: number | null;
-            EuropeVehicle?: number | null;
+            EuropeVehicle?: boolean | null;
             ExpectedEnergyPercentAtTripArrival?: number | null;
             ExteriorColor?: string | null;
             FastChargerPresent?: boolean | null;
@@ -14616,7 +14616,7 @@ export type GetSseByVin_Responses = {
             HvacLeftTemperatureRequest?: number | null;
             HvacPower?: 'HvacPowerStateUnknown' | 'HvacPowerStateOff' | 'HvacPowerStateOn' | 'HvacPowerStatePrecondition' | 'HvacPowerStateOverheatProtect' | null;
             HvacRightTemperatureRequest?: number | null;
-            HvacSteeringWheelHeatAuto?: number | null;
+            HvacSteeringWheelHeatAuto?: boolean | null;
             HvacSteeringWheelHeatLevel?: number | null;
             Hvil?: 'HvilStatusUnknown' | 'HvilStatusFault' | 'HvilStatusOK' | null;
             IdealBatteryRange?: number | null;
@@ -14630,9 +14630,9 @@ export type GetSseByVin_Responses = {
             LightsHazardsActive?: boolean | null;
             LightsHighBeams?: boolean | null;
             LightsTurnSignal?: 'TurnSignalStateUnknown' | 'TurnSignalStateOff' | 'TurnSignalStateLeft' | 'TurnSignalStateRight' | 'TurnSignalStateBoth' | null;
-            LocatedAtFavorite?: number | null;
-            LocatedAtHome?: number | null;
-            LocatedAtWork?: number | null;
+            LocatedAtFavorite?: boolean | null;
+            LocatedAtHome?: boolean | null;
+            LocatedAtWork?: boolean | null;
             Location?: {
                 latitude: number;
                 longitude: number;
@@ -14655,7 +14655,7 @@ export type GetSseByVin_Responses = {
             MinutesToArrival?: number | null;
             ModuleTempMax?: number | null;
             ModuleTempMin?: number | null;
-            NotEnoughPowerToHeat?: number | null;
+            NotEnoughPowerToHeat?: boolean | null;
             NumBrickVoltageMax?: number | null;
             NumBrickVoltageMin?: number | null;
             NumModuleTempMax?: number | null;
@@ -14683,7 +14683,7 @@ export type GetSseByVin_Responses = {
             RdWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
             RearDefrostEnabled?: boolean | null;
             RearDisplayHvacEnabled?: boolean | null;
-            RearSeatHeaters?: number | null;
+            RearSeatHeaters?: string | null;
             RemoteStartEnabled?: boolean | null;
             RightHandDrive?: boolean | null;
             RoofColor?: string | null;
@@ -14692,7 +14692,7 @@ export type GetSseByVin_Responses = {
             RouteTrafficMinutesDelay?: number | null;
             RpWindow?: 'WindowStateUnknown' | 'WindowStateClosed' | 'WindowStatePartiallyOpen' | 'WindowStateOpened' | null;
             ScheduledChargingMode?: 'ScheduledChargingModeUnknown' | 'ScheduledChargingModeOff' | 'ScheduledChargingModeStartAt' | 'ScheduledChargingModeDepartBy' | null;
-            ScheduledChargingPending?: number | null;
+            ScheduledChargingPending?: boolean | null;
             ScheduledChargingStartTime?: number | null;
             ScheduledDepartureTime?: number | null;
             SeatHeaterLeft?: number | null;
