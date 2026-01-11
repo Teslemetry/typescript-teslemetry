@@ -1,9 +1,0 @@
-{
-  "error": {
-    "invalid_token": "Invalid token. Please try again.",
-    "invalid_refresh_token": "Invalid refresh token. Please re-authenticate.",
-    "subscription_required": "Subscription required. Please check your Teslemetry subscription.",
-    "could_not_wake_vehicle": "Vehicle didn't wake up. Please try again.",
-    "insufficient_credits": "Insufficent command credits. Please purchase additional credits to run commands."
-  }
-}
