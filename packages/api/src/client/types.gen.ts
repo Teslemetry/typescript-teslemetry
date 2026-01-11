@@ -85,82 +85,6 @@ export type GetApi1ProductsData = {
 
 export type GetApi1ProductsErrors = {
     /**
-     * Error response
-     */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
-    /**
      * Default Response
      */
     default: {
@@ -317,79 +241,7 @@ export type GetApiMetadataErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApiMetadataError = GetApiMetadataErrors[keyof GetApiMetadataErrors];
@@ -4244,88 +4096,10 @@ export type PatchApiConfigByVinData = {
 
 export type PatchApiConfigByVinErrors = {
     /**
-     * Error response
-     */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
-    /**
      * Default Response
      */
     default: unknown;
 };
-
-export type PatchApiConfigByVinError = PatchApiConfigByVinErrors[keyof PatchApiConfigByVinErrors];
 
 export type PatchApiConfigByVinResponses = {
     /**
@@ -6171,88 +5945,10 @@ export type PostApiConfigByVinData = {
 
 export type PostApiConfigByVinErrors = {
     /**
-     * Error response
-     */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
-    /**
      * Default Response
      */
     default: unknown;
 };
-
-export type PostApiConfigByVinError = PostApiConfigByVinErrors[keyof PostApiConfigByVinErrors];
 
 export type PostApiConfigByVinResponses = {
     /**
@@ -6287,82 +5983,19 @@ export type GetApiRefreshByVinErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApiRefreshByVinError = GetApiRefreshByVinErrors[keyof GetApiRefreshByVinErrors];
+
+export type GetApiRefreshByVinResponses = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApiRefreshByVinResponse = GetApiRefreshByVinResponses[keyof GetApiRefreshByVinResponses];
 
 export type GetApiImageByVinData = {
     body?: never;
@@ -6375,87 +6008,6 @@ export type GetApiImageByVinData = {
     query?: never;
     url: '/api/image/{vin}';
 };
-
-export type GetApiImageByVinErrors = {
-    /**
-     * Error response
-     */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
-};
-
-export type GetApiImageByVinError = GetApiImageByVinErrors[keyof GetApiImageByVinErrors];
 
 export type GetApiImageByVinResponses = {
     /**
@@ -6487,34 +6039,6 @@ export type GetApi1VehiclesByVinVehicleDataData = {
 
 export type GetApi1VehiclesByVinVehicleDataErrors = {
     /**
-     * Error response
-     */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
      * Vehicle offline
      */
     408: {
@@ -6540,50 +6064,6 @@ export type GetApi1VehiclesByVinVehicleDataErrors = {
             ble_autopair_enrolled?: boolean;
         };
     };
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
     /**
      * Default Response
      */
@@ -10849,79 +10329,7 @@ export type PostApi1VehiclesByVinInvitationsByIdRevokeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinInvitationsByIdRevokeError = PostApi1VehiclesByVinInvitationsByIdRevokeErrors[keyof PostApi1VehiclesByVinInvitationsByIdRevokeErrors];
@@ -11008,82 +10416,19 @@ export type PostApi1VehiclesByVinChargeHistoryErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinChargeHistoryError = PostApi1VehiclesByVinChargeHistoryErrors[keyof PostApi1VehiclesByVinChargeHistoryErrors];
+
+export type PostApi1VehiclesByVinChargeHistoryResponses = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type PostApi1VehiclesByVinChargeHistoryResponse = PostApi1VehiclesByVinChargeHistoryResponses[keyof PostApi1VehiclesByVinChargeHistoryResponses];
 
 export type PostApi1VehiclesByVinCommandActuateTrunkData = {
     body: {
@@ -11103,79 +10448,7 @@ export type PostApi1VehiclesByVinCommandActuateTrunkErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandActuateTrunkError = PostApi1VehiclesByVinCommandActuateTrunkErrors[keyof PostApi1VehiclesByVinCommandActuateTrunkErrors];
@@ -11255,79 +10528,7 @@ export type PostApi1VehiclesByVinCommandAddChargeScheduleErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandAddChargeScheduleError = PostApi1VehiclesByVinCommandAddChargeScheduleErrors[keyof PostApi1VehiclesByVinCommandAddChargeScheduleErrors];
@@ -11395,79 +10596,7 @@ export type PostApi1VehiclesByVinCommandAddPreconditionScheduleErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandAddPreconditionScheduleError = PostApi1VehiclesByVinCommandAddPreconditionScheduleErrors[keyof PostApi1VehiclesByVinCommandAddPreconditionScheduleErrors];
@@ -11504,79 +10633,7 @@ export type PostApi1VehiclesByVinCommandAdjustVolumeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandAdjustVolumeError = PostApi1VehiclesByVinCommandAdjustVolumeErrors[keyof PostApi1VehiclesByVinCommandAdjustVolumeErrors];
@@ -11611,79 +10668,7 @@ export type PostApi1VehiclesByVinCommandAutoConditioningStartErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandAutoConditioningStartError = PostApi1VehiclesByVinCommandAutoConditioningStartErrors[keyof PostApi1VehiclesByVinCommandAutoConditioningStartErrors];
@@ -11718,79 +10703,7 @@ export type PostApi1VehiclesByVinCommandAutoConditioningStopErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandAutoConditioningStopError = PostApi1VehiclesByVinCommandAutoConditioningStopErrors[keyof PostApi1VehiclesByVinCommandAutoConditioningStopErrors];
@@ -11825,79 +10738,7 @@ export type PostApi1VehiclesByVinCommandCancelSoftwareUpdateErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandCancelSoftwareUpdateError = PostApi1VehiclesByVinCommandCancelSoftwareUpdateErrors[keyof PostApi1VehiclesByVinCommandCancelSoftwareUpdateErrors];
@@ -11932,79 +10773,7 @@ export type PostApi1VehiclesByVinCommandChargeMaxRangeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandChargeMaxRangeError = PostApi1VehiclesByVinCommandChargeMaxRangeErrors[keyof PostApi1VehiclesByVinCommandChargeMaxRangeErrors];
@@ -12039,79 +10808,7 @@ export type PostApi1VehiclesByVinCommandChargePortDoorCloseErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandChargePortDoorCloseError = PostApi1VehiclesByVinCommandChargePortDoorCloseErrors[keyof PostApi1VehiclesByVinCommandChargePortDoorCloseErrors];
@@ -12146,79 +10843,7 @@ export type PostApi1VehiclesByVinCommandChargePortDoorOpenErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandChargePortDoorOpenError = PostApi1VehiclesByVinCommandChargePortDoorOpenErrors[keyof PostApi1VehiclesByVinCommandChargePortDoorOpenErrors];
@@ -12253,79 +10878,7 @@ export type PostApi1VehiclesByVinCommandChargeStandardErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandChargeStandardError = PostApi1VehiclesByVinCommandChargeStandardErrors[keyof PostApi1VehiclesByVinCommandChargeStandardErrors];
@@ -12360,79 +10913,7 @@ export type PostApi1VehiclesByVinCommandChargeStartErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandChargeStartError = PostApi1VehiclesByVinCommandChargeStartErrors[keyof PostApi1VehiclesByVinCommandChargeStartErrors];
@@ -12467,79 +10948,7 @@ export type PostApi1VehiclesByVinCommandChargeStopErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandChargeStopError = PostApi1VehiclesByVinCommandChargeStopErrors[keyof PostApi1VehiclesByVinCommandChargeStopErrors];
@@ -12574,79 +10983,7 @@ export type PostApi1VehiclesByVinCommandClearPinToDriveAdminErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandClearPinToDriveAdminError = PostApi1VehiclesByVinCommandClearPinToDriveAdminErrors[keyof PostApi1VehiclesByVinCommandClearPinToDriveAdminErrors];
@@ -12681,79 +11018,7 @@ export type PostApi1VehiclesByVinCommandDoorLockErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandDoorLockError = PostApi1VehiclesByVinCommandDoorLockErrors[keyof PostApi1VehiclesByVinCommandDoorLockErrors];
@@ -12788,79 +11053,7 @@ export type PostApi1VehiclesByVinCommandDoorUnlockErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandDoorUnlockError = PostApi1VehiclesByVinCommandDoorUnlockErrors[keyof PostApi1VehiclesByVinCommandDoorUnlockErrors];
@@ -12895,79 +11088,7 @@ export type PostApi1VehiclesByVinCommandEraseUserDataErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandEraseUserDataError = PostApi1VehiclesByVinCommandEraseUserDataErrors[keyof PostApi1VehiclesByVinCommandEraseUserDataErrors];
@@ -13002,79 +11123,7 @@ export type PostApi1VehiclesByVinCommandFlashLightsErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandFlashLightsError = PostApi1VehiclesByVinCommandFlashLightsErrors[keyof PostApi1VehiclesByVinCommandFlashLightsErrors];
@@ -13114,79 +11163,7 @@ export type PostApi1VehiclesByVinCommandGuestModeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandGuestModeError = PostApi1VehiclesByVinCommandGuestModeErrors[keyof PostApi1VehiclesByVinCommandGuestModeErrors];
@@ -13221,79 +11198,7 @@ export type PostApi1VehiclesByVinCommandHonkHornErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandHonkHornError = PostApi1VehiclesByVinCommandHonkHornErrors[keyof PostApi1VehiclesByVinCommandHonkHornErrors];
@@ -13328,79 +11233,7 @@ export type PostApi1VehiclesByVinCommandMediaNextFavErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandMediaNextFavError = PostApi1VehiclesByVinCommandMediaNextFavErrors[keyof PostApi1VehiclesByVinCommandMediaNextFavErrors];
@@ -13435,79 +11268,7 @@ export type PostApi1VehiclesByVinCommandMediaNextTrackErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandMediaNextTrackError = PostApi1VehiclesByVinCommandMediaNextTrackErrors[keyof PostApi1VehiclesByVinCommandMediaNextTrackErrors];
@@ -13542,79 +11303,7 @@ export type PostApi1VehiclesByVinCommandMediaPrevFavErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandMediaPrevFavError = PostApi1VehiclesByVinCommandMediaPrevFavErrors[keyof PostApi1VehiclesByVinCommandMediaPrevFavErrors];
@@ -13649,79 +11338,7 @@ export type PostApi1VehiclesByVinCommandMediaPrevTrackErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandMediaPrevTrackError = PostApi1VehiclesByVinCommandMediaPrevTrackErrors[keyof PostApi1VehiclesByVinCommandMediaPrevTrackErrors];
@@ -13756,79 +11373,7 @@ export type PostApi1VehiclesByVinCommandMediaTogglePlaybackErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandMediaTogglePlaybackError = PostApi1VehiclesByVinCommandMediaTogglePlaybackErrors[keyof PostApi1VehiclesByVinCommandMediaTogglePlaybackErrors];
@@ -13863,79 +11408,7 @@ export type PostApi1VehiclesByVinCommandMediaVolumeDownErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandMediaVolumeDownError = PostApi1VehiclesByVinCommandMediaVolumeDownErrors[keyof PostApi1VehiclesByVinCommandMediaVolumeDownErrors];
@@ -13974,79 +11447,7 @@ export type PostApi1VehiclesByVinCommandNavigationGpsRequestErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandNavigationGpsRequestError = PostApi1VehiclesByVinCommandNavigationGpsRequestErrors[keyof PostApi1VehiclesByVinCommandNavigationGpsRequestErrors];
@@ -14086,79 +11487,7 @@ export type PostApi1VehiclesByVinCommandNavigationRequestErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandNavigationRequestError = PostApi1VehiclesByVinCommandNavigationRequestErrors[keyof PostApi1VehiclesByVinCommandNavigationRequestErrors];
@@ -14196,79 +11525,7 @@ export type PostApi1VehiclesByVinCommandNavigationScRequestErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandNavigationScRequestError = PostApi1VehiclesByVinCommandNavigationScRequestErrors[keyof PostApi1VehiclesByVinCommandNavigationScRequestErrors];
@@ -14305,79 +11562,7 @@ export type PostApi1VehiclesByVinCommandNavigationWaypointsRequestErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandNavigationWaypointsRequestError = PostApi1VehiclesByVinCommandNavigationWaypointsRequestErrors[keyof PostApi1VehiclesByVinCommandNavigationWaypointsRequestErrors];
@@ -14415,79 +11600,7 @@ export type PostApi1VehiclesByVinCommandRemoteAutoSeatClimateRequestErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemoteAutoSeatClimateRequestError = PostApi1VehiclesByVinCommandRemoteAutoSeatClimateRequestErrors[keyof PostApi1VehiclesByVinCommandRemoteAutoSeatClimateRequestErrors];
@@ -14524,79 +11637,7 @@ export type PostApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateReques
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateRequestError = PostApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateRequestErrors[keyof PostApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateRequestErrors];
@@ -14633,79 +11674,7 @@ export type PostApi1VehiclesByVinCommandRemoteBoomboxErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemoteBoomboxError = PostApi1VehiclesByVinCommandRemoteBoomboxErrors[keyof PostApi1VehiclesByVinCommandRemoteBoomboxErrors];
@@ -14743,79 +11712,7 @@ export type PostApi1VehiclesByVinCommandRemoteSeatCoolerRequestErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemoteSeatCoolerRequestError = PostApi1VehiclesByVinCommandRemoteSeatCoolerRequestErrors[keyof PostApi1VehiclesByVinCommandRemoteSeatCoolerRequestErrors];
@@ -14853,79 +11750,7 @@ export type PostApi1VehiclesByVinCommandRemoteSeatHeaterRequestErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemoteSeatHeaterRequestError = PostApi1VehiclesByVinCommandRemoteSeatHeaterRequestErrors[keyof PostApi1VehiclesByVinCommandRemoteSeatHeaterRequestErrors];
@@ -14960,79 +11785,7 @@ export type PostApi1VehiclesByVinCommandRemoteStartDriveErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemoteStartDriveError = PostApi1VehiclesByVinCommandRemoteStartDriveErrors[keyof PostApi1VehiclesByVinCommandRemoteStartDriveErrors];
@@ -15069,79 +11822,7 @@ export type PostApi1VehiclesByVinCommandRemoteSteeringWheelHeatLevelRequestError
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemoteSteeringWheelHeatLevelRequestError = PostApi1VehiclesByVinCommandRemoteSteeringWheelHeatLevelRequestErrors[keyof PostApi1VehiclesByVinCommandRemoteSteeringWheelHeatLevelRequestErrors];
@@ -15178,79 +11859,7 @@ export type PostApi1VehiclesByVinCommandRemoteSteeringWheelHeaterRequestErrors =
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemoteSteeringWheelHeaterRequestError = PostApi1VehiclesByVinCommandRemoteSteeringWheelHeaterRequestErrors[keyof PostApi1VehiclesByVinCommandRemoteSteeringWheelHeaterRequestErrors];
@@ -15287,79 +11896,7 @@ export type PostApi1VehiclesByVinCommandRemoveChargeScheduleErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemoveChargeScheduleError = PostApi1VehiclesByVinCommandRemoveChargeScheduleErrors[keyof PostApi1VehiclesByVinCommandRemoveChargeScheduleErrors];
@@ -15396,79 +11933,7 @@ export type PostApi1VehiclesByVinCommandRemovePreconditionScheduleErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandRemovePreconditionScheduleError = PostApi1VehiclesByVinCommandRemovePreconditionScheduleErrors[keyof PostApi1VehiclesByVinCommandRemovePreconditionScheduleErrors];
@@ -15503,79 +11968,7 @@ export type PostApi1VehiclesByVinCommandResetPinToDrivePinErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandResetPinToDrivePinError = PostApi1VehiclesByVinCommandResetPinToDrivePinErrors[keyof PostApi1VehiclesByVinCommandResetPinToDrivePinErrors];
@@ -15610,79 +12003,7 @@ export type PostApi1VehiclesByVinCommandResetValetPinErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandResetValetPinError = PostApi1VehiclesByVinCommandResetValetPinErrors[keyof PostApi1VehiclesByVinCommandResetValetPinErrors];
@@ -15719,79 +12040,7 @@ export type PostApi1VehiclesByVinCommandScheduleSoftwareUpdateErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandScheduleSoftwareUpdateError = PostApi1VehiclesByVinCommandScheduleSoftwareUpdateErrors[keyof PostApi1VehiclesByVinCommandScheduleSoftwareUpdateErrors];
@@ -15829,79 +12078,7 @@ export type PostApi1VehiclesByVinCommandSetBioweaponModeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetBioweaponModeError = PostApi1VehiclesByVinCommandSetBioweaponModeErrors[keyof PostApi1VehiclesByVinCommandSetBioweaponModeErrors];
@@ -15939,79 +12116,7 @@ export type PostApi1VehiclesByVinCommandSetCabinOverheatProtectionErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetCabinOverheatProtectionError = PostApi1VehiclesByVinCommandSetCabinOverheatProtectionErrors[keyof PostApi1VehiclesByVinCommandSetCabinOverheatProtectionErrors];
@@ -16048,79 +12153,7 @@ export type PostApi1VehiclesByVinCommandSetChargeLimitErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetChargeLimitError = PostApi1VehiclesByVinCommandSetChargeLimitErrors[keyof PostApi1VehiclesByVinCommandSetChargeLimitErrors];
@@ -16157,79 +12190,7 @@ export type PostApi1VehiclesByVinCommandSetChargingAmpsErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetChargingAmpsError = PostApi1VehiclesByVinCommandSetChargingAmpsErrors[keyof PostApi1VehiclesByVinCommandSetChargingAmpsErrors];
@@ -16269,79 +12230,7 @@ export type PostApi1VehiclesByVinCommandSetClimateKeeperModeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetClimateKeeperModeError = PostApi1VehiclesByVinCommandSetClimateKeeperModeErrors[keyof PostApi1VehiclesByVinCommandSetClimateKeeperModeErrors];
@@ -16381,79 +12270,7 @@ export type PostApi1VehiclesByVinCommandSetCopTempErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetCopTempError = PostApi1VehiclesByVinCommandSetCopTempErrors[keyof PostApi1VehiclesByVinCommandSetCopTempErrors];
@@ -16491,79 +12308,7 @@ export type PostApi1VehiclesByVinCommandSetPinToDriveErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetPinToDriveError = PostApi1VehiclesByVinCommandSetPinToDriveErrors[keyof PostApi1VehiclesByVinCommandSetPinToDriveErrors];
@@ -16601,79 +12346,7 @@ export type PostApi1VehiclesByVinCommandSetPreconditioningMaxErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetPreconditioningMaxError = PostApi1VehiclesByVinCommandSetPreconditioningMaxErrors[keyof PostApi1VehiclesByVinCommandSetPreconditioningMaxErrors];
@@ -16711,79 +12384,7 @@ export type PostApi1VehiclesByVinCommandSetScheduledChargingErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetScheduledChargingError = PostApi1VehiclesByVinCommandSetScheduledChargingErrors[keyof PostApi1VehiclesByVinCommandSetScheduledChargingErrors];
@@ -16826,79 +12427,7 @@ export type PostApi1VehiclesByVinCommandSetScheduledDepartureErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetScheduledDepartureError = PostApi1VehiclesByVinCommandSetScheduledDepartureErrors[keyof PostApi1VehiclesByVinCommandSetScheduledDepartureErrors];
@@ -16935,79 +12464,7 @@ export type PostApi1VehiclesByVinCommandSetSentryModeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetSentryModeError = PostApi1VehiclesByVinCommandSetSentryModeErrors[keyof PostApi1VehiclesByVinCommandSetSentryModeErrors];
@@ -17045,79 +12502,7 @@ export type PostApi1VehiclesByVinCommandSetTempsErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetTempsError = PostApi1VehiclesByVinCommandSetTempsErrors[keyof PostApi1VehiclesByVinCommandSetTempsErrors];
@@ -17155,79 +12540,7 @@ export type PostApi1VehiclesByVinCommandSetValetModeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetValetModeError = PostApi1VehiclesByVinCommandSetValetModeErrors[keyof PostApi1VehiclesByVinCommandSetValetModeErrors];
@@ -17264,79 +12577,7 @@ export type PostApi1VehiclesByVinCommandSetVehicleNameErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSetVehicleNameError = PostApi1VehiclesByVinCommandSetVehicleNameErrors[keyof PostApi1VehiclesByVinCommandSetVehicleNameErrors];
@@ -17373,79 +12614,7 @@ export type PostApi1VehiclesByVinCommandSpeedLimitActivateErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSpeedLimitActivateError = PostApi1VehiclesByVinCommandSpeedLimitActivateErrors[keyof PostApi1VehiclesByVinCommandSpeedLimitActivateErrors];
@@ -17482,79 +12651,7 @@ export type PostApi1VehiclesByVinCommandSpeedLimitClearPinErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSpeedLimitClearPinError = PostApi1VehiclesByVinCommandSpeedLimitClearPinErrors[keyof PostApi1VehiclesByVinCommandSpeedLimitClearPinErrors];
@@ -17591,79 +12688,7 @@ export type PostApi1VehiclesByVinCommandSpeedLimitClearPinAdminErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSpeedLimitClearPinAdminError = PostApi1VehiclesByVinCommandSpeedLimitClearPinAdminErrors[keyof PostApi1VehiclesByVinCommandSpeedLimitClearPinAdminErrors];
@@ -17700,79 +12725,7 @@ export type PostApi1VehiclesByVinCommandSpeedLimitDeactivateErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSpeedLimitDeactivateError = PostApi1VehiclesByVinCommandSpeedLimitDeactivateErrors[keyof PostApi1VehiclesByVinCommandSpeedLimitDeactivateErrors];
@@ -17809,79 +12762,7 @@ export type PostApi1VehiclesByVinCommandSpeedLimitSetLimitErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSpeedLimitSetLimitError = PostApi1VehiclesByVinCommandSpeedLimitSetLimitErrors[keyof PostApi1VehiclesByVinCommandSpeedLimitSetLimitErrors];
@@ -17918,79 +12799,7 @@ export type PostApi1VehiclesByVinCommandSunRoofControlErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandSunRoofControlError = PostApi1VehiclesByVinCommandSunRoofControlErrors[keyof PostApi1VehiclesByVinCommandSunRoofControlErrors];
@@ -18029,79 +12838,7 @@ export type PostApi1VehiclesByVinCommandTriggerHomelinkErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandTriggerHomelinkError = PostApi1VehiclesByVinCommandTriggerHomelinkErrors[keyof PostApi1VehiclesByVinCommandTriggerHomelinkErrors];
@@ -18140,79 +12877,7 @@ export type PostApi1VehiclesByVinCommandUpcomingCalendarEntriesErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandUpcomingCalendarEntriesError = PostApi1VehiclesByVinCommandUpcomingCalendarEntriesErrors[keyof PostApi1VehiclesByVinCommandUpcomingCalendarEntriesErrors];
@@ -18251,79 +12916,7 @@ export type PostApi1VehiclesByVinCommandWindowControlErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCommandWindowControlError = PostApi1VehiclesByVinCommandWindowControlErrors[keyof PostApi1VehiclesByVinCommandWindowControlErrors];
@@ -18358,79 +12951,7 @@ export type PostApi1VehiclesByVinCustomCommandPingErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandPingError = PostApi1VehiclesByVinCustomCommandPingErrors[keyof PostApi1VehiclesByVinCustomCommandPingErrors];
@@ -18474,79 +12995,7 @@ export type PostApi1VehiclesByVinCustomCommandClosureErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandClosureError = PostApi1VehiclesByVinCustomCommandClosureErrors[keyof PostApi1VehiclesByVinCustomCommandClosureErrors];
@@ -18591,79 +13040,7 @@ export type PostApi1VehiclesByVinCustomCommandSeatHeaterErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandSeatHeaterError = PostApi1VehiclesByVinCustomCommandSeatHeaterErrors[keyof PostApi1VehiclesByVinCustomCommandSeatHeaterErrors];
@@ -18702,79 +13079,7 @@ export type PostApi1VehiclesByVinCustomCommandChargeOnSolarErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandChargeOnSolarError = PostApi1VehiclesByVinCustomCommandChargeOnSolarErrors[keyof PostApi1VehiclesByVinCustomCommandChargeOnSolarErrors];
@@ -18809,79 +13114,7 @@ export type PostApi1VehiclesByVinCustomCommandDashcamSaveErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandDashcamSaveError = PostApi1VehiclesByVinCustomCommandDashcamSaveErrors[keyof PostApi1VehiclesByVinCustomCommandDashcamSaveErrors];
@@ -18918,79 +13151,7 @@ export type PostApi1VehiclesByVinCustomCommandPlayVideoErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandPlayVideoError = PostApi1VehiclesByVinCustomCommandPlayVideoErrors[keyof PostApi1VehiclesByVinCustomCommandPlayVideoErrors];
@@ -19025,79 +13186,7 @@ export type PostApi1VehiclesByVinCustomCommandStopLightShowErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandStopLightShowError = PostApi1VehiclesByVinCustomCommandStopLightShowErrors[keyof PostApi1VehiclesByVinCustomCommandStopLightShowErrors];
@@ -19149,79 +13238,7 @@ export type PostApi1VehiclesByVinCustomCommandStartLightShowErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandStartLightShowError = PostApi1VehiclesByVinCustomCommandStartLightShowErrors[keyof PostApi1VehiclesByVinCustomCommandStartLightShowErrors];
@@ -19261,79 +13278,7 @@ export type PostApi1VehiclesByVinCustomCommandClearPinToDriveErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandClearPinToDriveError = PostApi1VehiclesByVinCustomCommandClearPinToDriveErrors[keyof PostApi1VehiclesByVinCustomCommandClearPinToDriveErrors];
@@ -19368,79 +13313,7 @@ export type PostApi1VehiclesByVinCustomCommandRemoveKeyErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1VehiclesByVinCustomCommandRemoveKeyError = PostApi1VehiclesByVinCustomCommandRemoveKeyErrors[keyof PostApi1VehiclesByVinCustomCommandRemoveKeyErrors];
@@ -19475,79 +13348,7 @@ export type WakeUpErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type WakeUpError = WakeUpErrors[keyof WakeUpErrors];
@@ -19596,79 +13397,7 @@ export type GetApi1DxVehiclesSubscriptionsEligibleErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1DxVehiclesSubscriptionsEligibleError = GetApi1DxVehiclesSubscriptionsEligibleErrors[keyof GetApi1DxVehiclesSubscriptionsEligibleErrors];
@@ -19693,79 +13422,7 @@ export type GetApi1DxVehiclesUpgradeEligibilityErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1DxVehiclesUpgradeEligibilityError = GetApi1DxVehiclesUpgradeEligibilityErrors[keyof GetApi1DxVehiclesUpgradeEligibilityErrors];
@@ -19790,79 +13447,7 @@ export type GetApi1DxVehiclesOptionsErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1DxVehiclesOptionsError = GetApi1DxVehiclesOptionsErrors[keyof GetApi1DxVehiclesOptionsErrors];
@@ -19887,79 +13472,7 @@ export type GetApi1DxWarrantyDetailsErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1DxWarrantyDetailsError = GetApi1DxWarrantyDetailsErrors[keyof GetApi1DxWarrantyDetailsErrors];
@@ -19992,79 +13505,7 @@ export type PostApi1EnergySitesByIdBackupErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1EnergySitesByIdBackupError = PostApi1EnergySitesByIdBackupErrors[keyof PostApi1EnergySitesByIdBackupErrors];
@@ -20120,79 +13561,7 @@ export type GetApi1EnergySitesByIdCalendarHistoryErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1EnergySitesByIdCalendarHistoryError = GetApi1EnergySitesByIdCalendarHistoryErrors[keyof GetApi1EnergySitesByIdCalendarHistoryErrors];
@@ -20261,11 +13630,11 @@ export type GetApi1EnergySitesByIdTelemetryHistoryData = {
         /**
          * Start date of the window to retrieve backup events in RFC3339 format. i.e. 2023-01-01T00:00:00-08:00
          */
-        start_date: string;
+        start_date?: string;
         /**
          * End date of the window to retrieve backup events in RFC3339 format. i.e. 2023-01-01T00:00:00-08:00
          */
-        end_date: string;
+        end_date?: string;
         /**
          * Timezone of the requested window in IANA name format. i.e. 'America/Los_Angeles'
          */
@@ -20278,79 +13647,7 @@ export type GetApi1EnergySitesByIdTelemetryHistoryErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1EnergySitesByIdTelemetryHistoryError = GetApi1EnergySitesByIdTelemetryHistoryErrors[keyof GetApi1EnergySitesByIdTelemetryHistoryErrors];
@@ -20361,8 +13658,7 @@ export type GetApi1EnergySitesByIdTelemetryHistoryResponses = {
      */
     200: {
         response?: {
-            period?: string;
-            time_series?: Array<{
+            charge_history?: Array<{
                 charge_start_time?: {
                     seconds?: number;
                 };
@@ -20370,6 +13666,10 @@ export type GetApi1EnergySitesByIdTelemetryHistoryResponses = {
                     seconds?: number;
                 };
                 energy_added_wh?: number;
+                target_id?: {
+                    text?: string;
+                };
+                din?: string;
             }>;
         };
     };
@@ -20402,79 +13702,7 @@ export type PostApi1EnergySitesByIdGridImportExportErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1EnergySitesByIdGridImportExportError = PostApi1EnergySitesByIdGridImportExportErrors[keyof PostApi1EnergySitesByIdGridImportExportErrors];
@@ -20504,22 +13732,6 @@ export type GetApi1EnergySitesByIdLiveStatusData = {
 
 export type GetApi1EnergySitesByIdLiveStatusErrors = {
     /**
-     * Error response
-     */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
      * Default Response
      */
     404: {
@@ -20531,59 +13743,7 @@ export type GetApi1EnergySitesByIdLiveStatusErrors = {
     /**
      * Error response
      */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1EnergySitesByIdLiveStatusError = GetApi1EnergySitesByIdLiveStatusErrors[keyof GetApi1EnergySitesByIdLiveStatusErrors];
@@ -20648,79 +13808,7 @@ export type PostApi1EnergySitesByIdOffGridVehicleChargingReserveErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1EnergySitesByIdOffGridVehicleChargingReserveError = PostApi1EnergySitesByIdOffGridVehicleChargingReserveErrors[keyof PostApi1EnergySitesByIdOffGridVehicleChargingReserveErrors];
@@ -20760,79 +13848,7 @@ export type PostApi1EnergySitesByIdOperationErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1EnergySitesByIdOperationError = PostApi1EnergySitesByIdOperationErrors[keyof PostApi1EnergySitesByIdOperationErrors];
@@ -20865,22 +13881,6 @@ export type GetApi1EnergySitesByIdSiteInfoData = {
 
 export type GetApi1EnergySitesByIdSiteInfoErrors = {
     /**
-     * Error response
-     */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
      * Default Response
      */
     404: {
@@ -20889,50 +13889,6 @@ export type GetApi1EnergySitesByIdSiteInfoErrors = {
         error_description: string;
         txid: string;
     };
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
     /**
      * Default Response
      */
@@ -20945,11 +13901,7 @@ export type GetApi1EnergySitesByIdSiteInfoErrors = {
     /**
      * Error response
      */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1EnergySitesByIdSiteInfoError = GetApi1EnergySitesByIdSiteInfoErrors[keyof GetApi1EnergySitesByIdSiteInfoErrors];
@@ -21171,79 +14123,7 @@ export type PostApi1EnergySitesByIdStormModeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1EnergySitesByIdStormModeError = PostApi1EnergySitesByIdStormModeErrors[keyof PostApi1EnergySitesByIdStormModeErrors];
@@ -21290,79 +14170,7 @@ export type PostApi1EnergySitesByIdTimeOfUseSettingsErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type PostApi1EnergySitesByIdTimeOfUseSettingsError = PostApi1EnergySitesByIdTimeOfUseSettingsErrors[keyof PostApi1EnergySitesByIdTimeOfUseSettingsErrors];
@@ -21392,79 +14200,7 @@ export type GetApi1UsersFeatureConfigErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1UsersFeatureConfigError = GetApi1UsersFeatureConfigErrors[keyof GetApi1UsersFeatureConfigErrors];
@@ -21497,79 +14233,7 @@ export type GetApi1UsersMeErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1UsersMeError = GetApi1UsersMeErrors[keyof GetApi1UsersMeErrors];
@@ -21601,79 +14265,7 @@ export type GetApi1UsersOrdersErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1UsersOrdersError = GetApi1UsersOrdersErrors[keyof GetApi1UsersOrdersErrors];
@@ -21712,79 +14304,7 @@ export type GetApi1UsersRegionErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1UsersRegionError = GetApi1UsersRegionErrors[keyof GetApi1UsersRegionErrors];
@@ -21843,82 +14363,19 @@ export type GetApi1DxChargingHistoryErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1DxChargingHistoryError = GetApi1DxChargingHistoryErrors[keyof GetApi1DxChargingHistoryErrors];
+
+export type GetApi1DxChargingHistoryResponses = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1DxChargingHistoryResponse = GetApi1DxChargingHistoryResponses[keyof GetApi1DxChargingHistoryResponses];
 
 export type GetApi1DxChargingInvoiceByIdData = {
     body?: never;
@@ -21936,82 +14393,19 @@ export type GetApi1DxChargingInvoiceByIdErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1DxChargingInvoiceByIdError = GetApi1DxChargingInvoiceByIdErrors[keyof GetApi1DxChargingInvoiceByIdErrors];
+
+export type GetApi1DxChargingInvoiceByIdResponses = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1DxChargingInvoiceByIdResponse = GetApi1DxChargingInvoiceByIdResponses[keyof GetApi1DxChargingInvoiceByIdResponses];
 
 export type GetApi1DxChargingSessionsData = {
     body?: never;
@@ -22045,82 +14439,19 @@ export type GetApi1DxChargingSessionsErrors = {
     /**
      * Error response
      */
-    400: Def0;
-    /**
-     * Error response
-     */
-    401: Def0;
-    /**
-     * Error response
-     */
-    402: Def0;
-    /**
-     * Error response
-     */
-    403: Def0;
-    /**
-     * Error response
-     */
-    404: Def0;
-    /**
-     * Error response
-     */
-    405: Def0;
-    /**
-     * Error response
-     */
-    406: Def0;
-    /**
-     * Error response
-     */
-    408: Def0;
-    /**
-     * Error response
-     */
-    412: Def0;
-    /**
-     * Error response
-     */
-    418: Def0;
-    /**
-     * Error response
-     */
-    421: Def0;
-    /**
-     * Error response
-     */
-    422: Def0;
-    /**
-     * Error response
-     */
-    423: Def0;
-    /**
-     * Error response
-     */
-    429: Def0;
-    /**
-     * Error response
-     */
-    451: Def0;
-    /**
-     * Error response
-     */
-    499: Def0;
-    /**
-     * Error response
-     */
-    500: Def0;
-    /**
-     * Error response
-     */
-    503: Def0;
-    /**
-     * Error response
-     */
-    504: Def0;
+    default: Def0;
 };
 
 export type GetApi1DxChargingSessionsError = GetApi1DxChargingSessionsErrors[keyof GetApi1DxChargingSessionsErrors];
+
+export type GetApi1DxChargingSessionsResponses = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1DxChargingSessionsResponse = GetApi1DxChargingSessionsResponses[keyof GetApi1DxChargingSessionsResponses];
 
 export type GetSseByVin_Data = {
     body?: never;

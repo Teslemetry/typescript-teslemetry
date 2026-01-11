@@ -154,7 +154,7 @@ export class TeslemetryVehicleStream extends EventEmitter {
         );
       }
       this._debounceTimeout = null;
-    }, 100);
+    }, 1000);
   }
 
   /** Modify the field configuration of the vehicle */
