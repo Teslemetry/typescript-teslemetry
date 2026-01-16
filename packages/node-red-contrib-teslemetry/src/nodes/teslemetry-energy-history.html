@@ -1,0 +1,230 @@
+<script type="text/javascript">
+    RED.nodes.registerType("teslemetry-energy-history", {
+        category: "Teslemetry Energy",
+        paletteLabel: "History",
+        color: "#e6e600",
+        defaults: {
+            name: { value: "" },
+            teslemetryConfig: {
+                value: "",
+                type: "teslemetry-config",
+                required: true,
+            },
+            siteId: { value: "" },
+            historyType: { value: "energy" },
+            period: { value: "day" },
+            startDate: { value: "" },
+            endDate: { value: "" },
+            timeZone: { value: "" },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-line-chart",
+        label: function () {
+            return this.name || "Energy: " + (this.historyType || "History");
+        },
+        oneditprepare: function () {
+            const node = this;
+            const siteSelect = $("#node-input-siteId");
+            const configInput = $("#node-input-teslemetryConfig");
+            const historyTypeSelect = $("#node-input-historyType");
+            const periodRow = $("#period-row");
+
+            function updateSites() {
+                const configId = configInput.val();
+                if (configId && configId !== "_ADD_") {
+                    $.getJSON("teslemetry/energy_sites", { config: configId })
+                        .done(function (data) {
+                            const current = siteSelect.val() || node.siteId;
+                            siteSelect.empty();
+                            siteSelect.append(
+                                '<option value="">From msg.siteId</option>',
+                            );
+                            if (data && data.length > 0) {
+                                data.forEach(function ([id, name]) {
+                                    siteSelect.append(
+                                        '<option value="' +
+                                            id +
+                                            '">' +
+                                            name +
+                                            " (" +
+                                            id +
+                                            ")</option>",
+                                    );
+                                });
+                            }
+                            if (current) {
+                                siteSelect.val(current);
+                            }
+                        })
+                        .fail(function (jqxhr, textStatus, error) {
+                            console.error(
+                                "Failed to fetch energy sites",
+                                error,
+                            );
+                        });
+                }
+            }
+
+            function updatePeriodVisibility() {
+                const historyType = historyTypeSelect.val();
+                if (historyType === "telemetry") {
+                    periodRow.hide();
+                } else {
+                    periodRow.show();
+                }
+            }
+
+            configInput.change(function () {
+                updateSites();
+            });
+
+            historyTypeSelect.change(function () {
+                updatePeriodVisibility();
+            });
+
+            if (configInput.val()) {
+                updateSites();
+            }
+
+            updatePeriodVisibility();
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="teslemetry-energy-history">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-teslemetryConfig">
+            <i class="fa fa-globe"></i> Config
+        </label>
+        <input type="text" id="node-input-teslemetryConfig" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-siteId">
+            <i class="fa fa-home"></i> Site ID
+        </label>
+        <select id="node-input-siteId" style="width: 70%;">
+            <option value="">From msg.siteId</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-historyType">
+            <i class="fa fa-database"></i> History Type
+        </label>
+        <select id="node-input-historyType">
+            <option value="energy">Energy History</option>
+            <option value="backup">Backup History</option>
+            <option value="telemetry">Telemetry (Charging)</option>
+        </select>
+    </div>
+    <div class="form-row" id="period-row">
+        <label for="node-input-period">
+            <i class="fa fa-calendar"></i> Period
+        </label>
+        <select id="node-input-period">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-startDate">
+            <i class="fa fa-calendar-o"></i> Start Date
+        </label>
+        <input
+            type="text"
+            id="node-input-startDate"
+            placeholder="From msg.startDate (ISO 8601)"
+        />
+    </div>
+    <div class="form-row">
+        <label for="node-input-endDate">
+            <i class="fa fa-calendar-check-o"></i> End Date
+        </label>
+        <input
+            type="text"
+            id="node-input-endDate"
+            placeholder="From msg.endDate (ISO 8601)"
+        />
+    </div>
+    <div class="form-row">
+        <label for="node-input-timeZone">
+            <i class="fa fa-clock-o"></i> Time Zone
+        </label>
+        <input
+            type="text"
+            id="node-input-timeZone"
+            placeholder="From msg.timeZone (e.g., America/Los_Angeles)"
+        />
+    </div>
+</script>
+
+<script type="text/html" data-help-name="teslemetry-energy-history">
+    <p>Retrieves historical data from an Energy Site via Teslemetry API.</p>
+    <p>Requires a valid Teslemetry configuration and a Site ID.</p>
+
+    <h3>History Types</h3>
+    <dl>
+        <dt>Energy History</dt>
+        <dd>
+            Returns energy measurements (solar production, battery usage, grid
+            imports/exports) aggregated by the selected period.
+        </dd>
+        <dt>Backup History</dt>
+        <dd>
+            Returns backup (off-grid) event history aggregated by the selected
+            period.
+        </dd>
+        <dt>Telemetry (Charging)</dt>
+        <dd>
+            Returns wall connector charging history. Period is not used for this
+            type.
+        </dd>
+    </dl>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">
+            siteId <span class="property-type">number</span>
+        </dt>
+        <dd>Energy Site ID (if not set in config)</dd>
+        <dt class="optional">
+            historyType <span class="property-type">string</span>
+        </dt>
+        <dd>Type of history: "energy", "backup", or "telemetry"</dd>
+        <dt class="optional">
+            period <span class="property-type">string</span>
+        </dt>
+        <dd>Aggregation period: "day", "week", "month", or "year"</dd>
+        <dt class="optional">
+            startDate <span class="property-type">string</span>
+        </dt>
+        <dd>Start date in ISO 8601 format (defaults to start of today)</dd>
+        <dt class="optional">
+            endDate <span class="property-type">string</span>
+        </dt>
+        <dd>End date in ISO 8601 format (defaults to end of today)</dd>
+        <dt class="optional">
+            timeZone <span class="property-type">string</span>
+        </dt>
+        <dd>IANA time zone identifier (e.g., "America/Los_Angeles")</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>The historical data from the API.</dd>
+    </dl>
+
+    <h3>References</h3>
+    <ul>
+        <li>
+            <a href="https://teslemetry.com/docs">Teslemetry API Documentation</a>
+        </li>
+    </ul>
+</script>
