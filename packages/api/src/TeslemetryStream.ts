@@ -28,6 +28,7 @@ export interface TeslemetryStreamOptions {
 
 // Interface for event type safety
 type TeslemetryStreamEventMap = {
+  all: SseEvent;
   state: SseState;
   data: SseData;
   errors: SseErrors;
@@ -263,6 +264,7 @@ export class TeslemetryStream extends EventEmitter {
     } else if ("config" in event) {
       this.emit("config", event);
     }
+    this.emit("all", event);
 
     const vehicle = this.vehicles.get(event.vin);
     if (vehicle) {

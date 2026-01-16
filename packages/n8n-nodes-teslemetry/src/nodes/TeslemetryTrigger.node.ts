@@ -133,41 +133,27 @@ export class TeslemetryTrigger implements INodeType {
 					emit({ field, value, topic: 'signal' });
 				});
 		} else {
+			// Create callback that filters by VIN if specified
 			const callback = (eventData: SseEvent) => {
-				emit(eventData);
+				if (!vin || eventData.vin === vin) {
+					emit(eventData);
+				}
 			};
 
-			const vinParam = vin || null;
+			// Determine event type to listen for
+			const eventType = event as
+				| 'all'
+				| 'data'
+				| 'state'
+				| 'vehicle_data'
+				| 'errors'
+				| 'alerts'
+				| 'connectivity'
+				| 'credits'
+				| 'config';
 
-			switch (event) {
-				case 'data':
-					cleanup = sse.onData(callback, { vin: vinParam });
-					break;
-				case 'state':
-					cleanup = sse.onState(callback, { vin: vinParam });
-					break;
-				case 'vehicle_data':
-					cleanup = sse.onVehicleData(callback, { vin: vinParam });
-					break;
-				case 'errors':
-					cleanup = sse.onErrors(callback, { vin: vinParam });
-					break;
-				case 'alerts':
-					cleanup = sse.onAlerts(callback, { vin: vinParam });
-					break;
-				case 'connectivity':
-					cleanup = sse.onConnectivity(callback, { vin: vinParam });
-					break;
-				case 'credits':
-					cleanup = sse.onCredits(callback);
-					break;
-				case 'config':
-					cleanup = sse.onConfig(callback, { vin: vinParam });
-					break;
-				default: // all
-					cleanup = sse.on(callback);
-					break;
-			}
+			sse.on(eventType, callback);
+			cleanup = () => sse.off(eventType, callback);
 		}
 
 		async function closeFunction() {

@@ -101,9 +101,8 @@ vehicle.sse.onSignal("PackCurrent", (val) => console.log("Current:", val));
 vehicle.sse.onSignal("ChargerVoltage", (val) => console.log("Voltage:", val));
 
 // Monitor connection status
-teslemetry.sse.onConnection((isConnected) => {
-  console.log(isConnected ? "Stream Connected" : "Stream Disconnected");
-});
+teslemetry.sse.on("connect", () => console.log("Stream Connected"));
+teslemetry.sse.on("disconnect", () => console.log("Stream Disconnected"));
 
 // Start streaming (connects to the shared Teslemetry stream)
 await teslemetry.sse.connect();

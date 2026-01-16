@@ -109,13 +109,6 @@ export class VehicleAccessory {
       }
     });
 
-    // Handle errors
-    this.vehicle.sse.on("error", (error) => {
-      this.platform.log.error(
-        `Streaming error for vehicle ${this.vehicle.name}:`,
-        error,
-      );
-    });
   }
 
   /**

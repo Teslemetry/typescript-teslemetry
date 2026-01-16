@@ -47,18 +47,21 @@ export default function (RED: NodeAPI) {
     if (sse.connected) {
       node.status({ fill: "green", shape: "dot", text: "connected" });
     } else {
-      sse.connect();
       node.status({ fill: "yellow", shape: "ring", text: "connecting" });
+      sse.connect().catch((error) => {
+        node.status({ fill: "red", shape: "ring", text: "connection failed" });
+        const errorMsg = { payload: null, topic: "signal", field: node.field };
+        node.error(error?.message || "Failed to connect to SSE", errorMsg);
+      });
     }
-    const removeConnectionListener = node.teslemetry.sse.onConnection(
-      (connected) => {
-        if (connected) {
-          node.status({ fill: "green", shape: "dot", text: "connected" });
-        } else {
-          node.status({ fill: "red", shape: "ring", text: "disconnected" });
-        }
-      },
-    );
+    const onConnect = () => {
+      node.status({ fill: "green", shape: "dot", text: "connected" });
+    };
+    const onDisconnect = () => {
+      node.status({ fill: "red", shape: "ring", text: "disconnected" });
+    };
+    sse.on("connect", onConnect);
+    sse.on("disconnect", onDisconnect);
 
     const cleanup = sse
       .getVehicle(node.vin)
@@ -68,7 +71,8 @@ export default function (RED: NodeAPI) {
 
     node.on("close", function (done: any) {
       if (cleanup) cleanup();
-      if (removeConnectionListener) removeConnectionListener();
+      sse.off("connect", onConnect);
+      sse.off("disconnect", onDisconnect);
       done();
     });
   }

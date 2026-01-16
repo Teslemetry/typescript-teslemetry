@@ -38,7 +38,7 @@ Handles Server-Sent Events (SSE) for real-time data.
   - `connect()`: Start the SSE connection.
   - `disconnect()`: Close the connection.
   - `onSignal(signalName: string, callback)`: Subscribe to specific vehicle signals (e.g., "Speed", "PackCurrent").
-  - `onConnection(callback)`: Monitor connection state.
+  - `on("connect", callback)` / `on("disconnect", callback)`: Monitor connection state.
 
 ## Code Examples
 

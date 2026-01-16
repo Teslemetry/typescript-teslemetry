@@ -33,17 +33,15 @@ async function main() {
   const removeDataListener2 = sonic.sse.onSignal("PackCurrent", (x) => {
     console.log(`PackCurrent: ${x}`);
   });
-  teslemetry.sse.on((event) => {
-    console.log(`listen:`, event);
-  });
   // Listen for connection status changes
-  const removeConnectionListener = teslemetry.sse.onConnection(
-    (connected: boolean) => {
-      console.log(
-        `Stream connection status: ${connected ? "Connected" : "Disconnected"}`,
-      );
-    },
-  );
+  const onConnect = () => {
+    console.log(`Stream connection status: Connected`);
+  };
+  const onDisconnect = () => {
+    console.log(`Stream connection status: Disconnected`);
+  };
+  teslemetry.sse.on("connect", onConnect);
+  teslemetry.sse.on("disconnect", onDisconnect);
 
   // Connect to the stream
   await teslemetry.sse.connect();
@@ -55,7 +53,9 @@ async function main() {
   process.on("SIGINT", () => {
     console.log("Disconnecting from Teslemetry Stream...");
     removeDataListener();
-    removeConnectionListener();
+    removeDataListener2();
+    teslemetry.sse.off("connect", onConnect);
+    teslemetry.sse.off("disconnect", onDisconnect);
     teslemetry.sse.disconnect();
     process.exit(0);
   });

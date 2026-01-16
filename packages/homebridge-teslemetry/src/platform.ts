@@ -159,10 +159,6 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     this.teslemetry.sse.on("disconnect", () => {
       this.log.warn("✗ Streaming API disconnected - will attempt to reconnect");
     });
-
-    this.teslemetry.sse.on("error", (error) => {
-      this.log.error("Streaming API error:", error);
-    });
   }
 
   /**

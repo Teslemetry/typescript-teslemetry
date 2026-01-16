@@ -30,39 +30,32 @@ export class StreamHandler {
 			const sse = this.teslemetry.sse;
 
 			// Set up event handlers
-			sse.onOpen(() => {
+			sse.on('connect', () => {
 				this.adapter.log.info('SSE stream connected');
 				this.reconnectAttempts = 0;
 				this.isConnecting = false;
 				this.adapter.setStateAsync('info.connection', true, true);
 			});
 
-			sse.onError((error: any) => {
-				this.adapter.log.error(`SSE stream error: ${error.message || error}`);
-				this.isConnecting = false;
-				this.adapter.setStateAsync('info.connection', false, true);
-				this.scheduleReconnect();
-			});
-
-			sse.onClose(() => {
-				this.adapter.log.warn('SSE stream closed');
+			sse.on('disconnect', () => {
+				this.adapter.log.warn('SSE stream disconnected');
 				this.isConnecting = false;
 				this.adapter.setStateAsync('info.connection', false, true);
 				this.scheduleReconnect();
 			});
 
 			// Handle vehicle data updates
-			sse.onData((event: any) => {
+			sse.on('data', (event: any) => {
 				this.handleDataEvent(event);
 			});
 
 			// Handle vehicle state changes (online/asleep/offline)
-			sse.onState((event: any) => {
+			sse.on('state', (event: any) => {
 				this.handleStateEvent(event);
 			});
 
 			// Handle alerts
-			sse.onAlert((event: any) => {
+			sse.on('alerts', (event: any) => {
 				this.handleAlertEvent(event);
 			});
 

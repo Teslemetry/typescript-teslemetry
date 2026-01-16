@@ -37,58 +37,47 @@ export default function (RED: NodeAPI) {
     if (sse.connected) {
       node.status({ fill: "green", shape: "dot", text: "connected" });
     } else {
-      sse.connect();
       node.status({ fill: "yellow", shape: "ring", text: "connecting" });
+      sse.connect().catch((error) => {
+        node.status({ fill: "red", shape: "ring", text: "connection failed" });
+        const errorMsg = { payload: null, topic: node.event };
+        node.error(error?.message || "Failed to connect to SSE", errorMsg);
+      });
     }
-    const removeConnectionListener = node.teslemetry.sse.onConnection(
-      (connected) => {
-        if (connected) {
-          node.status({ fill: "green", shape: "dot", text: "connected" });
-        } else {
-          node.status({ fill: "red", shape: "ring", text: "disconnected" });
-        }
-      },
-    );
+    const onConnect = () => {
+      node.status({ fill: "green", shape: "dot", text: "connected" });
+    };
+    const onDisconnect = () => {
+      node.status({ fill: "red", shape: "ring", text: "disconnected" });
+    };
+    sse.on("connect", onConnect);
+    sse.on("disconnect", onDisconnect);
 
-    let cleanup: () => void;
-
+    // Create callback that filters by VIN if specified
     const callback = (event: SseEvent) => {
-      node.send({ payload: event, topic: node.event });
+      if (!node.vin || event.vin === node.vin) {
+        node.send({ payload: event, topic: node.event });
+      }
     };
 
-    switch (node.event) {
-      case "data":
-        cleanup = sse.onData(callback, { vin: node.vin });
-        break;
-      case "state":
-        cleanup = sse.onState(callback, { vin: node.vin });
-        break;
-      case "vehicle_data":
-        cleanup = sse.onVehicleData(callback, { vin: node.vin });
-        break;
-      case "errors":
-        cleanup = sse.onErrors(callback, { vin: node.vin });
-        break;
-      case "alerts":
-        cleanup = sse.onAlerts(callback, { vin: node.vin });
-        break;
-      case "connectivity":
-        cleanup = sse.onConnectivity(callback, { vin: node.vin });
-        break;
-      case "credits":
-        cleanup = sse.onCredits(callback);
-        break;
-      case "config":
-        cleanup = sse.onConfig(callback, { vin: node.vin });
-        break;
-      default:
-        cleanup = sse.on(callback);
-        break;
-    }
+    // Determine event type to listen for
+    const eventType = node.event as
+      | "all"
+      | "data"
+      | "state"
+      | "vehicle_data"
+      | "errors"
+      | "alerts"
+      | "connectivity"
+      | "credits"
+      | "config";
+
+    sse.on(eventType, callback);
 
     node.on("close", function (done: any) {
-      if (cleanup) cleanup();
-      if (removeConnectionListener) removeConnectionListener();
+      sse.off(eventType, callback);
+      sse.off("connect", onConnect);
+      sse.off("disconnect", onDisconnect);
       done();
     });
   }

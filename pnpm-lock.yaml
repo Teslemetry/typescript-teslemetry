@@ -131,6 +131,12 @@ importers:
         specifier: ^0.16.7
         version: 0.16.7(typescript@5.9.3)
 
+  packages/node-red-contrib-teslemetry/.node-red-home:
+    dependencies:
+      '@teslemetry/node-red-contrib-teslemetry':
+        specifier: link:..
+        version: link:..
+
 packages:
 
   '@acuminous/bitsyntax@0.1.2':
