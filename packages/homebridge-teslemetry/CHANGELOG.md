@@ -1,5 +1,13 @@
 # @teslemetry/homebridge-teslemetry
 
+## 0.1.3
+
+### Patch Changes
+
+- 6291669: Remove non-existent "error" event listeners from SSE stream handlers (errors result in disconnect events)
+- Updated dependencies [6291669]
+  - @teslemetry/api@0.6.10
+
 ## 0.1.2
 
 ### Patch Changes

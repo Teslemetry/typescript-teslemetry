@@ -1,5 +1,14 @@
 # @teslemetry/n8n-nodes-teslemetry
 
+## 0.2.1
+
+### Patch Changes
+
+- 6291669: Update SSE event handling to use standard EventEmitter pattern:
+  - Replace `onData()`, `onState()`, etc. with `on("data")`, `on("state")` pattern
+  - Use new `on("all")` event for subscribing to all events
+  - Add VIN filtering in event callbacks
+
 ## 0.2.0
 
 ### Minor Changes
