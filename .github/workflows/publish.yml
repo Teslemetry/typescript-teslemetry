@@ -83,6 +83,13 @@ jobs:
           -d "{\"username\": \"Teslemetry Release\", \"content\": \"🚀 **New Release**\n**@teslemetry/node-red-contrib-teslemetry** version **$VERSION** is now available!\"}" \
           $DISCORD_WEBHOOK
 
+      - name: Refresh Node-RED Flow Library
+        if: steps.check_releases.outputs.node_red_version
+        run: |
+          curl -X POST https://flows.nodered.org/hooks/npm \
+            -H "Content-Type: application/json" \
+            -d '{"name": "@teslemetry/node-red-contrib-teslemetry"}'
+
       - name: Discord Notification (n8n)
         if: steps.check_releases.outputs.n8n_version
         env:
