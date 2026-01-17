@@ -1,5 +1,5 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
-import { instances } from "../shared";
+import { getInstance } from "../shared";
 import { Teslemetry } from "@teslemetry/api";
 
 export interface TeslemetrySignalNodeDef extends NodeDef {
@@ -22,15 +22,13 @@ export default function (RED: NodeAPI) {
     RED.nodes.createNode(this, config);
     const node = this;
 
-    node.teslemetry = instances.get(config.teslemetryConfig)?.teslemetry;
+    const instance = getInstance(config.teslemetryConfig, node);
+    if (!instance) return;
+
+    node.teslemetry = instance.teslemetry;
     node.vin = config.vin;
     node.field = config.field;
 
-    if (!node.teslemetry) {
-      node.status({ fill: "red", shape: "ring", text: "Config missing" });
-      node.error("No Teslemetry instance found");
-      return;
-    }
     if (!node.vin) {
       node.error("VIN is required for Signal node");
       node.status({ fill: "red", shape: "ring", text: "VIN missing" });
@@ -44,22 +42,13 @@ export default function (RED: NodeAPI) {
 
     const sse = node.teslemetry.sse;
 
-    if (sse.connected) {
-      node.status({ fill: "green", shape: "dot", text: "connected" });
-    } else {
-      node.status({ fill: "yellow", shape: "ring", text: "connecting" });
-      sse.connect().catch((error) => {
-        node.status({ fill: "red", shape: "ring", text: "connection failed" });
-        const errorMsg = { payload: null, topic: "signal", field: node.field };
-        node.error(error?.message || "Failed to connect to SSE", errorMsg);
-      });
-    }
     const onConnect = () => {
       node.status({ fill: "green", shape: "dot", text: "connected" });
     };
     const onDisconnect = () => {
       node.status({ fill: "red", shape: "ring", text: "disconnected" });
     };
+
     sse.on("connect", onConnect);
     sse.on("disconnect", onDisconnect);
 
@@ -68,6 +57,8 @@ export default function (RED: NodeAPI) {
       .onSignal(node.field as any, (value: any) => {
         node.send({ payload: value, topic: "signal", field: node.field });
       });
+
+    sse.connect();
 
     node.on("close", function (done: any) {
       if (cleanup) cleanup();

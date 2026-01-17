@@ -20,6 +20,20 @@ import type {
 import { Logger } from "./logger.js";
 import { VehicleCache } from "./TeslemetryStream.js";
 
+/** Simple deferred promise pattern */
+class Deferred<T> {
+  public promise: Promise<T>;
+  public resolve!: (value: T) => void;
+  public reject!: (error: Error) => void;
+
+  constructor() {
+    this.promise = new Promise<T>((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+  }
+}
+
 type TeslemetryStreamEventMap = {
   state: SseState;
   data: SseData;
@@ -77,8 +91,11 @@ export class TeslemetryVehicleStream extends EventEmitter {
   private root: Teslemetry;
   public vin: string;
   public fields: FieldsRequest = {}; // Allow updates from both requests, and responses
-  private _pendingFields: FieldsRequest = {}; // Used for accumulating config changes before patching
-  private _debounceTimeout: NodeJS.Timeout | null = null; // Debounce timeout for patchConfig
+  private _fieldUpdateBatch: {
+    fields: FieldsRequest;
+    deferred: Deferred<void>;
+    timeout: NodeJS.Timeout;
+  } | null = null;
   public logger: Logger;
   public data: TeslemetryVehicleStreamData;
 
@@ -128,33 +145,56 @@ export class TeslemetryVehicleStream extends EventEmitter {
     }
   }
 
-  /** Safely add field configuration to the vehicle */
-  public async updateFields(fields: FieldsRequest) {
-    this._pendingFields = { ...this._pendingFields, ...fields };
-
-    // Clear existing timeout if it exists
-    if (this._debounceTimeout) {
-      clearTimeout(this._debounceTimeout);
+  /** Safely add field configuration to the vehicle
+   * Returns a promise that resolves when the debounced update completes.
+   * Multiple calls within the debounce window share the same promise.
+   */
+  public updateFields(fields: FieldsRequest): Promise<void> {
+    if (!this._fieldUpdateBatch) {
+      this._fieldUpdateBatch = {
+        fields: {},
+        deferred: new Deferred<void>(),
+        timeout: null!,
+      };
     }
 
-    // Set new timeout to debounce patchConfig calls
-    this._debounceTimeout = setTimeout(async () => {
-      const data = await this.patchConfig(this._pendingFields);
+    this._fieldUpdateBatch.fields = {
+      ...this._fieldUpdateBatch.fields,
+      ...fields,
+    };
+
+    clearTimeout(this._fieldUpdateBatch.timeout);
+    this._fieldUpdateBatch.timeout = setTimeout(
+      () => this._flushFieldUpdate(),
+      1000,
+    );
+
+    return this._fieldUpdateBatch.deferred.promise;
+  }
+
+  /** Flush pending field updates to the API */
+  private async _flushFieldUpdate(): Promise<void> {
+    const batch = this._fieldUpdateBatch!;
+    this._fieldUpdateBatch = null;
+
+    try {
+      const data = await this.patchConfig(batch.fields);
       if (data?.updated_vehicles) {
         this.logger.info(
-          `Updated ${Object.keys(this._pendingFields).length} streaming fields for ${this.vin}`,
+          `Updated ${Object.keys(batch.fields).length} streaming fields for ${this.vin}`,
         );
-        // null means default, not delete, so its okay
-        this.fields = { ...this.fields, ...this._pendingFields };
-        this._pendingFields = {};
+        this.fields = { ...this.fields, ...batch.fields };
+        batch.deferred.resolve();
       } else {
-        this.logger.error(
+        const error = new Error(
           `Error updating streaming config for ${this.vin}`,
-          data,
         );
+        this.logger.error(error.message, data);
+        batch.deferred.reject(error);
       }
-      this._debounceTimeout = null;
-    }, 1000);
+    } catch (error: any) {
+      batch.deferred.reject(error);
+    }
   }
 
   /** Modify the field configuration of the vehicle */
@@ -181,9 +221,9 @@ export class TeslemetryVehicleStream extends EventEmitter {
    * Add a field to the vehicles streaming configuration
    * @param field Vehicle Signal
    * @param interval
-   * @returns
+   * @returns Promise that resolves when the field is added
    */
-  public async addField(field: Signals, interval?: number): Promise<void> {
+  public addField(field: Signals, interval?: number): Promise<void> {
     if (
       this.fields &&
       this.fields[field] &&
@@ -193,12 +233,12 @@ export class TeslemetryVehicleStream extends EventEmitter {
       this.logger.debug(
         `Streaming field ${field} already enabled @ ${this.fields[field]?.interval_seconds || "default"}s`,
       );
-      return;
+      return Promise.resolve();
     }
 
     const value =
       interval !== undefined ? { interval_seconds: interval } : null;
-    this.updateFields({ [field]: value } as FieldsRequest);
+    return this.updateFields({ [field]: value } as FieldsRequest);
   }
 
   /**
@@ -211,8 +251,8 @@ export class TeslemetryVehicleStream extends EventEmitter {
     field: T,
     callback: (value: Exclude<SseData["data"][T], undefined>) => void,
   ): () => void {
-    this.addField(field).catch((error) => {
-      this.logger.error(`Failed to add field ${field}:`, error);
+    this.addField(field).catch(() => {
+      this.logger.error(`Failed to add field ${field}`);
     });
     const data = this.root.sse.cache?.[this.vin]?.data?.[field];
     if (data !== undefined) {

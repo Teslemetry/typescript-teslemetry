@@ -1,6 +1,6 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { Teslemetry } from "@teslemetry/api";
-import { instances } from "../shared";
+import { getInstance, hasInstanceError } from "../shared";
 import { validateParameters } from "../validation";
 import { Msg } from "../types";
 
@@ -32,19 +32,18 @@ export default function (RED: NodeAPI) {
     RED.nodes.createNode(this, config);
     const node = this;
 
-    node.teslemetry = instances.get(config.teslemetryConfig)?.teslemetry;
+    const instance = getInstance(config.teslemetryConfig, node);
+    if (!instance) return;
+    if (hasInstanceError(instance, node)) return;
+
+    node.teslemetry = instance.teslemetry;
     node.siteId = config.siteId;
     node.historyType = config.historyType;
     node.period = config.period;
     node.startDate = config.startDate;
     node.endDate = config.endDate;
     node.timeZone = config.timeZone;
-
-    if (!node.teslemetry) {
-      node.status({ fill: "red", shape: "ring", text: "Config missing" });
-      node.error("No Teslemetry configuration found");
-      return;
-    } else node.status({});
+    node.status({});
 
     node.on("input", async function (msg: Msg, send, done) {
       const siteId: string = node.siteId || (msg.siteId as string) || "";

@@ -1,5 +1,5 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
-import { instances } from "../shared";
+import { getInstance, hasInstanceError } from "../shared";
 import { validateParameters, ValidationRules } from "../validation";
 import { Teslemetry } from "@teslemetry/api";
 import { Msg } from "../types";
@@ -24,15 +24,14 @@ export default function (RED: NodeAPI) {
     RED.nodes.createNode(this, config);
     const node = this;
 
-    node.teslemetry = instances.get(config.teslemetryConfig)?.teslemetry;
+    const instance = getInstance(config.teslemetryConfig, node);
+    if (!instance) return;
+    if (hasInstanceError(instance, node)) return;
+
+    node.teslemetry = instance.teslemetry;
     node.vin = config.vin;
     node.command = config.command;
-
-    if (!node.teslemetry) {
-      node.status({ fill: "red", shape: "ring", text: "Config missing" });
-      node.error("No Teslemetry configuration found");
-      return;
-    } else node.status({});
+    node.status({});
 
     node.on("input", async function (msg: Msg, send, done) {
       const vin: string = node.vin || msg.vin || "";
