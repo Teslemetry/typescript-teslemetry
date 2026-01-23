@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.11
+
+### Patch Changes
+
+- 8fedd76: Fix bug with sendCache
+
 ## 0.6.10
 
 ### Patch Changes
