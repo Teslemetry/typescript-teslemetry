@@ -116,6 +116,7 @@ export class TeslemetryStream extends EventEmitter {
   ) {
     if (this.cache) {
       const vehicleCache = this.cache[vin];
+      if (!vehicleCache) return;
       if (event === "connectivity" && vehicleCache.connectivity) {
         for (const networkInterface in vehicleCache.connectivity) {
           const typedNetworkInterface =
