@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.6.12
+
+### Patch Changes
+
+- 54c358b: Fix timezone bug in date formatting for telemetry history API calls
+
 ## 0.6.11
 
 ### Patch Changes
