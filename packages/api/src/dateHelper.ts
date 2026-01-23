@@ -4,12 +4,27 @@
 export type DateInput = string | Date;
 
 /**
- * Converts a Date object to ISO string format without milliseconds
+ * Converts a Date object to RFC3339 format with local timezone offset
  * @param date The Date object to convert
- * @returns ISO string with milliseconds removed (e.g., "2024-01-15T00:00:00Z")
+ * @returns RFC3339 string with timezone offset (e.g., "2024-01-15T00:00:00+11:00")
  */
 function formatDate(date: Date): string {
-  return date.toISOString().replace(/\.\d{3}Z$/, "Z");
+  const pad = (n: number, digits = 2) => String(n).padStart(digits, "0");
+
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+
+  // Get timezone offset in minutes and convert to ±HH:MM format
+  const tzOffset = -date.getTimezoneOffset();
+  const tzSign = tzOffset >= 0 ? "+" : "-";
+  const tzHours = pad(Math.floor(Math.abs(tzOffset) / 60));
+  const tzMinutes = pad(Math.abs(tzOffset) % 60);
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${tzSign}${tzHours}:${tzMinutes}`;
 }
 
 /**
