@@ -309,7 +309,7 @@ export class TeslemetryEnergyApi extends EventEmitter {
    * Returns the charging history of a wall connector.
    * @param start_date Start date for the telemetry data (string, Date, or undefined - defaults to start of today)
    * @param end_date End date for the telemetry data (string, Date, or undefined - defaults to end of today)
-   * @param time_zone Optional timezone for the data
+   * @param time_zone IANA timezone for the data (e.g., 'America/Los_Angeles') - defaults to local timezone
    * @return Promise to an object with response containing charging history data from wall connectors
    */
   public async getTelemetryHistory(
@@ -324,7 +324,7 @@ export class TeslemetryEnergyApi extends EventEmitter {
           start_date ?? getStartOfToday(),
           end_date ?? getEndOfToday(),
         ),
-        time_zone,
+        time_zone: time_zone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
       path: { id: this.siteId },
       client: this.root.client,
