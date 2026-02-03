@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsdown src/credentials/TeslemetryApi.credentials.ts src/nodes/TeslemetryVehicle.node.ts src/nodes/TeslemetryEnergy.node.ts src/nodes/TeslemetryTrigger.node.ts --format cjs --out-dir dist",
+    "build": "tsdown",
     "dev2": "pnpm build && mkdir -p .n8n-home/nodes && ln -sf $(pwd) .n8n-home/nodes/teslemetry && N8N_LOG_OUTPUT=console N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true N8N_USER_FOLDER=$(pwd)/.n8n-home ./node_modules/.bin/n8n start",
     "tsc": "tsc",
     "validate": "n8n-node lint",
