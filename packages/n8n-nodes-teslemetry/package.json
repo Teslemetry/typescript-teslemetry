@@ -2,13 +2,13 @@
   "name": "@teslemetry/n8n-nodes-teslemetry",
   "version": "0.2.1",
   "description": "n8n nodes for controlling Tesla vehicles and energy sites via Teslemetry API",
-  "main": "dist/index.cjs",
+  "main": "dist/nodes/TeslemetryVehicle.node.cjs",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsdown src/index.ts --format cjs",
+    "build": "tsdown src/credentials/TeslemetryApi.credentials.ts src/nodes/TeslemetryVehicle.node.ts src/nodes/TeslemetryEnergy.node.ts src/nodes/TeslemetryTrigger.node.ts --format cjs --out-dir dist",
     "dev2": "pnpm build && mkdir -p .n8n-home/nodes && ln -sf $(pwd) .n8n-home/nodes/teslemetry && N8N_LOG_OUTPUT=console N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true N8N_USER_FOLDER=$(pwd)/.n8n-home ./node_modules/.bin/n8n start",
     "tsc": "tsc",
     "validate": "n8n-node lint",
@@ -45,15 +45,19 @@
   ],
   "n8n": {
     "credentials": [
-      "dist/index.cjs"
+      "dist/credentials/TeslemetryApi.credentials.cjs"
     ],
     "nodes": [
-      "dist/index.cjs"
+      "dist/nodes/TeslemetryVehicle.node.cjs",
+      "dist/nodes/TeslemetryEnergy.node.cjs",
+      "dist/nodes/TeslemetryTrigger.node.cjs"
     ]
+  },
+  "dependencies": {
+    "@teslemetry/api": "workspace:*"
   },
   "devDependencies": {
     "@n8n/node-cli": "^0.17.0",
-    "@teslemetry/api": "workspace:*",
     "n8n": "^1.122.5",
     "n8n-workflow": "^1.119.1",
     "sqlite3": "^5.1.7",
