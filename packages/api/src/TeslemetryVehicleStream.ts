@@ -93,7 +93,7 @@ export class TeslemetryVehicleStream extends EventEmitter {
   public fields: FieldsRequest = {}; // Allow updates from both requests, and responses
   private _fieldUpdateBatch: {
     fields: FieldsRequest;
-    deferred: Deferred<void>;
+    deferred: Deferred<boolean>;
     timeout: NodeJS.Timeout;
   } | null = null;
   public logger: Logger;
@@ -149,11 +149,11 @@ export class TeslemetryVehicleStream extends EventEmitter {
    * Returns a promise that resolves when the debounced update completes.
    * Multiple calls within the debounce window share the same promise.
    */
-  public updateFields(fields: FieldsRequest): Promise<void> {
+  public updateFields(fields: FieldsRequest): Promise<boolean> {
     if (!this._fieldUpdateBatch) {
       this._fieldUpdateBatch = {
         fields: {},
-        deferred: new Deferred<void>(),
+        deferred: new Deferred<boolean>(),
         timeout: null!,
       };
     }
@@ -182,15 +182,16 @@ export class TeslemetryVehicleStream extends EventEmitter {
       if (data?.updated_vehicles === undefined) {
         throw new Error(`Error updating streaming config for ${this.vin}`);
       }
+      this.fields = { ...this.fields, ...batch.fields };
       if (data.updated_vehicles === 0) {
         this.logger.debug(`No update required for ${this.vin}`);
+        batch.deferred.resolve(false);
       } else {
         this.logger.info(
           `Updated ${Object.keys(batch.fields).length} streaming fields for ${this.vin}`,
         );
+        batch.deferred.resolve(true);
       }
-      this.fields = { ...this.fields, ...batch.fields };
-      batch.deferred.resolve();
     } catch (error: any) {
       this.logger.error(error.message);
       batch.deferred.reject(error);
@@ -221,9 +222,9 @@ export class TeslemetryVehicleStream extends EventEmitter {
    * Add a field to the vehicles streaming configuration
    * @param field Vehicle Signal
    * @param interval
-   * @returns Promise that resolves when the field is added
+   * @returns Promise that resolves to whether the field configuration changed
    */
-  public addField(field: Signals, interval?: number): Promise<void> {
+  public addField(field: Signals, interval?: number): Promise<boolean> {
     if (
       this.fields &&
       this.fields[field] &&
@@ -233,7 +234,7 @@ export class TeslemetryVehicleStream extends EventEmitter {
       this.logger.debug(
         `Streaming field ${field} already enabled @ ${this.fields[field]?.interval_seconds || "default"}s`,
       );
-      return Promise.resolve();
+      return Promise.resolve(false);
     }
 
     const value =
