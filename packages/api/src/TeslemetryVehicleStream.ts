@@ -179,20 +179,20 @@ export class TeslemetryVehicleStream extends EventEmitter {
 
     try {
       const data = await this.patchConfig(batch.fields);
-      if (data?.updated_vehicles) {
+      if (data?.updated_vehicles === undefined) {
+        throw new Error(`Error updating streaming config for ${this.vin}`);
+      }
+      if (data.updated_vehicles === 0) {
+        this.logger.debug(`No update required for ${this.vin}`);
+      } else {
         this.logger.info(
           `Updated ${Object.keys(batch.fields).length} streaming fields for ${this.vin}`,
         );
-        this.fields = { ...this.fields, ...batch.fields };
-        batch.deferred.resolve();
-      } else {
-        const error = new Error(
-          `Error updating streaming config for ${this.vin}`,
-        );
-        this.logger.error(error.message, data);
-        batch.deferred.reject(error);
       }
+      this.fields = { ...this.fields, ...batch.fields };
+      batch.deferred.resolve();
     } catch (error: any) {
+      this.logger.error(error.message);
       batch.deferred.reject(error);
     }
   }
