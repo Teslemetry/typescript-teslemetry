@@ -1,5 +1,16 @@
 # @teslemetry/api
 
+## 0.6.13
+
+### Patch Changes
+
+- 0b18bc3: Fix timezone handling in telemetry history API calls
+  - Format dates as RFC3339 with local timezone offset instead of UTC
+  - Default time_zone parameter to local IANA timezone
+
+- 1a40778: Field updates no longer throw when nothing changed, but return a boolean instead
+- a18f277: Add energy command endpoint
+
 ## 0.6.12
 
 ### Patch Changes
