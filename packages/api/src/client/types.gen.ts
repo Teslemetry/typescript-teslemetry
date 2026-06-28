@@ -302,6 +302,43 @@ export type GetApiMetadataResponses = {
                  */
                 fleet_telemetry: null | string;
                 /**
+                 * Detected configuration issue preventing data access, or null if none. 'no_data': fleet status unavailable; 'streaming_toggle': the safety screen streaming toggle is disabled; 'key': the virtual key is not paired.
+                 */
+                issue: 'no_data' | 'streaming_toggle' | 'key' | null;
+                /**
+                 * Raw fleet status as stored, or null if unavailable
+                 */
+                fleet: null | {
+                    /**
+                     * Whether a virtual key is paired with the vehicle
+                     */
+                    paired: boolean;
+                    /**
+                     * Firmware version of the vehicle
+                     */
+                    firmware_version: string;
+                    /**
+                     * Whether the vehicle requires the command protocol (proxy)
+                     */
+                    vehicle_command_protocol_required: boolean;
+                    /**
+                     * Whether the vehicle has discounted device data
+                     */
+                    discounted_device_data: boolean;
+                    /**
+                     * Fleet Telemetry version running on the vehicle
+                     */
+                    fleet_telemetry_version?: string;
+                    /**
+                     * Total number of keys paired with the vehicle
+                     */
+                    total_number_of_keys: null | number;
+                    /**
+                     * Whether the safety screen streaming toggle is enabled
+                     */
+                    safety_screen_streaming_toggle_enabled?: boolean;
+                };
+                /**
                  * Vehicle physical configuration aspects
                  */
                 config: {
@@ -1608,7 +1645,7 @@ export type GetApiConfigByVinResponses = {
                 minimum_delta?: number;
             };
             /**
-             * The number of miles the vehicle has driven. Beginning with firmware version 2025.2.6, the minimum delta for Odometer is set to 0.1 by default. (Requires 2024.26)
+             * The number of miles the vehicle has driven. (Requires 2024.26)
              */
             Odometer?: {
                 interval_seconds: number;
@@ -2270,7 +2307,7 @@ export type GetApiConfigByVinResponses = {
 export type GetApiConfigByVinResponse = GetApiConfigByVinResponses[keyof GetApiConfigByVinResponses];
 
 export type PatchApiConfigByVinData = {
-    body?: {
+    body: {
         /**
          * Fields to stream.
          */
@@ -3429,7 +3466,7 @@ export type PatchApiConfigByVinData = {
                 minimum_delta?: number;
             } | null;
             /**
-             * The number of miles the vehicle has driven. Beginning with firmware version 2025.2.6, the minimum delta for Odometer is set to 0.1 by default. (Requires 2024.26)
+             * The number of miles the vehicle has driven. (Requires 2024.26)
              */
             Odometer?: {
                 interval_seconds: number;
@@ -4124,7 +4161,7 @@ export type PatchApiConfigByVinResponses = {
 export type PatchApiConfigByVinResponse = PatchApiConfigByVinResponses[keyof PatchApiConfigByVinResponses];
 
 export type PostApiConfigByVinData = {
-    body?: {
+    body: {
         /**
          * Fields to stream.
          */
@@ -5283,7 +5320,7 @@ export type PostApiConfigByVinData = {
                 minimum_delta?: number;
             } | null;
             /**
-             * The number of miles the vehicle has driven. Beginning with firmware version 2025.2.6, the minimum delta for Odometer is set to 0.1 by default. (Requires 2024.26)
+             * The number of miles the vehicle has driven. (Requires 2024.26)
              */
             Odometer?: {
                 interval_seconds: number;
@@ -7401,7 +7438,7 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
                     minimum_delta?: number;
                 };
                 /**
-                 * The number of miles the vehicle has driven. Beginning with firmware version 2025.2.6, the minimum delta for Odometer is set to 0.1 by default. (Requires 2024.26)
+                 * The number of miles the vehicle has driven. (Requires 2024.26)
                  */
                 Odometer?: {
                     interval_seconds: number;
@@ -9292,7 +9329,7 @@ export type GetApi1VehiclesByVinFleetTelemetryConfigResponses = {
                         minimum_delta?: number;
                     };
                     /**
-                     * The number of miles the vehicle has driven. Beginning with firmware version 2025.2.6, the minimum delta for Odometer is set to 0.1 by default. (Requires 2024.26)
+                     * The number of miles the vehicle has driven. (Requires 2024.26)
                      */
                     Odometer?: {
                         interval_seconds: number;
@@ -11667,7 +11704,7 @@ export type PostApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateReques
 export type PostApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateRequestResponse = PostApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateRequestResponses[keyof PostApi1VehiclesByVinCommandRemoteAutoSteeringWheelHeatClimateRequestResponses];
 
 export type PostApi1VehiclesByVinCommandRemoteBoomboxData = {
-    body?: {
+    body: {
         sound?: number;
     };
     path: {
@@ -12681,7 +12718,7 @@ export type PostApi1VehiclesByVinCommandSpeedLimitClearPinResponses = {
 export type PostApi1VehiclesByVinCommandSpeedLimitClearPinResponse = PostApi1VehiclesByVinCommandSpeedLimitClearPinResponses[keyof PostApi1VehiclesByVinCommandSpeedLimitClearPinResponses];
 
 export type PostApi1VehiclesByVinCommandSpeedLimitClearPinAdminData = {
-    body?: {
+    body: {
         pin?: string;
     };
     path: {
@@ -12981,7 +13018,7 @@ export type PostApi1VehiclesByVinCustomCommandPingResponses = {
 export type PostApi1VehiclesByVinCustomCommandPingResponse = PostApi1VehiclesByVinCustomCommandPingResponses[keyof PostApi1VehiclesByVinCustomCommandPingResponses];
 
 export type PostApi1VehiclesByVinCustomCommandClosureData = {
-    body?: {
+    body: {
         frontDriverDoor?: 'none' | 'move' | 'stop' | 'open' | 'close';
         frontPassengerDoor?: 'none' | 'move' | 'stop' | 'open' | 'close';
         rearDriverDoor?: 'none' | 'move' | 'stop' | 'open' | 'close';
@@ -13025,7 +13062,7 @@ export type PostApi1VehiclesByVinCustomCommandClosureResponses = {
 export type PostApi1VehiclesByVinCustomCommandClosureResponse = PostApi1VehiclesByVinCustomCommandClosureResponses[keyof PostApi1VehiclesByVinCustomCommandClosureResponses];
 
 export type PostApi1VehiclesByVinCustomCommandSeatHeaterData = {
-    body?: {
+    body: {
         frontLeft?: 'off' | 'low' | 'medium' | 'high';
         frontRight?: 'off' | 'low' | 'medium' | 'high';
         rearLeft?: 'off' | 'low' | 'medium' | 'high';
@@ -13070,7 +13107,7 @@ export type PostApi1VehiclesByVinCustomCommandSeatHeaterResponses = {
 export type PostApi1VehiclesByVinCustomCommandSeatHeaterResponse = PostApi1VehiclesByVinCustomCommandSeatHeaterResponses[keyof PostApi1VehiclesByVinCustomCommandSeatHeaterResponses];
 
 export type PostApi1VehiclesByVinCustomCommandChargeOnSolarData = {
-    body?: {
+    body: {
         enabled?: boolean;
         lowerChargeLimit?: number;
         upperChargeLimit?: number;
@@ -13688,7 +13725,7 @@ export type GetApi1EnergySitesByIdTelemetryHistoryResponses = {
 export type GetApi1EnergySitesByIdTelemetryHistoryResponse = GetApi1EnergySitesByIdTelemetryHistoryResponses[keyof GetApi1EnergySitesByIdTelemetryHistoryResponses];
 
 export type PostApi1EnergySitesByIdGridImportExportData = {
-    body?: {
+    body: {
         /**
          * The desired behavior for grid exporting
          */
@@ -13742,14 +13779,9 @@ export type GetApi1EnergySitesByIdLiveStatusData = {
 
 export type GetApi1EnergySitesByIdLiveStatusErrors = {
     /**
-     * Default Response
+     * Error response
      */
-    404: {
-        response: null;
-        error: string;
-        error_description: string;
-        txid: string;
-    };
+    404: Def0;
     /**
      * Error response
      */
@@ -13836,7 +13868,7 @@ export type GetApi1EnergySitesByIdLiveStatusResponses = {
             /**
              * ISO 8601 timestamp when this data was captured.
              */
-            timestamp: string;
+            timestamp?: string;
             /**
              * Active Storm Watch events with timing and storm type information.
              */
@@ -13966,23 +13998,13 @@ export type GetApi1EnergySitesByIdSiteInfoData = {
 
 export type GetApi1EnergySitesByIdSiteInfoErrors = {
     /**
-     * Default Response
+     * Error response
      */
-    404: {
-        response: null;
-        error: string;
-        error_description: string;
-        txid: string;
-    };
+    404: Def0;
     /**
-     * Default Response
+     * Error response
      */
-    500: {
-        response: null;
-        error: string;
-        error_description: string;
-        txid: string;
-    };
+    500: Def0;
     /**
      * Error response
      */
@@ -14000,7 +14022,7 @@ export type GetApi1EnergySitesByIdSiteInfoResponses = {
             /**
              * Unique identifier for the energy site.
              */
-            id: string;
+            id?: string;
             /**
              * User-defined name for the energy site.
              */
@@ -14016,11 +14038,11 @@ export type GetApi1EnergySitesByIdSiteInfoResponses = {
             /**
              * Date when the energy system was installed, in ISO 8601 format.
              */
-            installation_date: string;
+            installation_date?: string;
             /**
              * User-configurable settings for the energy site.
              */
-            user_settings: {
+            user_settings?: {
                 /**
                  * Whether the Go Off-Grid test banner is shown in the app.
                  */
@@ -14049,7 +14071,7 @@ export type GetApi1EnergySitesByIdSiteInfoResponses = {
             /**
              * Hardware components and feature capabilities of the energy site.
              */
-            components: {
+            components?: {
                 /**
                  * Whether solar panels are installed at the site.
                  */
@@ -14388,24 +14410,71 @@ export type PostApi1EnergySitesByIdTimeOfUseSettingsResponses = {
 
 export type PostApi1EnergySitesByIdTimeOfUseSettingsResponse = PostApi1EnergySitesByIdTimeOfUseSettingsResponses[keyof PostApi1EnergySitesByIdTimeOfUseSettingsResponses];
 
+export type GetApi1EnergySitesByIdProgramsData = {
+    body?: never;
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/programs';
+};
+
+export type GetApi1EnergySitesByIdProgramsErrors = {
+    /**
+     * Error response
+     */
+    404: Def0;
+    /**
+     * Error response
+     */
+    500: Def0;
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1EnergySitesByIdProgramsError = GetApi1EnergySitesByIdProgramsErrors[keyof GetApi1EnergySitesByIdProgramsErrors];
+
+export type GetApi1EnergySitesByIdProgramsResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response: {
+            [key: string]: unknown;
+        };
+        error?: string;
+        error_description?: string;
+        txid?: string;
+    };
+};
+
+export type GetApi1EnergySitesByIdProgramsResponse = GetApi1EnergySitesByIdProgramsResponses[keyof GetApi1EnergySitesByIdProgramsResponses];
+
 export type PostApi1EnergySitesByIdCommandData = {
     body: {
         /**
-         * Type of command: 'grpc_command' for unsigned commands, 'grpc_signed_command' for signed commands.
+         * Top-level protobuf message category.
          */
-        command_type: 'grpc_command' | 'grpc_signed_command';
-        command_properties: {
-            /**
-             * For grpc_command: JSON object containing protobuf fields (e.g., { authorization: { list_authorized_clients_request: {} } }). For grpc_signed_command: object with routable_message containing base64-encoded RoutableMessage bytes.
-             */
-            message: {
-                [key: string]: unknown;
-            };
-            /**
-             * Identifier type for the command.
-             */
-            identifier_type?: number;
+        category: 'common' | 'teg' | 'authorization';
+        /**
+         * Snake_case protobuf request field name, for example `get_system_info_request`.
+         */
+        command_name: string;
+        /**
+         * Raw protobuf JSON fields for the request message. Keys and nesting must match Tesla's snake_case proto field names.
+         */
+        params?: {
+            [key: string]: unknown;
         };
+        /**
+         * Target identifier type. Defaults to gateway DIN for gateway-scoped commands.
+         */
+        identifier_type?: 1 | 2 | 3 | 4;
     };
     path: {
         /**
@@ -14417,20 +14486,14 @@ export type PostApi1EnergySitesByIdCommandData = {
     url: '/api/1/energy_sites/{id}/command';
 };
 
-export type PostApi1EnergySitesByIdCommandErrors = {
-    /**
-     * Error response
-     */
-    default: Def0;
-};
-
-export type PostApi1EnergySitesByIdCommandError = PostApi1EnergySitesByIdCommandErrors[keyof PostApi1EnergySitesByIdCommandErrors];
-
 export type PostApi1EnergySitesByIdCommandResponses = {
     /**
      * Default Response
      */
     200: {
+        /**
+         * The decoded energy device response payload from the gateway.
+         */
         response?: {
             [key: string]: unknown;
         };
@@ -14439,21 +14502,1286 @@ export type PostApi1EnergySitesByIdCommandResponses = {
 
 export type PostApi1EnergySitesByIdCommandResponse = PostApi1EnergySitesByIdCommandResponses[keyof PostApi1EnergySitesByIdCommandResponses];
 
-export type PostApi1EnergySitesByIdDeviceCommandData = {
+export type GetApi1EnergySitesByIdCommandSystemInfoData = {
+    body?: never;
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/system_info';
+};
+
+export type GetApi1EnergySitesByIdCommandSystemInfoErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1EnergySitesByIdCommandSystemInfoError = GetApi1EnergySitesByIdCommandSystemInfoErrors[keyof GetApi1EnergySitesByIdCommandSystemInfoErrors];
+
+export type GetApi1EnergySitesByIdCommandSystemInfoResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            device_id?: {
+                part_number?: string;
+                serial_number?: string;
+                [key: string]: unknown | string | undefined;
+            };
+            /**
+             * Gateway DIN (collapsed from {value: string}).
+             */
+            din?: string;
+            firmware_version?: {
+                version?: string;
+                /**
+                 * Base64-encoded git hash.
+                 */
+                githash?: string;
+                [key: string]: unknown | string | undefined;
+            };
+            system_update?: {
+                /**
+                 * UpdateHandshakeResult enum value.
+                 */
+                handshake_result?: number;
+                /**
+                 * UpdateStatus enum value.
+                 */
+                update_status?: number;
+                server_staged_version?: {
+                    version?: string;
+                    /**
+                     * Base64-encoded git hash.
+                     */
+                    githash?: string;
+                    [key: string]: unknown | string | undefined;
+                };
+                total_bytes?: number | string;
+                bytes_offset?: number | string;
+                estimated_bytes_per_second?: number | string;
+                last_handshake_timestamp?: number | string;
+                /**
+                 * LastUpdateResult enum value.
+                 */
+                last_update_result?: number;
+                server_staged_packages?: Array<{
+                    download_url?: string;
+                    package_id?: number | string;
+                    package_signature?: string;
+                    server_staged_version?: {
+                        version?: string;
+                        /**
+                         * Base64-encoded git hash.
+                         */
+                        githash?: string;
+                        [key: string]: unknown | string | undefined;
+                    };
+                    [key: string]: unknown | string | number | string | {
+                        version?: string;
+                        /**
+                         * Base64-encoded git hash.
+                         */
+                        githash?: string;
+                        [key: string]: unknown | string | undefined;
+                    } | undefined;
+                }>;
+                [key: string]: unknown | number | {
+                    version?: string;
+                    /**
+                     * Base64-encoded git hash.
+                     */
+                    githash?: string;
+                    [key: string]: unknown | string | undefined;
+                } | number | string | number | string | number | string | number | string | Array<{
+                    download_url?: string;
+                    package_id?: number | string;
+                    package_signature?: string;
+                    server_staged_version?: {
+                        version?: string;
+                        /**
+                         * Base64-encoded git hash.
+                         */
+                        githash?: string;
+                        [key: string]: unknown | string | undefined;
+                    };
+                    [key: string]: unknown | string | number | string | {
+                        version?: string;
+                        /**
+                         * Base64-encoded git hash.
+                         */
+                        githash?: string;
+                        [key: string]: unknown | string | undefined;
+                    } | undefined;
+                }> | undefined;
+            };
+            /**
+             * DeviceType enum value.
+             */
+            device_type?: number;
+            compliance_information?: {
+                radio_legal_information?: Array<{
+                    manufacturer?: string;
+                    model?: string;
+                    fcc_id?: string;
+                    ic_id?: string;
+                    [key: string]: unknown | string | undefined;
+                }>;
+                [key: string]: unknown | Array<{
+                    manufacturer?: string;
+                    model?: string;
+                    fcc_id?: string;
+                    ic_id?: string;
+                    [key: string]: unknown | string | undefined;
+                }> | undefined;
+            };
+            /**
+             * Base64-encoded signature of the installed firmware.
+             */
+            installed_firmware_signature?: string;
+            [key: string]: unknown | string | {
+                part_number?: string;
+                serial_number?: string;
+                [key: string]: unknown | string | undefined;
+            } | {
+                version?: string;
+                /**
+                 * Base64-encoded git hash.
+                 */
+                githash?: string;
+                [key: string]: unknown | string | undefined;
+            } | {
+                /**
+                 * UpdateHandshakeResult enum value.
+                 */
+                handshake_result?: number;
+                /**
+                 * UpdateStatus enum value.
+                 */
+                update_status?: number;
+                server_staged_version?: {
+                    version?: string;
+                    /**
+                     * Base64-encoded git hash.
+                     */
+                    githash?: string;
+                    [key: string]: unknown | string | undefined;
+                };
+                total_bytes?: number | string;
+                bytes_offset?: number | string;
+                estimated_bytes_per_second?: number | string;
+                last_handshake_timestamp?: number | string;
+                /**
+                 * LastUpdateResult enum value.
+                 */
+                last_update_result?: number;
+                server_staged_packages?: Array<{
+                    download_url?: string;
+                    package_id?: number | string;
+                    package_signature?: string;
+                    server_staged_version?: {
+                        version?: string;
+                        /**
+                         * Base64-encoded git hash.
+                         */
+                        githash?: string;
+                        [key: string]: unknown | string | undefined;
+                    };
+                    [key: string]: unknown | string | number | string | {
+                        version?: string;
+                        /**
+                         * Base64-encoded git hash.
+                         */
+                        githash?: string;
+                        [key: string]: unknown | string | undefined;
+                    } | undefined;
+                }>;
+                [key: string]: unknown | number | {
+                    version?: string;
+                    /**
+                     * Base64-encoded git hash.
+                     */
+                    githash?: string;
+                    [key: string]: unknown | string | undefined;
+                } | number | string | number | string | number | string | number | string | Array<{
+                    download_url?: string;
+                    package_id?: number | string;
+                    package_signature?: string;
+                    server_staged_version?: {
+                        version?: string;
+                        /**
+                         * Base64-encoded git hash.
+                         */
+                        githash?: string;
+                        [key: string]: unknown | string | undefined;
+                    };
+                    [key: string]: unknown | string | number | string | {
+                        version?: string;
+                        /**
+                         * Base64-encoded git hash.
+                         */
+                        githash?: string;
+                        [key: string]: unknown | string | undefined;
+                    } | undefined;
+                }> | undefined;
+            } | number | {
+                radio_legal_information?: Array<{
+                    manufacturer?: string;
+                    model?: string;
+                    fcc_id?: string;
+                    ic_id?: string;
+                    [key: string]: unknown | string | undefined;
+                }>;
+                [key: string]: unknown | Array<{
+                    manufacturer?: string;
+                    model?: string;
+                    fcc_id?: string;
+                    ic_id?: string;
+                    [key: string]: unknown | string | undefined;
+                }> | undefined;
+            } | undefined;
+        };
+    };
+};
+
+export type GetApi1EnergySitesByIdCommandSystemInfoResponse = GetApi1EnergySitesByIdCommandSystemInfoResponses[keyof GetApi1EnergySitesByIdCommandSystemInfoResponses];
+
+export type GetApi1EnergySitesByIdCommandNetworkingStatusData = {
+    body?: never;
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/networking_status';
+};
+
+export type GetApi1EnergySitesByIdCommandNetworkingStatusErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1EnergySitesByIdCommandNetworkingStatusError = GetApi1EnergySitesByIdCommandNetworkingStatusErrors[keyof GetApi1EnergySitesByIdCommandNetworkingStatusErrors];
+
+export type GetApi1EnergySitesByIdCommandNetworkingStatusResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            wifi_config?: {
+                ssid?: string;
+                /**
+                 * WiFi password (typically omitted from responses).
+                 */
+                password?: string;
+                /**
+                 * WifiNetworkSecurityType enum value.
+                 */
+                security_type?: number;
+                [key: string]: unknown | string | number | undefined;
+            };
+            wifi?: {
+                /**
+                 * Base64-encoded MAC address.
+                 */
+                mac_address?: string;
+                enabled?: boolean;
+                active_route?: boolean;
+                ipv4_config?: {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                };
+                connectivity_status?: {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                };
+                /**
+                 * NetworkDeviceState enum value.
+                 */
+                device_state?: number;
+                /**
+                 * NetworkDeviceStateReason enum value.
+                 */
+                device_state_reason?: number;
+                [key: string]: unknown | string | boolean | {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                } | {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                } | number | undefined;
+            };
+            eth?: {
+                /**
+                 * Base64-encoded MAC address.
+                 */
+                mac_address?: string;
+                enabled?: boolean;
+                active_route?: boolean;
+                ipv4_config?: {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                };
+                connectivity_status?: {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                };
+                /**
+                 * NetworkDeviceState enum value.
+                 */
+                device_state?: number;
+                /**
+                 * NetworkDeviceStateReason enum value.
+                 */
+                device_state_reason?: number;
+                [key: string]: unknown | string | boolean | {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                } | {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                } | number | undefined;
+            };
+            gsm?: {
+                /**
+                 * Base64-encoded MAC address.
+                 */
+                mac_address?: string;
+                enabled?: boolean;
+                active_route?: boolean;
+                ipv4_config?: {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                };
+                connectivity_status?: {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                };
+                /**
+                 * NetworkDeviceState enum value.
+                 */
+                device_state?: number;
+                /**
+                 * NetworkDeviceStateReason enum value.
+                 */
+                device_state_reason?: number;
+                [key: string]: unknown | string | boolean | {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                } | {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                } | number | undefined;
+            };
+            [key: string]: unknown | string | {
+                ssid?: string;
+                /**
+                 * WiFi password (typically omitted from responses).
+                 */
+                password?: string;
+                /**
+                 * WifiNetworkSecurityType enum value.
+                 */
+                security_type?: number;
+                [key: string]: unknown | string | number | undefined;
+            } | {
+                /**
+                 * Base64-encoded MAC address.
+                 */
+                mac_address?: string;
+                enabled?: boolean;
+                active_route?: boolean;
+                ipv4_config?: {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                };
+                connectivity_status?: {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                };
+                /**
+                 * NetworkDeviceState enum value.
+                 */
+                device_state?: number;
+                /**
+                 * NetworkDeviceStateReason enum value.
+                 */
+                device_state_reason?: number;
+                [key: string]: unknown | string | boolean | {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                } | {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                } | number | undefined;
+            } | {
+                /**
+                 * Base64-encoded MAC address.
+                 */
+                mac_address?: string;
+                enabled?: boolean;
+                active_route?: boolean;
+                ipv4_config?: {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                };
+                connectivity_status?: {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                };
+                /**
+                 * NetworkDeviceState enum value.
+                 */
+                device_state?: number;
+                /**
+                 * NetworkDeviceStateReason enum value.
+                 */
+                device_state_reason?: number;
+                [key: string]: unknown | string | boolean | {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                } | {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                } | number | undefined;
+            } | {
+                /**
+                 * Base64-encoded MAC address.
+                 */
+                mac_address?: string;
+                enabled?: boolean;
+                active_route?: boolean;
+                ipv4_config?: {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                };
+                connectivity_status?: {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                };
+                /**
+                 * NetworkDeviceState enum value.
+                 */
+                device_state?: number;
+                /**
+                 * NetworkDeviceStateReason enum value.
+                 */
+                device_state_reason?: number;
+                [key: string]: unknown | string | boolean | {
+                    dhcp_enabled?: boolean;
+                    /**
+                     * IPv4 address (dotted quad).
+                     */
+                    address?: string;
+                    subnet_mask?: string;
+                    gateway?: string;
+                    dns?: Array<string>;
+                    [key: string]: unknown | boolean | string | Array<string> | undefined;
+                } | {
+                    connected_physical?: boolean;
+                    connected_internet?: boolean;
+                    connected_tesla?: boolean;
+                    /**
+                     * Signal strength info.
+                     */
+                    rssi?: {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    };
+                    /**
+                     * Signal-to-noise ratio.
+                     */
+                    snr?: number;
+                    [key: string]: unknown | boolean | {
+                        /**
+                         * Raw RSSI in dBm.
+                         */
+                        value?: number;
+                        /**
+                         * Signal strength as a percentage (0-100).
+                         */
+                        signal_strength_percent?: number;
+                        [key: string]: unknown | number | undefined;
+                    } | number | undefined;
+                } | number | undefined;
+            } | undefined;
+        };
+    };
+};
+
+export type GetApi1EnergySitesByIdCommandNetworkingStatusResponse = GetApi1EnergySitesByIdCommandNetworkingStatusResponses[keyof GetApi1EnergySitesByIdCommandNetworkingStatusResponses];
+
+export type GetApi1EnergySitesByIdCommandAuthorizedClientsData = {
+    body?: never;
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/authorized_clients';
+};
+
+export type GetApi1EnergySitesByIdCommandAuthorizedClientsErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1EnergySitesByIdCommandAuthorizedClientsError = GetApi1EnergySitesByIdCommandAuthorizedClientsErrors[keyof GetApi1EnergySitesByIdCommandAuthorizedClientsErrors];
+
+export type GetApi1EnergySitesByIdCommandAuthorizedClientsResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            /**
+             * List of authorized clients.
+             */
+            clients?: Array<{
+                /**
+                 * AuthorizedClientType enum.
+                 */
+                type?: number;
+                description?: string;
+                /**
+                 * AuthorizedKeyType enum.
+                 */
+                key_type?: number;
+                /**
+                 * Base64-encoded public key.
+                 */
+                public_key?: string;
+                roles?: Array<number>;
+                /**
+                 * AuthorizedState enum.
+                 */
+                state?: number;
+                /**
+                 * AuthorizedVerificationType enum.
+                 */
+                verification?: number;
+                added_time?: {
+                    /**
+                     * Unix timestamp seconds.
+                     */
+                    seconds?: number | string;
+                    nanos?: number;
+                    [key: string]: unknown | number | string | number | undefined;
+                };
+                identifier?: string;
+                /**
+                 * Base64-encoded public key.
+                 */
+                authorized_by_public_key?: string;
+                [key: string]: unknown | number | string | Array<number> | {
+                    /**
+                     * Unix timestamp seconds.
+                     */
+                    seconds?: number | string;
+                    nanos?: number;
+                    [key: string]: unknown | number | string | number | undefined;
+                } | undefined;
+            }>;
+            enable_line_switch_off?: boolean;
+            [key: string]: unknown | string | Array<{
+                /**
+                 * AuthorizedClientType enum.
+                 */
+                type?: number;
+                description?: string;
+                /**
+                 * AuthorizedKeyType enum.
+                 */
+                key_type?: number;
+                /**
+                 * Base64-encoded public key.
+                 */
+                public_key?: string;
+                roles?: Array<number>;
+                /**
+                 * AuthorizedState enum.
+                 */
+                state?: number;
+                /**
+                 * AuthorizedVerificationType enum.
+                 */
+                verification?: number;
+                added_time?: {
+                    /**
+                     * Unix timestamp seconds.
+                     */
+                    seconds?: number | string;
+                    nanos?: number;
+                    [key: string]: unknown | number | string | number | undefined;
+                };
+                identifier?: string;
+                /**
+                 * Base64-encoded public key.
+                 */
+                authorized_by_public_key?: string;
+                [key: string]: unknown | number | string | Array<number> | {
+                    /**
+                     * Unix timestamp seconds.
+                     */
+                    seconds?: number | string;
+                    nanos?: number;
+                    [key: string]: unknown | number | string | number | undefined;
+                } | undefined;
+            }> | boolean | undefined;
+        };
+    };
+};
+
+export type GetApi1EnergySitesByIdCommandAuthorizedClientsResponse = GetApi1EnergySitesByIdCommandAuthorizedClientsResponses[keyof GetApi1EnergySitesByIdCommandAuthorizedClientsResponses];
+
+export type GetApi1EnergySitesByIdCommandSignedCommandsPublicKeyData = {
+    body?: never;
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/signed_commands_public_key';
+};
+
+export type GetApi1EnergySitesByIdCommandSignedCommandsPublicKeyErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1EnergySitesByIdCommandSignedCommandsPublicKeyError = GetApi1EnergySitesByIdCommandSignedCommandsPublicKeyErrors[keyof GetApi1EnergySitesByIdCommandSignedCommandsPublicKeyErrors];
+
+export type GetApi1EnergySitesByIdCommandSignedCommandsPublicKeyResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            /**
+             * Base64-encoded ECC public key.
+             */
+            pubKeyEcc?: string;
+            [key: string]: unknown | string | undefined;
+        };
+    };
+};
+
+export type GetApi1EnergySitesByIdCommandSignedCommandsPublicKeyResponse = GetApi1EnergySitesByIdCommandSignedCommandsPublicKeyResponses[keyof GetApi1EnergySitesByIdCommandSignedCommandsPublicKeyResponses];
+
+export type GetApi1EnergySitesByIdCommandWifiScanData = {
+    body?: never;
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/wifi_scan';
+};
+
+export type GetApi1EnergySitesByIdCommandWifiScanErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1EnergySitesByIdCommandWifiScanError = GetApi1EnergySitesByIdCommandWifiScanErrors[keyof GetApi1EnergySitesByIdCommandWifiScanErrors];
+
+export type GetApi1EnergySitesByIdCommandWifiScanResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            wifi_networks?: Array<{
+                ssid?: string;
+                /**
+                 * Signal strength info.
+                 */
+                rssi?: {
+                    /**
+                     * Raw RSSI in dBm.
+                     */
+                    value?: number;
+                    /**
+                     * Signal strength as a percentage (0-100).
+                     */
+                    signal_strength_percent?: number;
+                    [key: string]: unknown | number | undefined;
+                };
+                /**
+                 * WifiNetworkSecurityType enum value.
+                 */
+                security_type?: number;
+                [key: string]: unknown | string | {
+                    /**
+                     * Raw RSSI in dBm.
+                     */
+                    value?: number;
+                    /**
+                     * Signal strength as a percentage (0-100).
+                     */
+                    signal_strength_percent?: number;
+                    [key: string]: unknown | number | undefined;
+                } | number | undefined;
+            }>;
+            [key: string]: unknown | string | Array<{
+                ssid?: string;
+                /**
+                 * Signal strength info.
+                 */
+                rssi?: {
+                    /**
+                     * Raw RSSI in dBm.
+                     */
+                    value?: number;
+                    /**
+                     * Signal strength as a percentage (0-100).
+                     */
+                    signal_strength_percent?: number;
+                    [key: string]: unknown | number | undefined;
+                };
+                /**
+                 * WifiNetworkSecurityType enum value.
+                 */
+                security_type?: number;
+                [key: string]: unknown | string | {
+                    /**
+                     * Raw RSSI in dBm.
+                     */
+                    value?: number;
+                    /**
+                     * Signal strength as a percentage (0-100).
+                     */
+                    signal_strength_percent?: number;
+                    [key: string]: unknown | number | undefined;
+                } | number | undefined;
+            }> | undefined;
+        };
+    };
+};
+
+export type GetApi1EnergySitesByIdCommandWifiScanResponse = GetApi1EnergySitesByIdCommandWifiScanResponses[keyof GetApi1EnergySitesByIdCommandWifiScanResponses];
+
+export type GetApi1EnergySitesByIdCommandDeviceCertData = {
+    body?: never;
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/device_cert';
+};
+
+export type GetApi1EnergySitesByIdCommandDeviceCertErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type GetApi1EnergySitesByIdCommandDeviceCertError = GetApi1EnergySitesByIdCommandDeviceCertErrors[keyof GetApi1EnergySitesByIdCommandDeviceCertErrors];
+
+export type GetApi1EnergySitesByIdCommandDeviceCertResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            /**
+             * DeviceCertFormat enum value.
+             */
+            format?: number;
+            /**
+             * Base64-encoded device certificate.
+             */
+            device_cert?: string;
+            [key: string]: unknown | string | number | undefined;
+        };
+    };
+};
+
+export type GetApi1EnergySitesByIdCommandDeviceCertResponse = GetApi1EnergySitesByIdCommandDeviceCertResponses[keyof GetApi1EnergySitesByIdCommandDeviceCertResponses];
+
+export type PostApi1EnergySitesByIdCommandScheduleBackupEventData = {
     body: {
-        data: {
+        /**
+         * Scheduling parameters for the backup event.
+         */
+        scheduling_info?: {
             /**
-             * Base64-encoded serialized RoutableMessage bytes.
+             * ISO 8601 timestamp for when the backup event should start.
              */
-            routable_message: string;
+            start_time?: string;
             /**
-             * Identifier type for the command.
+             * Duration of the backup event in seconds.
              */
-            identifier_type?: number;
+            duration_seconds?: number;
             /**
-             * Target device identifier (e.g., gateway DIN).
+             * Priority level for the backup event.
              */
-            target_id?: string;
+            priority?: number;
         };
     };
     path: {
@@ -14463,30 +15791,337 @@ export type PostApi1EnergySitesByIdDeviceCommandData = {
         id: number;
     };
     query?: never;
-    url: '/api/1/energy_sites/{id}/device_command';
+    url: '/api/1/energy_sites/{id}/command/schedule_backup_event';
 };
 
-export type PostApi1EnergySitesByIdDeviceCommandErrors = {
+export type PostApi1EnergySitesByIdCommandScheduleBackupEventErrors = {
     /**
      * Error response
      */
     default: Def0;
 };
 
-export type PostApi1EnergySitesByIdDeviceCommandError = PostApi1EnergySitesByIdDeviceCommandErrors[keyof PostApi1EnergySitesByIdDeviceCommandErrors];
+export type PostApi1EnergySitesByIdCommandScheduleBackupEventError = PostApi1EnergySitesByIdCommandScheduleBackupEventErrors[keyof PostApi1EnergySitesByIdCommandScheduleBackupEventErrors];
 
-export type PostApi1EnergySitesByIdDeviceCommandResponses = {
+export type PostApi1EnergySitesByIdCommandScheduleBackupEventResponses = {
     /**
      * Default Response
      */
     200: {
         response?: {
-            [key: string]: unknown;
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            [key: string]: unknown | string | undefined;
         };
     };
 };
 
-export type PostApi1EnergySitesByIdDeviceCommandResponse = PostApi1EnergySitesByIdDeviceCommandResponses[keyof PostApi1EnergySitesByIdDeviceCommandResponses];
+export type PostApi1EnergySitesByIdCommandScheduleBackupEventResponse = PostApi1EnergySitesByIdCommandScheduleBackupEventResponses[keyof PostApi1EnergySitesByIdCommandScheduleBackupEventResponses];
+
+export type PostApi1EnergySitesByIdCommandCancelBackupEventData = {
+    body?: never;
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/cancel_backup_event';
+};
+
+export type PostApi1EnergySitesByIdCommandCancelBackupEventErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type PostApi1EnergySitesByIdCommandCancelBackupEventError = PostApi1EnergySitesByIdCommandCancelBackupEventErrors[keyof PostApi1EnergySitesByIdCommandCancelBackupEventErrors];
+
+export type PostApi1EnergySitesByIdCommandCancelBackupEventResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            [key: string]: unknown | string | undefined;
+        };
+    };
+};
+
+export type PostApi1EnergySitesByIdCommandCancelBackupEventResponse = PostApi1EnergySitesByIdCommandCancelBackupEventResponses[keyof PostApi1EnergySitesByIdCommandCancelBackupEventResponses];
+
+export type PostApi1EnergySitesByIdCommandSetLocalSiteConfigData = {
+    /**
+     * Raw protobuf JSON fields for the request message. Keys and nesting must match Tesla's snake_case proto field names.
+     */
+    body: {
+        [key: string]: unknown;
+    };
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/set_local_site_config';
+};
+
+export type PostApi1EnergySitesByIdCommandSetLocalSiteConfigErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type PostApi1EnergySitesByIdCommandSetLocalSiteConfigError = PostApi1EnergySitesByIdCommandSetLocalSiteConfigErrors[keyof PostApi1EnergySitesByIdCommandSetLocalSiteConfigErrors];
+
+export type PostApi1EnergySitesByIdCommandSetLocalSiteConfigResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            [key: string]: unknown | string | undefined;
+        };
+    };
+};
+
+export type PostApi1EnergySitesByIdCommandSetLocalSiteConfigResponse = PostApi1EnergySitesByIdCommandSetLocalSiteConfigResponses[keyof PostApi1EnergySitesByIdCommandSetLocalSiteConfigResponses];
+
+export type PostApi1EnergySitesByIdCommandSetIslandModeData = {
+    body: {
+        /**
+         * Island mode to request from the gateway.
+         */
+        mode: 1 | 6;
+        /**
+         * Whether to force the mode change even if the gateway would normally reject it.
+         */
+        force?: boolean;
+    };
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/set_island_mode';
+};
+
+export type PostApi1EnergySitesByIdCommandSetIslandModeErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type PostApi1EnergySitesByIdCommandSetIslandModeError = PostApi1EnergySitesByIdCommandSetIslandModeErrors[keyof PostApi1EnergySitesByIdCommandSetIslandModeErrors];
+
+export type PostApi1EnergySitesByIdCommandSetIslandModeResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            [key: string]: unknown | string | undefined;
+        };
+    };
+};
+
+export type PostApi1EnergySitesByIdCommandSetIslandModeResponse = PostApi1EnergySitesByIdCommandSetIslandModeResponses[keyof PostApi1EnergySitesByIdCommandSetIslandModeResponses];
+
+export type PostApi1EnergySitesByIdCommandAddAuthorizedClientData = {
+    body: {
+        key_type?: number;
+        public_key?: string;
+        authorized_client_type?: number;
+        description?: string;
+    };
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/add_authorized_client';
+};
+
+export type PostApi1EnergySitesByIdCommandAddAuthorizedClientErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type PostApi1EnergySitesByIdCommandAddAuthorizedClientError = PostApi1EnergySitesByIdCommandAddAuthorizedClientErrors[keyof PostApi1EnergySitesByIdCommandAddAuthorizedClientErrors];
+
+export type PostApi1EnergySitesByIdCommandAddAuthorizedClientResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            client?: {
+                /**
+                 * AuthorizedClientType enum.
+                 */
+                type?: number;
+                description?: string;
+                /**
+                 * AuthorizedKeyType enum.
+                 */
+                key_type?: number;
+                /**
+                 * Base64-encoded public key.
+                 */
+                public_key?: string;
+                roles?: Array<number>;
+                /**
+                 * AuthorizedState enum.
+                 */
+                state?: number;
+                /**
+                 * AuthorizedVerificationType enum.
+                 */
+                verification?: number;
+                added_time?: {
+                    /**
+                     * Unix timestamp seconds.
+                     */
+                    seconds?: number | string;
+                    nanos?: number;
+                    [key: string]: unknown | number | string | number | undefined;
+                };
+                identifier?: string;
+                /**
+                 * Base64-encoded public key.
+                 */
+                authorized_by_public_key?: string;
+                [key: string]: unknown | number | string | Array<number> | {
+                    /**
+                     * Unix timestamp seconds.
+                     */
+                    seconds?: number | string;
+                    nanos?: number;
+                    [key: string]: unknown | number | string | number | undefined;
+                } | undefined;
+            };
+            [key: string]: unknown | string | {
+                /**
+                 * AuthorizedClientType enum.
+                 */
+                type?: number;
+                description?: string;
+                /**
+                 * AuthorizedKeyType enum.
+                 */
+                key_type?: number;
+                /**
+                 * Base64-encoded public key.
+                 */
+                public_key?: string;
+                roles?: Array<number>;
+                /**
+                 * AuthorizedState enum.
+                 */
+                state?: number;
+                /**
+                 * AuthorizedVerificationType enum.
+                 */
+                verification?: number;
+                added_time?: {
+                    /**
+                     * Unix timestamp seconds.
+                     */
+                    seconds?: number | string;
+                    nanos?: number;
+                    [key: string]: unknown | number | string | number | undefined;
+                };
+                identifier?: string;
+                /**
+                 * Base64-encoded public key.
+                 */
+                authorized_by_public_key?: string;
+                [key: string]: unknown | number | string | Array<number> | {
+                    /**
+                     * Unix timestamp seconds.
+                     */
+                    seconds?: number | string;
+                    nanos?: number;
+                    [key: string]: unknown | number | string | number | undefined;
+                } | undefined;
+            } | undefined;
+        };
+    };
+};
+
+export type PostApi1EnergySitesByIdCommandAddAuthorizedClientResponse = PostApi1EnergySitesByIdCommandAddAuthorizedClientResponses[keyof PostApi1EnergySitesByIdCommandAddAuthorizedClientResponses];
+
+export type PostApi1EnergySitesByIdCommandRemoveAuthorizedClientData = {
+    /**
+     * Raw protobuf JSON fields for the request message. Keys and nesting must match Tesla's snake_case proto field names.
+     */
+    body: {
+        [key: string]: unknown;
+    };
+    path: {
+        /**
+         * Energy Site ID
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/1/energy_sites/{id}/command/remove_authorized_client';
+};
+
+export type PostApi1EnergySitesByIdCommandRemoveAuthorizedClientErrors = {
+    /**
+     * Error response
+     */
+    default: Def0;
+};
+
+export type PostApi1EnergySitesByIdCommandRemoveAuthorizedClientError = PostApi1EnergySitesByIdCommandRemoveAuthorizedClientErrors[keyof PostApi1EnergySitesByIdCommandRemoveAuthorizedClientErrors];
+
+export type PostApi1EnergySitesByIdCommandRemoveAuthorizedClientResponses = {
+    /**
+     * Default Response
+     */
+    200: {
+        response?: {
+            /**
+             * Request identifier for the gRPC command.
+             */
+            request_id?: string;
+            [key: string]: unknown | string | undefined;
+        };
+    };
+};
+
+export type PostApi1EnergySitesByIdCommandRemoveAuthorizedClientResponse = PostApi1EnergySitesByIdCommandRemoveAuthorizedClientResponses[keyof PostApi1EnergySitesByIdCommandRemoveAuthorizedClientResponses];
 
 export type GetApi1UsersFeatureConfigData = {
     body?: never;
@@ -15110,13 +16745,26 @@ export type GetSseByVin_Responses = {
         status: 'connected' | 'disconnected';
     } | {
         createdAt: string;
-        vin: string;
+        vin?: string;
         isCache?: boolean;
         credits: {
-            balance: number;
-            cost: number;
-            name: string;
             type: string;
+            cost: number;
+            name?: string;
+            balance: number;
+            accounting?: {
+                quota_fraction_used: number;
+                quota_credits_used: number;
+                balance_credits_used: number;
+            };
+            quota?: {
+                used: number;
+                fraction: number;
+                reset_at: string;
+                anchor_day: number;
+                lifetime: number;
+                allowance?: number;
+            };
         };
     } | {
         createdAt: string;
