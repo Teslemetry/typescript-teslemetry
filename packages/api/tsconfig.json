@@ -4,6 +4,6 @@
     "outDir": "./dist",
     "declaration": true
   },
-  "include": ["src/**/*.ts", "openapi-ts.config.ts"],
+  "include": ["src/**/*.ts", "test/**/*.ts", "openapi-ts.config.ts"],
   "exclude": ["node_modules", "dist", "examples"]
 }

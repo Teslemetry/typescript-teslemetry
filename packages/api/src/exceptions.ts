@@ -14,6 +14,15 @@ export class TeslemetryStreamConnectionError extends TeslemetryStreamError {
   }
 }
 
+export class TeslemetryStreamAuthError extends TeslemetryStreamConnectionError {
+  public status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "TeslemetryStreamAuthError";
+    this.status = status;
+  }
+}
+
 export class TeslemetryVehicleStreamNotConfigured extends TeslemetryStreamError {
   constructor(message: string) {
     super(message);
