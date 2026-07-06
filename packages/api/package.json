@@ -23,6 +23,7 @@
     "sse": "pnpm build && node examples/sse.ts",
     "client": "openapi-ts --file openapi-ts.config.ts",
     "build": "tsdown --format cjs,esm",
+    "test": "tsx --test test/*.test.ts",
     "tsc": "tsc --noEmit",
     "release": "pnpm version patch"
   },

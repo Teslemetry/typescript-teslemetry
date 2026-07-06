@@ -111,6 +111,31 @@ await teslemetry.sse.connect();
 teslemetry.sse.disconnect();
 ```
 
+##### Stream errors and reconnecting
+
+The stream reconnects automatically with exponential backoff, re-resolving
+your access token callback on every attempt. Each failed attempt emits a
+`stream_error` event with the error, the HTTP status (when one was received),
+and the number of consecutive failures.
+
+Authentication failures are handled differently: after a `401`/`403` the
+stream reconnects once immediately (so a refreshed token can take over), and
+if that attempt is also rejected it **stops reconnecting** and emits a
+terminal `auth_failure` event instead of looping forever. Listen for it to
+prompt the user to re-authenticate, then call `connect()` again to resume.
+
+```typescript
+teslemetry.sse.on("stream_error", ({ error, status, retries }) => {
+  console.warn(`Stream attempt ${retries} failed`, status, error);
+});
+
+teslemetry.sse.on("auth_failure", (error) => {
+  // error is a TeslemetryStreamAuthError with a .status of 401 or 403
+  console.error("Streaming credentials rejected, reauthorize:", error.status);
+  // ...surface reauth to the user, then: await teslemetry.sse.connect();
+});
+```
+
 ### Energy API
 
 Interact with Tesla Energy sites (Solar, Powerwall, Wall Connector).

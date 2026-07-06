@@ -15,6 +15,7 @@ import {
 import { Teslemetry } from "./Teslemetry.js";
 import { Logger } from "./logger.js";
 import { getSseByVin_ } from "./client/sdk.gen.js";
+import { TeslemetryStreamAuthError } from "./exceptions.js";
 
 export interface TeslemetryStreamOptions {
   vin?: string;
@@ -24,6 +25,14 @@ export interface TeslemetryStreamOptions {
         cloud: boolean;
         local: boolean;
       };
+}
+
+export interface TeslemetryStreamErrorEvent {
+  error: unknown;
+  /** HTTP status of the failed connection attempt, when one was received */
+  status?: number;
+  /** Consecutive failed connection attempts since the last received event */
+  retries: number;
 }
 
 // Interface for event type safety
@@ -39,6 +48,8 @@ type TeslemetryStreamEventMap = {
   config: SseConfig;
   connect: void;
   disconnect: void;
+  stream_error: TeslemetryStreamErrorEvent;
+  auth_failure: TeslemetryStreamAuthError;
 };
 
 export declare interface TeslemetryStream {
@@ -192,7 +203,13 @@ export class TeslemetryStream extends EventEmitter {
 
   private async _connectLoop() {
     let retries = 0;
+    let authFailures = 0;
     while (this.active) {
+      // The generated SSE client retries internally and never rethrows, so
+      // limit it to a single attempt and capture its failure: every retry
+      // then flows through this loop, which re-resolves auth (a refreshed
+      // token is picked up on reconnect) and applies the policy below.
+      let streamError: unknown;
       try {
         const sse = await getSseByVin_({
           client: this.root.client,
@@ -200,34 +217,68 @@ export class TeslemetryStream extends EventEmitter {
           query: {
             cache: this.cloudCache,
           },
+          sseMaxRetryAttempts: 1,
+          onSseError: (error) => {
+            streamError = error;
+          },
         });
 
         this.logger.info(`Connected to stream`);
-        retries = 0;
         this.connected = true;
         this.emit("connect");
 
         if (sse.stream) {
           for await (const event of sse.stream) {
             if (!this.active) break;
+            retries = 0;
+            authFailures = 0;
             this._dispatch(event);
           }
         }
+
+        if (streamError !== undefined) throw streamError;
       } catch (error) {
         if (!this.active) break;
-
-        this.logger.error("SSE error:", error);
 
         this.connected = false;
         this.emit("disconnect");
 
         retries++;
+        const status = parseSseStatus(error);
+        const isAuthError = status === 401 || status === 403;
+        const finalError = isAuthError
+          ? new TeslemetryStreamAuthError(
+              error instanceof Error ? error.message : String(error),
+              status,
+            )
+          : error;
+
+        this.logger.error("SSE error:", finalError);
+        this.emit("stream_error", { error: finalError, status, retries });
+
+        if (isAuthError) {
+          authFailures++;
+          if (authFailures >= 2) {
+            this.logger.error(
+              "Stream authentication failed twice in a row; stopping. Call connect() with valid credentials to resume.",
+            );
+            this.active = false;
+            this.emit("auth_failure", finalError as TeslemetryStreamAuthError);
+            break;
+          }
+          // Reconnect immediately: the next attempt re-resolves the auth
+          // callback, giving a refreshed token exactly one retry before the
+          // stream stops.
+          continue;
+        }
+
         const delay = Math.min(2 ** retries, 600) * 1000;
         this.logger.info(`Reconnecting in ${delay / 1000} seconds...`);
 
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
+    this.connected = false;
     this.emit("disconnect");
   }
 
@@ -340,6 +391,20 @@ export class TeslemetryStream extends EventEmitter {
     this.off("connectivity", this.cacheConnectivity);
     this.logger.info(`Stopped local cache`);
   }
+}
+
+/**
+ * Extract the HTTP status from a failed SSE connection attempt. The generated
+ * client throws a plain Error with the message "SSE failed: <status>
+ * <statusText>" and generated code must not be hand-edited, so the status is
+ * recovered from the message.
+ */
+function parseSseStatus(error: unknown): number | undefined {
+  if (error instanceof Error) {
+    const match = /^SSE failed: (\d{3})\b/.exec(error.message);
+    if (match) return Number(match[1]);
+  }
+  return undefined;
 }
 
 /**
