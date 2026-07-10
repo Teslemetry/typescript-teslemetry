@@ -128,7 +128,7 @@ export class StreamHandler {
 	 */
 	private async handleAlertEvent(event: any): Promise<void> {
 		try {
-			const { vin, name, startedAt, endedAt } = event;
+			const { vin, name, endedAt } = event;
 
 			if (!vin || !name) {
 				return;

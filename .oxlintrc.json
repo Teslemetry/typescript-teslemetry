@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {},
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": ["packages/api/src/client/**"],
+  "overrides": [
+    {
+      "files": ["packages/api/src/**/*.ts"],
+      "rules": {
+        "typescript/no-unsafe-declaration-merging": "off"
+      }
+    },
+    {
+      "files": ["packages/node-red-contrib-teslemetry/src/nodes/**/*.ts"],
+      "rules": {
+        "typescript/no-this-alias": "off"
+      }
+    }
+  ]
+}
