@@ -152,7 +152,7 @@ pnpm --filter homey build
 ### Build Tools
 - **tsdown** (>=0.22) - Primary build tool (bundles via rolldown); its `rolldown-plugin-dts` dependency must support the installed `typescript` major version for declaration emit to work, since that's the actual compiler-API consumer, not tsdown itself
 - **TypeScript** 7.x - Type checking and compilation. TS7's config surface dropped `baseUrl` and the `node`/`node10` `moduleResolution` value, and defaults `types` to `[]` instead of auto-including all `@types/*` packages - any tsconfig relying on the old implicit behavior needs `"types": ["node"]` added explicitly
-- **ESLint** - Code linting
+- **Oxlint** - Code linting (native TS parsing, no per-package tsconfig project setup needed; config at root `.oxlintrc.json`)
 - **tsx** - TypeScript execution (for scripts)
 
 ### Version Management
@@ -319,13 +319,21 @@ pnpm update -r <package-name>
 
 ### Lint Code
 
+A single root `oxlint` invocation covers every package in one pass - no per-package config needed since oxlint parses TS natively without a tsconfig project reference.
+
 ```bash
-# Run linter (if configured)
+# Run linter across the whole monorepo
 pnpm lint
 
-# Fix linting issues
+# Fix auto-fixable issues
 pnpm lint:fix
 ```
+
+Config: `.oxlintrc.json` at repo root. Two `overrides` blocks intentionally silence rules that conflict with deliberate patterns rather than bugs:
+- `typescript/no-unsafe-declaration-merging` off under `packages/api/src/**` - the `class X extends EventEmitter` + `declare interface X` typed-emitter pattern used throughout the SDK
+- `typescript/no-this-alias` off under `packages/node-red-contrib-teslemetry/src/nodes/**` - Node-RED's standard `const node = this;` idiom for capturing node identity inside async callbacks
+
+The generated OpenAPI client (`packages/api/src/client/**`) is excluded via `ignorePatterns` - don't hand-edit it or add lint overrides for it.
 
 ### Test n8n Nodes Locally
 
