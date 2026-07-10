@@ -25,6 +25,6 @@
     "@changesets/cli": "^2.29.7",
     "@types/node": "^24.10.1",
     "tsup": "^8.2.3",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }

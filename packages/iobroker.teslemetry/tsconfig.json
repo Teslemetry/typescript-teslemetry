@@ -6,7 +6,10 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@teslemetry/api": ["../api/dist"]
+    }
   },
   "include": ["src/**/*", "lib/**/*"],
   "exclude": ["node_modules", "build", "test"]
