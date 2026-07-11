@@ -192,9 +192,12 @@ export class TeslemetryVehicleStream extends EventEmitter {
         );
         batch.deferred.resolve(true);
       }
-    } catch (error: any) {
-      this.logger.error(error.message);
-      batch.deferred.reject(error);
+    } catch (error) {
+      this.logger.error(
+        `Failed to update streaming config for ${this.vin}:`,
+        error,
+      );
+      batch.deferred.reject(error as Error);
     }
   }
 
