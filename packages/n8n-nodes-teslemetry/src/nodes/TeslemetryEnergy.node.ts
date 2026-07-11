@@ -170,7 +170,7 @@ export class TeslemetryEnergy implements INodeType {
 			async getSites(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const credentials = await this.getCredentials('teslemetryApi');
 				const teslemetry = new Teslemetry(credentials.accessToken as string);
-				const response = await teslemetry.api.products();
+				const response = await teslemetry.api.getProducts();
                 const products = response.response || [];
                 const sites = products.filter((p: any) => p.resource_type === "battery" || p.resource_type === "solar" || "energy_site_id" in p);
 				return sites.map((s: any) => ({

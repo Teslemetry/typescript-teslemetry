@@ -13,7 +13,7 @@ import { BaseService } from "./base.js";
  */
 export class InformationService extends BaseService {
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     vehicle: import("@teslemetry/api").VehicleDetails,
   ) {
@@ -46,7 +46,7 @@ export class InformationService extends BaseService {
 
     // Set firmware revision if available
     this.subscribeSignal(
-      "CarVersion",
+      "Version",
       this.platform.Characteristic.FirmwareRevision,
       (version: string) => this.extractFirmwareVersion(version),
     );

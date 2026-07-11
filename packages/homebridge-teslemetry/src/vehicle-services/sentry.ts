@@ -13,7 +13,7 @@ import { BaseService } from "./base.js";
  */
 export class SentryService extends BaseService {
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     vehicle: import("@teslemetry/api").VehicleDetails,
   ) {
@@ -43,11 +43,11 @@ export class SentryService extends BaseService {
         if (value) {
           // Turn on sentry mode
           this.platform.log.info(`Turning on sentry mode for ${vehicle.name}`);
-          await vehicle.api.setSentryMode({ on: true });
+          await vehicle.api.setSentryMode(true);
         } else {
           // Turn off sentry mode
           this.platform.log.info(`Turning off sentry mode for ${vehicle.name}`);
-          await vehicle.api.setSentryMode({ on: false });
+          await vehicle.api.setSentryMode(false);
         }
       },
     );

@@ -16,7 +16,7 @@ export class DoorService extends BaseService {
   private doorServices: Map<string, Service> = new Map();
 
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     vehicle: import("@teslemetry/api").VehicleDetails,
   ) {

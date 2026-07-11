@@ -1,5 +1,3 @@
-import type * as ioBroker from '@iobroker/adapter-core';
-
 export interface VehicleMetadata {
 	vin: string;
 	display_name: string;
@@ -291,11 +289,13 @@ export class StateManager {
 	 * Parse state ID to extract vehicle/energy site info and command
 	 */
 	parseStateId(id: string): { type: 'vehicle' | 'energy'; identifier: string; category: string; state: string } | null {
-		// Remove adapter prefix (e.g., "teslemetry.0.")
-		const parts = id.split('.');
+		// Remove adapter prefix (e.g., "teslemetry.0.") so parts[0] is "vehicles" or "energy"
+		const prefix = `${this.adapter.namespace}.`;
+		const ownId = id.startsWith(prefix) ? id.slice(prefix.length) : id;
+		const parts = ownId.split('.');
 		if (parts.length < 4) return null;
 
-		const type = parts[0] as 'vehicle' | 'energy'; // vehicles or energy
+		const type = parts[0]; // "vehicles" or "energy"
 		const identifier = parts[1]; // VIN or site ID
 		const category = parts[2]; // commands, climate, etc.
 		const state = parts[3]; // specific state name

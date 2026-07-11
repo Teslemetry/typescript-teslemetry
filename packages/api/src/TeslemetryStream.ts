@@ -318,6 +318,9 @@ export class TeslemetryStream extends EventEmitter {
     }
     this.emit("all", event);
 
+    // "credits" events are account-wide and carry no vin, so they never route to a vehicle.
+    if (!event.vin) return;
+
     const vehicle = this.vehicles.get(event.vin);
     if (vehicle) {
       if ("state" in event) {

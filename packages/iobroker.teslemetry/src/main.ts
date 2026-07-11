@@ -5,6 +5,20 @@ import { VehicleHandler } from '../lib/VehicleHandler.js';
 import { EnergyHandler } from '../lib/EnergyHandler.js';
 import { StreamHandler } from '../lib/StreamHandler.js';
 
+// Matches the "native" config schema in io-package.json / admin/jsonConfig.json.
+declare global {
+	namespace ioBroker {
+		interface AdapterConfig {
+			accessToken: string;
+			region: 'auto' | 'na' | 'eu';
+			pollInterval: number;
+			enableStreaming: boolean;
+			selectedVehicles: string[];
+			selectedEnergySites: number[];
+		}
+	}
+}
+
 class TeslemetryAdapter extends utils.Adapter {
 	private teslemetry?: Teslemetry;
 	private stateManager?: StateManager;
@@ -64,11 +78,10 @@ class TeslemetryAdapter extends utils.Adapter {
 				for (const [vin, vehicle] of vehicleEntries) {
 					// If no selection made, include all vehicles
 					if (selectedVehicles.length === 0 || selectedVehicles.includes(vin)) {
-						this.log.info(`Setting up vehicle: ${vehicle.display_name} (${vin})`);
+						this.log.info(`Setting up vehicle: ${vehicle.name} (${vin})`);
 						await this.stateManager.createVehicleStates({
 							vin,
-							display_name: vehicle.display_name,
-							model: vehicle.vehicle_config?.car_type,
+							display_name: vehicle.name,
 						});
 						this.vehicleHandler.registerVehicle(vin);
 					}
@@ -86,11 +99,10 @@ class TeslemetryAdapter extends utils.Adapter {
 					const siteId = Number(id);
 					// If no selection made, include all sites
 					if (selectedSites.length === 0 || selectedSites.includes(siteId)) {
-						this.log.info(`Setting up energy site: ${site.site_name} (${siteId})`);
+						this.log.info(`Setting up energy site: ${site.name} (${siteId})`);
 						await this.stateManager.createEnergySiteStates({
 							id: siteId,
-							site_name: site.site_name,
-							resource_type: site.resource_type,
+							site_name: site.name,
 						});
 						this.energyHandler.registerSite(siteId);
 					}
@@ -213,11 +225,11 @@ class TeslemetryAdapter extends utils.Adapter {
 							message: `Connected successfully! Found ${vehicleCount} vehicle(s) and ${siteCount} energy site(s).`,
 							vehicles: Object.entries(products.vehicles).map(([vin, v]) => ({
 								vin,
-								name: v.display_name,
+								name: v.name,
 							})),
 							energySites: Object.entries(products.energySites).map(([id, s]) => ({
 								id: Number(id),
-								name: s.site_name,
+								name: s.name,
 							})),
 						},
 						obj.callback

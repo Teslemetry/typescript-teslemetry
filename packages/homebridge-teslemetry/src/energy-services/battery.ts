@@ -15,7 +15,7 @@ export class EnergyBatteryService extends BaseEnergyService {
   private currentBatteryLevel = 100;
 
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     site: import("@teslemetry/api").EnergyDetails,
   ) {

@@ -13,7 +13,7 @@ import { BaseService } from "./base.js";
  */
 export class ChargeSwitchService extends BaseService {
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     vehicle: import("@teslemetry/api").VehicleDetails,
   ) {
@@ -28,12 +28,13 @@ export class ChargeSwitchService extends BaseService {
 
     // Subscribe to charge state updates
     this.subscribeSignal(
-      "ChargeState",
+      "DetailedChargeState",
       this.platform.Characteristic.On,
-      (state: string) => {
+      (state) => {
         // Charging is "on" if actively charging or starting
         return (
-          state === "ChargeStateCharging" || state === "ChargeStateStarting"
+          state === "DetailedChargeStateCharging" ||
+          state === "DetailedChargeStateStarting"
         );
       },
     );

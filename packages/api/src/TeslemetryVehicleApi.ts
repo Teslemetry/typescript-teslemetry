@@ -1344,6 +1344,7 @@ export class TeslemetryVehicleApi extends EventEmitter {
    */
   public async speedLimitClearPinAdmin() {
     const { data } = await postApi1VehiclesByVinCommandSpeedLimitClearPinAdmin({
+      body: {},
       path: { vin: this.vin },
       client: this.root.client,
     });

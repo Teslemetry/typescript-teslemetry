@@ -24,6 +24,7 @@
     "build": "tsdown --format cjs",
     "watch": "tsdown --format cjs --watch",
     "tsc": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
     "prepublishOnly": "pnpm build"
   },
   "keywords": [
@@ -39,8 +40,10 @@
     "@teslemetry/api": "workspace:*"
   },
   "devDependencies": {
+    "hap-nodejs": "^0.14.0",
     "homebridge": "^1.8.0",
     "tsdown": "^0.22.4",
+    "tsx": "^4.20.6",
     "typescript": "^7.0.2"
   },
   "peerDependencies": {

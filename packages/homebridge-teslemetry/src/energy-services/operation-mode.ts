@@ -27,15 +27,20 @@ export class OperationModeService extends BaseEnergyService {
     time_based_control: 100,
   };
 
-  private readonly SPEED_TO_MODE: Record<number, string> = {
+  private readonly SPEED_TO_MODE: Record<
+    number,
+    "backup" | "autonomous" | "self_consumption" | "time_based_control"
+  > = {
     0: "backup",
     33: "autonomous",
     66: "self_consumption",
     100: "time_based_control",
   };
 
+  private readonly SPEED_STEPS = [0, 33, 66, 100];
+
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     site: import("@teslemetry/api").EnergyDetails,
   ) {
@@ -77,8 +82,22 @@ export class OperationModeService extends BaseEnergyService {
     this.registerCharacteristicSet(
       this.platform.Characteristic.RotationSpeed,
       async (value) => {
-        const speed = Math.round((value as number) / 33) * 33; // Snap to nearest step
+        // Snap to the nearest of the 4 documented steps; the last gap (66->100) is
+        // wider than the others, so a uniform round(value/33)*33 can never land on 100.
+        const raw = value as number;
+        const speed = this.SPEED_STEPS.reduce((closest, step) =>
+          Math.abs(step - raw) < Math.abs(closest - raw) ? step : closest,
+        );
         const mode = this.SPEED_TO_MODE[speed] || "self_consumption";
+
+        if (mode === "time_based_control") {
+          // The Fleet API command only accepts backup/autonomous/self_consumption;
+          // time_based_control is a read-only telemetry state, not a settable mode.
+          this.platform.log.warn(
+            `Time-Based Control cannot be set via HomeKit; ignoring for ${site.name}`,
+          );
+          return;
+        }
 
         this.platform.log.info(
           `Setting operation mode to ${mode} (${speed}%) for ${site.name}`,

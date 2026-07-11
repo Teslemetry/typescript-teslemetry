@@ -309,7 +309,7 @@ export class TeslemetryVehicle implements INodeType {
 			async getVins(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const credentials = await this.getCredentials('teslemetryApi');
 				const teslemetry = new Teslemetry(credentials.accessToken as string);
-				const response = await teslemetry.api.vehicles();
+				const response = await teslemetry.api.getVehicles();
 				// The API returns { response: [...], count: ... }
 				const vehicles = response.response || [];
 				return vehicles.map((v: any) => ({

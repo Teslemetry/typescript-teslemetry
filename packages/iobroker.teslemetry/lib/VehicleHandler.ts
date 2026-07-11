@@ -1,4 +1,3 @@
-import type * as ioBroker from '@iobroker/adapter-core';
 import { Teslemetry } from '@teslemetry/api';
 import { StateManager } from './StateManager.js';
 

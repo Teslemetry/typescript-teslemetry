@@ -11,16 +11,19 @@ This is the **Teslemetry TypeScript monorepo** containing the official TypeScrip
 ```
 typescript-teslemetry/
 ├── packages/
-│   ├── api/                           # Core TypeScript/JavaScript SDK (v0.6.7)
-│   ├── node-red-contrib-teslemetry/   # Node-RED integration (v0.1.2)
-│   ├── n8n-nodes-teslemetry/          # n8n workflow integration (v0.1.0)
-│   └── homey/                         # Homey smart home app (v0.0.3)
+│   ├── api/                           # Core TypeScript/JavaScript SDK
+│   ├── node-red-contrib-teslemetry/   # Node-RED integration
+│   ├── n8n-nodes-teslemetry/          # n8n workflow integration
+│   ├── homebridge-teslemetry/         # Homebridge plugin (private, not published)
+│   └── iobroker.teslemetry/           # ioBroker adapter (private, not published)
 ├── pnpm-workspace.yaml                # Workspace configuration
 ├── tsconfig.json                      # Root TypeScript config
 ├── package.json                       # Monorepo root package
 ├── RELEASE.md                         # Release process documentation
 └── .github/workflows/publish.yml      # Automated CI/CD
 ```
+
+See each package's own `package.json`/`README.md` for its purpose and structure - don't rely on this file for per-package detail, which goes stale quickly.
 
 ## Packages
 
@@ -107,41 +110,23 @@ pnpm --filter node-red-contrib-teslemetry build
 
 **Build Output**: `dist/index.cjs` (single entry point)
 
-### 4. `homey` - Homey Smart Home App
+### 4. `homebridge-teslemetry` - Homebridge Plugin
 
-**Location**: `packages/homey/`
-**Version**: 0.0.3
-**App ID**: com.teslemetry
-**Status**: Development (has separate dedicated repo)
+**Location**: `packages/homebridge-teslemetry/`
+**Status**: Private (`"private": true`, not published to npm)
 
-**Purpose**: Smart home integration for the Homey platform.
+**Purpose**: Exposes vehicles and energy sites as HomeKit accessories via `src/vehicle-services/*` and `src/energy-services/*` service classes, each a thin adapter between a HomeKit `Service`/`Characteristic` and the corresponding `@teslemetry/api` method.
 
-**Supported Devices**:
-- Tesla Vehicles (via Fleet Telemetry)
-- Energy Sites (Powerwall, Solar)
-- Wall Connectors
+**Gotcha**: HomeKit's `Service`/`Characteristic` static members (e.g. `Service.Lightbulb`, `Characteristic.On`) are concrete subclasses with simpler overridden constructors than the base `Service`/`Characteristic` class hap-nodejs types against - generic helpers that accept "any service/characteristic type" need `WithUUID<{ new (...): T }>`-shaped types (see `*-services/base.ts`), not `typeof Service`/`typeof Characteristic` directly, or `addService`/`getCharacteristic` overload resolution breaks.
 
-**Features**:
-- Real-time status monitoring
-- Climate control
-- Charging management
-- Security features
-- Power flow monitoring
-- Operation mode control
+### 5. `iobroker.teslemetry` - ioBroker Adapter
 
-**Structure**:
-- `app.ts` - App entry point
-- `drivers/` - Device drivers (vehicle, energy-site, wall-connector)
-- `lib/` - Shared logic (TeslemetryDevice, TeslemetryOAuth2Client)
-- `.homeycompose/` - App composition files
-- `assets/` - Images and icons
-- `locales/` - Translations
+**Location**: `packages/iobroker.teslemetry/`
+**Status**: Private (`"private": true`, not published to npm)
 
-**Build Process**:
-```bash
-pnpm --filter homey build
-# Runs: node compose.cjs && tsdown
-```
+**Purpose**: ioBroker adapter exposing vehicles and energy sites as ioBroker states/objects (`lib/StateManager.ts`, `lib/VehicleHandler.ts`, `lib/EnergyHandler.ts`, `lib/StreamHandler.ts`).
+
+**Gotcha**: its typecheck script is named `check`, not `tsc` (`pnpm --filter iobroker.teslemetry check`) - `pnpm -r tsc` silently skips it. The `@iobroker/adapter-core` module's own exports don't include an `Adapter` type; the real `ioBroker.Adapter` type comes from the global `ioBroker` namespace ambiently declared by `@iobroker/types` (pulled in transitively) - don't alias a local import to the name `ioBroker`, it shadows that global.
 
 ## Technology Stack
 
@@ -165,7 +150,8 @@ pnpm --filter homey build
 ### Platform-Specific
 - **Node-RED** 4.1.1 - For node-red integration
 - **n8n** 1.122.5 - For n8n integration
-- **Homey SDK** 3.10.0 - For Homey app development
+- **Homebridge** 1.8+ - For homebridge-teslemetry (uses hap-nodejs for HomeKit types)
+- **ioBroker** - For iobroker.teslemetry (`@iobroker/adapter-core`, `@iobroker/types`)
 
 ## Development Workflow
 
@@ -190,7 +176,8 @@ pnpm build
 pnpm --filter @teslemetry/api build
 pnpm --filter node-red-contrib-teslemetry build
 pnpm --filter n8n-nodes-teslemetry build
-pnpm --filter homey build
+pnpm --filter homebridge-teslemetry build
+pnpm --filter iobroker.teslemetry build
 
 # Run tests (if available)
 pnpm --filter @teslemetry/api test
@@ -253,7 +240,6 @@ The monorepo uses **Changesets** for version management and automated publishing
      - Version bumping
      - Changelog generation
      - npm publishing (with --access public)
-     - Homey app validation
      - Discord notifications
 
 See `RELEASE.md` for detailed release documentation.
@@ -261,7 +247,7 @@ See `RELEASE.md` for detailed release documentation.
 ## Key Architecture Decisions
 
 ### 1. Shared Dependency Model
-All integration packages (`node-red`, `n8n`, `homey`) depend on `@teslemetry/api` via workspace references:
+All integration packages (`node-red`, `n8n`, `homebridge-teslemetry`, `iobroker.teslemetry`) depend on `@teslemetry/api` via workspace references:
 ```json
 "dependencies": {
   "@teslemetry/api": "workspace:*"
@@ -335,6 +321,12 @@ Config: `.oxlintrc.json` at repo root. Two `overrides` blocks intentionally sile
 
 The generated OpenAPI client (`packages/api/src/client/**`) is excluded via `ignorePatterns` - don't hand-edit it or add lint overrides for it.
 
+### Typecheck and Test Every Package
+
+`pnpm -r tsc` runs every package's `tsc` script, but `iobroker.teslemetry`'s is named `check` (not `tsc`), so it's silently skipped - run `pnpm --filter iobroker.teslemetry check` separately, or `pnpm -r --no-bail tsc` to see every package's errors instead of stopping at the first failure.
+
+Each package's `test` script runs `tsx --test test/*.test.ts` (Node's built-in test runner, no extra framework) - a convention applied across `api`, `n8n-nodes-teslemetry`, `iobroker.teslemetry`, and `homebridge-teslemetry`. `node-red-contrib-teslemetry` has no test suite yet.
+
 ### Test n8n Nodes Locally
 
 ```bash
@@ -360,14 +352,6 @@ pnpm link --global node-red-contrib-teslemetry
 node-red
 ```
 
-### Validate Homey App
-
-```bash
-cd packages/homey
-pnpm build
-homey app validate
-```
-
 ## Important Files and Directories
 
 ### Root Level
@@ -391,10 +375,13 @@ homey app validate
 - `src/nodes/` - Node implementations
 - `src/shared.ts` - Shared state management
 
-### Homey Package
-- `.homeycompose/` - Source composition files
-- `app.json` - Generated app manifest (don't edit manually)
-- `compose.cjs` - Build script to generate app.json
+### Homebridge Package
+- `src/vehicle-services/`, `src/energy-services/` - One class per HomeKit service, extending `base.ts`'s `BaseService`/`BaseEnergyService`
+- `src/platform.ts` - Discovers vehicles/energy sites and registers HomeKit accessories
+
+### ioBroker Package
+- `lib/StateManager.ts` - Creates/updates ioBroker states and parses incoming state-change IDs back into vehicle/site commands
+- `src/main.ts` - Adapter entry point; augments the ambient `ioBroker.AdapterConfig` type to match `io-package.json`'s native config schema
 
 ### CI/CD
 - `.github/workflows/publish.yml` - Automated build, test, and publish. Its "Upgrade npm for OIDC support" step always installs `npm@latest`, whose `engines.node` requirement can rise ahead of the workflow's `actions/setup-node` pin (this happened 2026-07: npm 12 required node ^22.22.2/^24.15.0/>=26, but the workflow was pinned to Node 20, breaking every publish with EBADENGINE). If publish starts failing, check `npm view npm@latest engines` against the pinned `node-version` first.
@@ -439,12 +426,6 @@ pnpm link --global  # Makes available to local n8n instance
 - HTML files must be manually copied during build
 - Node-RED specific conventions in `.html` files
 
-### Homey Integration
-- Has separate dedicated repository
-- Copy in monorepo for convenience but doesn't work well in monorepo structure
-- Uses Homey-specific build and publish process
-- OAuth2 integration for authentication
-
 ## TypeScript Configuration
 
 ### Root `tsconfig.json`
@@ -473,7 +454,8 @@ Each package extends the root config and adds:
     ↑
     ├── node-red-contrib-teslemetry (depends on API)
     ├── n8n-nodes-teslemetry (depends on API)
-    └── homey (depends on API)
+    ├── homebridge-teslemetry (depends on API)
+    └── iobroker.teslemetry (depends on API)
 ```
 
 All integrations use `"@teslemetry/api": "workspace:*"` to ensure they use the local version during development.
@@ -527,7 +509,8 @@ pnpm install
 - **Changesets**: https://github.com/changesets/changesets
 - **Node-RED**: https://nodered.org/docs/creating-nodes/
 - **n8n**: https://docs.n8n.io/integrations/creating-nodes/
-- **Homey SDK**: https://apps.developer.homey.app/
+- **Homebridge Plugin Dev**: https://developers.homebridge.io/
+- **ioBroker Adapter Dev**: https://www.iobroker.net/#en/documentation/dev/adapterdev.md
 
 ## Contributing
 
@@ -541,7 +524,7 @@ See individual package READMEs for package-specific contribution guidelines.
 
 ---
 
-**Last Updated**: 2026-01-08
+**Last Updated**: 2026-07-11
 **Monorepo Version**: pnpm workspaces
 **Primary Maintainer**: Teslemetry
 
