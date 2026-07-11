@@ -1,7 +1,7 @@
 {
   "name": "@teslemetry/homebridge-teslemetry",
   "displayName": "Homebridge Teslemetry",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "description": "Teslemetry integration for Homebridge with real-time streaming support",
   "author": "Teslemetry",
