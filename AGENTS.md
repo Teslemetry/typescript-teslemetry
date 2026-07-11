@@ -397,7 +397,7 @@ homey app validate
 - `compose.cjs` - Build script to generate app.json
 
 ### CI/CD
-- `.github/workflows/publish.yml` - Automated build, test, and publish
+- `.github/workflows/publish.yml` - Automated build, test, and publish. Its "Upgrade npm for OIDC support" step always installs `npm@latest`, whose `engines.node` requirement can rise ahead of the workflow's `actions/setup-node` pin (this happened 2026-07: npm 12 required node ^22.22.2/^24.15.0/>=26, but the workflow was pinned to Node 20, breaking every publish with EBADENGINE). If publish starts failing, check `npm view npm@latest engines` against the pinned `node-version` first.
 
 ## Integration-Specific Notes
 
