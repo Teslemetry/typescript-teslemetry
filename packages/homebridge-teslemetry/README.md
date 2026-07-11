@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/%40teslemetry%2Fhomebridge-teslemetry.svg)](https://badge.fury.io/js/%40teslemetry%2Fhomebridge-teslemetry)
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 
-Teslemetry platform plugin for Homebridge with **real-time streaming support** for Tesla vehicles and energy sites.
+Teslemetry platform plugin for Homebridge with real-time streaming for Tesla vehicles and energy site monitoring.
 
 ## Features
 
@@ -16,14 +16,14 @@ Teslemetry platform plugin for Homebridge with **real-time streaming support** f
 - Window control
 - And more...
 
-⚡ **Energy Site Support** *(Coming Soon)*
+⚡ **Energy Site Support**
 - Powerwall monitoring
 - Solar production tracking
-- Grid control
+- Backup reserve, storm watch, and grid control
 
-🔄 **Real-time Streaming**
-- Instant updates when vehicle state changes
-- No polling - efficient and responsive
+🔄 **Live Updates**
+- Vehicles: instant updates via real-time streaming (SSE), no polling
+- Energy sites: periodic polling for status and power flow
 - Built on Teslemetry's Fleet Telemetry API
 
 ## Requirements
