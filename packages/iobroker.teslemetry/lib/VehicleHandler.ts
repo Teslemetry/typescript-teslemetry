@@ -22,7 +22,7 @@ export class VehicleHandler {
 	/**
 	 * Execute a vehicle command
 	 */
-	async executeCommand(vin: string, command: string, params?: any): Promise<void> {
+	async executeCommand(vin: string, command: string, _params?: any): Promise<void> {
 		const vehicle = this.vehicles.get(vin);
 		if (!vehicle) {
 			this.adapter.log.error(`Vehicle ${vin} not registered`);

@@ -149,7 +149,7 @@ class TeslemetryAdapter extends utils.Adapter {
 			}
 
 			callback();
-		} catch (e) {
+		} catch {
 			callback();
 		}
 	}

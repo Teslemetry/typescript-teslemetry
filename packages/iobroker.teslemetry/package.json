@@ -37,7 +37,7 @@
     "watch": "tsdown src/main.ts lib/*.ts --format cjs --target node20 --watch --outDir build",
     "test": "mocha --config test/.mocharc.json",
     "coverage": "nyc npm test",
-    "lint": "eslint src/**/*.ts lib/**/*.ts",
+    "lint": "oxlint .",
     "check": "tsc --noEmit"
   },
   "main": "build/src/main.cjs",
@@ -55,10 +55,7 @@
   "devDependencies": {
     "@iobroker/testing": "^5.0.0",
     "@types/node": "^22.10.2",
-    "@typescript-eslint/eslint-plugin": "^8.19.1",
-    "@typescript-eslint/parser": "^8.19.1",
     "chai": "^4.5.0",
-    "eslint": "^9.18.0",
     "mocha": "^10.8.2",
     "nyc": "^17.1.0",
     "tsdown": "^0.22.4",

@@ -17,14 +17,14 @@ async function main() {
   const l1 = sonic.sse.onSignal("ChargerVoltage", (x) => {
     console.log(`BChargerVoltage:`, x);
   });
-  const l2 = sonic.sse.on("connectivity", (x) => {
+  sonic.sse.on("connectivity", (x) => {
     console.log(`Sonic:`, x);
   });
-  const l3 = sonic.sse.data.on("VehicleSpeed", (x) => {
+  sonic.sse.data.on("VehicleSpeed", (x) => {
     console.log(`VehicleSpeed:`, x);
   });
   // Listen for connection status changes
-  const l4 = teslemetry.sse.on("connect", () => {
+  teslemetry.sse.on("connect", () => {
     console.log(`Stream connection status: Connected`);
   });
 
