@@ -5,9 +5,19 @@
  * Provides common functionality for service management and cleanup.
  */
 
-import type { PlatformAccessory, Service, Characteristic } from "homebridge";
+import type {
+  PlatformAccessory,
+  Service,
+  Characteristic,
+  CharacteristicValue,
+  Nullable,
+  WithUUID,
+} from "homebridge";
 import type { TeslemetryPlatform } from "../platform.js";
-import type { VehicleDetails } from "@teslemetry/api";
+import type { VehicleDetails, Signals, SseData } from "@teslemetry/api";
+
+/** All standard HomeKit Characteristic subclasses override the base constructor to take no arguments. */
+type CharacteristicConstructor = WithUUID<{ new (): Characteristic }>;
 
 /**
  * BaseService
@@ -22,14 +32,22 @@ export abstract class BaseService {
     protected readonly platform: TeslemetryPlatform,
     protected readonly accessory: PlatformAccessory,
     protected readonly vehicle: VehicleDetails,
-    serviceType: typeof Service[keyof typeof Service],
+    serviceType: WithUUID<typeof Service>,
     displayName: string,
     subType?: string,
   ) {
-    // Get or create the service
+    // Get or create the service.
+    // addService()'s generic constructorArgs are inferred from the *base* Service
+    // class (displayName, UUID, subtype?), not the 2-arg (displayName?, subtype?)
+    // constructor every concrete subclass (e.g. Service.Lightbulb) actually has, so
+    // we build the instance ourselves and hand addService a plain Service.
+    const ConcreteService = serviceType as unknown as new (
+      displayName?: string,
+      subtype?: string,
+    ) => Service;
     this.service =
       this.accessory.getService(serviceType) ||
-      this.accessory.addService(serviceType, displayName, subType);
+      this.accessory.addService(new ConcreteService(displayName, subType));
 
     // Set the service name
     this.service.setCharacteristic(
@@ -51,15 +69,28 @@ export abstract class BaseService {
   /**
    * Subscribe to a vehicle signal and update a characteristic
    */
-  protected subscribeSignal<T = any>(
-    signal: string,
-    characteristic: typeof Characteristic[keyof typeof Characteristic],
-    mapper?: (value: T) => any,
+  protected subscribeSignal<S extends Signals, T = any>(
+    signal: S,
+    characteristic: CharacteristicConstructor,
+    mapper?: (value: Exclude<SseData["data"][S], null | undefined>) => T,
   ): void {
-    const cleanup = this.vehicle.sse.onSignal(signal, (value: T) => {
+    const cleanup = this.vehicle.sse.onSignal(signal, (value) => {
+      // null means the vehicle reported "no data" for this signal; leave the
+      // characteristic at its last known value rather than passing null through.
+      if (value === null) return;
+
       try {
-        const mappedValue = mapper ? mapper(value) : value;
-        this.service.updateCharacteristic(characteristic, mappedValue);
+        // TS can't narrow a generic indexed-access type (SseData["data"][S]) through
+        // the `value === null` check above, even though it's a plain runtime check.
+        const nonNullValue = value as Exclude<SseData["data"][S], null | undefined>;
+        const mappedValue = mapper ? mapper(nonNullValue) : nonNullValue;
+        // Callers of a signal whose native value isn't already a HomeKit primitive
+        // (e.g. Location) must supply a mapper that converts it; that contract isn't
+        // expressible in subscribeSignal's generic signature.
+        this.service.updateCharacteristic(
+          characteristic,
+          mappedValue as Nullable<CharacteristicValue>,
+        );
       } catch (error) {
         this.platform.log.error(
           `Error updating characteristic for signal ${signal}:`,
@@ -75,7 +106,7 @@ export abstract class BaseService {
    * Register a characteristic SET handler
    */
   protected registerCharacteristicSet(
-    characteristic: typeof Characteristic[keyof typeof Characteristic],
+    characteristic: CharacteristicConstructor,
     handler: (value: any) => Promise<void>,
   ): void {
     this.service
@@ -99,7 +130,7 @@ export abstract class BaseService {
    * Register a characteristic GET handler
    */
   protected registerCharacteristicGet(
-    characteristic: typeof Characteristic[keyof typeof Characteristic],
+    characteristic: CharacteristicConstructor,
     handler: () => Promise<any>,
   ): void {
     this.service

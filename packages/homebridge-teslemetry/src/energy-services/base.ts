@@ -5,9 +5,12 @@
  * Uses polling via API events instead of streaming
  */
 
-import type { PlatformAccessory, Service, Characteristic } from "homebridge";
+import type { PlatformAccessory, Service, Characteristic, WithUUID } from "homebridge";
 import type { TeslemetryPlatform } from "../platform.js";
 import type { EnergyDetails } from "@teslemetry/api";
+
+/** All standard HomeKit Characteristic subclasses override the base constructor to take no arguments. */
+type CharacteristicConstructor = WithUUID<{ new (): Characteristic }>;
 
 /**
  * BaseEnergyService
@@ -22,14 +25,22 @@ export abstract class BaseEnergyService {
     protected readonly platform: TeslemetryPlatform,
     protected readonly accessory: PlatformAccessory,
     protected readonly site: EnergyDetails,
-    serviceType: typeof Service[keyof typeof Service],
+    serviceType: WithUUID<typeof Service>,
     displayName: string,
     subType?: string,
   ) {
-    // Get or create the service
+    // Get or create the service.
+    // addService()'s generic constructorArgs are inferred from the *base* Service
+    // class (displayName, UUID, subtype?), not the 2-arg (displayName?, subtype?)
+    // constructor every concrete subclass (e.g. Service.Lightbulb) actually has, so
+    // we build the instance ourselves and hand addService a plain Service.
+    const ConcreteService = serviceType as unknown as new (
+      displayName?: string,
+      subtype?: string,
+    ) => Service;
     this.service =
       this.accessory.getService(serviceType) ||
-      this.accessory.addService(serviceType, displayName, subType);
+      this.accessory.addService(new ConcreteService(displayName, subType));
 
     // Set the service name
     this.service.setCharacteristic(
@@ -78,7 +89,7 @@ export abstract class BaseEnergyService {
    * Register a characteristic SET handler
    */
   protected registerCharacteristicSet(
-    characteristic: typeof Characteristic[keyof typeof Characteristic],
+    characteristic: CharacteristicConstructor,
     handler: (value: any) => Promise<void>,
   ): void {
     this.service
@@ -102,7 +113,7 @@ export abstract class BaseEnergyService {
    * Register a characteristic GET handler
    */
   protected registerCharacteristicGet(
-    characteristic: typeof Characteristic[keyof typeof Characteristic],
+    characteristic: CharacteristicConstructor,
     handler: () => Promise<any>,
   ): void {
     this.service

@@ -11,6 +11,6 @@
       "@teslemetry/api": ["../api/dist"]
     }
   },
-  "include": ["src/**/*", "lib/**/*"],
-  "exclude": ["node_modules", "build", "test"]
+  "include": ["src/**/*", "lib/**/*", "test/**/*"],
+  "exclude": ["node_modules", "build"]
 }

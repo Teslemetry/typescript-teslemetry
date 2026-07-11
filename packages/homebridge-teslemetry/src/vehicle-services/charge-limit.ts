@@ -14,7 +14,7 @@ import { BaseService } from "./base.js";
  */
 export class ChargeLimitService extends BaseService {
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     vehicle: import("@teslemetry/api").VehicleDetails,
   ) {
@@ -32,7 +32,7 @@ export class ChargeLimitService extends BaseService {
 
     // Subscribe to charge limit updates
     this.subscribeSignal(
-      "ChargeLimit",
+      "ChargeLimitSoc",
       this.platform.Characteristic.Brightness,
       (limit: number) => {
         // Ensure limit is within valid range (50-100)
@@ -49,7 +49,7 @@ export class ChargeLimitService extends BaseService {
           `Setting charge limit to ${limit}% for ${vehicle.name}`,
         );
 
-        await vehicle.api.setChargeLimit({ percent: limit });
+        await vehicle.api.setChargeLimit(limit);
       },
     );
 

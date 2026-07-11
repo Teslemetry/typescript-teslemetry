@@ -12,10 +12,10 @@ import { BaseEnergyService } from "./base.js";
  * Represents grid charging permission as a switch
  */
 export class GridChargingService extends BaseEnergyService {
-  private currentExportSetting = "battery_ok";
+  private currentExportSetting: "battery_ok" | "never" | "pv_only" = "battery_ok";
 
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     site: import("@teslemetry/api").EnergyDetails,
   ) {

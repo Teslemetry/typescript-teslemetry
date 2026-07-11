@@ -15,7 +15,7 @@ export class BatteryService extends BaseService {
   private currentBatteryLevel = 100;
 
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     vehicle: import("@teslemetry/api").VehicleDetails,
   ) {
@@ -48,9 +48,9 @@ export class BatteryService extends BaseService {
 
     // Subscribe to charging state updates
     this.subscribeSignal(
-      "ChargeState",
+      "DetailedChargeState",
       this.platform.Characteristic.ChargingState,
-      (state: string) => this.mapChargeState(state),
+      (state) => this.mapChargeState(state),
     );
 
     this.platform.log.debug(`Battery service initialized for ${vehicle.name}`);
@@ -63,14 +63,14 @@ export class BatteryService extends BaseService {
     const { ChargingState } = this.platform.Characteristic;
 
     switch (state) {
-      case "ChargeStateCharging":
-      case "ChargeStateStarting":
+      case "DetailedChargeStateCharging":
+      case "DetailedChargeStateStarting":
         return ChargingState.CHARGING;
 
-      case "ChargeStateComplete":
-      case "ChargeStateDisconnected":
-      case "ChargeStateStopped":
-      case "ChargeStateNoPower":
+      case "DetailedChargeStateComplete":
+      case "DetailedChargeStateDisconnected":
+      case "DetailedChargeStateStopped":
+      case "DetailedChargeStateNoPower":
         return ChargingState.NOT_CHARGING;
 
       default:

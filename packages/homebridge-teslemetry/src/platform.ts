@@ -84,10 +84,10 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
       this.log.info("Connecting to Teslemetry...");
       this.teslemetry = new Teslemetry(this.config.accessToken, {
         logger: {
-          info: (...args: unknown[]) => this.log.info(...args),
-          error: (...args: unknown[]) => this.log.error(...args),
-          warn: (...args: unknown[]) => this.log.warn(...args),
-          debug: (...args: unknown[]) => this.log.debug(...args),
+          info: (message, ...args) => this.log.info(message, ...args),
+          error: (message, ...args) => this.log.error(message, ...args),
+          warn: (message, ...args) => this.log.warn(message, ...args),
+          debug: (message, ...args) => this.log.debug(message, ...args),
         },
         stream: {
           cache: true, // Enable caching for immediate value access

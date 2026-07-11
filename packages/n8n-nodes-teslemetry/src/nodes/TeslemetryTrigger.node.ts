@@ -80,7 +80,7 @@ export class TeslemetryTrigger implements INodeType {
 			async getVins(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const credentials = await this.getCredentials('teslemetryApi');
 				const teslemetry = new Teslemetry(credentials.accessToken as string);
-				const response = await teslemetry.api.vehicles();
+				const response = await teslemetry.api.getVehicles();
 				const vehicles = response.response || [];
 				return [
 					{ name: 'All Vehicles', value: '' },
@@ -93,7 +93,7 @@ export class TeslemetryTrigger implements INodeType {
 			async getFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const credentials = await this.getCredentials('teslemetryApi');
 				const teslemetry = new Teslemetry(credentials.accessToken as string);
-				const fields = await teslemetry.api.fields();
+				const fields = await teslemetry.api.getFields();
 				return Object.keys(fields).map((f) => ({
 					name: f,
 					value: f,

@@ -13,7 +13,7 @@ import { BaseService } from "./base.js";
  */
 export class DefrostService extends BaseService {
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     vehicle: import("@teslemetry/api").VehicleDetails,
   ) {
@@ -43,11 +43,11 @@ export class DefrostService extends BaseService {
         if (value) {
           // Turn on max defrost
           this.platform.log.info(`Turning on max defrost for ${vehicle.name}`);
-          await vehicle.api.setPreconditioningMax({ on: true });
+          await vehicle.api.setPreconditioningMax(true, true);
         } else {
           // Turn off max defrost
           this.platform.log.info(`Turning off max defrost for ${vehicle.name}`);
-          await vehicle.api.setPreconditioningMax({ on: false });
+          await vehicle.api.setPreconditioningMax(false, true);
         }
       },
     );

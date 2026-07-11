@@ -16,7 +16,7 @@ export class ClimateService extends BaseService {
   private isRHD = false; // Right-hand drive flag
 
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     vehicle: import("@teslemetry/api").VehicleDetails,
   ) {
@@ -122,10 +122,7 @@ export class ClimateService extends BaseService {
         );
 
         // Set both driver and passenger temps to the same value
-        await vehicle.api.setTemps({
-          driverTemp: temp,
-          passengerTemp: temp,
-        });
+        await vehicle.api.setTemps(temp, temp);
 
         this.targetTemperature = temp;
       },

@@ -45,12 +45,18 @@ importers:
         specifier: workspace:*
         version: link:../api
     devDependencies:
+      hap-nodejs:
+        specifier: ^0.14.0
+        version: 0.14.0
       homebridge:
         specifier: ^1.8.0
         version: 1.11.1
       tsdown:
         specifier: ^0.22.4
         version: 0.22.4(tsx@4.20.6)(typescript@7.0.2)(unrun@0.2.11(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -82,6 +88,9 @@ importers:
       tsdown:
         specifier: ^0.22.4
         version: 0.22.4(tsx@4.20.6)(typescript@7.0.2)(unrun@0.2.11(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -106,6 +115,9 @@ importers:
       tsdown:
         specifier: ^0.22.4
         version: 0.22.4(tsx@4.20.6)(typescript@7.0.2)(unrun@0.2.11(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
 
   packages/node-red-contrib-teslemetry:
     devDependencies:

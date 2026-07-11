@@ -13,7 +13,7 @@ import { BaseEnergyService } from "./base.js";
  */
 export class StormWatchService extends BaseEnergyService {
   constructor(
-    platform: ReturnType<typeof import("../platform.js").TeslemetryPlatform>,
+    platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
     site: import("@teslemetry/api").EnergyDetails,
   ) {
