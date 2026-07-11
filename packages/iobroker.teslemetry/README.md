@@ -24,10 +24,10 @@ ioBroker adapter for controlling Tesla vehicles and energy sites via the Tesleme
 - 🏠 **Off-Grid** - Configure backup reserves
 
 ### Real-Time Updates
-- 📡 **SSE Streaming** - Live updates via Server-Sent Events
+- 📡 **SSE Streaming** - Live vehicle updates via Server-Sent Events
 - 🔄 **Automatic Reconnection** - Robust connection handling
 - 💤 **Sleep Mode Aware** - Won't wake sleeping vehicles unnecessarily
-- 📊 **Polling Fallback** - Optional polling when streaming is disabled
+- 📊 **Polling** - Energy site data updates via polling; vehicles can also use polling instead of streaming
 
 ## Prerequisites
 
@@ -82,11 +82,12 @@ npm install iobroker.teslemetry
 
 **Real-time Streaming (recommended)**
 - Enable **"Enable real-time streaming (SSE)"**
-- Provides instant updates when vehicle or energy site data changes
+- Provides instant updates when vehicle data changes
 - More efficient and responsive than polling
+- Energy site data is always updated via polling, regardless of this setting
 
 **Polling Mode**
-- Disable streaming to use polling instead
+- Disable streaming to use polling instead for vehicles too
 - Set **Poll Interval** (minimum 30 seconds)
 - Less efficient but works if streaming has issues
 

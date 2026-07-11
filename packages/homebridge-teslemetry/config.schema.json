@@ -2,7 +2,7 @@
   "pluginAlias": "Teslemetry",
   "pluginType": "platform",
   "singular": true,
-  "headerDisplay": "Teslemetry platform plugin for Homebridge with real-time streaming support. Create an access token at [teslemetry.com](https://teslemetry.com).",
+  "headerDisplay": "Teslemetry platform plugin for Homebridge with real-time vehicle streaming and periodic energy site updates. Create an access token at [teslemetry.com](https://teslemetry.com).",
   "footerDisplay": "For support and documentation, visit [GitHub](https://github.com/Teslemetry/typescript-teslemetry/tree/main/packages/homebridge-teslemetry).",
   "schema": {
     "type": "object",
