@@ -62,6 +62,7 @@ See each package's own `package.json`/`README.md` for its purpose and structure 
 **Code Generation**:
 - Uses `@hey-api/openapi-ts` to generate client from OpenAPI spec
 - Run: `pnpm --filter @teslemetry/api generate`
+- The generated client (`src/client/sdk.gen.ts`) often already has functions for endpoints that `TeslemetryVehicleApi.ts`/`TeslemetryEnergyApi.ts` haven't wrapped yet - grep `src/client/sdk.gen.ts` for the endpoint before assuming closing a capability gap needs a spec regen; usually it's just a new hand-written method that calls the existing generated function.
 
 ### 2. `node-red-contrib-teslemetry` - Node-RED Integration
 

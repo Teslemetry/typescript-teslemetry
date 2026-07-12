@@ -15,11 +15,13 @@ import {
   postApi1EnergySitesByIdOffGridVehicleChargingReserve,
   postApi1EnergySitesByIdOperation,
   postApi1EnergySitesByIdStormMode,
+  postApi1EnergySitesByIdTimeOfUseSettings,
   getApi1EnergySitesByIdTelemetryHistory,
   GetApi1EnergySitesByIdSiteInfoResponse,
   GetApi1EnergySitesByIdLiveStatusResponse,
   GetApi1EnergySitesByIdCalendarHistoryResponse,
   GetApi1EnergySitesByIdTelemetryHistoryResponse,
+  PostApi1EnergySitesByIdTimeOfUseSettingsData,
 } from "./client/index.js";
 import { reuse } from "./reuse.js";
 import { scheduler } from "./scheduler.js";
@@ -299,6 +301,22 @@ export class TeslemetryEnergyApi extends EventEmitter {
   public async setStormMode(enabled: boolean) {
     const { data } = await postApi1EnergySitesByIdStormMode({
       body: { enabled },
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Update the site's time-of-use tariff (buy/sell rate schedule).
+   * @param body The time-of-use settings configuration
+   * @return Promise to an object with response containing tariff update confirmation
+   */
+  public async setTimeOfUseSettings(
+    body: PostApi1EnergySitesByIdTimeOfUseSettingsData["body"],
+  ) {
+    const { data } = await postApi1EnergySitesByIdTimeOfUseSettings({
+      body,
       path: { id: this.siteId },
       client: this.root.client,
     });
