@@ -116,12 +116,12 @@ export class StateManager {
 		await this.createState(`${base}.live.battery_power`, 'Battery Power', 'number', 'value.power', true, false, 0, 'W');
 		await this.createState(`${base}.live.grid_power`, 'Grid Power', 'number', 'value.power', true, false, 0, 'W');
 		await this.createState(`${base}.live.load_power`, 'Load Power', 'number', 'value.power', true, false, 0, 'W');
+		await this.createState(`${base}.live.grid_status`, 'Grid Status', 'string', 'text', true, false, 'Unknown');
 		await this.createState(`${base}.live.timestamp`, 'Timestamp', 'number', 'value.time', true, false);
 
 		// Battery channel
 		await this.createChannel(`${base}.battery`, 'Battery');
 		await this.createState(`${base}.battery.percentage`, 'Battery Level', 'number', 'value.battery', true, false, 0, '%');
-		await this.createState(`${base}.battery.total_pack_energy`, 'Total Pack Energy', 'number', 'value.power.consumption', true, false, 0, 'Wh');
 
 		// Operation channel
 		await this.createChannel(`${base}.operation`, 'Operation');
@@ -135,10 +135,11 @@ export class StateManager {
 	}
 
 	/**
-	 * Update vehicle data from API response
+	 * Update vehicle data from a REST vehicleData() response ({ response: { charge_state, ... } })
 	 */
-	async updateVehicleData(vin: string, data: any): Promise<void> {
+	async updateVehicleData(vin: string, result: any): Promise<void> {
 		const base = `vehicles.${vin}`;
+		const data = result?.response;
 
 		if (!data) return;
 
@@ -196,7 +197,48 @@ export class StateManager {
 	}
 
 	/**
-	 * Update energy site data from API response
+	 * Update vehicle data from an SSE `data` event - a flat map of PascalCase signal
+	 * names, unrelated to the REST vehicleData() response shape.
+	 */
+	async updateVehicleDataFromSignals(vin: string, signals: Record<string, any>): Promise<void> {
+		const base = `vehicles.${vin}`;
+
+		if (!signals) return;
+
+		try {
+			if (signals.Location?.latitude !== undefined) await this.setStateAsync(`${base}.location.latitude`, signals.Location.latitude);
+			if (signals.Location?.longitude !== undefined) await this.setStateAsync(`${base}.location.longitude`, signals.Location.longitude);
+			if (signals.GpsHeading !== undefined) await this.setStateAsync(`${base}.location.heading`, signals.GpsHeading);
+			if (signals.VehicleSpeed !== undefined) await this.setStateAsync(`${base}.location.speed`, signals.VehicleSpeed || 0);
+			if (signals.Gear !== undefined) await this.setStateAsync(`${base}.drive.shift_state`, signals.Gear);
+			if (signals.Odometer !== undefined) await this.setStateAsync(`${base}.drive.odometer`, signals.Odometer);
+
+			if (signals.InsideTemp !== undefined) await this.setStateAsync(`${base}.climate.inside_temp`, signals.InsideTemp);
+			if (signals.OutsideTemp !== undefined) await this.setStateAsync(`${base}.climate.outside_temp`, signals.OutsideTemp);
+			if (signals.HvacLeftTemperatureRequest !== undefined)
+				await this.setStateAsync(`${base}.climate.driver_temp_setting`, signals.HvacLeftTemperatureRequest);
+			if (signals.HvacRightTemperatureRequest !== undefined)
+				await this.setStateAsync(`${base}.climate.passenger_temp_setting`, signals.HvacRightTemperatureRequest);
+			if (signals.HvacPower !== undefined)
+				await this.setStateAsync(`${base}.climate.is_climate_on`, signals.HvacPower !== 'HvacPowerStateOff');
+
+			if (signals.BatteryLevel !== undefined) await this.setStateAsync(`${base}.charge.battery_level`, signals.BatteryLevel);
+			if (signals.DetailedChargeState !== undefined) await this.setStateAsync(`${base}.charge.charging_state`, signals.DetailedChargeState);
+			if (signals.ChargeLimitSoc !== undefined) await this.setStateAsync(`${base}.charge.charge_limit_soc`, signals.ChargeLimitSoc);
+			if (signals.ChargeRateMilePerHour !== undefined) await this.setStateAsync(`${base}.charge.charge_rate`, signals.ChargeRateMilePerHour);
+			if (signals.TimeToFullCharge !== undefined) await this.setStateAsync(`${base}.charge.time_to_full_charge`, signals.TimeToFullCharge);
+
+			if (signals.Locked !== undefined) await this.setStateAsync(`${base}.state.locked`, signals.Locked);
+			if (signals.SentryMode !== undefined) await this.setStateAsync(`${base}.state.sentry_mode`, signals.SentryMode !== 'SentryModeStateOff');
+			if (signals.ValetModeEnabled !== undefined) await this.setStateAsync(`${base}.state.valet_mode`, signals.ValetModeEnabled);
+		} catch (error) {
+			this.adapter.log.error(`Error updating vehicle data for ${vin}: ${error}`);
+		}
+	}
+
+	/**
+	 * Update energy site data from the merged { ...siteInfo.response, ...liveStatus.response }
+	 * of getSiteInfo() and getLiveStatus() - both are flat, no `live_status` wrapper.
 	 */
 	async updateEnergySiteData(siteId: number, data: any): Promise<void> {
 		const base = `energy.${siteId}`;
@@ -205,21 +247,16 @@ export class StateManager {
 
 		try {
 			// Update live data
-			if (data.live_status) {
-				const ls = data.live_status;
-				if (ls.solar_power !== undefined) await this.setStateAsync(`${base}.live.solar_power`, ls.solar_power);
-				if (ls.battery_power !== undefined) await this.setStateAsync(`${base}.live.battery_power`, ls.battery_power);
-				if (ls.grid_power !== undefined) await this.setStateAsync(`${base}.live.grid_power`, ls.grid_power);
-				if (ls.load_power !== undefined) await this.setStateAsync(`${base}.live.load_power`, ls.load_power);
-				if (ls.timestamp !== undefined) await this.setStateAsync(`${base}.live.timestamp`, new Date(ls.timestamp).getTime());
-			}
+			if (data.solar_power !== undefined) await this.setStateAsync(`${base}.live.solar_power`, data.solar_power);
+			if (data.battery_power !== undefined) await this.setStateAsync(`${base}.live.battery_power`, data.battery_power);
+			if (data.grid_power !== undefined) await this.setStateAsync(`${base}.live.grid_power`, data.grid_power);
+			if (data.load_power !== undefined) await this.setStateAsync(`${base}.live.load_power`, data.load_power);
+			if (data.grid_status !== undefined) await this.setStateAsync(`${base}.live.grid_status`, data.grid_status);
+			if (data.timestamp !== undefined) await this.setStateAsync(`${base}.live.timestamp`, new Date(data.timestamp).getTime());
 
 			// Update battery
-			if (data.percentage !== undefined) {
-				await this.setStateAsync(`${base}.battery.percentage`, data.percentage);
-			}
-			if (data.total_pack_energy !== undefined) {
-				await this.setStateAsync(`${base}.battery.total_pack_energy`, data.total_pack_energy);
+			if (data.percentage_charged !== undefined) {
+				await this.setStateAsync(`${base}.battery.percentage`, data.percentage_charged);
 			}
 
 			// Update operation

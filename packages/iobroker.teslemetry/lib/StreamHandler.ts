@@ -98,7 +98,7 @@ export class StreamHandler {
 			}
 
 			this.adapter.log.debug(`Received data event for vehicle ${vin}`);
-			await this.stateManager.updateVehicleData(vin, data);
+			await this.stateManager.updateVehicleDataFromSignals(vin, data);
 		} catch (error: any) {
 			this.adapter.log.error(`Error handling data event: ${error.message}`);
 		}
@@ -127,14 +127,16 @@ export class StreamHandler {
 	 */
 	private async handleAlertEvent(event: any): Promise<void> {
 		try {
-			const { vin, name, endedAt } = event;
+			const { vin, alerts } = event;
 
-			if (!vin || !name) {
+			if (!vin || !alerts) {
 				return;
 			}
 
-			const status = endedAt ? 'ended' : 'started';
-			this.adapter.log.info(`Alert ${name} ${status} for vehicle ${vin}`);
+			for (const alert of alerts) {
+				const status = alert.endedAt ? 'ended' : 'started';
+				this.adapter.log.info(`Alert ${alert.name} ${status} for vehicle ${vin}`);
+			}
 
 			// Could create alert states here if needed
 			// For now, just log it
