@@ -1,8 +1,8 @@
-import { Teslemetry } from '@teslemetry/api';
+import { Teslemetry, TeslemetryVehicleApi } from '@teslemetry/api';
 import { StateManager } from './StateManager.js';
 
 export class VehicleHandler {
-	private vehicles: Map<string, any> = new Map();
+	private vehicles: Map<string, TeslemetryVehicleApi> = new Map();
 
 	constructor(
 		private adapter: ioBroker.Adapter,
@@ -14,7 +14,9 @@ export class VehicleHandler {
 	 * Register a vehicle for handling
 	 */
 	registerVehicle(vin: string): void {
-		this.vehicles.set(vin, this.teslemetry.vehicle(vin));
+		// api.getVehicle is get-or-create; createProducts() already created this
+		// entry, so the constructor's `new TeslemetryVehicleApi` guard would throw.
+		this.vehicles.set(vin, this.teslemetry.api.getVehicle(vin));
 		this.adapter.log.info(`Registered vehicle: ${vin}`);
 	}
 
@@ -33,61 +35,61 @@ export class VehicleHandler {
 		try {
 			switch (command) {
 				case 'wake':
-					await vehicle.wake();
+					await vehicle.wakeUp();
 					this.adapter.log.info(`Woke up vehicle ${vin}`);
 					break;
 
 				case 'lock':
-					await vehicle.lock();
+					await vehicle.lockDoors();
 					this.adapter.log.info(`Locked vehicle ${vin}`);
 					await this.adapter.setStateAsync(`vehicles.${vin}.state.locked`, true, true);
 					break;
 
 				case 'unlock':
-					await vehicle.unlock();
+					await vehicle.unlockDoors();
 					this.adapter.log.info(`Unlocked vehicle ${vin}`);
 					await this.adapter.setStateAsync(`vehicles.${vin}.state.locked`, false, true);
 					break;
 
 				case 'start_climate':
-					await vehicle.start_climate();
+					await vehicle.startAutoConditioning();
 					this.adapter.log.info(`Started climate for vehicle ${vin}`);
 					await this.adapter.setStateAsync(`vehicles.${vin}.climate.is_climate_on`, true, true);
 					break;
 
 				case 'stop_climate':
-					await vehicle.stop_climate();
+					await vehicle.stopAutoConditioning();
 					this.adapter.log.info(`Stopped climate for vehicle ${vin}`);
 					await this.adapter.setStateAsync(`vehicles.${vin}.climate.is_climate_on`, false, true);
 					break;
 
 				case 'start_charging':
-					await vehicle.start_charging();
+					await vehicle.startCharging();
 					this.adapter.log.info(`Started charging for vehicle ${vin}`);
 					break;
 
 				case 'stop_charging':
-					await vehicle.stop_charging();
+					await vehicle.stopCharging();
 					this.adapter.log.info(`Stopped charging for vehicle ${vin}`);
 					break;
 
 				case 'flash_lights':
-					await vehicle.flash_lights();
+					await vehicle.flashLights();
 					this.adapter.log.info(`Flashed lights for vehicle ${vin}`);
 					break;
 
 				case 'honk_horn':
-					await vehicle.honk_horn();
+					await vehicle.honkHorn();
 					this.adapter.log.info(`Honked horn for vehicle ${vin}`);
 					break;
 
 				case 'open_frunk':
-					await vehicle.open_frunk();
+					await vehicle.actuateTrunk('front');
 					this.adapter.log.info(`Opened frunk for vehicle ${vin}`);
 					break;
 
 				case 'open_trunk':
-					await vehicle.open_trunk();
+					await vehicle.actuateTrunk('rear');
 					this.adapter.log.info(`Opened trunk for vehicle ${vin}`);
 					break;
 
@@ -121,25 +123,26 @@ export class VehicleHandler {
 
 			// Handle writable states
 			if (category === 'climate') {
-				if (stateName === 'driver_temp_setting') {
-					await vehicle.set_temps({ driver_temp: value });
-					this.adapter.log.info(`Set driver temp to ${value}°C for vehicle ${vin}`);
-				} else if (stateName === 'passenger_temp_setting') {
-					await vehicle.set_temps({ passenger_temp: value });
-					this.adapter.log.info(`Set passenger temp to ${value}°C for vehicle ${vin}`);
+				if (stateName === 'driver_temp_setting' || stateName === 'passenger_temp_setting') {
+					// setTemps takes both temps positionally, so read the other one's
+					// current value to avoid clobbering it.
+					const [driverState, passengerState] = await Promise.all([
+						this.adapter.getStateAsync(`vehicles.${vin}.climate.driver_temp_setting`),
+						this.adapter.getStateAsync(`vehicles.${vin}.climate.passenger_temp_setting`),
+					]);
+					const driverTemp = stateName === 'driver_temp_setting' ? value : (driverState?.val ?? 21);
+					const passengerTemp = stateName === 'passenger_temp_setting' ? value : (passengerState?.val ?? 21);
+					await vehicle.setTemps(driverTemp, passengerTemp);
+					this.adapter.log.info(`Set temps to ${driverTemp}/${passengerTemp}°C for vehicle ${vin}`);
 				}
 			} else if (category === 'charge') {
 				if (stateName === 'charge_limit_soc') {
-					await vehicle.set_charge_limit({ percent: value });
+					await vehicle.setChargeLimit(value);
 					this.adapter.log.info(`Set charge limit to ${value}% for vehicle ${vin}`);
 				}
 			} else if (category === 'state') {
 				if (stateName === 'sentry_mode') {
-					if (value) {
-						await vehicle.sentry_mode_on();
-					} else {
-						await vehicle.sentry_mode_off();
-					}
+					await vehicle.setSentryMode(!!value);
 					this.adapter.log.info(`Set sentry mode to ${value} for vehicle ${vin}`);
 				}
 			}
@@ -160,7 +163,8 @@ export class VehicleHandler {
 
 		try {
 			// Get vehicle state first (doesn't wake vehicle)
-			const state = await vehicle.state();
+			const stateResult = await vehicle.state();
+			const state = stateResult?.response?.state ?? 'unknown';
 			await this.adapter.setStateAsync(`vehicles.${vin}._info.state`, state, true);
 
 			// Only fetch data if vehicle is online or we're allowed to wake it
@@ -170,7 +174,7 @@ export class VehicleHandler {
 			}
 
 			// Fetch vehicle data
-			const data = await vehicle.data();
+			const data = await vehicle.vehicleData();
 			await this.stateManager.updateVehicleData(vin, data);
 			this.adapter.log.debug(`Updated data for vehicle ${vin}`);
 		} catch (error: any) {

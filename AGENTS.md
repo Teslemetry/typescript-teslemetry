@@ -129,6 +129,8 @@ pnpm --filter node-red-contrib-teslemetry build
 
 **Gotcha**: its typecheck script is named `check`, not `tsc` (`pnpm --filter iobroker.teslemetry check`) - `pnpm -r tsc` silently skips it. The `@iobroker/adapter-core` module's own exports don't include an `Adapter` type; the real `ioBroker.Adapter` type comes from the global `ioBroker` namespace ambiently declared by `@iobroker/types` (pulled in transitively) - don't alias a local import to the name `ioBroker`, it shadows that global.
 
+**Gotcha**: `VehicleHandler`/`EnergyHandler` register vehicles/sites via `teslemetry.api.getVehicle(vin)` / `teslemetry.api.getEnergySite(id)` (get-or-create), never `teslemetry.vehicle(vin)` / `teslemetry.energySite(id)` (those construct unconditionally and throw "already exists" once `createProducts()` has already discovered the same VIN/id - this took the adapter down at startup for one release). Keep the handlers' SDK-instance maps typed as `Map<string, TeslemetryVehicleApi>` / `Map<number, TeslemetryEnergyApi>`, not `Map<string, any>` - `any` erases the compiler's ability to catch a wrong method name, which is exactly how the whole handler layer silently called a non-existent snake_case surface for a release. Also mind the two distinct vehicle-data shapes: `vehicle.vehicleData()` (REST) resolves `{ response: { charge_state, climate_state, vehicle_state, ... } }` (nested, snake_case), while the SSE `data` stream event carries a flat PascalCase signal map (`{ BatteryLevel, InsideTemp, Locked, ... }`) - `StateManager` has separate parsers (`updateVehicleData` vs `updateVehicleDataFromSignals`) for exactly this reason; don't route one shape through the other's parser.
+
 ## Technology Stack
 
 ### Package Management

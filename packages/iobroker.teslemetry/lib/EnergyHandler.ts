@@ -1,8 +1,8 @@
-import { Teslemetry } from '@teslemetry/api';
+import { Teslemetry, TeslemetryEnergyApi } from '@teslemetry/api';
 import { StateManager } from './StateManager.js';
 
 export class EnergyHandler {
-	private sites: Map<number, any> = new Map();
+	private sites: Map<number, TeslemetryEnergyApi> = new Map();
 
 	constructor(
 		private adapter: ioBroker.Adapter,
@@ -14,7 +14,9 @@ export class EnergyHandler {
 	 * Register an energy site for handling
 	 */
 	registerSite(siteId: number): void {
-		this.sites.set(siteId, this.teslemetry.energySite(siteId));
+		// api.getEnergySite is get-or-create; createProducts() already created this
+		// entry, so the constructor's `new TeslemetryEnergyApi` guard would throw.
+		this.sites.set(siteId, this.teslemetry.api.getEnergySite(siteId));
 		this.adapter.log.info(`Registered energy site: ${siteId}`);
 	}
 
@@ -34,7 +36,7 @@ export class EnergyHandler {
 			switch (command) {
 				case 'storm_mode':
 					if (params?.enabled !== undefined) {
-						await site.storm_mode({ enabled: params.enabled });
+						await site.setStormMode(params.enabled);
 						this.adapter.log.info(`Set storm mode to ${params.enabled} for site ${siteId}`);
 					}
 					break;
@@ -70,13 +72,13 @@ export class EnergyHandler {
 			// Handle writable operation states
 			if (category === 'operation') {
 				if (stateName === 'mode') {
-					await site.operation({ real_mode: value });
+					await site.setOperationMode(value);
 					this.adapter.log.info(`Set operation mode to ${value} for site ${siteId}`);
 				} else if (stateName === 'backup_reserve_percent') {
-					await site.backup({ backup_reserve_percent: value });
+					await site.setBackupReserve(value);
 					this.adapter.log.info(`Set backup reserve to ${value}% for site ${siteId}`);
 				} else if (stateName === 'off_grid_reserve_percent') {
-					await site.off_grid_vehicle_charging_reserve({ off_grid_vehicle_charging_reserve_percent: value });
+					await site.setOffGridVehicleChargingReserve(value);
 					this.adapter.log.info(`Set off-grid reserve to ${value}% for site ${siteId}`);
 				}
 			}
@@ -96,9 +98,12 @@ export class EnergyHandler {
 		}
 
 		try {
-			// Fetch site status
-			const status = await site.live_status();
-			await this.stateManager.updateEnergySiteData(siteId, status);
+			// Fetch site status (power/battery/grid) and site info (operation settings)
+			const [liveStatus, siteInfo] = await Promise.all([site.getLiveStatus(), site.getSiteInfo()]);
+			await this.stateManager.updateEnergySiteData(siteId, {
+				...siteInfo?.response,
+				...liveStatus?.response,
+			});
 			this.adapter.log.debug(`Updated data for energy site ${siteId}`);
 		} catch (error: any) {
 			this.adapter.log.error(`Error fetching data for site ${siteId}: ${error.message}`);
