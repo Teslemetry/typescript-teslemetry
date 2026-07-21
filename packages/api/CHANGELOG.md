@@ -1,5 +1,15 @@
 # @teslemetry/api
 
+## 0.8.0
+
+### Minor Changes
+
+- a06f296: Add `TeslemetryEnergyApi.setTimeOfUseSettings()` to write an energy site's time-of-use tariff (buy/sell rate schedule), mirroring the `/api/1/energy_sites/{id}/time_of_use_settings` endpoint. Previously the client only exposed tariff reads via `getSiteInfo()`.
+
+### Patch Changes
+
+- 0a00bb9: Fix `speedLimitClearPinAdmin()` sending no request body at all, which stripped the Content-Type header and made the Fleet API reject the call. Also fix an SSE `vin` type mismatch when dispatching account-wide `credits` events (no behavior change).
+
 ## 0.7.1
 
 ### Patch Changes

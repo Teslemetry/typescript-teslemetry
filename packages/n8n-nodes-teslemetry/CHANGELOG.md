@@ -1,5 +1,11 @@
 # @teslemetry/n8n-nodes-teslemetry
 
+## 0.2.2
+
+### Patch Changes
+
+- 0a00bb9: Fix the VIN, energy site, and signal field dropdowns (`loadOptions`) throwing `TypeError: ... is not a function` instead of populating, because they called nonexistent `TeslemetryApi` methods (`.vehicles()`, `.products()`, `.fields()` instead of `.getVehicles()`, `.getProducts()`, `.getFields()`).
+
 ## 0.2.1
 
 ### Patch Changes
