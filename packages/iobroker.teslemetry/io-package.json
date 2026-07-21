@@ -1,8 +1,44 @@
 {
   "common": {
     "name": "teslemetry",
-    "version": "0.1.0",
+    "version": "0.1.9",
     "news": {
+      "0.1.9": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert"
+      },
+      "0.1.8": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert"
+      },
+      "0.1.7": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert"
+      },
+      "0.1.6": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert"
+      },
+      "0.1.5": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert"
+      },
+      "0.1.4": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert"
+      },
+      "0.1.3": {
+        "en": "SSE event handling now uses the standard EventEmitter pattern",
+        "de": "SSE-Ereignisbehandlung verwendet jetzt das Standard-EventEmitter-Muster"
+      },
+      "0.1.2": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert"
+      },
+      "0.1.1": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert"
+      },
       "0.1.0": {
         "en": "Initial release",
         "de": "Erstveröffentlichung"
