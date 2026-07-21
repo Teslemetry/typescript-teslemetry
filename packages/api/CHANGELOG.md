@@ -1,5 +1,12 @@
 # @teslemetry/api
 
+## 0.9.0
+
+### Minor Changes
+
+- 1445aa6: Add wrapper methods on `TeslemetryEnergyApi` for the remaining generated energy-command functions: `getPrograms()`, `sendCommand()`, `getCommandSystemInfo()`, `getCommandNetworkingStatus()`, `getCommandAuthorizedClients()`, `getCommandSignedCommandsPublicKey()`, `getCommandWifiScan()`, `getCommandDeviceCert()`, `scheduleBackupEvent()`, `cancelBackupEvent()`, `setLocalSiteConfig()`, `setIslandMode()`, `addAuthorizedClient()`, and `removeAuthorizedClient()`. These cover Powerwall/gateway networking diagnostics, guest-client (installer) access management, and scheduled backup-event control, which previously required calling the generated client functions directly.
+- 2d1d852: Add `getTariff()` to `TeslemetryEnergyApi`, a typed accessor for the site's time-of-use tariff (`tariff_id`, `tariff_content`, `tariff_content_v2`). No dedicated tariff endpoint exists in the Fleet API, so this reads the fields out of `getSiteInfo()` rather than issuing a new request.
+
 ## 0.8.0
 
 ### Minor Changes
