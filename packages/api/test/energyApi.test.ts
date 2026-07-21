@@ -82,6 +82,46 @@ test("getPrograms fetches the site's programs endpoint", async () => {
   assert.deepEqual(result, { response: { programs: [] } });
 });
 
+test("getTariff extracts tariff fields from the site's site_info endpoint", async () => {
+  const siteId = 12345;
+  let receivedUrl: string | undefined;
+  let receivedMethod: string | undefined;
+
+  const teslemetry = makeTeslemetry(async (request) => {
+    receivedUrl = request.url;
+    receivedMethod = request.method;
+    return new Response(
+      JSON.stringify({
+        response: {
+          id: "STE12345",
+          site_name: "Home",
+          tariff_id: "PGE-EV2-A",
+          tariff_content: { code: "PGE-EV2-A" },
+          tariff_content_v2: {
+            code: "PGE-EV2-A",
+            utility: "PG&E",
+            currency: "USD",
+          },
+        },
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+
+  const result = await teslemetry.energySite(siteId).getTariff();
+
+  assert.equal(receivedMethod, "GET");
+  assert.match(
+    receivedUrl ?? "",
+    new RegExp(`/api/1/energy_sites/${siteId}/site_info$`),
+  );
+  assert.deepEqual(result, {
+    tariff_id: "PGE-EV2-A",
+    tariff_content: { code: "PGE-EV2-A" },
+    tariff_content_v2: { code: "PGE-EV2-A", utility: "PG&E", currency: "USD" },
+  });
+});
+
 test("sendCommand posts the category/command_name/params body to the site's command endpoint", async () => {
   const siteId = 12345;
   let receivedUrl: string | undefined;

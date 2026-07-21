@@ -59,6 +59,12 @@ export type EnergyHistoryResponse = {
   >;
 };
 
+// The site info response bundles tariff data alongside unrelated settings/asset fields.
+export type TariffInfo = Pick<
+  GetApi1EnergySitesByIdSiteInfoResponse["response"],
+  "tariff_id" | "tariff_content" | "tariff_content_v2"
+>;
+
 // Interface for event type safety
 type TeslemetryEnergyEventMap = {
   siteInfo: GetApi1EnergySitesByIdSiteInfoResponse;
@@ -276,6 +282,20 @@ export class TeslemetryEnergyApi extends EventEmitter {
       this.emit("siteInfo", data);
       return data;
     });
+  }
+
+  /**
+   * Returns the site's time-of-use tariff (buy/sell rate schedule). No dedicated tariff
+   * endpoint exists - this reads from getSiteInfo() to give it a first-class typed accessor.
+   * @return Promise to the tariff id and rate schedule (v1 and v2 content, where set)
+   */
+  public async getTariff(): Promise<TariffInfo> {
+    const { response } = await this.getSiteInfo();
+    return {
+      tariff_id: response.tariff_id,
+      tariff_content: response.tariff_content,
+      tariff_content_v2: response.tariff_content_v2,
+    };
   }
 
   /**
