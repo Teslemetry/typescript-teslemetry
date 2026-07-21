@@ -120,6 +120,10 @@ pnpm --filter node-red-contrib-teslemetry build
 
 **Gotcha**: HomeKit's `Service`/`Characteristic` static members (e.g. `Service.Lightbulb`, `Characteristic.On`) are concrete subclasses with simpler overridden constructors than the base `Service`/`Characteristic` class hap-nodejs types against - generic helpers that accept "any service/characteristic type" need `WithUUID<{ new (...): T }>`-shaped types (see `*-services/base.ts`), not `typeof Service`/`typeof Characteristic` directly, or `addService`/`getCharacteristic` overload resolution breaks.
 
+**Known bug**: `BaseService`/`BaseEnergyService`'s getOrCreate lookup (`this.accessory.getService(serviceType) || this.accessory.addService(...)`) matches an existing service by HAP service type alone, ignoring subType. Several sibling services intentionally share a service type with different subTypes - `LockService`/`ChargePortService` both use `Service.LockMechanism`; `ChargeSwitchService`/`DefrostService`/`SentryService`/`WakeService` and `StormWatchService`/`GridChargingService` all use `Service.Switch` - so each group collapses onto one shared HAP service instead of one each, and the last-constructed service's `onSet` registration silently replaces the earlier ones'. `test/serviceCollision.test.ts` and `test/energyServiceCollision.test.ts` pin down the current (buggy) behavior; a real fix needs subType-aware lookup (e.g. `getServiceById`) in both base classes.
+
+**Testing**: `test/fakePlatform.ts`, `test/fakeVehicle.ts`, and `test/fakeEnergySite.ts` provide fakes for the Homebridge/HAP/Teslemetry-SDK objects the services depend on - real hap-nodejs `Service`/`Characteristic` classes are used (not mocks) so characteristic get/set wiring behaves as it does at runtime, driven via `handleSetRequest`/`handleGetRequest` rather than `setValue` (which fires the handler asynchronously with no return value to await). `vehicle.api`/`site.api` are plain stubs, not real `@teslemetry/api` instances, to keep tests free of network I/O.
+
 ### 5. `iobroker.teslemetry` - ioBroker Adapter
 
 **Location**: `packages/iobroker.teslemetry/`
