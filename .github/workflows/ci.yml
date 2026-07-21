@@ -43,3 +43,6 @@ jobs:
 
       - name: Typecheck (iobroker.teslemetry)
         run: pnpm --filter iobroker.teslemetry check
+
+      - name: Test
+        run: pnpm test
