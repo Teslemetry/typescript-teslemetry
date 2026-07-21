@@ -17,11 +17,30 @@ import {
   postApi1EnergySitesByIdStormMode,
   postApi1EnergySitesByIdTimeOfUseSettings,
   getApi1EnergySitesByIdTelemetryHistory,
+  getApi1EnergySitesByIdPrograms,
+  postApi1EnergySitesByIdCommand,
+  getApi1EnergySitesByIdCommandSystemInfo,
+  getApi1EnergySitesByIdCommandNetworkingStatus,
+  getApi1EnergySitesByIdCommandAuthorizedClients,
+  getApi1EnergySitesByIdCommandSignedCommandsPublicKey,
+  getApi1EnergySitesByIdCommandWifiScan,
+  getApi1EnergySitesByIdCommandDeviceCert,
+  postApi1EnergySitesByIdCommandScheduleBackupEvent,
+  postApi1EnergySitesByIdCommandCancelBackupEvent,
+  postApi1EnergySitesByIdCommandSetLocalSiteConfig,
+  postApi1EnergySitesByIdCommandSetIslandMode,
+  postApi1EnergySitesByIdCommandAddAuthorizedClient,
+  postApi1EnergySitesByIdCommandRemoveAuthorizedClient,
   GetApi1EnergySitesByIdSiteInfoResponse,
   GetApi1EnergySitesByIdLiveStatusResponse,
   GetApi1EnergySitesByIdCalendarHistoryResponse,
   GetApi1EnergySitesByIdTelemetryHistoryResponse,
   PostApi1EnergySitesByIdTimeOfUseSettingsData,
+  PostApi1EnergySitesByIdCommandData,
+  PostApi1EnergySitesByIdCommandScheduleBackupEventData,
+  PostApi1EnergySitesByIdCommandSetLocalSiteConfigData,
+  PostApi1EnergySitesByIdCommandAddAuthorizedClientData,
+  PostApi1EnergySitesByIdCommandRemoveAuthorizedClientData,
 } from "./client/index.js";
 import { reuse } from "./reuse.js";
 import { scheduler } from "./scheduler.js";
@@ -347,6 +366,202 @@ export class TeslemetryEnergyApi extends EventEmitter {
       path: { id: this.siteId },
       client: this.root.client,
     });
+    return data;
+  }
+
+  /**
+   * Returns the site's configured programs (e.g. utility demand-response or VPP programs).
+   * @return Promise to an object with response containing the site's programs
+   */
+  public async getPrograms() {
+    const { data } = await getApi1EnergySitesByIdPrograms({
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Send an unsigned energy-device gRPC command using a category, command name, and raw protobuf JSON fields.
+   * This is intended for discovery and testing of undocumented energy gateway commands.
+   * @param body The category, command name, and raw protobuf JSON fields for the request
+   * @return Promise to an object with the decoded energy device response payload
+   */
+  public async sendCommand(body: PostApi1EnergySitesByIdCommandData["body"]) {
+    const { data } = await postApi1EnergySitesByIdCommand({
+      body,
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Retrieve system information from the energy gateway including device ID, DIN, firmware version, update status, and device type.
+   * @return Promise to an object with response containing the gateway's system information
+   */
+  public async getCommandSystemInfo() {
+    const { data } = await getApi1EnergySitesByIdCommandSystemInfo({
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Retrieve networking status from the energy gateway including WiFi configuration, WiFi interface, Ethernet interface, and GSM/cellular interface details.
+   * @return Promise to an object with response containing the gateway's networking status
+   */
+  public async getCommandNetworkingStatus() {
+    const { data } = await getApi1EnergySitesByIdCommandNetworkingStatus({
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * List all authorized clients on the energy gateway, including their role, type, and verification status.
+   * @return Promise to an object with response containing the gateway's authorized clients
+   */
+  public async getCommandAuthorizedClients() {
+    const { data } = await getApi1EnergySitesByIdCommandAuthorizedClients({
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Retrieve the public key used by the energy gateway for signed command verification.
+   * @return Promise to an object with response containing the gateway's signed commands public key
+   */
+  public async getCommandSignedCommandsPublicKey() {
+    const { data } = await getApi1EnergySitesByIdCommandSignedCommandsPublicKey(
+      {
+        path: { id: this.siteId },
+        client: this.root.client,
+      },
+    );
+    return data;
+  }
+
+  /**
+   * Trigger a WiFi scan on the energy gateway and return discovered networks with signal strength information.
+   * @return Promise to an object with response containing discovered WiFi networks
+   */
+  public async getCommandWifiScan() {
+    const { data } = await getApi1EnergySitesByIdCommandWifiScan({
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Retrieve the device certificate from the energy gateway.
+   * @return Promise to an object with response containing the gateway's device certificate
+   */
+  public async getCommandDeviceCert() {
+    const { data } = await getApi1EnergySitesByIdCommandDeviceCert({
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Schedule a manual backup event on the Tesla Energy Gateway (TEG), triggering the Powerwall to enter backup mode for the specified duration.
+   * @param scheduling_info Scheduling parameters for the backup event
+   * @return Promise to an object with response containing the scheduled backup event's request ID
+   */
+  public async scheduleBackupEvent(
+    scheduling_info?: NonNullable<
+      PostApi1EnergySitesByIdCommandScheduleBackupEventData["body"]
+    >["scheduling_info"],
+  ) {
+    const { data } = await postApi1EnergySitesByIdCommandScheduleBackupEvent({
+      body: { scheduling_info },
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Cancel a previously scheduled manual backup event on the Tesla Energy Gateway (TEG).
+   * @return Promise to an object with response containing the cancelled backup event's request ID
+   */
+  public async cancelBackupEvent() {
+    const { data } = await postApi1EnergySitesByIdCommandCancelBackupEvent({
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Update local site configuration on the energy gateway using raw protobuf request fields.
+   * @param body Raw protobuf JSON fields for the request message
+   * @return Promise to an object with response containing the local site config update's request ID
+   */
+  public async setLocalSiteConfig(
+    body: PostApi1EnergySitesByIdCommandSetLocalSiteConfigData["body"],
+  ) {
+    const { data } = await postApi1EnergySitesByIdCommandSetLocalSiteConfig({
+      body,
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Set the Tesla Energy Gateway island mode.
+   * @param mode Island mode to request from the gateway
+   * @param force Whether to force the mode change even if the gateway would normally reject it
+   * @return Promise to an object with response containing the island mode change's request ID
+   */
+  public async setIslandMode(mode: 1 | 6, force?: boolean) {
+    const { data } = await postApi1EnergySitesByIdCommandSetIslandMode({
+      body: { mode, force },
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Add an authorized client to the energy gateway.
+   * @param body The authorized client's key type, public key, client type, and description
+   * @return Promise to an object with response containing the added authorized client
+   */
+  public async addAuthorizedClient(
+    body: PostApi1EnergySitesByIdCommandAddAuthorizedClientData["body"],
+  ) {
+    const { data } = await postApi1EnergySitesByIdCommandAddAuthorizedClient({
+      body,
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * Remove an authorized client from the energy gateway.
+   * @param body Raw protobuf JSON fields identifying the client to remove
+   * @return Promise to an object with response containing the removed authorized client's request ID
+   */
+  public async removeAuthorizedClient(
+    body: PostApi1EnergySitesByIdCommandRemoveAuthorizedClientData["body"],
+  ) {
+    const { data } = await postApi1EnergySitesByIdCommandRemoveAuthorizedClient(
+      {
+        body,
+        path: { id: this.siteId },
+        client: this.root.client,
+      },
+    );
     return data;
   }
 
