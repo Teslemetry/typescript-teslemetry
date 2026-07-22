@@ -394,6 +394,7 @@ node-red
 
 ### CI/CD
 - `.github/workflows/publish.yml` - Automated build, test, and publish. Its "Upgrade npm for OIDC support" step always installs `npm@latest`, whose `engines.node` requirement can rise ahead of the workflow's `actions/setup-node` pin (this happened 2026-07: npm 12 required node ^22.22.2/^24.15.0/>=26, but the workflow was pinned to Node 20, breaking every publish with EBADENGINE). If publish starts failing, check `npm view npm@latest engines` against the pinned `node-version` first.
+- `pnpm/action-setup` in `publish.yml`/`ci.yml` must use `@v4` with no hardcoded `version:` (it then reads the `packageManager` field in root `package.json`). A `@v2`/hardcoded-major pin that drifts from `packageManager` (e.g. installing pnpm 9 while `packageManager` says `pnpm@10.x`) makes `changeset publish` silently fall through to a plain `npm publish` that rejects the `--git-checks` flag changesets passes for the pnpm path, failing with `EUNKNOWNCONFIG` - this looks like a changesets/flag bug but is actually a pnpm-version mismatch. Keep root `packageManager` and both workflow files' pnpm major in sync (see the sibling `tesla-protocol` repo's `publish.yml` for the working reference shape).
 
 ## Integration-Specific Notes
 
