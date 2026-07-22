@@ -38,9 +38,17 @@ export abstract class BaseEnergyService {
       displayName?: string,
       subtype?: string,
     ) => Service;
-    this.service =
-      this.accessory.getService(serviceType) ||
-      this.accessory.addService(new ConcreteService(displayName, subType));
+    // getService() matches by service type alone, so sibling services that
+    // intentionally share a HomeKit service class (e.g. Switch) would collapse
+    // onto one instance. Look up by subType when one is given; services with
+    // no subType are singletons for their type (e.g. AccessoryInformation, which
+    // HAP itself pre-creates on every Accessory) and must keep matching by type
+    // alone so they attach to that existing instance instead of colliding with it.
+    this.service = subType
+      ? this.accessory.getServiceById(serviceType, subType) ||
+        this.accessory.addService(new ConcreteService(displayName, subType))
+      : this.accessory.getService(serviceType) ||
+        this.accessory.addService(new ConcreteService(displayName));
 
     // Set the service name
     this.service.setCharacteristic(
