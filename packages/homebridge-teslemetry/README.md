@@ -1,6 +1,6 @@
-# @teslemetry/homebridge-teslemetry
+# homebridge-teslemetry
 
-[![npm version](https://badge.fury.io/js/%40teslemetry%2Fhomebridge-teslemetry.svg)](https://badge.fury.io/js/%40teslemetry%2Fhomebridge-teslemetry)
+[![npm version](https://badge.fury.io/js/homebridge-teslemetry.svg)](https://badge.fury.io/js/homebridge-teslemetry)
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 
 Teslemetry platform plugin for Homebridge with real-time streaming for Tesla vehicles and energy site monitoring.
@@ -44,13 +44,13 @@ Teslemetry platform plugin for Homebridge with real-time streaming for Tesla veh
 ### Via Command Line
 
 ```bash
-npm install -g @teslemetry/homebridge-teslemetry
+npm install -g homebridge-teslemetry
 ```
 
 Or if using pnpm:
 
 ```bash
-pnpm add -g @teslemetry/homebridge-teslemetry
+pnpm add -g homebridge-teslemetry
 ```
 
 ## Configuration
@@ -171,10 +171,10 @@ cd typescript-teslemetry
 pnpm install
 
 # Build the package
-pnpm --filter @teslemetry/homebridge-teslemetry build
+pnpm --filter homebridge-teslemetry build
 
 # Watch mode for development
-pnpm --filter @teslemetry/homebridge-teslemetry watch
+pnpm --filter homebridge-teslemetry watch
 ```
 
 ### Testing Locally
@@ -186,7 +186,7 @@ pnpm link --global
 
 # In your Homebridge directory
 cd ~/.homebridge
-pnpm link --global @teslemetry/homebridge-teslemetry
+pnpm link --global homebridge-teslemetry
 
 # Run Homebridge in debug mode
 homebridge -D

@@ -55,4 +55,4 @@ export interface TeslemetryPlatformConfig {
  * Plugin constants
  */
 export const PLATFORM_NAME = "Teslemetry";
-export const PLUGIN_NAME = "@teslemetry/homebridge-teslemetry";
+export const PLUGIN_NAME = "homebridge-teslemetry";
