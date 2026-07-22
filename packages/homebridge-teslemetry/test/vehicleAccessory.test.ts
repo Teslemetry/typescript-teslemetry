@@ -16,10 +16,10 @@ function setup() {
 test("initializes the expected number of distinct HAP services", () => {
 	const { accessory } = setup();
 	// Information, Battery, Climate, ChargeLimit, Door(x6) = 10 services with a
-	// unique HAP service type/subtype pair, plus 1 shared Switch service and 1
-	// shared LockMechanism service (see serviceCollision.test.ts for why those
-	// two are shared instead of 4 and 2 respectively).
-	assert.equal(accessory.services.length, 12);
+	// unique HAP service type, plus 4 distinct Switch services (ChargeSwitch,
+	// Defrost, Sentry, Wake) and 2 distinct LockMechanism services (Lock,
+	// ChargePort), each with its own subType.
+	assert.equal(accessory.services.length, 16);
 });
 
 test("destroy() tears down signal subscriptions so later SSE data no longer updates characteristics", () => {

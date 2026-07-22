@@ -15,9 +15,9 @@ function setup() {
 test("initializes the expected number of distinct HAP services", () => {
 	const { accessory } = setup();
 	// Information, Battery, BackupReserve, OperationMode = 4 services with a
-	// unique HAP service type, plus 1 shared Switch service (StormWatch and
-	// GridCharging both use Service.Switch; see energyServiceCollision.test.ts).
-	assert.equal(accessory.services.length, 5);
+	// unique HAP service type, plus 2 distinct Switch services (StormWatch and
+	// GridCharging), each with its own subType.
+	assert.equal(accessory.services.length, 6);
 });
 
 test("startPolling requests both siteInfo and liveStatus polling", () => {

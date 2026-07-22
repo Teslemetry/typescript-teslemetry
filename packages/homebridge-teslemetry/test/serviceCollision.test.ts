@@ -5,12 +5,10 @@ import { VehicleAccessory } from "../src/vehicle.js";
 import { createFakeAccessory, createFakePlatform } from "./fakePlatform.js";
 import { createFakeVehicle } from "./fakeVehicle.js";
 
-// BaseService's getOrCreate lookup (vehicle-services/base.ts) matches an existing
-// service by HAP service type alone; it does not also match on subType. Several
-// vehicle-services intentionally pass different subTypes but share a service
-// type, so they collapse onto one shared service instance instead of getting
-// one each, and each service's onSet registration silently replaces the
-// previous one's. These tests pin down that current, shared-instance behavior.
+// BaseService's getOrCreate lookup (vehicle-services/base.ts) now matches an
+// existing service by HAP service type *and* subType. Several vehicle-services
+// intentionally pass different subTypes but share a service type, so each one
+// gets its own service instance and its own onSet registration.
 
 function setup() {
 	const { platform } = createFakePlatform();
@@ -20,13 +18,15 @@ function setup() {
 	return { accessory, vehicle };
 }
 
-test("ChargeSwitch/Defrost/Sentry/Wake share a single Service.Switch instance instead of getting one each", () => {
+test("ChargeSwitch/Defrost/Sentry/Wake each get their own Service.Switch instance", () => {
 	const { accessory } = setup();
 	const switchServices = accessory.services.filter((s) => s.UUID === Service.Switch.UUID);
-	assert.equal(switchServices.length, 1);
+	assert.equal(switchServices.length, 4);
+	const subtypes = switchServices.map((s) => s.subtype).sort();
+	assert.deepEqual(subtypes, ["charging", "defrost", "sentry", "wake"]);
 });
 
-test("only the last-constructed Switch service (Wake) responds to the shared switch's SET handler", async () => {
+test("each Switch service's SET handler routes to its own vehicle command independently", async () => {
 	const { accessory, vehicle } = setup();
 	const calls: string[] = [];
 	(vehicle.api as any).wakeUp = () => {
@@ -38,19 +38,22 @@ test("only the last-constructed Switch service (Wake) responds to the shared swi
 		return Promise.resolve({});
 	};
 
-	const switchService = accessory.getService(Service.Switch)!;
-	await switchService.getCharacteristic(Characteristic.On).handleSetRequest(true as never);
-
+	const wakeService = accessory.getServiceById(Service.Switch, "wake")!;
+	await wakeService.getCharacteristic(Characteristic.On).handleSetRequest(true as never);
 	assert.deepEqual(calls, ["wakeUp"]);
+
+	const chargingService = accessory.getServiceById(Service.Switch, "charging")!;
+	await chargingService.getCharacteristic(Characteristic.On).handleSetRequest(true as never);
+	assert.deepEqual(calls, ["wakeUp", "startCharging"]);
 });
 
-test("Lock and ChargePort share a single Service.LockMechanism instance instead of getting one each", () => {
+test("Lock and ChargePort each get their own Service.LockMechanism instance", () => {
 	const { accessory } = setup();
 	const lockServices = accessory.services.filter((s) => s.UUID === Service.LockMechanism.UUID);
-	assert.equal(lockServices.length, 1);
+	assert.equal(lockServices.length, 2);
 });
 
-test("only the last-constructed LockMechanism service (ChargePort) responds to the shared lock's SET handler", async () => {
+test("each LockMechanism service's SET handler routes to its own vehicle command independently", async () => {
 	const { accessory, vehicle } = setup();
 	const calls: string[] = [];
 	(vehicle.api as any).closeChargePort = () => {
@@ -62,10 +65,16 @@ test("only the last-constructed LockMechanism service (ChargePort) responds to t
 		return Promise.resolve({});
 	};
 
-	const lockService = accessory.getService(Service.LockMechanism)!;
+	const lockService = accessory.getServiceById(Service.LockMechanism, "charge-port")!;
 	await lockService
 		.getCharacteristic(Characteristic.LockTargetState)
 		.handleSetRequest(Characteristic.LockTargetState.SECURED as never);
-
 	assert.deepEqual(calls, ["closeChargePort"]);
+
+	const doorLockService = accessory.getService(Service.LockMechanism)!;
+	assert.notEqual(doorLockService, lockService);
+	await doorLockService
+		.getCharacteristic(Characteristic.LockTargetState)
+		.handleSetRequest(Characteristic.LockTargetState.SECURED as never);
+	assert.deepEqual(calls, ["closeChargePort", "lockDoors"]);
 });
