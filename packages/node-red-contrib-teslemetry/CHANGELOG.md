@@ -1,5 +1,11 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.3.0
+
+### Minor Changes
+
+- d2907d5: Add a "Get Tariff (TOU rates)" command to the Energy Command node, surfacing the SDK's `getTariff()` read (time-of-use rate schedule) in flows.
+
 ## 0.2.1
 
 ### Patch Changes
