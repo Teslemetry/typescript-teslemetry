@@ -57,6 +57,9 @@ export default function (RED: NodeAPI) {
           case "getSiteInfo":
             result = await site.getSiteInfo();
             break;
+          case "getTariff":
+            result = { response: await site.getTariff() };
+            break;
           case "setBackupReserve":
             validateParameters(msg, {
               percentage: {
