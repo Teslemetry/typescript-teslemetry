@@ -14,7 +14,7 @@ typescript-teslemetry/
 │   ├── api/                           # Core TypeScript/JavaScript SDK
 │   ├── node-red-contrib-teslemetry/   # Node-RED integration
 │   ├── n8n-nodes-teslemetry/          # n8n workflow integration
-│   ├── homebridge-teslemetry/         # Homebridge plugin (private, not published)
+│   ├── homebridge-teslemetry/         # Homebridge plugin (published to npm)
 │   └── iobroker.teslemetry/           # ioBroker adapter (published to npm)
 ├── pnpm-workspace.yaml                # Workspace configuration
 ├── tsconfig.json                      # Root TypeScript config
@@ -114,7 +114,7 @@ pnpm --filter node-red-contrib-teslemetry build
 ### 4. `homebridge-teslemetry` - Homebridge Plugin
 
 **Location**: `packages/homebridge-teslemetry/`
-**Status**: Private (`"private": true`, not published to npm)
+**Status**: Published to npm as `homebridge-teslemetry`, superseding the legacy hand-published package of the same name via a same-name major hard cut (v1.0.0 over legacy 0.4.x) - no dual-maintain, no rename.
 
 **Purpose**: Exposes vehicles and energy sites as HomeKit accessories via `src/vehicle-services/*` and `src/energy-services/*` service classes, each a thin adapter between a HomeKit `Service`/`Characteristic` and the corresponding `@teslemetry/api` method.
 
