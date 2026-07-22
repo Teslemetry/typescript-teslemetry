@@ -15,7 +15,7 @@ typescript-teslemetry/
 │   ├── node-red-contrib-teslemetry/   # Node-RED integration
 │   ├── n8n-nodes-teslemetry/          # n8n workflow integration
 │   ├── homebridge-teslemetry/         # Homebridge plugin (private, not published)
-│   └── iobroker.teslemetry/           # ioBroker adapter (private, not published)
+│   └── iobroker.teslemetry/           # ioBroker adapter (published to npm)
 ├── pnpm-workspace.yaml                # Workspace configuration
 ├── tsconfig.json                      # Root TypeScript config
 ├── package.json                       # Monorepo root package
@@ -127,7 +127,7 @@ pnpm --filter node-red-contrib-teslemetry build
 ### 5. `iobroker.teslemetry` - ioBroker Adapter
 
 **Location**: `packages/iobroker.teslemetry/`
-**Status**: Private (`"private": true`, not published to npm)
+**Status**: Published to npm. Not yet listed in the ioBroker adapter repository (`ioBroker/ioBroker.repositories`) - that listing is a separate, manual submission (repochecker + ioBroker maintainer review) that requires the npm package to already exist.
 
 **Purpose**: ioBroker adapter exposing vehicles and energy sites as ioBroker states/objects (`lib/StateManager.ts`, `lib/VehicleHandler.ts`, `lib/EnergyHandler.ts`, `lib/StreamHandler.ts`).
 

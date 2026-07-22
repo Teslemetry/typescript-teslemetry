@@ -1,8 +1,12 @@
 {
   "common": {
     "name": "teslemetry",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "news": {
+      "0.1.10": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert"
+      },
       "0.1.9": {
         "en": "Dependency updates",
         "de": "Abhängigkeiten aktualisiert"
