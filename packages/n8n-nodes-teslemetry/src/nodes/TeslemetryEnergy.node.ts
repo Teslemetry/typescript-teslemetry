@@ -56,6 +56,11 @@ export class TeslemetryEnergy implements INodeType {
 						action: 'Get site info',
 					},
 					{
+						name: 'Get Tariff',
+						value: 'getTariff',
+						action: 'Get tariff TOU rates',
+					},
+					{
 						name: 'Set Backup Reserve',
 						value: 'setBackupReserve',
 						action: 'Set backup reserve percentage',
@@ -204,6 +209,9 @@ export class TeslemetryEnergy implements INodeType {
 						break;
 					case 'getSiteInfo':
 						result = await energy.getSiteInfo();
+						break;
+					case 'getTariff':
+						result = { response: await energy.getTariff() };
 						break;
 					case 'setBackupReserve':
 						const reserve = this.getNodeParameter('backup_reserve_percent', itemIndex) as number;

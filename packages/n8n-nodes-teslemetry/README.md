@@ -73,6 +73,7 @@ Interact with Tesla Energy sites (Solar/Powerwall).
 **Operations:**
 - **Get Live Status**: Live power usage details.
 - **Get Site Info**: Configuration and site details.
+- **Get Tariff**: Time-of-use rate schedule.
 - **Set Backup Reserve**: Set the battery reserve percentage.
 - **Set Operation Mode**: Self Consumption, Backup, or Autonomous.
 - **Set Storm Mode**: Enable/Disable Storm Mode.
