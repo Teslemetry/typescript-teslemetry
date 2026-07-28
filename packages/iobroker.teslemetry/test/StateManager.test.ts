@@ -50,3 +50,21 @@ test('updateEnergySiteData reads the flat getLiveStatus()/getSiteInfo() response
 	assert.equal(states.get('energy.123.live.grid_status'), 'Active');
 	assert.equal(states.get('energy.123.battery.percentage'), 77);
 });
+
+test('updateEnergySiteData surfaces tariff_id/tariff_content/tariff_content_v2 from the getSiteInfo() response shape', async () => {
+	const { adapter, states } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+
+	await stateManager.updateEnergySiteData(123, {
+		tariff_id: 'PGE-EV2-A',
+		tariff_content: { code: 'PGE-EV2-A' },
+		tariff_content_v2: { code: 'PGE-EV2-A', utility: 'PG&E', currency: 'USD' },
+	});
+
+	assert.equal(states.get('energy.123.tariff.tariff_id'), 'PGE-EV2-A');
+	assert.equal(states.get('energy.123.tariff.tariff_content'), JSON.stringify({ code: 'PGE-EV2-A' }));
+	assert.equal(
+		states.get('energy.123.tariff.tariff_content_v2'),
+		JSON.stringify({ code: 'PGE-EV2-A', utility: 'PG&E', currency: 'USD' })
+	);
+});

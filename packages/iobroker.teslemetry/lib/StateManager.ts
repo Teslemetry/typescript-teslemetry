@@ -129,6 +129,12 @@ export class StateManager {
 		await this.createState(`${base}.operation.backup_reserve_percent`, 'Backup Reserve', 'number', 'level.battery', true, true, 20, '%');
 		await this.createState(`${base}.operation.off_grid_reserve_percent`, 'Off-Grid Reserve', 'number', 'level.battery', true, true, 0, '%');
 
+		// Tariff channel (read-only - rate plan is managed through the utility/Tesla app, not this adapter)
+		await this.createChannel(`${base}.tariff`, 'Tariff');
+		await this.createState(`${base}.tariff.tariff_id`, 'Tariff Plan Name', 'string', 'text', true, false);
+		await this.createState(`${base}.tariff.tariff_content`, 'Tariff Content (JSON)', 'string', 'json', true, false);
+		await this.createState(`${base}.tariff.tariff_content_v2`, 'Tariff Content V2 (JSON)', 'string', 'json', true, false);
+
 		// Commands channel
 		await this.createChannel(`${base}.commands`, 'Commands');
 		await this.createState(`${base}.commands.storm_mode`, 'Storm Mode', 'boolean', 'button', false, true, false);
@@ -268,6 +274,17 @@ export class StateManager {
 			}
 			if (data.off_grid_vehicle_charging_reserve_percent !== undefined) {
 				await this.setStateAsync(`${base}.operation.off_grid_reserve_percent`, data.off_grid_vehicle_charging_reserve_percent);
+			}
+
+			// Update tariff (getSiteInfo() already carries these fields - see TeslemetryEnergyApi.getTariff())
+			if (data.tariff_id !== undefined) {
+				await this.setStateAsync(`${base}.tariff.tariff_id`, data.tariff_id);
+			}
+			if (data.tariff_content !== undefined) {
+				await this.setStateAsync(`${base}.tariff.tariff_content`, JSON.stringify(data.tariff_content));
+			}
+			if (data.tariff_content_v2 !== undefined) {
+				await this.setStateAsync(`${base}.tariff.tariff_content_v2`, JSON.stringify(data.tariff_content_v2));
 			}
 		} catch (error) {
 			this.adapter.log.error(`Error updating energy site data for ${siteId}: ${error}`);
