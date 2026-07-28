@@ -178,6 +178,10 @@ teslemetry.0
         │   ├── mode                      (string, read-write)
         │   ├── backup_reserve_percent    (number, read-write)
         │   └── off_grid_reserve_percent  (number, read-write)
+        ├── tariff
+        │   ├── tariff_id                 (string, read-only)
+        │   ├── tariff_content            (string/JSON, read-only)
+        │   └── tariff_content_v2         (string/JSON, read-only)
         └── commands
             └── storm_mode                (boolean, write-only)
 ```

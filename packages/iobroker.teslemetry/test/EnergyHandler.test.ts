@@ -70,7 +70,10 @@ test('fetchSiteData calls getLiveStatus()/getSiteInfo() and updates states from 
 
 	(site as any).getLiveStatus = () =>
 		Promise.resolve({ response: { solar_power: 500, battery_power: -100, grid_power: 0, grid_status: 'Active', percentage_charged: 80 } });
-	(site as any).getSiteInfo = () => Promise.resolve({ response: { default_real_mode: 'self_consumption', backup_reserve_percent: 20 } });
+	(site as any).getSiteInfo = () =>
+		Promise.resolve({
+			response: { default_real_mode: 'self_consumption', backup_reserve_percent: 20, tariff_id: 'PGE-EV2-A' },
+		});
 
 	const { adapter, states } = createFakeAdapter();
 	const handler = new EnergyHandler(adapter, teslemetry, new StateManager(adapter));
@@ -83,4 +86,5 @@ test('fetchSiteData calls getLiveStatus()/getSiteInfo() and updates states from 
 	assert.equal(states.get(`energy.${SITE_ID}.battery.percentage`), 80);
 	assert.equal(states.get(`energy.${SITE_ID}.operation.mode`), 'self_consumption');
 	assert.equal(states.get(`energy.${SITE_ID}.operation.backup_reserve_percent`), 20);
+	assert.equal(states.get(`energy.${SITE_ID}.tariff.tariff_id`), 'PGE-EV2-A');
 });
