@@ -27,18 +27,6 @@
         "required": false,
         "description": "Prefix accessory names with vehicle/site name for easier identification"
       },
-      "latitude": {
-        "title": "Latitude",
-        "type": "number",
-        "required": false,
-        "description": "Latitude for Homelink activation (required for Homelink service)"
-      },
-      "longitude": {
-        "title": "Longitude",
-        "type": "number",
-        "required": false,
-        "description": "Longitude for Homelink activation (required for Homelink service)"
-      },
       "ignoreVehicles": {
         "title": "Ignore Vehicles",
         "type": "array",
@@ -77,14 +65,6 @@
       "expandable": true,
       "expanded": false,
       "items": ["name", "prefixName"]
-    },
-    {
-      "type": "fieldset",
-      "title": "Homelink Location",
-      "expandable": true,
-      "expanded": false,
-      "description": "Configure location for Homelink activation",
-      "items": ["latitude", "longitude"]
     },
     {
       "type": "fieldset",

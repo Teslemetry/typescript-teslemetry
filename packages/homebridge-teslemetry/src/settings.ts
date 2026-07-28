@@ -23,18 +23,6 @@ export interface TeslemetryPlatformConfig {
   accessToken: string;
 
   /**
-   * Latitude for Homelink activation
-   * Required if using Homelink service
-   */
-  latitude?: number;
-
-  /**
-   * Longitude for Homelink activation
-   * Required if using Homelink service
-   */
-  longitude?: number;
-
-  /**
    * List of vehicle VINs to ignore
    */
   ignoreVehicles?: string[];

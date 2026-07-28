@@ -114,7 +114,7 @@ pnpm --filter node-red-contrib-teslemetry build
 ### 4. `homebridge-teslemetry` - Homebridge Plugin
 
 **Location**: `packages/homebridge-teslemetry/`
-**Status**: Published to npm as `homebridge-teslemetry`, superseding the legacy hand-published package of the same name via a same-name major hard cut (v1.0.0 over legacy 0.4.x) - no dual-maintain, no rename.
+**Status**: Ready to publish to npm as `homebridge-teslemetry` 1.0.0, superseding the legacy hand-published package of the same name via a same-name major hard cut (no dual-maintain, no rename). The first CI publish attempt 404s until npm trusted publishing is registered for the `homebridge-teslemetry` package name on npmjs.com - only an npm org owner can do that; once registered, the existing changesets flow publishes on the next merge to `main` without further repo changes.
 
 **Purpose**: Exposes vehicles and energy sites as HomeKit accessories via `src/vehicle-services/*` and `src/energy-services/*` service classes, each a thin adapter between a HomeKit `Service`/`Characteristic` and the corresponding `@teslemetry/api` method.
 
