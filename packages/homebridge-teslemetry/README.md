@@ -9,17 +9,15 @@ Teslemetry platform plugin for Homebridge with real-time streaming for Tesla veh
 
 🚗 **Tesla Vehicle Control**
 - Real-time status updates via Server-Sent Events (SSE)
-- Lock/unlock doors
+- Lock/unlock doors, charge port lock
 - Climate control (heat/cool)
-- Charge management
-- Sentry mode control
-- Window control
-- And more...
+- Charge start/stop, charge limit, charge port
+- Sentry mode and wake control
+- Defrost, door sensors, battery level
 
 ⚡ **Energy Site Support**
 - Powerwall monitoring
-- Solar production tracking
-- Backup reserve, storm watch, and grid control
+- Backup reserve, operation mode, storm watch, and grid charging control
 
 🔄 **Live Updates**
 - Vehicles: instant updates via real-time streaming (SSE), no polling
@@ -71,8 +69,6 @@ Add the following to your Homebridge `config.json`:
       "name": "Teslemetry",
       "accessToken": "your_teslemetry_access_token_here",
       "prefixName": true,
-      "latitude": 37.7749,
-      "longitude": -122.4194,
       "ignoreVehicles": [],
       "ignoreEnergySites": []
     }
@@ -88,8 +84,6 @@ Add the following to your Homebridge `config.json`:
 | `accessToken` | string | **Yes** | - | Your Teslemetry API access token from [teslemetry.com](https://teslemetry.com) |
 | `name` | string | No | `"Teslemetry"` | Display name for the platform |
 | `prefixName` | boolean | No | `true` | Whether to prefix accessory names with the vehicle name |
-| `latitude` | number | No | - | Latitude for Homelink activation (required if using Homelink) |
-| `longitude` | number | No | - | Longitude for Homelink activation (required if using Homelink) |
 | `ignoreVehicles` | string[] | No | `[]` | Array of vehicle VINs to ignore |
 | `ignoreEnergySites` | number[] | No | `[]` | Array of energy site IDs to ignore |
 
@@ -115,24 +109,26 @@ Older Model S and Model X vehicles may have limited support.
 
 ## HomeKit Accessories
 
-Each Tesla vehicle will appear as multiple accessories in HomeKit:
+Each Tesla vehicle appears as multiple accessories in HomeKit, backed by real-time streaming:
 
-### Current Implementation (Phase 1)
-- **Vehicle Discovery** - Automatic discovery and registration of vehicles
-- **Real-time Streaming** - Connection to Teslemetry's streaming API
-
-### Coming Soon (Phase 2)
-- **Battery Service** - Battery level and charging status
-- **Lock Service** - Lock/unlock doors
-- **Climate Service** - Temperature control and HVAC
+- **Battery** - Battery level and charging status
+- **Lock** - Lock/unlock doors
+- **Climate** - Temperature control and HVAC
 - **Charge Port** - Open/close charge port
 - **Charge Switch** - Start/stop charging
 - **Charge Limit** - Set charge limit percentage
-- **Defrost Service** - Activate max defrost
+- **Defrost** - Activate max defrost
 - **Door Sensors** - Individual door status
-- **Window Control** - Vent/close windows
 - **Sentry Mode** - Enable/disable sentry mode
-- **Homelink** - Trigger Homelink (requires location config)
+- **Wake** - Wake the vehicle on demand
+
+Each energy site appears as its own set of accessories:
+
+- **Battery** - Charge level
+- **Operation Mode** - Switch between self-consumption, backup, autonomous, and time-based control
+- **Backup Reserve** - Set the backup reserve percentage
+- **Storm Watch** - Enable/disable storm watch
+- **Grid Charging** - Enable/disable charging from the grid
 
 ## Troubleshooting
 
@@ -194,7 +190,7 @@ homebridge -D
 
 ## Contributing
 
-Contributions are welcome! Please read the [contributing guidelines](../../CONTRIBUTING.md) before submitting pull requests.
+Contributions are welcome! Please open an issue or pull request on [GitHub](https://github.com/Teslemetry/typescript-teslemetry).
 
 ## Support
 
@@ -204,7 +200,7 @@ Contributions are welcome! Please read the [contributing guidelines](../../CONTR
 
 ## License
 
-Apache-2.0 - see [LICENSE](../../LICENSE) for details.
+Apache-2.0 - see [LICENSE](./LICENSE) for details.
 
 ## Credits
 
@@ -217,7 +213,7 @@ Apache-2.0 - see [LICENSE](../../LICENSE) for details.
 - [@teslemetry/api](../api) - Core TypeScript SDK
 - [node-red-contrib-teslemetry](../node-red-contrib-teslemetry) - Node-RED integration
 - [n8n-nodes-teslemetry](../n8n-nodes-teslemetry) - n8n workflow integration
-- [homey](../homey) - Homey smart home app
+- [iobroker.teslemetry](../iobroker.teslemetry) - ioBroker adapter
 
 ## Changelog
 

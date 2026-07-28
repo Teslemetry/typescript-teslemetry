@@ -50,6 +50,11 @@
   },
   "files": [
     "dist",
-    "config.schema.json"
-  ]
+    "config.schema.json",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }
