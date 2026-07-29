@@ -16391,7 +16391,7 @@ export type GetSseByVin_Data = {
     body?: never;
     path: {
         /**
-         * Vehicle Identification Number
+         * Vehicle Identification Number or Energy Site ID
          */
         vin: string;
     };
@@ -17985,6 +17985,20 @@ export type GetSseByVin_Responses = {
                     resend_interval_seconds?: number;
                 };
             };
+        };
+    } | {
+        createdAt: string;
+        site_id: string;
+        isCache?: boolean;
+        live_status: {
+            [key: string]: unknown;
+        };
+    } | {
+        createdAt: string;
+        site_id: string;
+        isCache?: boolean;
+        site_info: {
+            [key: string]: unknown;
         };
     };
 };

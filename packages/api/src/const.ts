@@ -7,6 +7,7 @@ import type {
 import type { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
 import type { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
 import type { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
+import type { TeslemetryEnergySiteStream } from "./TeslemetryEnergySiteStream.js";
 
 // Helper to extract members from the union
 type ExtractSse<T> = Extract<GetSseByVin_Response, T>;
@@ -20,6 +21,8 @@ export type SseConnectivity = ExtractSse<{ networkInterface: any }>;
 export type SseCredits = ExtractSse<{ credits: any }>;
 export type SseVehicleData = ExtractSse<{ vehicle_data: any }>;
 export type SseConfig = ExtractSse<{ config: any }>;
+export type SseLiveStatus = ExtractSse<{ live_status: any }>;
+export type SseSiteInfo = ExtractSse<{ site_info: any }>;
 
 export type FieldsResponse = GetApiConfigByVinResponses[200]["fields"];
 // The body of patch/post config is { fields: ... }
@@ -44,6 +47,7 @@ export interface EnergyDetails {
   id: number;
   name: string;
   api: TeslemetryEnergyApi;
+  sse: TeslemetryEnergySiteStream;
   metadata: EnergyMetadata;
 }
 

@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
+import { TeslemetryEnergySiteStream } from "./TeslemetryEnergySiteStream.js";
 import {
   SseCredits,
   SseEvent,
@@ -10,6 +11,8 @@ import {
   SseConnectivity,
   SseVehicleData,
   SseConfig,
+  SseLiveStatus,
+  SseSiteInfo,
   Signals,
 } from "./const.js";
 import { Teslemetry } from "./Teslemetry.js";
@@ -46,6 +49,8 @@ type TeslemetryStreamEventMap = {
   credits: SseCredits;
   vehicle_data: SseVehicleData;
   config: SseConfig;
+  live_status: SseLiveStatus;
+  site_info: SseSiteInfo;
   connect: void;
   disconnect: void;
   stream_error: TeslemetryStreamErrorEvent;
@@ -88,16 +93,25 @@ export interface VehicleCache {
 
 type Cache = Record<string, VehicleCache>;
 
+export interface EnergySiteCache {
+  live_status?: SseLiveStatus["live_status"];
+  site_info?: SseSiteInfo["site_info"];
+}
+
+type EnergyCache = Record<string, EnergySiteCache>;
+
 export class TeslemetryStream extends EventEmitter {
   private root: Teslemetry;
   public active: boolean = false;
   public connected: boolean = false;
   private vin: string | undefined;
   public cache: Cache = {};
+  public energyCache: EnergyCache = {};
   private cloudCache: boolean | undefined;
   private localCache: boolean | undefined;
   public logger: Logger;
   public vehicles: Map<string, TeslemetryVehicleStream> = new Map();
+  public energySites: Map<string, TeslemetryEnergySiteStream> = new Map();
 
   // Constructor and basic setup
   constructor(root: Teslemetry, options?: TeslemetryStreamOptions) {
@@ -120,7 +134,7 @@ export class TeslemetryStream extends EventEmitter {
     }
   }
 
-  public sendCache<K extends keyof TeslemetryStreamEventMap>(
+  public sendVehicleCache<K extends keyof TeslemetryStreamEventMap>(
     vin: string,
     event: K,
     listener: (data: any) => void,
@@ -175,14 +189,49 @@ export class TeslemetryStream extends EventEmitter {
     }
   }
 
+  public sendEnergyCache<K extends keyof TeslemetryStreamEventMap>(
+    siteId: string,
+    event: K,
+    listener: (data: any) => void,
+  ) {
+    const siteCache = this.energyCache[siteId];
+    if (!siteCache) return;
+    if (event === "live_status" && siteCache.live_status) {
+      listener({
+        createdAt: new Date().toISOString(),
+        site_id: siteId,
+        live_status: siteCache.live_status,
+        isCache: true,
+      } satisfies SseLiveStatus);
+    } else if (event === "site_info" && siteCache.site_info) {
+      listener({
+        createdAt: new Date().toISOString(),
+        site_id: siteId,
+        site_info: siteCache.site_info,
+        isCache: true,
+      } satisfies SseSiteInfo);
+    }
+  }
+
   public on<K extends keyof TeslemetryStreamEventMap>(
     event: K,
     listener: (data: TeslemetryStreamEventMap[K]) => void,
   ): this {
+    // Register before replaying cached events: EventEmitter's once()
+    // implements itself via on(), wrapping the caller's listener in a
+    // self-removing shim. Replaying into that shim before it is registered
+    // makes its self-removal a no-op (nothing to remove yet), so it marks
+    // itself fired but is then added anyway - a dead listener that never
+    // fires again and never goes away. Registering first lets the shim
+    // remove itself correctly when the replay invokes it.
+    super.on(event, listener);
     for (const vin in this.cache) {
-      this.sendCache(vin, event, listener);
+      this.sendVehicleCache(vin, event, listener);
     }
-    return super.on(event, listener);
+    for (const siteId in this.energyCache) {
+      this.sendEnergyCache(siteId, event, listener);
+    }
+    return this;
   }
 
   public getVehicle(vin: string): TeslemetryVehicleStream {
@@ -190,6 +239,13 @@ export class TeslemetryStream extends EventEmitter {
       new TeslemetryVehicleStream(this.root, vin);
     }
     return this.vehicles.get(vin)!;
+  }
+
+  public getEnergySite(id: string): TeslemetryEnergySiteStream {
+    if (!this.energySites.has(id)) {
+      new TeslemetryEnergySiteStream(this.root, id);
+    }
+    return this.energySites.get(id)!;
   }
 
   public async connect(): Promise<void> {
@@ -315,11 +371,27 @@ export class TeslemetryStream extends EventEmitter {
       this.emit("vehicle_data", event);
     } else if ("config" in event) {
       this.emit("config", event);
+    } else if ("live_status" in event) {
+      this.emit("live_status", event);
+    } else if ("site_info" in event) {
+      this.emit("site_info", event);
     }
     this.emit("all", event);
 
+    if ("site_id" in event) {
+      const site = this.energySites.get(event.site_id);
+      if (site) {
+        if ("live_status" in event) {
+          site.emit("live_status", event);
+        } else if ("site_info" in event) {
+          site.emit("site_info", event);
+        }
+      }
+      return;
+    }
+
     // "credits" events are account-wide and carry no vin, so they never route to a vehicle.
-    if (!event.vin) return;
+    if (!("vin" in event) || !event.vin) return;
 
     const vehicle = this.vehicles.get(event.vin);
     if (vehicle) {
@@ -346,34 +418,48 @@ export class TeslemetryStream extends EventEmitter {
     }
   }
 
-  private cacheState(event: SseState): void {
+  // Arrow-function fields, not methods: sendVehicleCache/sendEnergyCache
+  // replay cached events by calling the listener as a bare function (not
+  // through emit(), which binds `this` to the emitter itself), so an
+  // unbound method reference would see `this` as undefined mid-replay.
+  private cacheState = (event: SseState): void => {
     this.cache[event.vin] ??= {};
     this.cache[event.vin].state = event.state;
-  }
+  };
 
-  private cacheData(event: SseData): void {
+  private cacheData = (event: SseData): void => {
     this.cache[event.vin] ??= { data: {} };
     this.cache[event.vin].data = {
       ...this.cache[event.vin].data,
       ...event.data,
     };
-  }
+  };
 
-  private cacheErrors(event: SseErrors): void {
+  private cacheErrors = (event: SseErrors): void => {
     this.cache[event.vin] ??= {};
     this.cache[event.vin].errors = event.errors;
-  }
+  };
 
-  private cacheAlerts(event: SseAlerts): void {
+  private cacheAlerts = (event: SseAlerts): void => {
     this.cache[event.vin] ??= {};
     this.cache[event.vin].alerts = event.alerts;
-  }
+  };
 
-  private cacheConnectivity(event: SseConnectivity): void {
+  private cacheConnectivity = (event: SseConnectivity): void => {
     this.cache[event.vin] ??= {};
     this.cache[event.vin].connectivity ??= {};
     this.cache[event.vin].connectivity![event.networkInterface] = event.status;
-  }
+  };
+
+  private cacheLiveStatus = (event: SseLiveStatus): void => {
+    this.energyCache[event.site_id] ??= {};
+    this.energyCache[event.site_id].live_status = event.live_status;
+  };
+
+  private cacheSiteInfo = (event: SseSiteInfo): void => {
+    this.energyCache[event.site_id] ??= {};
+    this.energyCache[event.site_id].site_info = event.site_info;
+  };
 
   public startLocalCache(): void {
     this.localCache = true;
@@ -382,6 +468,8 @@ export class TeslemetryStream extends EventEmitter {
     this.on("errors", this.cacheErrors);
     this.on("alerts", this.cacheAlerts);
     this.on("connectivity", this.cacheConnectivity);
+    this.on("live_status", this.cacheLiveStatus);
+    this.on("site_info", this.cacheSiteInfo);
     this.logger.info(`Started local cache`);
   }
 
@@ -392,6 +480,8 @@ export class TeslemetryStream extends EventEmitter {
     this.off("errors", this.cacheErrors);
     this.off("alerts", this.cacheAlerts);
     this.off("connectivity", this.cacheConnectivity);
+    this.off("live_status", this.cacheLiveStatus);
+    this.off("site_info", this.cacheSiteInfo);
     this.logger.info(`Stopped local cache`);
   }
 }

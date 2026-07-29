@@ -61,8 +61,9 @@ See each package's own `package.json`/`README.md` for its purpose and structure 
 
 **Code Generation**:
 - Uses `@hey-api/openapi-ts` to generate client from OpenAPI spec
-- Run: `pnpm --filter @teslemetry/api generate`
+- Run: `pnpm --filter @teslemetry/api client` (package.json script is named `client`, not `generate`)
 - The generated client (`src/client/sdk.gen.ts`) often already has functions for endpoints that `TeslemetryVehicleApi.ts`/`TeslemetryEnergyApi.ts` haven't wrapped yet - grep `src/client/sdk.gen.ts` for the endpoint before assuming closing a capability gap needs a spec regen; usually it's just a new hand-written method that calls the existing generated function.
+- `@hey-api/openapi-ts@0.88.0` cannot run against the root-pinned `typescript@7.0.2` in this repo's own `node_modules` - it throws `TypeError: Cannot read properties of undefined (reading 'LineFeed')` from its bundled `ts.NewLineKind` access, regardless of input spec (confirmed against both a local file and the real `openapi.yaml` URL). Workaround: `npm install @hey-api/openapi-ts@0.88.0 typescript@5.9.3 --no-save` in a scratch directory outside the repo, then run that scratch install's `openapi-ts` binary with a config pointing `input` at the desired spec and `output: { path: ..., importFileExtension: ".js" }` (the `.js` extension - to match this repo's NodeNext-style generated imports - is otherwise only inferred from a nearby tsconfig, which a scratch dir doesn't have). Diff the result against the committed `src/client/` and apply only the intended delta by hand if regenerating against an unreleased/PR spec, since the live production spec may have drifted since the client was last committed.
 
 ### 2. `node-red-contrib-teslemetry` - Node-RED Integration
 

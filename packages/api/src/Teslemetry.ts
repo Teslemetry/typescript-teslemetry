@@ -84,6 +84,18 @@ export class Teslemetry {
   }
 
   /**
+   * Get an energy site instance with both API and SSE capabilities.
+   * @param siteId Energy site ID
+   * @returns Object containing both API and SSE energy site instances
+   */
+  public getEnergySite(siteId: number) {
+    return {
+      api: this.api.getEnergySite(siteId),
+      sse: this.sse.getEnergySite(String(siteId)),
+    };
+  }
+
+  /**
    * Ensure the users region has been set
    * @returns Promise that resolves to the region ("na" or "eu")
    */
@@ -125,6 +137,7 @@ export class Teslemetry {
             name: metadata.name ?? "Unnamed",
             id: siteId,
             api: this.api.getEnergySite(siteId),
+            sse: this.sse.getEnergySite(id),
             metadata,
           },
         ];

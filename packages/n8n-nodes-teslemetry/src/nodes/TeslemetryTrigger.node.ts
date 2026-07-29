@@ -135,7 +135,7 @@ export class TeslemetryTrigger implements INodeType {
 		} else {
 			// Create callback that filters by VIN if specified
 			const callback = (eventData: SseEvent) => {
-				if (!vin || eventData.vin === vin) {
+				if (!vin || ('vin' in eventData && eventData.vin === vin)) {
 					emit(eventData);
 				}
 			};

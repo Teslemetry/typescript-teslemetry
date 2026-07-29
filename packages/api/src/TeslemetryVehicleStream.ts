@@ -125,8 +125,13 @@ export class TeslemetryVehicleStream extends EventEmitter {
     event: K,
     listener: (data: TeslemetryStreamEventMap[K]) => void,
   ): this {
-    this.root.sse.sendCache(this.vin, event, listener);
-    return super.on(event, listener);
+    // Register before replaying: see the matching comment in
+    // TeslemetryStream.on() - once() wraps the listener in a self-removing
+    // shim that must already be registered for its self-removal to work,
+    // or it becomes a permanently inert leftover listener.
+    super.on(event, listener);
+    this.root.sse.sendVehicleCache(this.vin, event, listener);
+    return this;
   }
 
   /** Get the current configuration for the vehicle */

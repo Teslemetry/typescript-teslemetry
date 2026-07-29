@@ -45,7 +45,7 @@ export default function (RED: NodeAPI) {
 
     // Create callback that filters by VIN if specified
     const callback = (event: SseEvent) => {
-      if (!node.vin || event.vin === node.vin) {
+      if (!node.vin || ("vin" in event && event.vin === node.vin)) {
         node.send({ payload: event, topic: node.event });
       }
     };
