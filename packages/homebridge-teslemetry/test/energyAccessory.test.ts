@@ -7,9 +7,9 @@ import { createFakeEnergySite } from "./fakeEnergySite.js";
 function setup() {
 	const { platform, logs } = createFakePlatform();
 	const accessory = createFakeAccessory("Test Site");
-	const { site, api } = createFakeEnergySite();
+	const { site, api, sse } = createFakeEnergySite();
 	const energyAccessory = new EnergyAccessory(platform as never, accessory, site);
-	return { accessory, logs, api, energyAccessory };
+	return { accessory, logs, api, sse, energyAccessory };
 }
 
 test("initializes the expected number of distinct HAP services", () => {
@@ -20,20 +20,51 @@ test("initializes the expected number of distinct HAP services", () => {
 	assert.equal(accessory.services.length, 6);
 });
 
-test("startPolling requests both siteInfo and liveStatus polling", () => {
+test("startPolling requests siteInfo polling and an initial liveStatus REST read, but no recurring liveStatus poll", async () => {
 	const { api } = setup();
-	assert.deepEqual(api.requestedPolling.sort(), ["liveStatus", "siteInfo"]);
+	assert.deepEqual(api.requestedPolling, ["siteInfo"]);
 });
 
-test("destroy() stops polling and detaches all service event listeners", () => {
-	const { api, energyAccessory } = setup();
+test("live_status stream events update subscribed services without a recurring REST poll", () => {
+	const { api, sse } = setup();
+	let received: unknown;
+	api.on("liveStatus", (data) => {
+		received = data;
+	});
+
+	sse.emit("live_status", { live_status: { percentage_charged: 42 } });
+
+	assert.deepEqual(received, { response: { percentage_charged: 42 } });
+});
+
+test("site_info stream events merge into the existing cache instead of replacing it", () => {
+	const { api, sse } = setup();
+	api.cache.siteInfo = { response: { version: "1.0", backup_reserve_percent: 20 } };
+
+	let received: unknown;
+	api.on("siteInfo", (data) => {
+		received = data;
+	});
+	sse.emit("site_info", { site_info: { backup_reserve_percent: 30 } });
+
+	assert.deepEqual(received, {
+		response: { version: "1.0", backup_reserve_percent: 30 },
+	});
+});
+
+test("destroy() stops polling and detaches all service and stream event listeners", () => {
+	const { api, sse, energyAccessory } = setup();
 	// Information, BackupReserve, StormWatch, OperationMode, and GridChargingService
 	// each subscribe to siteInfo.
 	assert.equal(api.listenerCount("siteInfo"), 5);
+	assert.equal(sse.listenerCount("live_status"), 1);
+	assert.equal(sse.listenerCount("site_info"), 1);
 
 	energyAccessory.destroy();
 
-	assert.deepEqual(api.stoppedPolling.sort(), ["liveStatus", "siteInfo"]);
+	assert.deepEqual(api.stoppedPolling, ["siteInfo"]);
 	assert.equal(api.listenerCount("siteInfo"), 0);
 	assert.equal(api.listenerCount("liveStatus"), 0);
+	assert.equal(sse.listenerCount("live_status"), 0);
+	assert.equal(sse.listenerCount("site_info"), 0);
 });
