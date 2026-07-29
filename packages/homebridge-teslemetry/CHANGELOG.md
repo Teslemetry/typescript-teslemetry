@@ -1,5 +1,15 @@
 # @teslemetry/homebridge-teslemetry
 
+## 1.0.1
+
+### Patch Changes
+
+- 7795040: Energy site accessories now consume `live_status` from the account stream instead of REST-polling it, matching the vehicle streaming path. An initial REST read still seeds deterministic startup values, and the persistent stream listener picks up the SDK's cache replay on reconnect. `site_info` stays REST-driven as the primary source, with stream events opportunistically merged in between polls.
+- Updated dependencies [9cd3c30]
+- Updated dependencies [dba83c5]
+- Updated dependencies [1908085]
+  - @teslemetry/api@0.10.0
+
 ## 1.0.0
 
 ### Major Changes
