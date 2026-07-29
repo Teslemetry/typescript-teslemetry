@@ -20,7 +20,7 @@ import {
 import { expandSseTopics, SseTopic, SseTopicPreset } from "./sseTopics.js";
 import { Teslemetry } from "./Teslemetry.js";
 import { Logger } from "./logger.js";
-import { getSseByVin_ } from "./client/sdk.gen.js";
+import { getSseById_ } from "./client/sdk.gen.js";
 import { TeslemetryStreamAuthError } from "./exceptions.js";
 
 export interface TeslemetryStreamOptions {
@@ -317,9 +317,9 @@ export class TeslemetryStream extends EventEmitter {
       // token is picked up on reconnect) and applies the policy below.
       let streamError: unknown;
       try {
-        const sse = await getSseByVin_({
+        const sse = await getSseById_({
           client: this.root.client,
-          path: { vin: this.vin || "" },
+          path: { id: this.vin || "" },
           query: {
             cache: this.cloudCache,
             ...(this.topicsParam ? { topics: this.topicsParam } : {}),

@@ -1,5 +1,5 @@
 import type {
-  GetSseByVin_Response,
+  GetSseById_Response,
   GetApiConfigByVinResponses,
   PatchApiConfigByVinData,
   GetApiMetadataResponses,
@@ -10,9 +10,9 @@ import type { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
 import type { TeslemetryEnergySiteStream } from "./TeslemetryEnergySiteStream.js";
 
 // Helper to extract members from the union
-type ExtractSse<T> = Extract<GetSseByVin_Response, T>;
+type ExtractSse<T> = Extract<GetSseById_Response, T>;
 
-export type SseEvent = GetSseByVin_Response;
+export type SseEvent = GetSseById_Response;
 export type SseState = ExtractSse<{ state: any }>;
 export type SseData = ExtractSse<{ data: any }>;
 export type SseErrors = ExtractSse<{ errors: any }>;
