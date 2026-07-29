@@ -14,8 +14,10 @@ import {
   SseLiveStatus,
   SseSiteInfo,
   SseEnergyTotals,
+  SseTariffContentV2,
   Signals,
 } from "./const.js";
+import { expandSseTopics, SseTopic, SseTopicPreset } from "./sseTopics.js";
 import { Teslemetry } from "./Teslemetry.js";
 import { Logger } from "./logger.js";
 import { getSseByVin_ } from "./client/sdk.gen.js";
@@ -29,6 +31,9 @@ export interface TeslemetryStreamOptions {
         cloud: boolean;
         local: boolean;
       };
+  /** Exact topic names and/or presets (see sseTopics.ts) selecting which SSE
+   *  events to receive. Omitted: legacy-all mode, unchanged forever. */
+  topics?: readonly (SseTopic | SseTopicPreset)[];
 }
 
 export interface TeslemetryStreamErrorEvent {
@@ -52,6 +57,7 @@ type TeslemetryStreamEventMap = {
   config: SseConfig;
   live_status: SseLiveStatus;
   site_info: SseSiteInfo;
+  tariff_content_v2: SseTariffContentV2;
   energy_totals: SseEnergyTotals;
   connect: void;
   disconnect: void;
@@ -98,10 +104,25 @@ type Cache = Record<string, VehicleCache>;
 export interface EnergySiteCache {
   live_status?: SseLiveStatus["live_status"];
   site_info?: SseSiteInfo["site_info"];
+  /** `undefined`: never received. `null`: explicitly removed by the server. */
+  tariff_content_v2?: SseTariffContentV2["tariff_content_v2"];
   energy_totals?: {
     url: SseEnergyTotals["url"];
     totals: SseEnergyTotals["totals"];
   };
+}
+
+/** Merges the cached slim `site_info` document with the last received
+ *  `tariff_content_v2` piece into a whole-document view resembling the full
+ *  REST `site_info` response. Returns `undefined` until a `site_info` event
+ *  has been cached; omits `tariff_content_v2` until a tariff event (present
+ *  or explicit-removal) has been cached, rather than guessing at absence. */
+export function composeEnergySiteInfo(
+  cache: EnergySiteCache,
+): (Record<string, unknown> & { tariff_content_v2?: Record<string, unknown> | null }) | undefined {
+  if (!cache.site_info) return undefined;
+  if (cache.tariff_content_v2 === undefined) return { ...cache.site_info };
+  return { ...cache.site_info, tariff_content_v2: cache.tariff_content_v2 };
 }
 
 type EnergyCache = Record<string, EnergySiteCache>;
@@ -115,6 +136,10 @@ export class TeslemetryStream extends EventEmitter {
   public energyCache: EnergyCache = {};
   private cloudCache: boolean | undefined;
   private localCache: boolean | undefined;
+  /** Comma-separated exact wire topic names, already expanded from any
+   *  presets; `undefined` means legacy-all mode (the `topics` param is
+   *  omitted entirely, never sent as an empty value). */
+  private topicsParam: string | undefined;
   public logger: Logger;
   public vehicles: Map<string, TeslemetryVehicleStream> = new Map();
   public energySites: Map<string, TeslemetryEnergySiteStream> = new Map();
@@ -132,6 +157,9 @@ export class TeslemetryStream extends EventEmitter {
       this.localCache = options?.cache?.local ?? true;
     }
     this.logger = root.logger;
+    if (options?.topics?.length) {
+      this.topicsParam = expandSseTopics(options.topics).join(",");
+    }
     if (this.vin) {
       this.getVehicle(this.vin);
     }
@@ -216,6 +244,16 @@ export class TeslemetryStream extends EventEmitter {
         site_info: siteCache.site_info,
         isCache: true,
       } satisfies SseSiteInfo);
+    } else if (
+      event === "tariff_content_v2" &&
+      siteCache.tariff_content_v2 !== undefined
+    ) {
+      listener({
+        createdAt: new Date().toISOString(),
+        site_id: siteId,
+        tariff_content_v2: siteCache.tariff_content_v2,
+        isCache: true,
+      } satisfies SseTariffContentV2);
     } else if (event === "energy_totals" && siteCache.energy_totals) {
       listener({
         createdAt: new Date().toISOString(),
@@ -288,6 +326,7 @@ export class TeslemetryStream extends EventEmitter {
           path: { vin: this.vin || "" },
           query: {
             cache: this.cloudCache,
+            ...(this.topicsParam ? { topics: this.topicsParam } : {}),
           },
           sseMaxRetryAttempts: 1,
           onSseError: (error) => {
@@ -391,6 +430,8 @@ export class TeslemetryStream extends EventEmitter {
       this.emit("live_status", event);
     } else if ("site_info" in event) {
       this.emit("site_info", event);
+    } else if ("tariff_content_v2" in event) {
+      this.emit("tariff_content_v2", event);
     } else if ("totals" in event) {
       this.emit("energy_totals", event as SseEnergyTotals);
     }
@@ -403,6 +444,8 @@ export class TeslemetryStream extends EventEmitter {
           site.emit("live_status", event);
         } else if ("site_info" in event) {
           site.emit("site_info", event);
+        } else if ("tariff_content_v2" in event) {
+          site.emit("tariff_content_v2", event);
         }
       }
       return;
@@ -487,6 +530,11 @@ export class TeslemetryStream extends EventEmitter {
     this.energyCache[event.site_id].site_info = event.site_info;
   };
 
+  private cacheTariffContentV2 = (event: SseTariffContentV2): void => {
+    this.energyCache[event.site_id] ??= {};
+    this.energyCache[event.site_id].tariff_content_v2 = event.tariff_content_v2;
+  };
+
   private cacheEnergyTotals = (event: SseEnergyTotals): void => {
     this.energyCache[event.id] ??= {};
     this.energyCache[event.id].energy_totals = {
@@ -504,6 +552,7 @@ export class TeslemetryStream extends EventEmitter {
     this.on("connectivity", this.cacheConnectivity);
     this.on("live_status", this.cacheLiveStatus);
     this.on("site_info", this.cacheSiteInfo);
+    this.on("tariff_content_v2", this.cacheTariffContentV2);
     this.on("energy_totals", this.cacheEnergyTotals);
     this.logger.info(`Started local cache`);
   }
@@ -517,6 +566,7 @@ export class TeslemetryStream extends EventEmitter {
     this.off("connectivity", this.cacheConnectivity);
     this.off("live_status", this.cacheLiveStatus);
     this.off("site_info", this.cacheSiteInfo);
+    this.off("tariff_content_v2", this.cacheTariffContentV2);
     this.off("energy_totals", this.cacheEnergyTotals);
     this.logger.info(`Stopped local cache`);
   }

@@ -380,6 +380,8 @@ node-red
 
 **Gotcha**: energy-site SSE event union members are inconsistent about which field identifies the site - `live_status`/`site_info` carry `site_id`, but `energy_totals` (and any future refresh-notification event sharing that uniform `{id, product_type, topic, url, createdAt, isCache}` shape) carries `id` instead. `TeslemetryStream._dispatch()`'s two routing blocks (one per field name) reflect this; adding a new energy SSE event means checking which field the backend's schema actually uses, not assuming `site_id`. Every `on()` override across `TeslemetryStream`/`TeslemetryVehicleStream`/`TeslemetryEnergySiteStream` must call `super.on()` before replaying any cached value to the listener - reversing that order silently breaks `once()` (see `test/energyStream.test.ts`'s dead-listener regression tests).
 
+**Gotcha**: `src/sseTopics.ts`'s `SSE_TOPICS` is the client-side mirror of the API's `src/lib/sseTopics.ts` allowlist - keep both in sync when the backend adds a wire event, or the new topic can never be selected via `stream.topics`. `SSE_TOPIC_PRESETS` entries are SDK-only convenience and are always expanded to exact wire names client-side before the `topics` query parameter is built - never send a preset name or a wildcard over the wire. `tariff_content_v2`'s body is `null` for the server's explicit tariff-removal signal, not merely "no update yet" - `EnergySiteCache.tariff_content_v2` distinguishes that (`null`) from "never received" (`undefined`), and replay/cache logic must preserve the distinction rather than treating `null` as falsy-skip.
+
 ### Node-RED Package
 - `src/nodes/*.html` - Node UI definitions (copied to dist/)
 - `src/shared.ts` - Shared utilities for all nodes

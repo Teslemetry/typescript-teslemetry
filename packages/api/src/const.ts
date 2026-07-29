@@ -23,6 +23,10 @@ export type SseVehicleData = ExtractSse<{ vehicle_data: any }>;
 export type SseConfig = ExtractSse<{ config: any }>;
 export type SseLiveStatus = ExtractSse<{ live_status: any }>;
 export type SseSiteInfo = ExtractSse<{ site_info: any }>;
+/** `tariff_content_v2: null` is the server's explicit removal signal, not
+ *  absence - distinguish it from "never received" (key missing from the
+ *  cache) rather than coercing both to the same falsy state. */
+export type SseTariffContentV2 = ExtractSse<{ tariff_content_v2: any }>;
 
 /** Mirrors the Teslemetry API's `ENERGY_HISTORY_TOTAL_FIELDS` (energyHistoryTotals.ts) field-for-field,
  *  so this list must be kept in sync with that server-side list. */

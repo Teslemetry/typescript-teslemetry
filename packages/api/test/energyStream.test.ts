@@ -321,3 +321,151 @@ test("once() on a cached energy_totals event fires exactly once and does not lea
   });
   assert.deepEqual(received, [totals]);
 });
+
+test("emits tariff_content_v2 on the stream and the scoped energy site", async () => {
+  const siteId = "555";
+  const tariff = { code: "PGE-EV2-A" };
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        site_id: siteId,
+        tariff_content_v2: tariff,
+      },
+    ]),
+  );
+
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+  const streamTariffs: unknown[] = [];
+  const siteTariffs: unknown[] = [];
+  teslemetry.sse.on("tariff_content_v2", (event) =>
+    streamTariffs.push(event.tariff_content_v2),
+  );
+  siteStream.on("tariff_content_v2", (event) =>
+    siteTariffs.push(event.tariff_content_v2),
+  );
+
+  await teslemetry.sse.connect();
+  await waitFor(() => siteTariffs.length > 0);
+  teslemetry.sse.disconnect();
+
+  assert.deepEqual(streamTariffs, [tariff]);
+  assert.deepEqual(siteTariffs, [tariff]);
+});
+
+test("a null tariff_content_v2 body is the explicit removal signal and is cached/replayed as null, not skipped", async () => {
+  const siteId = "556";
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        site_id: siteId,
+        tariff_content_v2: null,
+      },
+    ]),
+  );
+
+  await teslemetry.sse.connect();
+  await waitFor(
+    () => teslemetry.sse.energyCache[siteId]?.tariff_content_v2 !== undefined,
+  );
+  teslemetry.sse.disconnect();
+
+  assert.equal(teslemetry.sse.energyCache[siteId].tariff_content_v2, null);
+
+  const replayed: unknown[] = [];
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+  siteStream.on("tariff_content_v2", (event) =>
+    replayed.push(event.tariff_content_v2),
+  );
+  assert.deepEqual(replayed, [null]);
+});
+
+test("once() on a cached tariff_content_v2 event fires exactly once and does not leak a dead listener", async () => {
+  const siteId = "557";
+  const tariff = { code: "PGE-EV2-A" };
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        site_id: siteId,
+        tariff_content_v2: tariff,
+      },
+    ]),
+  );
+
+  await teslemetry.sse.connect();
+  await waitFor(
+    () => teslemetry.sse.energyCache[siteId]?.tariff_content_v2 !== undefined,
+  );
+  teslemetry.sse.disconnect();
+
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+  const received: unknown[] = [];
+  siteStream.once("tariff_content_v2", (event) =>
+    received.push(event.tariff_content_v2),
+  );
+
+  assert.deepEqual(received, [tariff]);
+  assert.equal(siteStream.listenerCount("tariff_content_v2"), 0);
+
+  siteStream.emit("tariff_content_v2", {
+    createdAt: "2026-01-01T00:00:01.000Z",
+    site_id: siteId,
+    tariff_content_v2: { code: "OTHER" },
+  });
+  assert.deepEqual(received, [tariff]);
+});
+
+test("siteInfoDocument composes the cached slim site_info with the last tariff_content_v2 piece", async () => {
+  const siteId = "558";
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        site_id: siteId,
+        site_info: { site_name: "Home" },
+      },
+      {
+        createdAt: "2026-01-01T00:00:01.000Z",
+        site_id: siteId,
+        tariff_content_v2: { code: "PGE-EV2-A" },
+      },
+    ]),
+  );
+
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+
+  await teslemetry.sse.connect();
+  await waitFor(
+    () => teslemetry.sse.energyCache[siteId]?.tariff_content_v2 !== undefined,
+  );
+  teslemetry.sse.disconnect();
+
+  assert.deepEqual(siteStream.siteInfoDocument, {
+    site_name: "Home",
+    tariff_content_v2: { code: "PGE-EV2-A" },
+  });
+});
+
+test("siteInfoDocument omits tariff_content_v2 until a tariff event has been cached, and is undefined before site_info arrives", async () => {
+  const siteId = "559";
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        site_id: siteId,
+        site_info: { site_name: "Home" },
+      },
+    ]),
+  );
+
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+  assert.equal(siteStream.siteInfoDocument, undefined);
+
+  await teslemetry.sse.connect();
+  await waitFor(() => teslemetry.sse.energyCache[siteId]?.site_info !== undefined);
+  teslemetry.sse.disconnect();
+
+  assert.deepEqual(siteStream.siteInfoDocument, { site_name: "Home" });
+});

@@ -1,12 +1,18 @@
 import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
-import type { SseLiveStatus, SseSiteInfo, SseEnergyTotals } from "./const.js";
+import type {
+  SseLiveStatus,
+  SseSiteInfo,
+  SseTariffContentV2,
+  SseEnergyTotals,
+} from "./const.js";
 import { Logger } from "./logger.js";
-import { EnergySiteCache } from "./TeslemetryStream.js";
+import { composeEnergySiteInfo, EnergySiteCache } from "./TeslemetryStream.js";
 
 type TeslemetryEnergySiteStreamEventMap = {
   live_status: SseLiveStatus;
   site_info: SseSiteInfo;
+  tariff_content_v2: SseTariffContentV2;
   energy_totals: SseEnergyTotals;
 };
 
@@ -51,6 +57,15 @@ export class TeslemetryEnergySiteStream extends EventEmitter {
 
   get cache(): EnergySiteCache {
     return this.root.sse.energyCache[this.id] ?? {};
+  }
+
+  /** Merges the cached slim `site_info` with the last `tariff_content_v2`
+   *  piece into a whole-document view. `undefined` until `site_info` has
+   *  been received at least once. */
+  get siteInfoDocument():
+    | (Record<string, unknown> & { tariff_content_v2?: Record<string, unknown> | null })
+    | undefined {
+    return composeEnergySiteInfo(this.cache);
   }
 
   public on<K extends keyof TeslemetryEnergySiteStreamEventMap>(

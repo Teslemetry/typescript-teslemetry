@@ -16397,6 +16397,10 @@ export type GetSseByVin_Data = {
     };
     query?: {
         cache?: boolean;
+        /**
+         * Comma-separated exact SSE wire event names to receive (state, data, alerts, errors, connectivity, vehicle_data, config, live_status, site_info, tariff_content_v2, energy_totals, credits). Omitted: legacy-all mode - every topic applicable to every accessible product, unchanged forever. Present: an exact allowlist, validated against the recognized topic set before the stream opens (duplicates are normalized; an unrecognized name or an empty value 400s).
+         */
+        topics?: string;
     };
     url: '/sse/{vin}?';
 };
@@ -17997,6 +18001,9 @@ export type GetSseByVin_Responses = {
         createdAt: string;
         site_id: string;
         isCache?: boolean;
+        /**
+         * Never carries tariff_content or tariff_content_v2 - subscribe to the tariff_content_v2 event for the site's V2 tariff, or use the REST site_info endpoint for the full Tesla-shaped document including both tariffs.
+         */
         site_info: {
             [key: string]: unknown;
         };
@@ -18010,6 +18017,16 @@ export type GetSseByVin_Responses = {
         totals: {
             [key: string]: number | null;
         };
+    } | {
+        createdAt: string;
+        site_id: string;
+        isCache?: boolean;
+        /**
+         * The site's tariff_content_v2 document, exactly as Tesla formats it in site_info; null means the tariff was removed.
+         */
+        tariff_content_v2: {
+            [key: string]: unknown;
+        } | null;
     };
 };
 
