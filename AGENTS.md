@@ -125,6 +125,8 @@ pnpm --filter node-red-contrib-teslemetry build
 
 **Testing**: `test/fakePlatform.ts`, `test/fakeVehicle.ts`, and `test/fakeEnergySite.ts` provide fakes for the Homebridge/HAP/Teslemetry-SDK objects the services depend on - real hap-nodejs `Service`/`Characteristic` classes are used (not mocks) so characteristic get/set wiring behaves as it does at runtime, driven via `handleSetRequest`/`handleGetRequest` rather than `setValue` (which fires the handler asynchronously with no return value to await). `vehicle.api`/`site.api` are plain stubs, not real `@teslemetry/api` instances, to keep tests free of network I/O.
 
+**Gotcha**: `energy-services/*` never touch `site.sse` directly - they subscribe to `site.api.on("siteInfo"|"liveStatus", ...)`, an event bus whose REST-response envelope shape (`{ response: {...} }`) they all destructure from. `EnergyAccessory` (`src/energy.ts`) is the only place that touches `site.sse`: it re-wraps incoming `live_status`/`site_info` stream events into that same envelope and re-emits them on `site.api`, so every service keeps working unchanged regardless of whether the data came from REST or the stream. `live_status` fully replaces the cached value (it's the primary continuous-update path, no recurring REST poll); `site_info` shallow-merges into the existing cache instead of replacing it, since the stream's `site_info` payload is a slimmer, evolving subset of the full REST response (e.g. tariff content lives in its own `tariff_v2` topic) - don't build anything in this layer that assumes the stream `site_info` event carries the full REST shape.
+
 ### 5. `iobroker.teslemetry` - ioBroker Adapter
 
 **Location**: `packages/iobroker.teslemetry/`

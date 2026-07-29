@@ -2,7 +2,8 @@
  * Base Energy Service Class
  *
  * Abstract class for all energy site services
- * Uses polling via API events instead of streaming
+ * Services subscribe to the site.api "siteInfo"/"liveStatus" event bus; EnergyAccessory
+ * feeds it from the account stream (liveStatus) and REST polling (siteInfo).
  */
 
 import type { PlatformAccessory, Service, Characteristic, WithUUID } from "homebridge";

@@ -5,7 +5,7 @@
  */
 
 import type { PlatformAccessory } from "homebridge";
-import type { EnergyDetails } from "@teslemetry/api";
+import type { EnergyDetails, SseLiveStatus, SseSiteInfo } from "@teslemetry/api";
 import type { TeslemetryPlatform } from "./platform.js";
 import type { BaseEnergyService } from "./energy-services/base.js";
 
@@ -25,6 +25,7 @@ import { GridChargingService } from "./energy-services/grid-charging.js";
 export class EnergyAccessory {
   private readonly services: BaseEnergyService[] = [];
   private pollingCleanup: Array<() => void> = [];
+  private streamCleanup: Array<() => void> = [];
 
   constructor(
     private readonly platform: TeslemetryPlatform,
@@ -40,6 +41,9 @@ export class EnergyAccessory {
 
     // Start polling for data
     this.startPolling();
+
+    // Consume the account stream this platform already opens for continuous updates
+    this.setupStreamListeners();
   }
 
   /**
@@ -79,17 +83,62 @@ export class EnergyAccessory {
    * Start polling for energy site data
    */
   private startPolling(): void {
-    // Request polling for site info (static configuration)
+    // Site info is slow-changing settings data; REST polling stays the primary source.
     this.pollingCleanup.push(this.site.api.requestPolling("siteInfo"));
 
-    // Request polling for live status (dynamic data like power flow, battery %)
-    this.pollingCleanup.push(this.site.api.requestPolling("liveStatus"));
+    // Live status now arrives continuously via the stream; fetch once via REST so
+    // characteristics have a deterministic value before the first stream event lands.
+    this.site.api.getLiveStatus().catch((error) => {
+      this.platform.log.warn(
+        `Initial live status fetch failed for ${this.site.name}:`,
+        error,
+      );
+    });
 
     this.platform.log.debug(`Started polling for ${this.site.name}`);
   }
 
   /**
-   * Cleanup all services and stop polling
+   * Register persistent stream listeners for continuous energy site updates.
+   *
+   * Registered before any wait on stream data (no once()) so
+   * TeslemetryEnergySiteStream's on-registration cache replay - which fires on
+   * every reconnect - is never missed.
+   */
+  private setupStreamListeners(): void {
+    const onLiveStatus = (event: SseLiveStatus) => {
+      const liveStatus = {
+        response: event.live_status,
+      } as NonNullable<typeof this.site.api.cache.liveStatus>;
+
+      this.site.api.cache.liveStatus = liveStatus;
+      this.site.api.emit("liveStatus", liveStatus);
+    };
+    this.site.sse.on("live_status", onLiveStatus);
+    this.streamCleanup.push(() => this.site.sse.off("live_status", onLiveStatus));
+
+    // Opportunistic only: site_info is being slimmed server-side (tariff is moving to
+    // its own tariff_v2 topic), so merge rather than replace to avoid clobbering
+    // REST-sourced fields that a slimmed stream event no longer carries.
+    const onSiteInfo = (event: SseSiteInfo) => {
+      const siteInfo = {
+        response: {
+          ...this.site.api.cache.siteInfo?.response,
+          ...event.site_info,
+        },
+      } as NonNullable<typeof this.site.api.cache.siteInfo>;
+
+      this.site.api.cache.siteInfo = siteInfo;
+      this.site.api.emit("siteInfo", siteInfo);
+    };
+    this.site.sse.on("site_info", onSiteInfo);
+    this.streamCleanup.push(() => this.site.sse.off("site_info", onSiteInfo));
+
+    this.platform.log.debug(`Started stream listeners for ${this.site.name}`);
+  }
+
+  /**
+   * Cleanup all services and stop polling/streaming
    */
   destroy(): void {
     this.platform.log.debug(`Destroying energy site accessory: ${this.site.name}`);
@@ -97,6 +146,10 @@ export class EnergyAccessory {
     // Stop polling
     this.pollingCleanup.forEach((stop) => stop());
     this.pollingCleanup.length = 0;
+
+    // Stop stream listeners
+    this.streamCleanup.forEach((stop) => stop());
+    this.streamCleanup.length = 0;
 
     // Clean up services
     this.services.forEach((service) => service.destroy());

@@ -18,18 +18,22 @@ export interface FakeEnergyApiCall {
 
 export interface FakeEnergyApi extends EventEmitter {
 	requestPolling(endpoint: "siteInfo" | "liveStatus"): () => void;
+	getLiveStatus(): Promise<unknown>;
 	requestedPolling: Array<"siteInfo" | "liveStatus">;
 	stoppedPolling: Array<"siteInfo" | "liveStatus">;
+	cache: { siteInfo: unknown; liveStatus: unknown };
 	calls: FakeEnergyApiCall[];
 }
 
 export interface FakeEnergySite {
 	site: EnergyDetails;
 	api: FakeEnergyApi;
+	sse: EventEmitter;
 }
 
 export function createFakeEnergySite(overrides: Partial<EnergyDetails> = {}): FakeEnergySite {
 	const emitter = new EventEmitter();
+	const sse = new EventEmitter();
 	const requestedPolling: Array<"siteInfo" | "liveStatus"> = [];
 	const stoppedPolling: Array<"siteInfo" | "liveStatus"> = [];
 	const calls: FakeEnergyApiCall[] = [];
@@ -38,9 +42,13 @@ export function createFakeEnergySite(overrides: Partial<EnergyDetails> = {}): Fa
 		requestedPolling,
 		stoppedPolling,
 		calls,
+		cache: { siteInfo: null, liveStatus: null },
 		requestPolling(endpoint: "siteInfo" | "liveStatus") {
 			requestedPolling.push(endpoint);
 			return () => stoppedPolling.push(endpoint);
+		},
+		getLiveStatus() {
+			return Promise.resolve(null);
 		},
 	}) as FakeEnergyApi;
 
@@ -57,9 +65,10 @@ export function createFakeEnergySite(overrides: Partial<EnergyDetails> = {}): Fa
 		id: 12345,
 		name: "Test Site",
 		api,
+		sse,
 		metadata: {},
 		...overrides,
 	} as unknown as EnergyDetails;
 
-	return { site, api };
+	return { site, api, sse };
 }
