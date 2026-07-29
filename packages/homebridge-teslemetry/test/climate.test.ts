@@ -36,9 +36,9 @@ test("with metadata.config.rhd true, target temperature listens on the right-han
 	assert.equal(hapService.getCharacteristic(Characteristic.TargetTemperature).value, 19);
 });
 
-test("HvacACEnabled true maps to HEAT and puts the target state in AUTO", () => {
+test("HvacPower HvacPowerStateOn maps to HEAT and puts the target state in AUTO", () => {
 	const { hapService, sse } = setup();
-	sse.emitSignal("HvacACEnabled", true);
+	sse.emitSignal("HvacPower", "HvacPowerStateOn");
 	assert.equal(
 		hapService.getCharacteristic(Characteristic.CurrentHeatingCoolingState).value,
 		Characteristic.CurrentHeatingCoolingState.HEAT,
@@ -49,9 +49,9 @@ test("HvacACEnabled true maps to HEAT and puts the target state in AUTO", () => 
 	);
 });
 
-test("HvacACEnabled false maps to OFF for both current and target state", () => {
+test("HvacPower HvacPowerStateOff maps to OFF for both current and target state", () => {
 	const { hapService, sse } = setup();
-	sse.emitSignal("HvacACEnabled", false);
+	sse.emitSignal("HvacPower", "HvacPowerStateOff");
 	assert.equal(
 		hapService.getCharacteristic(Characteristic.CurrentHeatingCoolingState).value,
 		Characteristic.CurrentHeatingCoolingState.OFF,
@@ -59,6 +59,44 @@ test("HvacACEnabled false maps to OFF for both current and target state", () => 
 	assert.equal(
 		hapService.getCharacteristic(Characteristic.TargetHeatingCoolingState).value,
 		Characteristic.TargetHeatingCoolingState.OFF,
+	);
+});
+
+test("heating active with AC disabled still reports the system on (not OFF)", () => {
+	const { hapService, sse } = setup();
+	sse.emitSignal("HvacACEnabled", false);
+	sse.emitSignal("HvacPower", "HvacPowerStateOn");
+	assert.equal(
+		hapService.getCharacteristic(Characteristic.CurrentHeatingCoolingState).value,
+		Characteristic.CurrentHeatingCoolingState.HEAT,
+	);
+});
+
+test("HvacACEnabled true while HvacPower is on maps to COOL", () => {
+	const { hapService, sse } = setup();
+	sse.emitSignal("HvacPower", "HvacPowerStateOn");
+	sse.emitSignal("HvacACEnabled", true);
+	assert.equal(
+		hapService.getCharacteristic(Characteristic.CurrentHeatingCoolingState).value,
+		Characteristic.CurrentHeatingCoolingState.COOL,
+	);
+});
+
+test("HvacPower HvacPowerStateOverheatProtect maps to COOL", () => {
+	const { hapService, sse } = setup();
+	sse.emitSignal("HvacPower", "HvacPowerStateOverheatProtect");
+	assert.equal(
+		hapService.getCharacteristic(Characteristic.CurrentHeatingCoolingState).value,
+		Characteristic.CurrentHeatingCoolingState.COOL,
+	);
+});
+
+test("HvacPower HvacPowerStatePrecondition with AC disabled maps to HEAT", () => {
+	const { hapService, sse } = setup();
+	sse.emitSignal("HvacPower", "HvacPowerStatePrecondition");
+	assert.equal(
+		hapService.getCharacteristic(Characteristic.CurrentHeatingCoolingState).value,
+		Characteristic.CurrentHeatingCoolingState.HEAT,
 	);
 });
 
