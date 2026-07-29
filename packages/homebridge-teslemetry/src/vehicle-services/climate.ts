@@ -5,6 +5,7 @@
  */
 
 import { BaseService } from "./base.js";
+import type { SseData } from "@teslemetry/api";
 
 /**
  * ClimateService
@@ -14,6 +15,9 @@ import { BaseService } from "./base.js";
 export class ClimateService extends BaseService {
   private targetTemperature = 20; // Default target temp in Celsius
   private isRHD = false; // Right-hand drive flag
+  private hvacPower: Exclude<SseData["data"]["HvacPower"], null | undefined> =
+    "HvacPowerStateOff";
+  private acEnabled = false; // used only to distinguish HEAT vs COOL while HvacPower reports the system on
 
   constructor(
     platform: import("../platform.js").TeslemetryPlatform,
@@ -60,27 +64,47 @@ export class ClimateService extends BaseService {
       },
     );
 
-    // Subscribe to HVAC state
-    this.subscribeSignal(
-      "HvacACEnabled",
-      this.platform.Characteristic.CurrentHeatingCoolingState,
-      (enabled: boolean) => {
-        const { CurrentHeatingCoolingState } = this.platform.Characteristic;
-        const state = enabled
-          ? CurrentHeatingCoolingState.HEAT // Tesla doesn't distinguish heat/cool in signal
-          : CurrentHeatingCoolingState.OFF;
+    // HvacPower is the system's actual on/off state; HvacACEnabled only tells
+    // us whether the AC compressor is running, which we use solely to pick
+    // HEAT vs COOL once we already know the system is on.
+    const computeCurrentState = () => {
+      const { CurrentHeatingCoolingState } = this.platform.Characteristic;
+      switch (this.hvacPower) {
+        case "HvacPowerStateOff":
+        case "HvacPowerStateUnknown":
+          return CurrentHeatingCoolingState.OFF;
+        case "HvacPowerStateOverheatProtect":
+          return CurrentHeatingCoolingState.COOL;
+        case "HvacPowerStateOn":
+        case "HvacPowerStatePrecondition":
+        default:
+          return this.acEnabled
+            ? CurrentHeatingCoolingState.COOL
+            : CurrentHeatingCoolingState.HEAT;
+      }
+    };
 
-        // Also update target state to match
-        this.service.updateCharacteristic(
-          this.platform.Characteristic.TargetHeatingCoolingState,
-          state === CurrentHeatingCoolingState.OFF
-            ? this.platform.Characteristic.TargetHeatingCoolingState.OFF
-            : this.platform.Characteristic.TargetHeatingCoolingState.AUTO,
-        );
+    // Subscribe to whether the AC compressor is running (heat/cool hint only)
+    this.subscribeSignal("HvacACEnabled", this.platform.Characteristic.CurrentHeatingCoolingState, (enabled: boolean) => {
+      this.acEnabled = enabled;
+      return computeCurrentState();
+    });
 
-        return state;
-      },
-    );
+    // Subscribe to HVAC system power state (source of truth for on/off)
+    this.subscribeSignal("HvacPower", this.platform.Characteristic.CurrentHeatingCoolingState, (power) => {
+      this.hvacPower = power;
+      const state = computeCurrentState();
+
+      // Also update target state to match
+      this.service.updateCharacteristic(
+        this.platform.Characteristic.TargetHeatingCoolingState,
+        state === this.platform.Characteristic.CurrentHeatingCoolingState.OFF
+          ? this.platform.Characteristic.TargetHeatingCoolingState.OFF
+          : this.platform.Characteristic.TargetHeatingCoolingState.AUTO,
+      );
+
+      return state;
+    });
 
     // Handle target heating/cooling state changes
     this.registerCharacteristicSet(
