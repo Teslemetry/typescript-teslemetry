@@ -18010,10 +18010,7 @@ export type GetSseByVin_Responses = {
     } | {
         createdAt: string;
         id: string;
-        product_type: "energy_site";
-        topic: "energy_totals";
-        url: string;
-        isCache?: boolean;
+        isCache?: true;
         totals: {
             [key: string]: number | null;
         };
