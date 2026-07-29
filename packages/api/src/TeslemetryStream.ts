@@ -13,6 +13,7 @@ import {
   SseConfig,
   SseLiveStatus,
   SseSiteInfo,
+  SseEnergyTotals,
   Signals,
 } from "./const.js";
 import { Teslemetry } from "./Teslemetry.js";
@@ -51,6 +52,7 @@ type TeslemetryStreamEventMap = {
   config: SseConfig;
   live_status: SseLiveStatus;
   site_info: SseSiteInfo;
+  energy_totals: SseEnergyTotals;
   connect: void;
   disconnect: void;
   stream_error: TeslemetryStreamErrorEvent;
@@ -96,6 +98,10 @@ type Cache = Record<string, VehicleCache>;
 export interface EnergySiteCache {
   live_status?: SseLiveStatus["live_status"];
   site_info?: SseSiteInfo["site_info"];
+  energy_totals?: {
+    url: SseEnergyTotals["url"];
+    totals: SseEnergyTotals["totals"];
+  };
 }
 
 type EnergyCache = Record<string, EnergySiteCache>;
@@ -210,6 +216,16 @@ export class TeslemetryStream extends EventEmitter {
         site_info: siteCache.site_info,
         isCache: true,
       } satisfies SseSiteInfo);
+    } else if (event === "energy_totals" && siteCache.energy_totals) {
+      listener({
+        createdAt: new Date().toISOString(),
+        id: siteId,
+        product_type: "energy_site",
+        topic: "energy_totals",
+        url: siteCache.energy_totals.url,
+        totals: siteCache.energy_totals.totals,
+        isCache: true,
+      } satisfies SseEnergyTotals);
     }
   }
 
@@ -375,6 +391,8 @@ export class TeslemetryStream extends EventEmitter {
       this.emit("live_status", event);
     } else if ("site_info" in event) {
       this.emit("site_info", event);
+    } else if ("totals" in event) {
+      this.emit("energy_totals", event as SseEnergyTotals);
     }
     this.emit("all", event);
 
@@ -386,6 +404,14 @@ export class TeslemetryStream extends EventEmitter {
         } else if ("site_info" in event) {
           site.emit("site_info", event);
         }
+      }
+      return;
+    }
+
+    if ("totals" in event) {
+      const site = this.energySites.get(event.id);
+      if (site) {
+        site.emit("energy_totals", event as SseEnergyTotals);
       }
       return;
     }
@@ -461,6 +487,14 @@ export class TeslemetryStream extends EventEmitter {
     this.energyCache[event.site_id].site_info = event.site_info;
   };
 
+  private cacheEnergyTotals = (event: SseEnergyTotals): void => {
+    this.energyCache[event.id] ??= {};
+    this.energyCache[event.id].energy_totals = {
+      url: event.url,
+      totals: event.totals,
+    };
+  };
+
   public startLocalCache(): void {
     this.localCache = true;
     this.on("state", this.cacheState);
@@ -470,6 +504,7 @@ export class TeslemetryStream extends EventEmitter {
     this.on("connectivity", this.cacheConnectivity);
     this.on("live_status", this.cacheLiveStatus);
     this.on("site_info", this.cacheSiteInfo);
+    this.on("energy_totals", this.cacheEnergyTotals);
     this.logger.info(`Started local cache`);
   }
 
@@ -482,6 +517,7 @@ export class TeslemetryStream extends EventEmitter {
     this.off("connectivity", this.cacheConnectivity);
     this.off("live_status", this.cacheLiveStatus);
     this.off("site_info", this.cacheSiteInfo);
+    this.off("energy_totals", this.cacheEnergyTotals);
     this.logger.info(`Stopped local cache`);
   }
 }

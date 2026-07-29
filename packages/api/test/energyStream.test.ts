@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Teslemetry } from "../src/Teslemetry.js";
+import { ENERGY_HISTORY_TOTAL_FIELDS } from "../src/const.js";
+import type { EnergyHistoryTotals } from "../src/const.js";
 import type { Logger } from "../src/logger.js";
 
 const silentLogger: Logger = {
@@ -9,6 +11,17 @@ const silentLogger: Logger = {
   error: () => {},
   debug: () => {},
 };
+
+function makeTotals(
+  overrides: Partial<EnergyHistoryTotals>,
+): EnergyHistoryTotals {
+  return Object.fromEntries(
+    ENERGY_HISTORY_TOTAL_FIELDS.map((field) => [
+      field,
+      overrides[field] ?? null,
+    ]),
+  ) as EnergyHistoryTotals;
+}
 
 function makeTeslemetry(
   fetchImpl: (request: Request) => Promise<Response>,
@@ -208,4 +221,103 @@ test("once() on a cached event fires exactly once and does not leak a dead liste
     live_status: { battery_power: 999 },
   });
   assert.deepEqual(received, [{ battery_power: 4 }]);
+});
+
+test("emits energy_totals on the stream and the scoped energy site, routed by id not site_id", async () => {
+  const siteId = "5150";
+  const totals = makeTotals({ total_home_usage: 12, total_solar_generation: 34 });
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        id: siteId,
+        product_type: "energy_site",
+        topic: "energy_totals",
+        url: `/api/1/energy_sites/${siteId}/calendar_history?kind=energy&period=day`,
+        isCache: false,
+        totals,
+      },
+    ]),
+  );
+
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+
+  const streamTotals: unknown[] = [];
+  const siteTotals: unknown[] = [];
+  teslemetry.sse.on("energy_totals", (event) => streamTotals.push(event.totals));
+  siteStream.on("energy_totals", (event) => siteTotals.push(event.totals));
+
+  await teslemetry.sse.connect();
+  await waitFor(() => siteTotals.length > 0);
+  teslemetry.sse.disconnect();
+
+  assert.deepEqual(streamTotals, [totals]);
+  assert.deepEqual(siteTotals, [totals]);
+});
+
+test("startLocalCache replays a cached energy_totals event to new listeners", async () => {
+  const siteId = "43";
+  const totals = makeTotals({ total_home_usage: 7 });
+  const url = `/api/1/energy_sites/${siteId}/calendar_history?kind=energy&period=day`;
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        id: siteId,
+        product_type: "energy_site",
+        topic: "energy_totals",
+        url,
+        totals,
+      },
+    ]),
+  );
+
+  await teslemetry.sse.connect();
+  await waitFor(() => teslemetry.sse.energyCache[siteId]?.energy_totals !== undefined);
+  teslemetry.sse.disconnect();
+
+  const replayed: unknown[] = [];
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+  siteStream.on("energy_totals", (event) => replayed.push(event.totals));
+
+  assert.deepEqual(replayed, [totals]);
+});
+
+test("once() on a cached energy_totals event fires exactly once and does not leak a dead listener", async () => {
+  const siteId = "9";
+  const totals = makeTotals({ total_home_usage: 1 });
+  const url = `/api/1/energy_sites/${siteId}/calendar_history?kind=energy&period=day`;
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        id: siteId,
+        product_type: "energy_site",
+        topic: "energy_totals",
+        url,
+        totals,
+      },
+    ]),
+  );
+
+  await teslemetry.sse.connect();
+  await waitFor(() => teslemetry.sse.energyCache[siteId]?.energy_totals !== undefined);
+  teslemetry.sse.disconnect();
+
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+  const received: unknown[] = [];
+  siteStream.once("energy_totals", (event) => received.push(event.totals));
+
+  assert.deepEqual(received, [totals]);
+  assert.equal(siteStream.listenerCount("energy_totals"), 0);
+
+  siteStream.emit("energy_totals", {
+    createdAt: "2026-01-01T00:00:01.000Z",
+    id: siteId,
+    product_type: "energy_site",
+    topic: "energy_totals",
+    url,
+    totals: makeTotals({ total_home_usage: 999 }),
+  });
+  assert.deepEqual(received, [totals]);
 });
