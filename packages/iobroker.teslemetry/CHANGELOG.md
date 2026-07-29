@@ -1,5 +1,14 @@
 # iobroker.teslemetry
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [9cd3c30]
+- Updated dependencies [dba83c5]
+- Updated dependencies [1908085]
+  - @teslemetry/api@0.10.0
+
 ## 0.2.0
 
 ### Minor Changes
