@@ -91,7 +91,7 @@ export class Teslemetry {
   public getEnergySite(siteId: number) {
     return {
       api: this.api.getEnergySite(siteId),
-      sse: this.sse.getSite(String(siteId)),
+      sse: this.sse.getEnergySite(String(siteId)),
     };
   }
 
@@ -137,7 +137,7 @@ export class Teslemetry {
             name: metadata.name ?? "Unnamed",
             id: siteId,
             api: this.api.getEnergySite(siteId),
-            sse: this.sse.getSite(id),
+            sse: this.sse.getEnergySite(id),
             metadata,
           },
         ];

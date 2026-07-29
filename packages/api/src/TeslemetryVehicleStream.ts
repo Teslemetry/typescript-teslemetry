@@ -125,7 +125,7 @@ export class TeslemetryVehicleStream extends EventEmitter {
     event: K,
     listener: (data: TeslemetryStreamEventMap[K]) => void,
   ): this {
-    this.root.sse.sendCache(this.vin, event, listener);
+    this.root.sse.sendVehicleCache(this.vin, event, listener);
     return super.on(event, listener);
   }
 

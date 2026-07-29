@@ -134,7 +134,7 @@ export class TeslemetryStream extends EventEmitter {
     }
   }
 
-  public sendCache<K extends keyof TeslemetryStreamEventMap>(
+  public sendVehicleCache<K extends keyof TeslemetryStreamEventMap>(
     vin: string,
     event: K,
     listener: (data: any) => void,
@@ -218,7 +218,7 @@ export class TeslemetryStream extends EventEmitter {
     listener: (data: TeslemetryStreamEventMap[K]) => void,
   ): this {
     for (const vin in this.cache) {
-      this.sendCache(vin, event, listener);
+      this.sendVehicleCache(vin, event, listener);
     }
     for (const siteId in this.energyCache) {
       this.sendEnergyCache(siteId, event, listener);
@@ -233,7 +233,7 @@ export class TeslemetryStream extends EventEmitter {
     return this.vehicles.get(vin)!;
   }
 
-  public getSite(id: string): TeslemetryEnergySiteStream {
+  public getEnergySite(id: string): TeslemetryEnergySiteStream {
     if (!this.energySites.has(id)) {
       new TeslemetryEnergySiteStream(this.root, id);
     }

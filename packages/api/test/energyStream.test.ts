@@ -69,7 +69,7 @@ test("emits live_status and site_info events on the stream and the scoped energy
     ]),
   );
 
-  const siteStream = teslemetry.sse.getSite(siteId);
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
 
   const streamLiveStatus: unknown[] = [];
   const siteLiveStatus: unknown[] = [];
@@ -106,7 +106,7 @@ test("does not route energy site events to a vehicle stream, or vice versa", asy
   );
 
   const vehicleStream = teslemetry.sse.getVehicle(vin);
-  const siteStream = teslemetry.sse.getSite(siteId);
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
 
   let vehicleLiveStatus = 0;
   let siteState = 0;
@@ -144,7 +144,7 @@ test("startLocalCache replays cached live_status/site_info to new listeners", as
   teslemetry.sse.disconnect();
 
   const replayed: unknown[] = [];
-  const siteStream = teslemetry.sse.getSite(siteId);
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
   siteStream.on("live_status", (event) => replayed.push(event.live_status));
 
   assert.deepEqual(replayed, [{ battery_power: 5 }]);
