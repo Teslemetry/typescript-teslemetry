@@ -136,6 +136,48 @@ teslemetry.sse.on("auth_failure", (error) => {
 });
 ```
 
+##### Selecting topics
+
+By default the stream sends every event applicable to every product you can
+access (legacy-all mode). Pass `stream.topics` to receive only the events you
+need - either exact wire topic names or the bundled presets from
+`SSE_TOPIC_PRESETS` (`vehicleFull`, `vehicleCore`, `energyLive`,
+`energyFullState`, `account`), which are expanded client-side to exact names
+before the connection opens:
+
+```typescript
+const teslemetry = new Teslemetry(getToken, {
+  stream: { topics: ["energyLive", "credits"] },
+});
+```
+
+Omitting `topics` entirely preserves legacy-all behavior forever - it is
+never reinterpreted as a narrower default.
+
+##### Energy tariffs and the composed site-info view
+
+`site_info` events no longer carry `tariff_content`/`tariff_content_v2` -
+subscribe separately to `tariff_content_v2`, whose body is `null` when Tesla
+explicitly removes the tariff (not merely "no update yet"):
+
+```typescript
+site.sse.on("tariff_content_v2", (event) => {
+  if (event.tariff_content_v2 === null) {
+    console.log("Tariff was removed");
+  } else {
+    console.log("Tariff updated:", event.tariff_content_v2);
+  }
+});
+```
+
+`site.sse.siteInfoDocument` merges the cached slim `site_info` with the last
+received tariff piece into a single whole-document view, resembling the full
+REST `site_info` response:
+
+```typescript
+const document = site.sse.siteInfoDocument; // undefined until site_info is cached
+```
+
 ### Energy API
 
 Interact with Tesla Energy sites (Solar, Powerwall, Wall Connector).
