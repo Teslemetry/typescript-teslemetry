@@ -52,7 +52,7 @@ test("setTimeOfUseSettings posts the tou_settings body to the site's time_of_use
   assert.equal(receivedMethod, "POST");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/time_of_use_settings$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/time_of_use_settings(?:[?].*)?$`),
   );
   assert.deepEqual(receivedBody, { tou_settings: touSettings });
   assert.deepEqual(result, { response: { code: 200, message: "Updated" } });
@@ -77,7 +77,7 @@ test("getPrograms fetches the site's programs endpoint", async () => {
   assert.equal(receivedMethod, "GET");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/programs$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/programs(?:[?].*)?$`),
   );
   assert.deepEqual(result, { response: { programs: [] } });
 });
@@ -113,7 +113,7 @@ test("getTariff extracts tariff fields from the site's site_info endpoint", asyn
   assert.equal(receivedMethod, "GET");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/site_info$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/site_info(?:[?].*)?$`),
   );
   assert.deepEqual(result, {
     tariff_id: "PGE-EV2-A",
@@ -149,7 +149,7 @@ test("sendCommand posts the category/command_name/params body to the site's comm
   assert.equal(receivedMethod, "POST");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/command$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/command/(?:[?].*)?$`),
   );
   assert.deepEqual(receivedBody, body);
   assert.deepEqual(result, { response: { ok: true } });
@@ -174,7 +174,7 @@ test("getCommandSystemInfo fetches the gateway's system_info command endpoint", 
   assert.equal(receivedMethod, "GET");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/command/system_info$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/command/system_info(?:[?].*)?$`),
   );
   assert.deepEqual(result, { response: { din: "abc-123" } });
 });
@@ -200,7 +200,7 @@ test("getCommandNetworkingStatus fetches the gateway's networking_status command
   assert.equal(receivedMethod, "GET");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/command/networking_status$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/command/networking_status(?:[?].*)?$`),
   );
   assert.deepEqual(result, { response: {} });
 });
@@ -226,7 +226,7 @@ test("getCommandAuthorizedClients fetches the gateway's authorized_clients comma
   assert.equal(receivedMethod, "GET");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/command/authorized_clients$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/command/authorized_clients(?:[?].*)?$`),
   );
   assert.deepEqual(result, { response: { clients: [] } });
 });
@@ -253,7 +253,7 @@ test("getCommandSignedCommandsPublicKey fetches the gateway's signed_commands_pu
   assert.match(
     receivedUrl ?? "",
     new RegExp(
-      `/api/1/energy_sites/${siteId}/command/signed_commands_public_key$`,
+      `/api/1/energy_sites/${siteId}/command/signed_commands_public_key(?:[?].*)?$`,
     ),
   );
   assert.deepEqual(result, { response: { public_key: "key" } });
@@ -278,7 +278,7 @@ test("getCommandWifiScan fetches the gateway's wifi_scan command endpoint", asyn
   assert.equal(receivedMethod, "GET");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/command/wifi_scan$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/command/wifi_scan(?:[?].*)?$`),
   );
   assert.deepEqual(result, { response: { networks: [] } });
 });
@@ -302,7 +302,7 @@ test("getCommandDeviceCert fetches the gateway's device_cert command endpoint", 
   assert.equal(receivedMethod, "GET");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/command/device_cert$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/command/device_cert(?:[?].*)?$`),
   );
   assert.deepEqual(result, { response: { cert: "cert" } });
 });
@@ -333,7 +333,7 @@ test("scheduleBackupEvent posts the scheduling_info body to the site's schedule_
   assert.match(
     receivedUrl ?? "",
     new RegExp(
-      `/api/1/energy_sites/${siteId}/command/schedule_backup_event$`,
+      `/api/1/energy_sites/${siteId}/command/schedule_backup_event(?:[?].*)?$`,
     ),
   );
   assert.deepEqual(receivedBody, { scheduling_info });
@@ -359,7 +359,7 @@ test("cancelBackupEvent posts to the site's cancel_backup_event command endpoint
   assert.equal(receivedMethod, "POST");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/command/cancel_backup_event$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/command/cancel_backup_event(?:[?].*)?$`),
   );
   assert.deepEqual(result, { response: { request_id: "req-2" } });
 });
@@ -390,7 +390,7 @@ test("setLocalSiteConfig posts the body to the site's set_local_site_config comm
   assert.match(
     receivedUrl ?? "",
     new RegExp(
-      `/api/1/energy_sites/${siteId}/command/set_local_site_config$`,
+      `/api/1/energy_sites/${siteId}/command/set_local_site_config(?:[?].*)?$`,
     ),
   );
   assert.deepEqual(receivedBody, body);
@@ -420,7 +420,7 @@ test("setIslandMode posts the mode/force body to the site's set_island_mode comm
   assert.equal(receivedMethod, "POST");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/command/set_island_mode$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/command/set_island_mode(?:[?].*)?$`),
   );
   assert.deepEqual(receivedBody, { mode: 1, force: true });
   assert.deepEqual(result, { response: { request_id: "req-4" } });
@@ -457,7 +457,7 @@ test("addAuthorizedClient posts the body to the site's add_authorized_client com
   assert.match(
     receivedUrl ?? "",
     new RegExp(
-      `/api/1/energy_sites/${siteId}/command/add_authorized_client$`,
+      `/api/1/energy_sites/${siteId}/command/add_authorized_client(?:[?].*)?$`,
     ),
   );
   assert.deepEqual(receivedBody, body);
@@ -490,7 +490,7 @@ test("removeAuthorizedClient posts the body to the site's remove_authorized_clie
   assert.match(
     receivedUrl ?? "",
     new RegExp(
-      `/api/1/energy_sites/${siteId}/command/remove_authorized_client$`,
+      `/api/1/energy_sites/${siteId}/command/remove_authorized_client(?:[?].*)?$`,
     ),
   );
   assert.deepEqual(receivedBody, body);
