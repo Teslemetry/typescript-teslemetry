@@ -107,7 +107,6 @@ export interface EnergySiteCache {
   /** `undefined`: never received. `null`: explicitly removed by the server. */
   tariff_content_v2?: SseTariffContentV2["tariff_content_v2"];
   energy_totals?: {
-    url: SseEnergyTotals["url"];
     totals: SseEnergyTotals["totals"];
   };
 }
@@ -258,9 +257,6 @@ export class TeslemetryStream extends EventEmitter {
       listener({
         createdAt: new Date().toISOString(),
         id: siteId,
-        product_type: "energy_site",
-        topic: "energy_totals",
-        url: siteCache.energy_totals.url,
         totals: siteCache.energy_totals.totals,
         isCache: true,
       } satisfies SseEnergyTotals);
@@ -538,7 +534,6 @@ export class TeslemetryStream extends EventEmitter {
   private cacheEnergyTotals = (event: SseEnergyTotals): void => {
     this.energyCache[event.id] ??= {};
     this.energyCache[event.id].energy_totals = {
-      url: event.url,
       totals: event.totals,
     };
   };

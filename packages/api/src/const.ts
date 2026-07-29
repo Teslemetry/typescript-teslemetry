@@ -59,12 +59,14 @@ export type EnergyHistoryTotalField = (typeof ENERGY_HISTORY_TOTAL_FIELDS)[numbe
 export type EnergyHistoryTotals = Record<EnergyHistoryTotalField, number | null>;
 
 /** A field absent from the polled day stays `null`, never coerced to 0 - see
- *  ENERGY_HISTORY_TOTAL_FIELDS above. `url` is the exact canonical REST path
- *  (including the polled query) to re-fetch the full time_series/events
- *  document; this event never carries that document itself. Silence on this
- *  event means no change since the last refresh, never staleness - the
- *  server only publishes on its 5-minute poll cadence. */
-export type SseEnergyTotals = Omit<ExtractSse<{ topic: any }>, "totals"> & {
+ *  ENERGY_HISTORY_TOTAL_FIELDS above. Re-fetch the full time_series/events
+ *  document via the site's calendar_history REST route using this event's
+ *  own `id`; this event never carries that document itself, nor a `url`. Its
+ *  `isCache` is `true` only on a connect-time snapshot replay and omitted
+ *  entirely on every live publish. Silence on this event means no change
+ *  since the last refresh, never staleness - the server only publishes on
+ *  its 5-minute poll cadence. */
+export type SseEnergyTotals = Omit<ExtractSse<{ totals: any }>, "totals"> & {
   totals: EnergyHistoryTotals;
 };
 

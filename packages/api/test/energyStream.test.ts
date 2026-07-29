@@ -231,10 +231,6 @@ test("emits energy_totals on the stream and the scoped energy site, routed by id
       {
         createdAt: "2026-01-01T00:00:00.000Z",
         id: siteId,
-        product_type: "energy_site",
-        topic: "energy_totals",
-        url: `/api/1/energy_sites/${siteId}/calendar_history?kind=energy&period=day`,
-        isCache: false,
         totals,
       },
     ]),
@@ -258,15 +254,11 @@ test("emits energy_totals on the stream and the scoped energy site, routed by id
 test("startLocalCache replays a cached energy_totals event to new listeners", async () => {
   const siteId = "43";
   const totals = makeTotals({ total_home_usage: 7 });
-  const url = `/api/1/energy_sites/${siteId}/calendar_history?kind=energy&period=day`;
   const teslemetry = makeTeslemetry(async () =>
     sseResponse([
       {
         createdAt: "2026-01-01T00:00:00.000Z",
         id: siteId,
-        product_type: "energy_site",
-        topic: "energy_totals",
-        url,
         totals,
       },
     ]),
@@ -286,15 +278,11 @@ test("startLocalCache replays a cached energy_totals event to new listeners", as
 test("once() on a cached energy_totals event fires exactly once and does not leak a dead listener", async () => {
   const siteId = "9";
   const totals = makeTotals({ total_home_usage: 1 });
-  const url = `/api/1/energy_sites/${siteId}/calendar_history?kind=energy&period=day`;
   const teslemetry = makeTeslemetry(async () =>
     sseResponse([
       {
         createdAt: "2026-01-01T00:00:00.000Z",
         id: siteId,
-        product_type: "energy_site",
-        topic: "energy_totals",
-        url,
         totals,
       },
     ]),
@@ -314,9 +302,6 @@ test("once() on a cached energy_totals event fires exactly once and does not lea
   siteStream.emit("energy_totals", {
     createdAt: "2026-01-01T00:00:01.000Z",
     id: siteId,
-    product_type: "energy_site",
-    topic: "energy_totals",
-    url,
     totals: makeTotals({ total_home_usage: 999 }),
   });
   assert.deepEqual(received, [totals]);
