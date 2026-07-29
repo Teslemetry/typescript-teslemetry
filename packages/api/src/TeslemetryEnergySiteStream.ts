@@ -56,8 +56,13 @@ export class TeslemetryEnergySiteStream extends EventEmitter {
     event: K,
     listener: (data: TeslemetryEnergySiteStreamEventMap[K]) => void,
   ): this {
+    // Register before replaying: see the matching comment in
+    // TeslemetryStream.on() - once() wraps the listener in a self-removing
+    // shim that must already be registered for its self-removal to work,
+    // or it becomes a permanently inert leftover listener.
+    super.on(event, listener);
     this.root.sse.sendEnergyCache(this.id, event, listener);
-    return super.on(event, listener);
+    return this;
   }
 
   public stop(): void {

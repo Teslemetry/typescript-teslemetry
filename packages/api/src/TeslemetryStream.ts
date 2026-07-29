@@ -217,13 +217,21 @@ export class TeslemetryStream extends EventEmitter {
     event: K,
     listener: (data: TeslemetryStreamEventMap[K]) => void,
   ): this {
+    // Register before replaying cached events: EventEmitter's once()
+    // implements itself via on(), wrapping the caller's listener in a
+    // self-removing shim. Replaying into that shim before it is registered
+    // makes its self-removal a no-op (nothing to remove yet), so it marks
+    // itself fired but is then added anyway - a dead listener that never
+    // fires again and never goes away. Registering first lets the shim
+    // remove itself correctly when the replay invokes it.
+    super.on(event, listener);
     for (const vin in this.cache) {
       this.sendVehicleCache(vin, event, listener);
     }
     for (const siteId in this.energyCache) {
       this.sendEnergyCache(siteId, event, listener);
     }
-    return super.on(event, listener);
+    return this;
   }
 
   public getVehicle(vin: string): TeslemetryVehicleStream {
@@ -410,44 +418,48 @@ export class TeslemetryStream extends EventEmitter {
     }
   }
 
-  private cacheState(event: SseState): void {
+  // Arrow-function fields, not methods: sendVehicleCache/sendEnergyCache
+  // replay cached events by calling the listener as a bare function (not
+  // through emit(), which binds `this` to the emitter itself), so an
+  // unbound method reference would see `this` as undefined mid-replay.
+  private cacheState = (event: SseState): void => {
     this.cache[event.vin] ??= {};
     this.cache[event.vin].state = event.state;
-  }
+  };
 
-  private cacheData(event: SseData): void {
+  private cacheData = (event: SseData): void => {
     this.cache[event.vin] ??= { data: {} };
     this.cache[event.vin].data = {
       ...this.cache[event.vin].data,
       ...event.data,
     };
-  }
+  };
 
-  private cacheErrors(event: SseErrors): void {
+  private cacheErrors = (event: SseErrors): void => {
     this.cache[event.vin] ??= {};
     this.cache[event.vin].errors = event.errors;
-  }
+  };
 
-  private cacheAlerts(event: SseAlerts): void {
+  private cacheAlerts = (event: SseAlerts): void => {
     this.cache[event.vin] ??= {};
     this.cache[event.vin].alerts = event.alerts;
-  }
+  };
 
-  private cacheConnectivity(event: SseConnectivity): void {
+  private cacheConnectivity = (event: SseConnectivity): void => {
     this.cache[event.vin] ??= {};
     this.cache[event.vin].connectivity ??= {};
     this.cache[event.vin].connectivity![event.networkInterface] = event.status;
-  }
+  };
 
-  private cacheLiveStatus(event: SseLiveStatus): void {
+  private cacheLiveStatus = (event: SseLiveStatus): void => {
     this.energyCache[event.site_id] ??= {};
     this.energyCache[event.site_id].live_status = event.live_status;
-  }
+  };
 
-  private cacheSiteInfo(event: SseSiteInfo): void {
+  private cacheSiteInfo = (event: SseSiteInfo): void => {
     this.energyCache[event.site_id] ??= {};
     this.energyCache[event.site_id].site_info = event.site_info;
-  }
+  };
 
   public startLocalCache(): void {
     this.localCache = true;

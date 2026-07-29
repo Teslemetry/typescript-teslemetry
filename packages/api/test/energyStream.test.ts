@@ -149,3 +149,63 @@ test("startLocalCache replays cached live_status/site_info to new listeners", as
 
   assert.deepEqual(replayed, [{ battery_power: 5 }]);
 });
+
+test("local caching can be stopped and restarted once an energy event has been cached", async () => {
+  const siteId = "7";
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        site_id: siteId,
+        live_status: { battery_power: 3 },
+      },
+    ]),
+  );
+
+  await teslemetry.sse.connect();
+  await waitFor(() => teslemetry.sse.energyCache[siteId]?.live_status !== undefined);
+  teslemetry.sse.disconnect();
+
+  teslemetry.sse.stopLocalCache();
+  // Previously threw: the internal cache handlers were plain unbound method
+  // references, and re-registering them replays the now-populated energy
+  // cache through a bare call that leaves `this` undefined mid-handler.
+  assert.doesNotThrow(() => teslemetry.sse.startLocalCache());
+});
+
+test("once() on a cached event fires exactly once and does not leak a dead listener", async () => {
+  const siteId = "8";
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        site_id: siteId,
+        live_status: { battery_power: 4 },
+      },
+    ]),
+  );
+
+  await teslemetry.sse.connect();
+  await waitFor(() => teslemetry.sse.energyCache[siteId]?.live_status !== undefined);
+  teslemetry.sse.disconnect();
+
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+  const received: unknown[] = [];
+  siteStream.once("live_status", (event) => received.push(event.live_status));
+
+  // The cached replay must satisfy the once() subscription immediately...
+  assert.deepEqual(received, [{ battery_power: 4 }]);
+  // ...and leave no dead listener behind (regression: once() previously
+  // replayed into its self-removing wrapper before the wrapper was
+  // registered, so the self-removal was a no-op and the wrapper stuck
+  // around permanently, inert).
+  assert.equal(siteStream.listenerCount("live_status"), 0);
+
+  // A later live event must not re-fire the already-satisfied once().
+  siteStream.emit("live_status", {
+    createdAt: "2026-01-01T00:00:01.000Z",
+    site_id: siteId,
+    live_status: { battery_power: 999 },
+  });
+  assert.deepEqual(received, [{ battery_power: 4 }]);
+});
