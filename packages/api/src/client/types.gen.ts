@@ -18000,6 +18000,16 @@ export type GetSseByVin_Responses = {
         site_info: {
             [key: string]: unknown;
         };
+    } | {
+        createdAt: string;
+        id: string;
+        product_type: "energy_site";
+        topic: "energy_totals";
+        url: string;
+        isCache?: boolean;
+        totals: {
+            [key: string]: number | null;
+        };
     };
 };
 

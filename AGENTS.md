@@ -376,6 +376,8 @@ node-red
 - `src/client/` - Auto-generated client code (don't edit manually)
 - `src/Teslemetry.ts` - Main SDK entry point
 
+**Gotcha**: energy-site SSE event union members are inconsistent about which field identifies the site - `live_status`/`site_info` carry `site_id`, but `energy_totals` (and any future refresh-notification event sharing that uniform `{id, product_type, topic, url, createdAt, isCache}` shape) carries `id` instead. `TeslemetryStream._dispatch()`'s two routing blocks (one per field name) reflect this; adding a new energy SSE event means checking which field the backend's schema actually uses, not assuming `site_id`. Every `on()` override across `TeslemetryStream`/`TeslemetryVehicleStream`/`TeslemetryEnergySiteStream` must call `super.on()` before replaying any cached value to the listener - reversing that order silently breaks `once()` (see `test/energyStream.test.ts`'s dead-listener regression tests).
+
 ### Node-RED Package
 - `src/nodes/*.html` - Node UI definitions (copied to dist/)
 - `src/shared.ts` - Shared utilities for all nodes

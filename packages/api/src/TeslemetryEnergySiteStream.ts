@@ -1,12 +1,13 @@
 import { EventEmitter } from "events";
 import { Teslemetry } from "./Teslemetry.js";
-import type { SseLiveStatus, SseSiteInfo } from "./const.js";
+import type { SseLiveStatus, SseSiteInfo, SseEnergyTotals } from "./const.js";
 import { Logger } from "./logger.js";
 import { EnergySiteCache } from "./TeslemetryStream.js";
 
 type TeslemetryEnergySiteStreamEventMap = {
   live_status: SseLiveStatus;
   site_info: SseSiteInfo;
+  energy_totals: SseEnergyTotals;
 };
 
 export declare interface TeslemetryEnergySiteStream {
