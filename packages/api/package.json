@@ -48,7 +48,7 @@
     "provenance": true
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "0.88.0",
+    "@hey-api/openapi-ts": "0.0.0-next-20260728215008",
     "dotenv": "^17.2.3",
     "tsdown": "^0.22.4",
     "tsx": "^4.20.6"
