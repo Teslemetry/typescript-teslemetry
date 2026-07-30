@@ -26,6 +26,13 @@ test("ChargeSwitch/Defrost/Sentry/Wake each get their own Service.Switch instanc
 	assert.deepEqual(subtypes, ["charging", "defrost", "sentry", "wake"]);
 });
 
+test("Door(x6) and RearDefrost each get their own Service.ContactSensor instance", () => {
+	const { accessory } = setup();
+	const contactSensors = accessory.services.filter((s) => s.UUID === Service.ContactSensor.UUID);
+	assert.equal(contactSensors.length, 7);
+	assert.ok(contactSensors.some((s) => s.subtype === "rear-defrost"));
+});
+
 test("each Switch service's SET handler routes to its own vehicle command independently", async () => {
 	const { accessory, vehicle } = setup();
 	const calls: string[] = [];
