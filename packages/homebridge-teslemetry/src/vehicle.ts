@@ -5,7 +5,7 @@
  */
 
 import type { PlatformAccessory } from "homebridge";
-import type { VehicleDetails } from "@teslemetry/api";
+import { useTeslaModel, type VehicleDetails } from "@teslemetry/api";
 import type { TeslemetryPlatform } from "./platform.js";
 import type { BaseService } from "./vehicle-services/base.js";
 
@@ -18,9 +18,11 @@ import { ChargePortService } from "./vehicle-services/charge-port.js";
 import { ChargeSwitchService } from "./vehicle-services/charge-switch.js";
 import { ChargeLimitService } from "./vehicle-services/charge-limit.js";
 import { DefrostService } from "./vehicle-services/defrost.js";
+import { RearDefrostService } from "./vehicle-services/rear-defrost.js";
 import { DoorService } from "./vehicle-services/door.js";
 import { SentryService } from "./vehicle-services/sentry.js";
 import { WakeService } from "./vehicle-services/wake.js";
+import { TonneauService } from "./vehicle-services/tonneau.js";
 
 /**
  * VehicleAccessory
@@ -82,6 +84,9 @@ export class VehicleAccessory {
       new DefrostService(this.platform, this.accessory, this.vehicle),
     );
     this.services.push(
+      new RearDefrostService(this.platform, this.accessory, this.vehicle),
+    );
+    this.services.push(
       new DoorService(this.platform, this.accessory, this.vehicle),
     );
     this.services.push(
@@ -90,6 +95,15 @@ export class VehicleAccessory {
     this.services.push(
       new WakeService(this.platform, this.accessory, this.vehicle),
     );
+    // Tonneau is Cybertruck-only hardware; unlike DoorService's frunk/trunk
+    // sensors (a legacy gap, not a pattern to extend), new services gate on
+    // the vehicle model derived from the VIN instead of registering
+    // unconditionally.
+    if (useTeslaModel(this.vehicle.vin) === "Cybertruck") {
+      this.services.push(
+        new TonneauService(this.platform, this.accessory, this.vehicle),
+      );
+    }
 
     this.platform.log.info(
       `Initialized ${this.services.length} services for ${this.vehicle.name}`,
