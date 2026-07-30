@@ -18,12 +18,12 @@ function setup() {
 	return { accessory, vehicle };
 }
 
-test("ChargeSwitch/Defrost/Sentry/Wake each get their own Service.Switch instance", () => {
+test("ChargeSwitch/Defrost/RearDefrost/Sentry/Wake each get their own Service.Switch instance", () => {
 	const { accessory } = setup();
 	const switchServices = accessory.services.filter((s) => s.UUID === Service.Switch.UUID);
-	assert.equal(switchServices.length, 4);
+	assert.equal(switchServices.length, 5);
 	const subtypes = switchServices.map((s) => s.subtype).sort();
-	assert.deepEqual(subtypes, ["charging", "defrost", "sentry", "wake"]);
+	assert.deepEqual(subtypes, ["charging", "defrost", "rear-defrost", "sentry", "wake"]);
 });
 
 test("each Switch service's SET handler routes to its own vehicle command independently", async () => {

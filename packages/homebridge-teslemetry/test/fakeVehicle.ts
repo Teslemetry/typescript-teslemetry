@@ -41,6 +41,7 @@ const NOOP_COMMANDS = [
 	"openChargePort",
 	"closeChargePort",
 	"setPreconditioningMax",
+	"closure",
 ] as const;
 
 export interface FakeVehicleApiCall {

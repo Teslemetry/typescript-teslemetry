@@ -18,9 +18,11 @@ import { ChargePortService } from "./vehicle-services/charge-port.js";
 import { ChargeSwitchService } from "./vehicle-services/charge-switch.js";
 import { ChargeLimitService } from "./vehicle-services/charge-limit.js";
 import { DefrostService } from "./vehicle-services/defrost.js";
+import { RearDefrostService } from "./vehicle-services/rear-defrost.js";
 import { DoorService } from "./vehicle-services/door.js";
 import { SentryService } from "./vehicle-services/sentry.js";
 import { WakeService } from "./vehicle-services/wake.js";
+import { TonneauService } from "./vehicle-services/tonneau.js";
 
 /**
  * VehicleAccessory
@@ -82,6 +84,9 @@ export class VehicleAccessory {
       new DefrostService(this.platform, this.accessory, this.vehicle),
     );
     this.services.push(
+      new RearDefrostService(this.platform, this.accessory, this.vehicle),
+    );
+    this.services.push(
       new DoorService(this.platform, this.accessory, this.vehicle),
     );
     this.services.push(
@@ -89,6 +94,12 @@ export class VehicleAccessory {
     );
     this.services.push(
       new WakeService(this.platform, this.accessory, this.vehicle),
+    );
+    // Cybertruck-only hardware; on other models TonneauOpenPercent simply
+    // never streams, so the service sits inert (same convention as Door's
+    // frunk/trunk sensors, which are also registered unconditionally).
+    this.services.push(
+      new TonneauService(this.platform, this.accessory, this.vehicle),
     );
 
     this.platform.log.info(
