@@ -10,8 +10,11 @@ import { BaseService } from "./base.js";
  * TonneauService
  *
  * Represents the Cybertruck tonneau as a window covering. TonneauOpenPercent
- * is already 0 (closed) to 100 (open), matching HomeKit's CurrentPosition/
- * TargetPosition scale directly - no conversion needed.
+ * is already 0 (closed) to 100 (open), matching HomeKit's CurrentPosition
+ * scale directly - no conversion needed. The vehicle's closure command is
+ * binary (open/close only, no "move to X%"), so TargetPosition is restricted
+ * to 0/100 via validValues - HomeKit rejects any other value before it ever
+ * reaches our SET handler.
  */
 export class TonneauService extends BaseService {
   constructor(
@@ -27,6 +30,10 @@ export class TonneauService extends BaseService {
       "Tonneau",
     );
 
+    this.service
+      .getCharacteristic(this.platform.Characteristic.TargetPosition)
+      .setProps({ validValues: [0, 100] });
+
     // Default to stopped; there's no dedicated "is moving" signal, only the
     // resulting position, so we never report IN_PROGRESS states.
     this.service.updateCharacteristic(
@@ -38,9 +45,12 @@ export class TonneauService extends BaseService {
       "TonneauOpenPercent",
       this.platform.Characteristic.CurrentPosition,
       (percent: number) => {
+        // TargetPosition only tracks the nearest binary endpoint - CurrentPosition
+        // can legitimately be a transient in-between value while the cover moves,
+        // but that value would violate TargetPosition's validValues restriction.
         this.service.updateCharacteristic(
           this.platform.Characteristic.TargetPosition,
-          percent,
+          percent >= 50 ? 100 : 0,
         );
         return percent;
       },
@@ -51,7 +61,7 @@ export class TonneauService extends BaseService {
       async (value) => {
         const percent = value as number;
         this.platform.log.info(
-          `Setting tonneau to ${percent}% for ${vehicle.name}`,
+          `Setting tonneau to ${percent === 0 ? "closed" : "open"} for ${vehicle.name}`,
         );
         await vehicle.api.closure({
           tonneau: percent === 0 ? "close" : "open",

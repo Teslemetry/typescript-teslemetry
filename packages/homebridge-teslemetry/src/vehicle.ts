@@ -5,7 +5,7 @@
  */
 
 import type { PlatformAccessory } from "homebridge";
-import type { VehicleDetails } from "@teslemetry/api";
+import { useTeslaModel, type VehicleDetails } from "@teslemetry/api";
 import type { TeslemetryPlatform } from "./platform.js";
 import type { BaseService } from "./vehicle-services/base.js";
 
@@ -95,12 +95,15 @@ export class VehicleAccessory {
     this.services.push(
       new WakeService(this.platform, this.accessory, this.vehicle),
     );
-    // Cybertruck-only hardware; on other models TonneauOpenPercent simply
-    // never streams, so the service sits inert (same convention as Door's
-    // frunk/trunk sensors, which are also registered unconditionally).
-    this.services.push(
-      new TonneauService(this.platform, this.accessory, this.vehicle),
-    );
+    // Tonneau is Cybertruck-only hardware; unlike DoorService's frunk/trunk
+    // sensors (a legacy gap, not a pattern to extend), new services gate on
+    // the vehicle model derived from the VIN instead of registering
+    // unconditionally.
+    if (useTeslaModel(this.vehicle.vin) === "Cybertruck") {
+      this.services.push(
+        new TonneauService(this.platform, this.accessory, this.vehicle),
+      );
+    }
 
     this.platform.log.info(
       `Initialized ${this.services.length} services for ${this.vehicle.name}`,

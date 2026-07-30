@@ -14,12 +14,27 @@ function setup() {
 	return { hapService, sse, calls };
 }
 
-test("TonneauOpenPercent maps directly onto CurrentPosition and TargetPosition, no conversion", () => {
+test("TargetPosition is restricted to the two positions the closure command actually supports", () => {
+	const { hapService } = setup();
+	assert.deepEqual(
+		hapService.getCharacteristic(Characteristic.TargetPosition).props.validValues,
+		[0, 100],
+	);
+});
+
+test("TonneauOpenPercent maps directly onto CurrentPosition, no conversion", () => {
 	const { hapService, sse } = setup();
 	sse.emitSignal("TonneauOpenPercent", 40);
-
 	assert.equal(hapService.getCharacteristic(Characteristic.CurrentPosition).value, 40);
-	assert.equal(hapService.getCharacteristic(Characteristic.TargetPosition).value, 40);
+});
+
+test("an in-between CurrentPosition (mid-transit) snaps TargetPosition to the nearer binary endpoint, not the raw percent", () => {
+	const { hapService, sse } = setup();
+	sse.emitSignal("TonneauOpenPercent", 40);
+	assert.equal(hapService.getCharacteristic(Characteristic.TargetPosition).value, 0);
+
+	sse.emitSignal("TonneauOpenPercent", 75);
+	assert.equal(hapService.getCharacteristic(Characteristic.TargetPosition).value, 100);
 });
 
 test("setting TargetPosition to 0 sends a close command", async () => {
@@ -28,8 +43,8 @@ test("setting TargetPosition to 0 sends a close command", async () => {
 	assert.deepEqual(calls, [{ method: "closure", args: [{ tonneau: "close" }] }]);
 });
 
-test("setting TargetPosition above 0 sends an open command", async () => {
+test("setting TargetPosition to 100 sends an open command", async () => {
 	const { hapService, calls } = setup();
-	await hapService.getCharacteristic(Characteristic.TargetPosition).handleSetRequest(75 as never);
+	await hapService.getCharacteristic(Characteristic.TargetPosition).handleSetRequest(100 as never);
 	assert.deepEqual(calls, [{ method: "closure", args: [{ tonneau: "open" }] }]);
 });

@@ -5,21 +5,31 @@ import { VehicleAccessory } from "../src/vehicle.js";
 import { createFakeAccessory, createFakePlatform } from "./fakePlatform.js";
 import { createFakeVehicle } from "./fakeVehicle.js";
 
-function setup() {
+function setup(overrides: Parameters<typeof createFakeVehicle>[0] = {}) {
 	const { platform, logs } = createFakePlatform();
 	const accessory = createFakeAccessory("Test Vehicle");
-	const { vehicle, sse } = createFakeVehicle();
+	const { vehicle, sse } = createFakeVehicle(overrides);
 	const vehicleAccessory = new VehicleAccessory(platform as never, accessory, vehicle);
 	return { accessory, logs, sse, vehicleAccessory };
 }
 
-test("initializes the expected number of distinct HAP services", () => {
+test("initializes the expected number of distinct HAP services on a non-Cybertruck vehicle", () => {
 	const { accessory } = setup();
-	// Information, Battery, Climate, ChargeLimit, Door(x6), Tonneau = 11
-	// services with a unique HAP service type, plus 5 distinct Switch services
-	// (ChargeSwitch, Defrost, RearDefrost, Sentry, Wake) and 2 distinct
-	// LockMechanism services (Lock, ChargePort), each with its own subType.
+	// Information, Battery, Climate, ChargeLimit, Door(x6) = 10 services with a
+	// unique HAP service type, plus 4 distinct Switch services (ChargeSwitch,
+	// Defrost, Sentry, Wake), 2 distinct LockMechanism services (Lock,
+	// ChargePort), and RearDefrost's ContactSensor - each with its own
+	// subType. No Tonneau: the default fake VIN decodes to Model 3.
+	assert.equal(accessory.services.length, 17);
+	assert.equal(accessory.getService(Service.WindowCovering), undefined);
+});
+
+test("adds a Tonneau WindowCovering service only for a Cybertruck VIN", () => {
+	// VIN character index 3 is Teslemetry's model discriminator (Teslemetry.ts's
+	// useTeslaModel) - "C" decodes to Cybertruck.
+	const { accessory } = setup({ vin: "5YJCA1E14FF000000" });
 	assert.equal(accessory.services.length, 18);
+	assert.ok(accessory.getService(Service.WindowCovering));
 });
 
 test("destroy() tears down signal subscriptions so later SSE data no longer updates characteristics", () => {
