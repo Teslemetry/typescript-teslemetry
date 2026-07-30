@@ -37,8 +37,14 @@ export class DoorService extends BaseService {
     this.createDoorService("PassengerFront", "Passenger Front Door");
     this.createDoorService("DriverRear", "Driver Rear Door");
     this.createDoorService("PassengerRear", "Passenger Rear Door");
-    this.createDoorService("TrunkFront", "Frunk");
-    this.createDoorService("TrunkRear", "Trunk");
+
+    // can_actuate_trunks is null/false on vehicles with manual latch-only
+    // frunk/trunk hardware (no motor to sense/actuate) - only vehicle config
+    // from metadata can tell latch-only apart from powered, the VIN alone can't.
+    if (vehicle.metadata.config.can_actuate_trunks) {
+      this.createDoorService("TrunkFront", "Frunk");
+      this.createDoorService("TrunkRear", "Trunk");
+    }
 
     // Subscribe to door state updates
     this.subscribeSignal("DoorState", null as any, (doorState: any) => {

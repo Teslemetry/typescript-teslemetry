@@ -95,10 +95,9 @@ export class VehicleAccessory {
     this.services.push(
       new WakeService(this.platform, this.accessory, this.vehicle),
     );
-    // Tonneau is Cybertruck-only hardware; unlike DoorService's frunk/trunk
-    // sensors (a legacy gap, not a pattern to extend), new services gate on
-    // the vehicle model derived from the VIN instead of registering
-    // unconditionally.
+    // Tonneau is Cybertruck-only hardware; single-model/config-dependent
+    // features gate on vehicle model/config instead of registering
+    // unconditionally (see DoorService's own can_actuate_trunks gate).
     if (useTeslaModel(this.vehicle.vin) === "Cybertruck") {
       this.services.push(
         new TonneauService(this.platform, this.accessory, this.vehicle),

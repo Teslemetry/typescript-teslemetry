@@ -71,7 +71,7 @@ export function createFakeVehicle(overrides: Partial<VehicleDetails> = {}): Fake
 		name: "Test Model 3",
 		api,
 		sse,
-		metadata: {},
+		metadata: { config: { can_actuate_trunks: true } },
 		...overrides,
 	} as unknown as VehicleDetails;
 
