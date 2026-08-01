@@ -1,5 +1,21 @@
 # @teslemetry/homebridge-teslemetry
 
+## 1.1.0
+
+### Minor Changes
+
+- 387add0: Add HomeKit accessories for two of the four telemetry signals selected in the 2026-07-29 field-parity audit that have a clean HomeKit concept: a `WindowCovering` for the Cybertruck's tonneau cover (`TonneauOpenPercent`/`closure({ tonneau })`, `TargetPosition` restricted to 0/100 since the vehicle command is open/close only), and a read-only `ContactSensor` for `RearDefrostEnabled` (no rear-specific command exists, so it's display-only rather than a fake-writable `Switch`). The tonneau service is gated to Cybertruck vehicles via `@teslemetry/api`'s newly-exported `useTeslaModel(vin)` helper. The other two selected signals - the FSD mileage counters (`MilesSinceReset`, `SelfDrivingMilesSinceReset`) and `LifetimeEnergyGainedRegen` - have no stock HomeKit characteristic for arbitrary distance or energy values, so they're intentionally left unmapped rather than forced onto an unrelated sensor type.
+
+### Patch Changes
+
+- b65ff34: `DoorService` now gates its frunk/trunk contact sensors on the vehicle metadata's `config.can_actuate_trunks` instead of registering them unconditionally - vehicles with manual latch-only frunk/trunk hardware no longer get contact sensors for hardware they don't have. The VIN alone can't distinguish powered from latch-only hardware within a model line, but the metadata surface can.
+- dc644ce: Climate accessory now uses `HvacPower` (the vehicle's actual system power state) instead of `HvacACEnabled` to determine HomeKit's `CurrentHeatingCoolingState`. Previously the accessory reported the climate system OFF whenever the AC compressor wasn't running, even while heating was active. `HvacACEnabled` is now only used to distinguish HEAT from COOL once `HvacPower` reports the system on.
+- Updated dependencies [288440b]
+- Updated dependencies [7265d49]
+- Updated dependencies [387add0]
+- Updated dependencies [4b5cf92]
+  - @teslemetry/api@0.11.0
+
 ## 1.0.1
 
 ### Patch Changes

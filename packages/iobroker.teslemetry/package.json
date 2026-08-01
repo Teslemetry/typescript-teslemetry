@@ -1,6 +1,6 @@
 {
   "name": "iobroker.teslemetry",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "ioBroker adapter for Tesla vehicle and energy site control via Teslemetry",
   "author": {
     "name": "Teslemetry",
