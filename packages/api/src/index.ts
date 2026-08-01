@@ -13,3 +13,10 @@ export * from "./const.js";
 export * from "./sseTopics.js";
 export * from "./exceptions.js";
 export type { EnergyDetails, VehicleDetails, Products } from "./const.js";
+export { getTariffPeriods } from "./tariff.js";
+export type {
+  TariffContentV2,
+  TariffRate,
+  TariffPeriod,
+  TariffResolution,
+} from "./tariff.js";

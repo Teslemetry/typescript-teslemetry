@@ -178,6 +178,22 @@ REST `site_info` response:
 const document = site.sse.siteInfoDocument; // undefined until site_info is cached
 ```
 
+`getTariffPeriods` resolves the current buy/sell rate (and, optionally, the
+upcoming schedule) from a `tariff_content_v2` body - pass the site's IANA
+`installation_time_zone`, since the tariff itself carries no timezone:
+
+```typescript
+import { getTariffPeriods, type TariffContentV2 } from "@teslemetry/api";
+
+const tariff = document?.tariff_content_v2 as TariffContentV2 | null;
+if (tariff) {
+  const resolution = getTariffPeriods(tariff, new Date(), {
+    timeZone: document.installation_time_zone,
+  });
+  console.log(resolution?.buy.price);
+}
+```
+
 ### Energy API
 
 Interact with Tesla Energy sites (Solar, Powerwall, Wall Connector).
