@@ -1,5 +1,17 @@
 # @teslemetry/api
 
+## 0.11.0
+
+### Minor Changes
+
+- 288440b: Adds `getTariffPeriods` and the `TariffContentV2` type it consumes, re-exported from the package root. The implementation is bundled in from `tesla-fleet-api` at build time (a devDependency, inlined by tsdown) - consumers get tariff resolution without taking a runtime dependency on `tesla-fleet-api` themselves.
+
+### Patch Changes
+
+- 7265d49: Unblock the `pnpm client` codegen script, which was crashing outright on this repo's pinned toolchain (`@hey-api/openapi-ts@0.88.0` against `typescript@7.0.2`, `TypeError: Cannot read properties of undefined (reading 'LineFeed')`) - `@hey-api/openapi-ts` bumped to a `next` prerelease that dropped its runtime dependency on the `typescript` package entirely (no stable release with this fix exists yet). Regenerating the client against the current API spec also picked up: the general SSE route's path param renaming from `vin` to `id` (`getSseByVin_` -> `getSseById_`), and a wider surface of schema changes accumulated since the client was last regenerated.
+- 387add0: Add HomeKit accessories for two of the four telemetry signals selected in the 2026-07-29 field-parity audit that have a clean HomeKit concept: a `WindowCovering` for the Cybertruck's tonneau cover (`TonneauOpenPercent`/`closure({ tonneau })`, `TargetPosition` restricted to 0/100 since the vehicle command is open/close only), and a read-only `ContactSensor` for `RearDefrostEnabled` (no rear-specific command exists, so it's display-only rather than a fake-writable `Switch`). The tonneau service is gated to Cybertruck vehicles via `@teslemetry/api`'s newly-exported `useTeslaModel(vin)` helper. The other two selected signals - the FSD mileage counters (`MilesSinceReset`, `SelfDrivingMilesSinceReset`) and `LifetimeEnergyGainedRegen` - have no stock HomeKit characteristic for arbitrary distance or energy values, so they're intentionally left unmapped rather than forced onto an unrelated sensor type.
+- 4b5cf92: Align the `energy_totals` SSE event type with the server's trimmed payload (Teslemetry/api#321): `product_type`, `topic`, and `url` are no longer part of the event, and `isCache` is now typed `?: true` (present only on a connect-time snapshot replay, omitted on every live publish) instead of a plain boolean. Adoption of this event was zero prior to today's release, so no deprecation cycle is needed.
+
 ## 0.10.0
 
 ### Minor Changes

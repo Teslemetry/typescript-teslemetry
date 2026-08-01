@@ -1,7 +1,7 @@
 {
   "name": "homebridge-teslemetry",
   "displayName": "Homebridge Teslemetry",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Teslemetry integration for Homebridge with real-time streaming support",
   "author": "Teslemetry",
   "license": "Apache-2.0",
