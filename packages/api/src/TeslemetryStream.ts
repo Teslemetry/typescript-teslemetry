@@ -142,6 +142,11 @@ export class TeslemetryStream extends EventEmitter {
   public logger: Logger;
   public vehicles: Map<string, TeslemetryVehicleStream> = new Map();
   public energySites: Map<string, TeslemetryEnergySiteStream> = new Map();
+  /** Aborts the in-flight SSE fetch and, via its shared signal, the
+   *  reconnect backoff wait; created fresh per connect() so a closed stream
+   *  can be reconnected without reusing an already-aborted controller. */
+  private abortController: AbortController | undefined;
+  private loopPromise: Promise<void> | undefined;
 
   // Constructor and basic setup
   constructor(root: Teslemetry, options?: TeslemetryStreamOptions) {
@@ -304,10 +309,11 @@ export class TeslemetryStream extends EventEmitter {
     }
 
     this.active = true;
-    this._connectLoop();
+    this.abortController = new AbortController();
+    this.loopPromise = this._connectLoop(this.abortController.signal);
   }
 
-  private async _connectLoop() {
+  private async _connectLoop(signal: AbortSignal) {
     let retries = 0;
     let authFailures = 0;
     while (this.active) {
@@ -325,6 +331,7 @@ export class TeslemetryStream extends EventEmitter {
             ...(this.topicsParam ? { topics: this.topicsParam } : {}),
           },
           sseMaxRetryAttempts: 1,
+          signal,
           onSseError: (error) => {
             streamError = error;
           },
@@ -382,21 +389,25 @@ export class TeslemetryStream extends EventEmitter {
         const delay = Math.min(2 ** retries, 600) * 1000;
         this.logger.info(`Reconnecting in ${delay / 1000} seconds...`);
 
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        await sleep(delay, signal);
       }
     }
     this.connected = false;
     this.emit("disconnect");
   }
 
-  public disconnect(): void {
-    this.active = false;
-    this.close();
+  public async disconnect(): Promise<void> {
+    await this.close();
   }
 
-  public close(): void {
+  /** Aborts the in-flight fetch/reader and cancels any pending reconnect
+   *  backoff wait immediately, then resolves once `_connectLoop` has fully
+   *  exited - safe to await before reconnecting. */
+  public async close(): Promise<void> {
     this.active = false;
     this.logger.info(`Disconnecting from stream`);
+    this.abortController?.abort();
+    await this.loopPromise;
   }
 
   public parseCreatedAt(event: SseEvent): Date {
@@ -579,4 +590,24 @@ function parseSseStatus(error: unknown): number | undefined {
     if (match) return Number(match[1]);
   }
   return undefined;
+}
+
+/** Resolves after `ms`, or immediately if `signal` aborts first - the
+ *  abort path also clears the pending timer so it never fires. */
+function sleep(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
 }
