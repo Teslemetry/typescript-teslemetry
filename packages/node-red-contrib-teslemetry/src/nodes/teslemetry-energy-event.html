@@ -1,0 +1,120 @@
+<script type="text/javascript">
+    RED.nodes.registerType("teslemetry-energy-event", {
+        category: "Teslemetry Energy",
+        paletteLabel: "Event",
+        color: "#e6e600",
+        defaults: {
+            name: { value: "" },
+            teslemetryConfig: {
+                value: "",
+                type: "teslemetry-config",
+                required: true,
+            },
+            siteId: { value: "", required: true },
+            event: { value: "all", required: true },
+        },
+        inputs: 0,
+        outputs: 1,
+        icon: "font-awesome/fa-rss",
+        label: function () {
+            return this.name || "Energy Event: " + this.event;
+        },
+        oneditprepare: function () {
+            const node = this;
+            const siteSelect = $("#node-input-siteId");
+            const configInput = $("#node-input-teslemetryConfig");
+
+            function updateSites() {
+                const configId = configInput.val();
+                if (configId && configId !== "_ADD_") {
+                    $.getJSON("teslemetry/energy_sites", { config: configId })
+                        .done(function (data) {
+                            const current = siteSelect.val() || node.siteId;
+                            siteSelect.empty();
+                            if (data && data.length > 0) {
+                                data.forEach(function ([id, name]) {
+                                    siteSelect.append(
+                                        '<option value="' +
+                                            id +
+                                            '">' +
+                                            name +
+                                            " (" +
+                                            id +
+                                            ")</option>",
+                                    );
+                                });
+                            }
+                            if (current) {
+                                siteSelect.val(current);
+                            }
+                        })
+                        .fail(function (jqxhr, textStatus, error) {
+                            console.error(
+                                "Failed to fetch energy sites",
+                                error,
+                            );
+                        });
+                }
+            }
+
+            configInput.change(function () {
+                updateSites();
+            });
+
+            if (configInput.val()) {
+                updateSites();
+            }
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="teslemetry-energy-event">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-teslemetryConfig">
+            <i class="fa fa-globe"></i> Config
+        </label>
+        <input type="text" id="node-input-teslemetryConfig" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-siteId">
+            <i class="fa fa-home"></i> Site ID
+        </label>
+        <select id="node-input-siteId" style="width: 70%;"></select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-event">
+            <i class="fa fa-list"></i> Event Type
+        </label>
+        <select id="node-input-event">
+            <option value="all">All Events</option>
+            <option value="live_status">Live Status</option>
+            <option value="site_info">Site Info</option>
+            <option value="tariff_content_v2">Tariff (TOU rates)</option>
+            <option value="energy_totals">Energy Totals</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="teslemetry-energy-event">
+    <p>
+        Listens for real-time Server-Sent Events (SSE) from a Tesla Energy
+        Site: live power flow, site configuration, tariff rates, and daily
+        energy totals.
+    </p>
+    <p>Requires a Site ID; unlike the vehicle Event node this cannot listen
+    across all sites, since each event topic is scoped to one site.</p>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>The event data (shape depends on the event type).</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>The event type that fired.</dd>
+        <dt>siteId <span class="property-type">string</span></dt>
+        <dd>The Energy Site ID the event belongs to.</dd>
+    </dl>
+</script>
