@@ -98,8 +98,7 @@ pnpm --filter node-red-contrib-teslemetry build
 ### 3. `n8n-nodes-teslemetry` - n8n Integration
 
 **Location**: `packages/n8n-nodes-teslemetry/`
-**Version**: 0.1.0
-**Status**: Active (early stage but functional)
+**Status**: Active
 
 **Purpose**: Provides n8n workflow nodes for Tesla automation.
 
@@ -107,12 +106,11 @@ pnpm --filter node-red-contrib-teslemetry build
 - `src/credentials/TeslemetryApi.credentials.ts` - API credential definition
 - `src/nodes/TeslemetryVehicle.node.ts` - Vehicle operations
 - `src/nodes/TeslemetryEnergy.node.ts` - Energy operations
-- `src/nodes/TeslemetryTrigger.node.ts` - Event triggers
+- `src/nodes/TeslemetryTrigger.node.ts` - Event triggers (Vehicle and Energy Site resources)
 
-**Node Capabilities**:
-- **Vehicle Node**: Data retrieval, wake, lights, horn, lock/unlock, climate, charging, sentry, homelink, navigation
-- **Energy Node**: Status, backup reserve, operation modes, storm mode, grid control, off-grid reserve
-- **Trigger Node**: Workflow triggers for events, data updates, state changes, alerts, connectivity, signal changes
+**Node Capabilities**: see each node's `operation`/`event` option list for the current set - it's grown incrementally and the list goes stale fast. As of the capability-expansion uplift (2026-08), Vehicle covers climate/seat automation, closures/windows, charging schedules, software update, and volume in addition to the original data/wake/lock/charge/sentry set; Energy covers backup reserve, operation mode, storm mode, grid rules, and off-grid EV reserve; Trigger covers both vehicle SSE events (including a generic per-field Signal listener) and energy site SSE events (live status, site info, tariff content, energy totals).
+
+**Gotcha**: before adding a new node operation to wrap an SDK command, check whether the capability is already reachable without new code. `TeslemetryVehicleApi`/`TeslemetryEnergyApi` already expose most of the Tesla command surface (grep before assuming a gap, per the `@teslemetry/api` codegen note above), and the Trigger node's generic Signal event type (any field from `teslemetry.api.getFields()`, delivered via `onSignal`) already covers arbitrary read-only vehicle telemetry - unlike Homey/Homebridge, which need a capability/service wired per field, n8n needs no new code to expose a new telemetry field. New operations are only needed for genuinely new **commands** (writes), not for reading data already covered by `vehicleData()`/`getLiveStatus()`/`getSiteInfo()` or the Signal/Energy Site event types.
 
 **Build Output**: `dist/index.cjs` (single entry point)
 
