@@ -215,6 +215,66 @@ export class TeslemetryVehicle implements INodeType {
 						value: 'tonneauControl',
 						action: 'Open or close the Cybertruck tonneau',
 					},
+					{
+						name: 'Set Scheduled Charging',
+						value: 'setScheduledCharging',
+						action: 'Enable or disable scheduled charging',
+					},
+					{
+						name: 'Set Scheduled Departure',
+						value: 'setScheduledDeparture',
+						action: 'Set scheduled departure and off-peak charging',
+					},
+					{
+						name: 'Add Charge Schedule',
+						value: 'addChargeSchedule',
+						action: 'Add or update a repeating charge schedule',
+					},
+					{
+						name: 'Remove Charge Schedule',
+						value: 'removeChargeSchedule',
+						action: 'Remove a charge schedule',
+					},
+					{
+						name: 'Add Precondition Schedule',
+						value: 'addPreconditionSchedule',
+						action: 'Add or update a repeating precondition schedule',
+					},
+					{
+						name: 'Remove Precondition Schedule',
+						value: 'removePreconditionSchedule',
+						action: 'Remove a precondition schedule',
+					},
+					{
+						name: 'Charge on Solar',
+						value: 'chargeOnSolar',
+						action: 'Enable or disable charging on solar with limits',
+					},
+					{
+						name: 'Charge to Standard',
+						value: 'chargeStandard',
+						action: 'Set the charge limit to standard',
+					},
+					{
+						name: 'Charge to Max Range',
+						value: 'chargeMaxRange',
+						action: 'Set the charge limit to max range',
+					},
+					{
+						name: 'Schedule Software Update',
+						value: 'scheduleSoftwareUpdate',
+						action: 'Schedule a software update install',
+					},
+					{
+						name: 'Cancel Software Update',
+						value: 'cancelSoftwareUpdate',
+						action: 'Cancel a scheduled software update',
+					},
+					{
+						name: 'Set Volume',
+						value: 'adjustVolume',
+						action: 'Set the absolute media volume',
+					},
 				],
 				default: 'vehicleData',
 			},
@@ -525,6 +585,141 @@ export class TeslemetryVehicle implements INodeType {
 					},
 				},
 			},
+			{
+				displayName: 'Enable',
+				name: 'schedule_enable',
+				type: 'boolean',
+				default: true,
+				displayOptions: {
+					show: {
+						operation: ['setScheduledCharging'],
+					},
+				},
+			},
+			{
+				displayName: 'Charging Time (HH:mm)',
+				name: 'schedule_time',
+				type: 'string',
+				default: '00:00',
+				description: 'Time of day charging should start, in the vehicle\'s local time',
+				displayOptions: {
+					show: {
+						operation: ['setScheduledCharging'],
+					},
+				},
+			},
+			{
+				displayName: 'Schedule ID',
+				name: 'schedule_id',
+				type: 'number',
+				default: 0,
+				description: 'The ID of an existing schedule to remove',
+				displayOptions: {
+					show: {
+						operation: ['removeChargeSchedule', 'removePreconditionSchedule'],
+					},
+				},
+			},
+			{
+				displayName: 'Scheduled Departure (JSON)',
+				name: 'scheduled_departure_body',
+				type: 'json',
+				default:
+					'{\n  "enable": true,\n  "departure_time": 480,\n  "preconditioning_enabled": true,\n  "off_peak_charging_enabled": true\n}',
+				description:
+					'Body for setScheduledDeparture. departure_time/end_off_peak_time are minutes into the day (1:05 AM = 65)',
+				displayOptions: {
+					show: {
+						operation: ['setScheduledDeparture'],
+					},
+				},
+			},
+			{
+				displayName: 'Charge Schedule (JSON)',
+				name: 'charge_schedule_body',
+				type: 'json',
+				default:
+					'{\n  "days_of_week": "All",\n  "enabled": true,\n  "start_enabled": true,\n  "start_time": 60,\n  "end_enabled": false,\n  "lat": 0,\n  "lon": 0\n}',
+				description: 'Body for addChargeSchedule. start_time/end_time are minutes into the day (1:05 AM = 65)',
+				displayOptions: {
+					show: {
+						operation: ['addChargeSchedule'],
+					},
+				},
+			},
+			{
+				displayName: 'Precondition Schedule (JSON)',
+				name: 'precondition_schedule_body',
+				type: 'json',
+				default:
+					'{\n  "days_of_week": "All",\n  "enabled": true,\n  "precondition_time": 420,\n  "lat": 0,\n  "lon": 0\n}',
+				description: 'Body for addPreconditionSchedule. precondition_time is minutes into the day (1:05 AM = 65)',
+				displayOptions: {
+					show: {
+						operation: ['addPreconditionSchedule'],
+					},
+				},
+			},
+			{
+				displayName: 'Enabled',
+				name: 'solar_charging_enabled',
+				type: 'boolean',
+				default: true,
+				displayOptions: {
+					show: {
+						operation: ['chargeOnSolar'],
+					},
+				},
+			},
+			{
+				displayName: 'Lower Charge Limit (%)',
+				name: 'solar_lower_charge_limit',
+				type: 'number',
+				typeOptions: { maxValue: 100, minValue: 0 },
+				default: 50,
+				displayOptions: {
+					show: {
+						operation: ['chargeOnSolar'],
+					},
+				},
+			},
+			{
+				displayName: 'Upper Charge Limit (%)',
+				name: 'solar_upper_charge_limit',
+				type: 'number',
+				typeOptions: { maxValue: 100, minValue: 0 },
+				default: 90,
+				displayOptions: {
+					show: {
+						operation: ['chargeOnSolar'],
+					},
+				},
+			},
+			{
+				displayName: 'Offset (Seconds)',
+				name: 'offset_sec',
+				type: 'number',
+				default: 0,
+				description: 'Delay from now before the software update install begins',
+				displayOptions: {
+					show: {
+						operation: ['scheduleSoftwareUpdate'],
+					},
+				},
+			},
+			{
+				displayName: 'Volume',
+				name: 'volume',
+				type: 'number',
+				typeOptions: { numberPrecision: 2 },
+				default: 5,
+				description: 'Absolute volume on the vehicle\'s own scale (read MediaAudioVolumeMax via a Signal trigger for the ceiling)',
+				displayOptions: {
+					show: {
+						operation: ['adjustVolume'],
+					},
+				},
+			},
 		],
 	};
 
@@ -705,6 +900,70 @@ export class TeslemetryVehicle implements INodeType {
 					case 'tonneauControl': {
 						const tonneauCommand = this.getNodeParameter('tonneau_command', itemIndex) as 'open' | 'close';
 						result = await vehicle.closure({ tonneau: tonneauCommand });
+						break;
+					}
+					case 'setScheduledCharging': {
+						const scheduleEnable = this.getNodeParameter('schedule_enable', itemIndex) as boolean;
+						const scheduleTime = this.getNodeParameter('schedule_time', itemIndex) as string;
+						const [hours, minutes] = scheduleTime.split(':').map(Number);
+						result = await vehicle.setScheduledCharging(scheduleEnable, hours * 60 + minutes);
+						break;
+					}
+					case 'setScheduledDeparture': {
+						const departureBody = JSON.parse(
+							this.getNodeParameter('scheduled_departure_body', itemIndex) as string,
+						);
+						result = await vehicle.setScheduledDeparture(departureBody);
+						break;
+					}
+					case 'addChargeSchedule': {
+						const chargeScheduleBody = JSON.parse(
+							this.getNodeParameter('charge_schedule_body', itemIndex) as string,
+						);
+						result = await vehicle.addChargeSchedule(chargeScheduleBody);
+						break;
+					}
+					case 'removeChargeSchedule': {
+						const chargeScheduleId = this.getNodeParameter('schedule_id', itemIndex) as number;
+						result = await vehicle.removeChargeSchedule(chargeScheduleId);
+						break;
+					}
+					case 'addPreconditionSchedule': {
+						const preconditionScheduleBody = JSON.parse(
+							this.getNodeParameter('precondition_schedule_body', itemIndex) as string,
+						);
+						result = await vehicle.addPreconditionSchedule(preconditionScheduleBody);
+						break;
+					}
+					case 'removePreconditionSchedule': {
+						const preconditionScheduleId = this.getNodeParameter('schedule_id', itemIndex) as number;
+						result = await vehicle.removePreconditionSchedule(preconditionScheduleId);
+						break;
+					}
+					case 'chargeOnSolar': {
+						const solarEnabled = this.getNodeParameter('solar_charging_enabled', itemIndex) as boolean;
+						const solarLower = this.getNodeParameter('solar_lower_charge_limit', itemIndex) as number;
+						const solarUpper = this.getNodeParameter('solar_upper_charge_limit', itemIndex) as number;
+						result = await vehicle.chargeOnSolar(solarEnabled, solarLower, solarUpper);
+						break;
+					}
+					case 'chargeStandard':
+						result = await vehicle.chargeStandard();
+						break;
+					case 'chargeMaxRange':
+						result = await vehicle.chargeMaxRange();
+						break;
+					case 'scheduleSoftwareUpdate': {
+						const offsetSec = this.getNodeParameter('offset_sec', itemIndex) as number;
+						result = await vehicle.scheduleSoftwareUpdate(offsetSec);
+						break;
+					}
+					case 'cancelSoftwareUpdate':
+						result = await vehicle.cancelSoftwareUpdate();
+						break;
+					case 'adjustVolume': {
+						const volume = this.getNodeParameter('volume', itemIndex) as number;
+						result = await vehicle.adjustVolume(volume);
 						break;
 					}
 					default:
