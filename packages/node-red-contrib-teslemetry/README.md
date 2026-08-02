@@ -166,11 +166,16 @@ Listen for specific signal changes from a vehicle.
 - **Lock/Unlock Doors**: Controls door locks
 - **Remote Start**: Enables keyless driving
 - **Actuate Trunk**: Opens/closes front or rear trunk
-- **Climate Control**: Start/stop HVAC, set temps, seat heaters, steering wheel heater
-- **Charging**: Start/stop, open/close port, set limit, set amps
+- **Tonneau**: Opens/closes the tonneau cover (Cybertruck)
+- **Sunroof**: Vent/close/stop (legacy Model S/X with a panoramic sunroof)
+- **Climate Control**: Start/stop HVAC, set temps, seat heaters, steering wheel heater, cabin overheat protection, auto seat/steering-wheel climate
+- **Charging**: Start/stop, open/close port, set limit, set amps, scheduled charging/departure
 - **Sentry Mode**: Enable/disable Sentry Mode
 - **Homelink**: Trigger Homelink at specific coordinates
 - **Navigation**: Send destination to vehicle navigation
+- **Media**: Set absolute volume (compose relative up/down from the
+  `MediaAudioVolume`/`MediaAudioVolumeIncrement` signals in a function node)
+- **Software Update**: Schedule (or install now) or cancel a pending update
 
 ## Available Energy Commands
 

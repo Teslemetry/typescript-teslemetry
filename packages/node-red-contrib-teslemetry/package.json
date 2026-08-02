@@ -51,7 +51,8 @@
       "teslemetry-event": "dist/nodes/teslemetry-event.cjs",
       "teslemetry-signal": "dist/nodes/teslemetry-signal.cjs",
       "teslemetry-energy-command": "dist/nodes/teslemetry-energy-command.cjs",
-      "teslemetry-energy-history": "dist/nodes/teslemetry-energy-history.cjs"
+      "teslemetry-energy-history": "dist/nodes/teslemetry-energy-history.cjs",
+      "teslemetry-energy-event": "dist/nodes/teslemetry-energy-event.cjs"
     }
   },
   "devDependencies": {

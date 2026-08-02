@@ -80,14 +80,18 @@ See each package's own `package.json`/`README.md` for its purpose and structure 
 **Nodes**:
 1. **teslemetry-config** - Configuration node (stores API credentials)
 2. **teslemetry-vehicle-command** - Vehicle commands and data retrieval
-3. **teslemetry-energy-command** - Energy site control
-4. **teslemetry-event** - Real-time event listener (SSE)
-5. **teslemetry-signal** - Monitor specific signal changes
+3. **teslemetry-energy-command** - Energy site commands (REST)
+4. **teslemetry-energy-history** - Energy site calendar/telemetry history (REST)
+5. **teslemetry-event** - Real-time vehicle event listener (SSE)
+6. **teslemetry-signal** - Real-time single vehicle signal field listener (SSE)
+7. **teslemetry-energy-event** - Real-time energy site event listener (SSE: `live_status`/`site_info`/`tariff_content_v2`/`energy_totals`)
 
 **Structure**:
 - Each node has a TypeScript file (`.ts`) and HTML UI file (`.html`)
 - `src/shared.ts` - Shared utilities
 - `src/validation.ts` - Input validation
+
+**Gotcha**: `teslemetry-signal`'s field dropdown is populated from `teslemetry.api.getFields()` at edit time (`teslemetry-config.ts`'s `/teslemetry/fields` admin route), i.e. the live API's field registry, not a hand-maintained list - any new vehicle telemetry field the backend exposes is automatically selectable with zero code changes here. Combined with `teslemetry-event`/`teslemetry-energy-event` streaming whole raw payloads, most Homey/Homebridge-style "new capability" work (per-field mapping, units, gating) has no equivalent here: only genuinely new SDK *commands* (wire into `teslemetry-vehicle-command`/`teslemetry-energy-command`'s switch-case) or missing *streams* (as `teslemetry-energy-event` was, until added) are real gaps in this package. Threshold-crossing and lifecycle-transition logic (Homey's Flow trigger cards) has no dedicated node either - it's expected to be composed downstream with core Node-RED `switch`/`change`/`function` nodes over the raw stream, not reimplemented here.
 
 **Build Process**:
 ```bash
