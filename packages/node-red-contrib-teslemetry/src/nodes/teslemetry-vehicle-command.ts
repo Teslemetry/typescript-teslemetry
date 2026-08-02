@@ -86,6 +86,12 @@ export default function (RED: NodeAPI) {
           case "actuateTrunkFront":
             result = await vehicle.actuateTrunk("front");
             break;
+          case "tonneauOpen":
+            result = await vehicle.closure({ tonneau: "open" });
+            break;
+          case "tonneauClose":
+            result = await vehicle.closure({ tonneau: "close" });
+            break;
           case "startAutoConditioning":
             result = await vehicle.startAutoConditioning();
             break;
