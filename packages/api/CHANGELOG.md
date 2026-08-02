@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.11.1
+
+### Patch Changes
+
+- c170974: `TeslemetryStream.close()`/`disconnect()` now abort the in-flight SSE fetch/reader and cancel any pending reconnect backoff wait immediately, instead of only flipping `active` to `false` and leaving the request/timer running until it naturally times out or fires (up to 10 minutes). Both methods are now awaitable, so callers can sequence teardown before reinitializing without leaking HTTP streams or timers.
+
 ## 0.11.0
 
 ### Minor Changes
@@ -19,7 +25,6 @@
 - 9cd3c30: Add `live_status`/`site_info` energy SSE events to `TeslemetryStream`, mirroring the existing vehicle event surface. `sse.getEnergySite(id)` returns a `TeslemetryEnergySiteStream` (analogous to `getVehicle`) that emits these events and replays the local cache to new listeners; account-wide and single-site streams both work through the existing optional-id connection mechanism. Forward-compatible and inert until the backend's energy SSE feature (flag-gated) is enabled.
 - dba83c5: Add the `energy_totals` energy SSE event to `TeslemetryStream`/`TeslemetryEnergySiteStream`, mirroring the existing `live_status`/`site_info` event surface. The event carries a compact, typed cumulative-totals object (`EnergyHistoryTotals`) plus the canonical REST `url` to re-fetch the full calendar history document - it never carries the full time_series/events payload itself. Silence on this event means no change since the last server-side poll, not staleness. Purely additive; existing event contracts are unchanged.
 - 1908085: Add typed support for the API's SSE topic-selection and tariff-v2 protocol changes:
-
   - `stream.topics` opt-in on `Teslemetry`/`TeslemetryStream` selects an exact comma-separated topic allowlist, either exact wire names or the bundled `SSE_TOPIC_PRESETS` (`vehicleFull`, `vehicleCore`, `energyLive`, `energyFullState`, `account`), expanded client-side before connecting. Omitting `topics` keeps legacy-all behavior forever.
   - New `tariff_content_v2` event on `TeslemetryStream`/`TeslemetryEnergySiteStream`; a `null` body is the server's explicit tariff-removal signal, distinct from "no update yet".
   - `site_info` events no longer carry tariff fields (matches the server's slim `site_info` schema); existing `site_info` listeners keep working unchanged.
@@ -68,7 +73,6 @@
 ### Patch Changes
 
 - 0b18bc3: Fix timezone handling in telemetry history API calls
-
   - Format dates as RFC3339 with local timezone offset instead of UTC
   - Default time_zone parameter to local IANA timezone
 
@@ -92,20 +96,17 @@
 ### Patch Changes
 
 - 6291669: Standardize SSE event handling to use EventEmitter pattern:
-
   - Remove `onConnection()` helper method - use `on("connect")` and `on("disconnect")` instead
   - Add `"all"` event type to subscribe to all SSE events at once
   - Update documentation and examples to reflect new patterns
 
   Fix unhandled promise rejections in SSE streaming:
-
   - Add error handling to `connect()` method's internal connection loop
   - `updateFields()` now returns a promise that resolves/rejects when the debounced update completes
   - Multiple calls within the debounce window share the same promise
   - `addField()` now properly returns the promise from `updateFields()`
 
   Refactor `updateFields()` internals:
-
   - Consolidate batch state into single `_fieldUpdateBatch` object
   - Extract flush logic into `_flushFieldUpdate()` method
   - Use Deferred pattern for cleaner promise handling
