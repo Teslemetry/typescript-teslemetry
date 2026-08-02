@@ -133,6 +133,13 @@
             <option value="setChargingAmps">
                 Set Charging Amps (msg.amps)
             </option>
+            <option value="setScheduledCharging">
+                Set Scheduled Charging (msg.enable, msg.time "HH:mm")
+            </option>
+            <option value="setScheduledDeparture">
+                Set Scheduled Departure (msg.enable, msg.departureTime
+                "HH:mm", ...)
+            </option>
             <option value="setSentryModeOn">Enable Sentry Mode</option>
             <option value="setSentryModeOff">Disable Sentry Mode</option>
             <option value="triggerHomelink">
@@ -170,6 +177,14 @@
         <dd>
             Arguments for commands (e.g. <code>{ "percent": 80 }</code> for Set
             Charge Limit)
+        </dd>
+        <dt class="optional">
+            time / departureTime / endOffPeakTime
+            <span class="property-type">string</span>
+        </dt>
+        <dd>
+            24-hour <code>HH:mm</code> time for the scheduled charging/
+            departure commands.
         </dd>
     </dl>
 
