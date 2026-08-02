@@ -162,6 +162,9 @@
             <option value="navigationRequest">
                 Navigation Request (msg.payload)
             </option>
+            <option value="adjustVolume">
+                Set Media Volume (msg.volume)
+            </option>
             <option value="scheduleSoftwareUpdate">
                 Schedule Software Update (msg.offsetSec, 0=now)
             </option>
@@ -201,6 +204,13 @@
             departure commands.
         </dd>
     </dl>
+    <p>
+        <code>adjustVolume</code> sets an absolute volume. For volume
+        up/down, read the <code>MediaAudioVolume</code> and
+        <code>MediaAudioVolumeIncrement</code> fields with a Signal node,
+        add/subtract them in a function node, and feed the result into
+        <code>msg.volume</code>.
+    </p>
 
     <h3>Outputs</h3>
     <dl class="message-properties">

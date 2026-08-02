@@ -304,6 +304,12 @@ export default function (RED: NodeAPI) {
               value: msg?.value,
             });
             break;
+          case "adjustVolume":
+            validateParameters(msg, {
+              volume: { required: true, type: "number", min: 0 },
+            });
+            result = await vehicle.adjustVolume(msg.volume);
+            break;
           default:
             throw new Error(`Unknown command: ${command}`);
         }

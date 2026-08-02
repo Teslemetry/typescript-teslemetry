@@ -173,6 +173,8 @@ Listen for specific signal changes from a vehicle.
 - **Sentry Mode**: Enable/disable Sentry Mode
 - **Homelink**: Trigger Homelink at specific coordinates
 - **Navigation**: Send destination to vehicle navigation
+- **Media**: Set absolute volume (compose relative up/down from the
+  `MediaAudioVolume`/`MediaAudioVolumeIncrement` signals in a function node)
 - **Software Update**: Schedule (or install now) or cancel a pending update
 
 ## Available Energy Commands
