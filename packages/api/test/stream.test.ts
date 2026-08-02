@@ -171,3 +171,124 @@ test("does not crash when nobody subscribes to error events", async () => {
   await waitFor(() => teslemetry.sse.active === false);
   assert.equal(fetches, 2);
 });
+
+/** A never-closing SSE response, so the reader stays parked in `reader.read()`
+ *  until something aborts it - lets tests observe close() cancelling a
+ *  genuinely in-flight fetch/reader rather than one that already finished. */
+function openSseResponse(
+  event: object,
+  onCancel?: () => void,
+): Response {
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(
+        new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`),
+      );
+    },
+    cancel() {
+      onCancel?.();
+    },
+  });
+  return new Response(stream, {
+    status: 200,
+    headers: { "Content-Type": "text/event-stream" },
+  });
+}
+
+test("close() aborts an in-flight fetch/reader", async () => {
+  let capturedSignal: AbortSignal | undefined;
+  let readerCancelled = false;
+  const teslemetry = makeTeslemetry(async (request) => {
+    capturedSignal = request.signal;
+    return openSseResponse(
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        vin: "TESTVIN0000000000",
+        state: "online",
+      },
+      () => {
+        readerCancelled = true;
+      },
+    );
+  });
+
+  const states: string[] = [];
+  teslemetry.sse.on("state", (event) => states.push(event.state));
+
+  await teslemetry.sse.connect();
+  await waitFor(() => states.length >= 1);
+  assert.equal(teslemetry.sse.connected, true);
+
+  await teslemetry.sse.close();
+
+  assert.equal(capturedSignal?.aborted, true);
+  assert.equal(readerCancelled, true);
+  assert.equal(teslemetry.sse.active, false);
+  assert.equal(teslemetry.sse.connected, false);
+});
+
+test("close() during backoff cancels the pending reconnect timer immediately", async () => {
+  let fetches = 0;
+  const teslemetry = makeTeslemetry(async () => {
+    fetches++;
+    return new Response(null, {
+      status: 500,
+      statusText: "Internal Server Error",
+    });
+  });
+
+  const streamErrors: TeslemetryStreamErrorEvent[] = [];
+  teslemetry.sse.on("stream_error", (event) => streamErrors.push(event));
+
+  await teslemetry.sse.connect();
+  // First failure schedules a 2s backoff (2^1 seconds) before retrying
+  await waitFor(() => streamErrors.length >= 1);
+  const fetchesAtClose = fetches;
+
+  const start = Date.now();
+  await teslemetry.sse.close();
+  const elapsed = Date.now() - start;
+
+  // close() must not sit through the pending backoff wait
+  assert.ok(elapsed < 500, `close() took ${elapsed}ms, expected < 500ms`);
+  assert.equal(teslemetry.sse.active, false);
+
+  // Give the (now-cancelled) 2s timer a chance to have fired if it wasn't
+  // actually cancelled
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  assert.equal(fetches, fetchesAtClose);
+});
+
+test("connect() after close() reinitializes the stream", async () => {
+  let fetches = 0;
+  const cancels: boolean[] = [];
+  const teslemetry = makeTeslemetry(async () => {
+    fetches++;
+    const vin = "TESTVIN0000000000";
+    return openSseResponse(
+      {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        vin,
+        state: fetches === 1 ? "online" : "asleep",
+      },
+      () => cancels.push(true),
+    );
+  });
+
+  const states: string[] = [];
+  teslemetry.sse.on("state", (event) => states.push(event.state));
+
+  await teslemetry.sse.connect();
+  await waitFor(() => states.length >= 1);
+  await teslemetry.sse.close();
+  assert.equal(teslemetry.sse.active, false);
+  assert.equal(fetches, 1);
+
+  await teslemetry.sse.connect();
+  await waitFor(() => states.length >= 2);
+  assert.equal(teslemetry.sse.active, true);
+  assert.deepEqual(states, ["online", "asleep"]);
+  assert.equal(fetches, 2);
+
+  await teslemetry.sse.close();
+});
