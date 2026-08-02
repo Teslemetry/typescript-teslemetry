@@ -99,13 +99,39 @@
             <option value="remoteStart">Remote Start</option>
             <option value="actuateTrunkRear">Open Rear Trunk</option>
             <option value="actuateTrunkFront">Open Front Trunk</option>
+            <option value="tonneauOpen">Open Tonneau (Cybertruck)</option>
+            <option value="tonneauClose">Close Tonneau (Cybertruck)</option>
+            <option value="sunRoofVent">Vent Sunroof (legacy S/X)</option>
+            <option value="sunRoofClose">Close Sunroof (legacy S/X)</option>
+            <option value="sunRoofStop">Stop Sunroof (legacy S/X)</option>
             <option value="startAutoConditioning">Start HVAC</option>
             <option value="stopAutoConditioning">Stop HVAC</option>
+            <option value="setCabinOverheatProtectionOff">
+                Cabin Overheat Protection: Off
+            </option>
+            <option value="setCabinOverheatProtectionOn">
+                Cabin Overheat Protection: On
+            </option>
+            <option value="setCabinOverheatProtectionFanOnly">
+                Cabin Overheat Protection: Fan Only
+            </option>
+            <option value="setCopTemp">
+                Set Cabin Overheat Protection Temp (msg.level 0-2)
+            </option>
             <option value="setSteeringWheelHeaterOn">
                 Enable Steering Wheel Heater
             </option>
             <option value="setSteeringWheelHeaterOff">
                 Disable Steering Wheel Heater
+            </option>
+            <option value="setAutoSteeringWheelHeatOn">
+                Enable Auto Steering Wheel Heat
+            </option>
+            <option value="setAutoSteeringWheelHeatOff">
+                Disable Auto Steering Wheel Heat
+            </option>
+            <option value="setAutoSeatClimate">
+                Set Auto Seat Climate (msg.seat, msg.on)
             </option>
             <option value="setTemps">Set Temps (msg.driver_temp)</option>
             <option value="setSeatHeater">
@@ -121,6 +147,13 @@
             <option value="setChargingAmps">
                 Set Charging Amps (msg.amps)
             </option>
+            <option value="setScheduledCharging">
+                Set Scheduled Charging (msg.enable, msg.time "HH:mm")
+            </option>
+            <option value="setScheduledDeparture">
+                Set Scheduled Departure (msg.enable, msg.departureTime
+                "HH:mm", ...)
+            </option>
             <option value="setSentryModeOn">Enable Sentry Mode</option>
             <option value="setSentryModeOff">Disable Sentry Mode</option>
             <option value="triggerHomelink">
@@ -128,6 +161,15 @@
             </option>
             <option value="navigationRequest">
                 Navigation Request (msg.payload)
+            </option>
+            <option value="adjustVolume">
+                Set Media Volume (msg.volume)
+            </option>
+            <option value="scheduleSoftwareUpdate">
+                Schedule Software Update (msg.offsetSec, 0=now)
+            </option>
+            <option value="cancelSoftwareUpdate">
+                Cancel Software Update
             </option>
             <option value="vehicleData">Get Vehicle Data</option>
         </select>
@@ -153,7 +195,22 @@
             Arguments for commands (e.g. <code>{ "percent": 80 }</code> for Set
             Charge Limit)
         </dd>
+        <dt class="optional">
+            time / departureTime / endOffPeakTime
+            <span class="property-type">string</span>
+        </dt>
+        <dd>
+            24-hour <code>HH:mm</code> time for the scheduled charging/
+            departure commands.
+        </dd>
     </dl>
+    <p>
+        <code>adjustVolume</code> sets an absolute volume. For volume
+        up/down, read the <code>MediaAudioVolume</code> and
+        <code>MediaAudioVolumeIncrement</code> fields with a Signal node,
+        add/subtract them in a function node, and feed the result into
+        <code>msg.volume</code>.
+    </p>
 
     <h3>Outputs</h3>
     <dl class="message-properties">
