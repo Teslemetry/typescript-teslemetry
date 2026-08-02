@@ -1,5 +1,11 @@
 # @teslemetry/n8n-nodes-teslemetry
 
+## 0.4.0
+
+### Minor Changes
+
+- 1198995: Add climate/seat automation, closure and window control, charging schedule, software update, and volume operations to the Vehicle node, and add Energy Site event support (live status, site info, tariff content, energy totals) to the Trigger node, bringing capability coverage in line with the Homey integration's capability-expansion campaign.
+
 ## 0.3.0
 
 ### Minor Changes
@@ -28,11 +34,9 @@
 - e0978a1: Uplift n8n integration to feature-complete status, ready for publishing
 
   **New Features:**
-
   - Added "errors" event type to Teslemetry Trigger node for monitoring vehicle error events
 
   **Improvements:**
-
   - Enhanced package.json with better metadata, author info, and keywords (including n8n-community-node-package)
   - Added node engine requirement (>=18.0.0)
   - Comprehensive README update with:
@@ -42,7 +46,6 @@
     - Links to resources and support
 
   **Status:**
-
   - Feature parity with Node-RED integration achieved
   - All vehicle operations (22/22) implemented
   - All energy operations (7/7) implemented
