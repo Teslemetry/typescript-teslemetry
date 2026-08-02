@@ -209,6 +209,15 @@ export default function (RED: NodeAPI) {
             });
             result = await vehicle.triggerHomelink(msg.lat, msg.lon);
             break;
+          case "scheduleSoftwareUpdate":
+            validateParameters(msg, {
+              offsetSec: { required: true, type: "number", min: 0 },
+            });
+            result = await vehicle.scheduleSoftwareUpdate(msg.offsetSec);
+            break;
+          case "cancelSoftwareUpdate":
+            result = await vehicle.cancelSoftwareUpdate();
+            break;
           case "navigationRequest":
             validateParameters(msg, {
               value: { required: true, type: "string" },
