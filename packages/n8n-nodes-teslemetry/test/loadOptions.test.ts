@@ -76,6 +76,27 @@ test("TeslemetryTrigger.getVins calls a real TeslemetryApi method (regression: a
   ]);
 });
 
+test("TeslemetryTrigger.getSites calls a real TeslemetryApi method (regression: api.products() is not a function)", async () => {
+  const node = new TeslemetryTrigger();
+  const options = await withMockedFetch(
+    () =>
+      new Response(
+        JSON.stringify({
+          response: [
+            { energy_site_id: 123, site_name: "Home", resource_type: "battery" },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    () => node.methods.loadOptions.getSites.call(fakeLoadOptionsContext),
+  );
+
+  assert.deepEqual(options, [
+    { name: "All Sites", value: "" },
+    { name: "Home (123)", value: 123 },
+  ]);
+});
+
 test("TeslemetryTrigger.getFields calls a real TeslemetryApi method (regression: api.fields() is not a function)", async () => {
   const node = new TeslemetryTrigger();
   const options = await withMockedFetch(

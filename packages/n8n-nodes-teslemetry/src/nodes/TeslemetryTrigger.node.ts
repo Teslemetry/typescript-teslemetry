@@ -29,6 +29,16 @@ export class TeslemetryTrigger implements INodeType {
 		],
 		properties: [
 			{
+				displayName: 'Resource',
+				name: 'resource',
+				type: 'options',
+				options: [
+					{ name: 'Vehicle', value: 'vehicle' },
+					{ name: 'Energy Site', value: 'energySite' },
+				],
+				default: 'vehicle',
+			},
+			{
 				displayName: 'VIN',
 				name: 'vin',
 				type: 'options',
@@ -37,6 +47,26 @@ export class TeslemetryTrigger implements INodeType {
 				},
 				default: '',
 				description: 'Vehicle to monitor. Leave empty for all vehicles (where applicable).',
+				displayOptions: {
+					show: {
+						resource: ['vehicle'],
+					},
+				},
+			},
+			{
+				displayName: 'Site ID',
+				name: 'siteId',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'getSites',
+				},
+				default: '',
+				description: 'Energy site to monitor. Leave empty for all sites.',
+				displayOptions: {
+					show: {
+						resource: ['energySite'],
+					},
+				},
 			},
 			{
 				displayName: 'Event Type',
@@ -56,6 +86,29 @@ export class TeslemetryTrigger implements INodeType {
 				],
 				default: 'all',
 				required: true,
+				displayOptions: {
+					show: {
+						resource: ['vehicle'],
+					},
+				},
+			},
+			{
+				displayName: 'Event Type',
+				name: 'event',
+				type: 'options',
+				options: [
+					{ name: 'Live Status', value: 'live_status' },
+					{ name: 'Site Info', value: 'site_info' },
+					{ name: 'Tariff Content', value: 'tariff_content_v2' },
+					{ name: 'Energy Totals', value: 'energy_totals' },
+				],
+				default: 'live_status',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['energySite'],
+					},
+				},
 			},
 			{
 				displayName: 'Signal Field',
@@ -67,6 +120,7 @@ export class TeslemetryTrigger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
+						resource: ['vehicle'],
 						event: ['signal'],
 					},
 				},
@@ -90,6 +144,22 @@ export class TeslemetryTrigger implements INodeType {
 					})),
 				];
 			},
+			async getSites(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const credentials = await this.getCredentials('teslemetryApi');
+				const teslemetry = new Teslemetry(credentials.accessToken as string);
+				const response = await teslemetry.api.getProducts();
+				const products = response.response || [];
+				const sites = products.filter(
+					(p: any) => p.resource_type === 'battery' || p.resource_type === 'solar' || 'energy_site_id' in p,
+				);
+				return [
+					{ name: 'All Sites', value: '' },
+					...sites.map((s: any) => ({
+						name: `${s.site_name || s.energy_site_id} (${s.energy_site_id})`,
+						value: s.energy_site_id,
+					})),
+				];
+			},
 			async getFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				const credentials = await this.getCredentials('teslemetryApi');
 				const teslemetry = new Teslemetry(credentials.accessToken as string);
@@ -104,9 +174,8 @@ export class TeslemetryTrigger implements INodeType {
 
 	async trigger(this: ITriggerFunctions): Promise<ITriggerResponse> {
 		const credentials = await this.getCredentials('teslemetryApi');
-		const vin = this.getNodeParameter('vin') as string;
+		const resource = this.getNodeParameter('resource') as string;
 		const event = this.getNodeParameter('event') as string;
-		const field = this.getNodeParameter('field', '') as string;
 
 		const teslemetry = new Teslemetry(credentials.accessToken as string);
 		const sse = teslemetry.sse;
@@ -120,40 +189,59 @@ export class TeslemetryTrigger implements INodeType {
 			this.emit([this.helpers.returnJsonArray(data)]);
 		};
 
-		if (event === 'signal') {
-			if (!vin) {
-				throw new Error('VIN is required for Signal events');
-			}
-			if (!field) {
-				throw new Error('Field is required for Signal events');
-			}
-			cleanup = sse
-				.getVehicle(vin)
-				.onSignal(field as any, (value: any) => {
-					emit({ field, value, topic: 'signal' });
-				});
-		} else {
-			// Create callback that filters by VIN if specified
-			const callback = (eventData: SseEvent) => {
-				if (!vin || ('vin' in eventData && eventData.vin === vin)) {
+		if (resource === 'energySite') {
+			const siteId = this.getNodeParameter('siteId') as string;
+
+			// live_status/site_info/tariff_content_v2 carry `site_id`; energy_totals carries `id` instead.
+			const callback = (eventData: any) => {
+				const eventSiteId = 'site_id' in eventData ? eventData.site_id : eventData.id;
+				if (!siteId || String(eventSiteId) === String(siteId)) {
 					emit(eventData);
 				}
 			};
 
-			// Determine event type to listen for
-			const eventType = event as
-				| 'all'
-				| 'data'
-				| 'state'
-				| 'vehicle_data'
-				| 'errors'
-				| 'alerts'
-				| 'connectivity'
-				| 'credits'
-				| 'config';
-
+			const eventType = event as 'live_status' | 'site_info' | 'tariff_content_v2' | 'energy_totals';
 			sse.on(eventType, callback);
 			cleanup = () => sse.off(eventType, callback);
+		} else {
+			const vin = this.getNodeParameter('vin') as string;
+			const field = this.getNodeParameter('field', '') as string;
+
+			if (event === 'signal') {
+				if (!vin) {
+					throw new Error('VIN is required for Signal events');
+				}
+				if (!field) {
+					throw new Error('Field is required for Signal events');
+				}
+				cleanup = sse
+					.getVehicle(vin)
+					.onSignal(field as any, (value: any) => {
+						emit({ field, value, topic: 'signal' });
+					});
+			} else {
+				// Create callback that filters by VIN if specified
+				const callback = (eventData: SseEvent) => {
+					if (!vin || ('vin' in eventData && eventData.vin === vin)) {
+						emit(eventData);
+					}
+				};
+
+				// Determine event type to listen for
+				const eventType = event as
+					| 'all'
+					| 'data'
+					| 'state'
+					| 'vehicle_data'
+					| 'errors'
+					| 'alerts'
+					| 'connectivity'
+					| 'credits'
+					| 'config';
+
+				sse.on(eventType, callback);
+				cleanup = () => sse.off(eventType, callback);
+			}
 		}
 
 		async function closeFunction() {
