@@ -92,6 +92,15 @@ export default function (RED: NodeAPI) {
           case "tonneauClose":
             result = await vehicle.closure({ tonneau: "close" });
             break;
+          case "sunRoofVent":
+            result = await vehicle.sunRoofControl("vent");
+            break;
+          case "sunRoofClose":
+            result = await vehicle.sunRoofControl("close");
+            break;
+          case "sunRoofStop":
+            result = await vehicle.sunRoofControl("stop");
+            break;
           case "startAutoConditioning":
             result = await vehicle.startAutoConditioning();
             break;

@@ -167,6 +167,7 @@ Listen for specific signal changes from a vehicle.
 - **Remote Start**: Enables keyless driving
 - **Actuate Trunk**: Opens/closes front or rear trunk
 - **Tonneau**: Opens/closes the tonneau cover (Cybertruck)
+- **Sunroof**: Vent/close/stop (legacy Model S/X with a panoramic sunroof)
 - **Climate Control**: Start/stop HVAC, set temps, seat heaters, steering wheel heater, cabin overheat protection, auto seat/steering-wheel climate
 - **Charging**: Start/stop, open/close port, set limit, set amps, scheduled charging/departure
 - **Sentry Mode**: Enable/disable Sentry Mode
