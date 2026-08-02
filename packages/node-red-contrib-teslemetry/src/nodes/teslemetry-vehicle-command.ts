@@ -173,6 +173,23 @@ export default function (RED: NodeAPI) {
           case "setSteeringWheelHeaterOff":
             result = await vehicle.setSteeringWheelHeater(false);
             break;
+          case "setAutoSteeringWheelHeatOn":
+            result = await vehicle.setAutoSteeringWheelHeat(true);
+            break;
+          case "setAutoSteeringWheelHeatOff":
+            result = await vehicle.setAutoSteeringWheelHeat(false);
+            break;
+          case "setAutoSeatClimate":
+            validateParameters(msg, {
+              seat: {
+                required: true,
+                type: "string",
+                allowedValues: ["front_left", "front_right"],
+              },
+              on: { required: true, type: "boolean" },
+            });
+            result = await vehicle.setAutoSeatClimate(msg.seat, msg.on);
+            break;
           case "startCharging":
             result = await vehicle.startCharging();
             break;
