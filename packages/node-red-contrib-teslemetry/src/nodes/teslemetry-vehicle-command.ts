@@ -81,6 +81,36 @@ export default function (RED: NodeAPI) {
           case "stopAutoConditioning":
             result = await vehicle.stopAutoConditioning();
             break;
+          case "setCabinOverheatProtectionOff":
+            result = await vehicle.setCabinOverheatProtection({
+              on: false,
+              fan_only: false,
+            });
+            break;
+          case "setCabinOverheatProtectionOn":
+            result = await vehicle.setCabinOverheatProtection({
+              on: true,
+              fan_only: false,
+            });
+            break;
+          case "setCabinOverheatProtectionFanOnly":
+            result = await vehicle.setCabinOverheatProtection({
+              on: true,
+              fan_only: true,
+            });
+            break;
+          case "setCopTemp":
+            validateParameters(msg, {
+              level: {
+                required: true,
+                type: "number",
+                min: 0,
+                max: 2,
+                integer: true,
+              },
+            });
+            result = await vehicle.setCopTemp(msg.level as 0 | 1 | 2);
+            break;
           case "setTemps":
             validateParameters(msg, {
               driver_temp: {

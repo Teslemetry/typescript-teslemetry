@@ -166,7 +166,7 @@ Listen for specific signal changes from a vehicle.
 - **Lock/Unlock Doors**: Controls door locks
 - **Remote Start**: Enables keyless driving
 - **Actuate Trunk**: Opens/closes front or rear trunk
-- **Climate Control**: Start/stop HVAC, set temps, seat heaters, steering wheel heater
+- **Climate Control**: Start/stop HVAC, set temps, seat heaters, steering wheel heater, cabin overheat protection
 - **Charging**: Start/stop, open/close port, set limit, set amps
 - **Sentry Mode**: Enable/disable Sentry Mode
 - **Homelink**: Trigger Homelink at specific coordinates
