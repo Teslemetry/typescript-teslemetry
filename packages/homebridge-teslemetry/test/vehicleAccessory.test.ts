@@ -34,6 +34,14 @@ test("adds a Tonneau WindowCovering service only for a Cybertruck VIN", () => {
 	assert.ok(accessory.getService(Service.WindowCovering));
 });
 
+test("does not add a Tonneau service for a Cybercab VIN", () => {
+	// Cybercab ("A") gets the generic/default model treatment; only Cybertruck
+	// has the tonneau hardware.
+	const { accessory } = setup({ vin: "5YJAA1E14FF000000" });
+	assert.equal(accessory.services.length, 22);
+	assert.equal(accessory.getService(Service.WindowCovering), undefined);
+});
+
 test("destroy() tears down signal subscriptions so later SSE data no longer updates characteristics", () => {
 	const { accessory, vehicleAccessory, sse } = setup();
 	sse.emitSignal("BatteryLevel", 40);
