@@ -16,8 +16,10 @@ test("initializes the expected number of distinct HAP services", () => {
 	const { accessory } = setup();
 	// Information, Battery, BackupReserve, OperationMode = 4 services with a
 	// unique HAP service type, plus 2 distinct Switch services (StormWatch and
-	// GridCharging), each with its own subType.
-	assert.equal(accessory.services.length, 6);
+	// GridCharging) and 2 distinct ContactSensor services (GridOutage and
+	// StormWatchActive), each with its own subType. WallConnectorService
+	// creates nothing until live_status reports a wall_connectors entry.
+	assert.equal(accessory.services.length, 8);
 });
 
 test("startPolling requests siteInfo polling and an initial liveStatus REST read, but no recurring liveStatus poll", async () => {

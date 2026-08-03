@@ -37,6 +37,14 @@ export interface TeslemetryPlatformConfig {
    * @default true
    */
   prefixName?: boolean;
+
+  /**
+   * Expose a presence sensor for the vehicle's favourite location, in
+   * addition to home/work. Off by default, matching the upstream integration's
+   * opt-in treatment of this field.
+   * @default false
+   */
+  enableFavoritePresence?: boolean;
 }
 
 /**

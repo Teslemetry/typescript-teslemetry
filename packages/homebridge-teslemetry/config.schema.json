@@ -27,6 +27,13 @@
         "required": false,
         "description": "Prefix accessory names with vehicle/site name for easier identification"
       },
+      "enableFavoritePresence": {
+        "title": "Enable Favourite Location Presence",
+        "type": "boolean",
+        "default": false,
+        "required": false,
+        "description": "Expose an additional presence sensor for the vehicle's favourite location, alongside home and work"
+      },
       "ignoreVehicles": {
         "title": "Ignore Vehicles",
         "type": "array",
@@ -64,7 +71,7 @@
       "title": "General Settings",
       "expandable": true,
       "expanded": false,
-      "items": ["name", "prefixName"]
+      "items": ["name", "prefixName", "enableFavoritePresence"]
     },
     {
       "type": "fieldset",

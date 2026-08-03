@@ -18,9 +18,11 @@ test("initializes the expected number of distinct HAP services on a non-Cybertru
 	// Information, Battery, Climate, ChargeLimit, Door(x6) = 10 services with a
 	// unique HAP service type, plus 4 distinct Switch services (ChargeSwitch,
 	// Defrost, Sentry, Wake), 2 distinct LockMechanism services (Lock,
-	// ChargePort), and RearDefrost's ContactSensor - each with its own
-	// subType. No Tonneau: the default fake VIN decodes to Model 3.
-	assert.equal(accessory.services.length, 17);
+	// ChargePort), RearDefrost's ContactSensor, and TPMS's 5 ContactSensors
+	// (1 aggregate hard-warning + 4 per-wheel soft-warning) - each with its
+	// own subType. PresenceService creates nothing until a LocatedAt* signal
+	// actually arrives. No Tonneau: the default fake VIN decodes to Model 3.
+	assert.equal(accessory.services.length, 22);
 	assert.equal(accessory.getService(Service.WindowCovering), undefined);
 });
 
@@ -28,7 +30,7 @@ test("adds a Tonneau WindowCovering service only for a Cybertruck VIN", () => {
 	// VIN character index 3 is Teslemetry's model discriminator (Teslemetry.ts's
 	// useTeslaModel) - "C" decodes to Cybertruck.
 	const { accessory } = setup({ vin: "5YJCA1E14FF000000" });
-	assert.equal(accessory.services.length, 18);
+	assert.equal(accessory.services.length, 23);
 	assert.ok(accessory.getService(Service.WindowCovering));
 });
 

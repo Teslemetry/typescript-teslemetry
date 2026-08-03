@@ -1,0 +1,104 @@
+/**
+ * Wall Connector Service
+ *
+ * Per-DIN fault and vehicle-connected contact sensors for each Tesla Wall
+ * Connector at the site, driven by live_status. No power/watts characteristic
+ * is exposed - there is no honest standard HomeKit surface for that.
+ */
+
+import type { PlatformAccessory, Service } from "homebridge";
+import type { TeslemetryPlatform } from "../platform.js";
+import type { EnergyDetails } from "@teslemetry/api";
+
+interface ConnectorServices {
+  fault: Service;
+  connected: Service;
+}
+
+interface WallConnectorStatus {
+  din: string;
+  vin?: string;
+  wall_connector_state: number;
+  wall_connector_fault_state?: number;
+}
+
+export class WallConnectorService {
+  private readonly cleanupFunctions: Array<() => void> = [];
+  private readonly connectors = new Map<string, ConnectorServices>();
+
+  constructor(
+    private readonly platform: TeslemetryPlatform,
+    private readonly accessory: PlatformAccessory,
+    private readonly site: EnergyDetails,
+  ) {
+    const listener = (data: any) => this.handleLiveStatus(data);
+    this.site.api.on("liveStatus", listener);
+    this.cleanupFunctions.push(() => this.site.api.off("liveStatus", listener));
+  }
+
+  private handleLiveStatus(data: any): void {
+    const connectors = data?.response?.wall_connectors;
+    if (!Array.isArray(connectors)) return;
+
+    for (const connector of connectors as WallConnectorStatus[]) {
+      if (!connector?.din) continue;
+      this.updateConnector(connector);
+    }
+  }
+
+  private updateConnector(connector: WallConnectorStatus): void {
+    let services = this.connectors.get(connector.din);
+    if (!services) {
+      services = this.createConnectorServices(connector.din);
+      this.connectors.set(connector.din, services);
+    }
+
+    const { ContactSensorState } = this.platform.Characteristic;
+
+    // Fault code 0 clears the fault contact; any nonzero code sets it.
+    const faultCode = connector.wall_connector_fault_state ?? 0;
+    services.fault.updateCharacteristic(
+      ContactSensorState,
+      faultCode === 0 ? ContactSensorState.CONTACT_DETECTED : ContactSensorState.CONTACT_NOT_DETECTED,
+    );
+
+    // wall_connector_state 2 = "not plugged in"; every other value means a
+    // cable is seated, whether or not it is actively charging.
+    const isConnected = connector.wall_connector_state !== 2;
+    services.connected.updateCharacteristic(
+      ContactSensorState,
+      isConnected ? ContactSensorState.CONTACT_DETECTED : ContactSensorState.CONTACT_NOT_DETECTED,
+    );
+  }
+
+  private createConnectorServices(din: string): ConnectorServices {
+    const faultSubType = `wall-connector-fault-${din}`;
+    const faultName = this.getDisplayName(`Wall Connector ${din} Fault`);
+    const fault =
+      this.accessory.getServiceById(this.platform.Service.ContactSensor, faultSubType) ||
+      this.accessory.addService(this.platform.Service.ContactSensor, faultName, faultSubType);
+    fault.setCharacteristic(this.platform.Characteristic.Name, faultName);
+
+    const connectedSubType = `wall-connector-connected-${din}`;
+    const connectedName = this.getDisplayName(`Wall Connector ${din} Vehicle Connected`);
+    const connected =
+      this.accessory.getServiceById(this.platform.Service.ContactSensor, connectedSubType) ||
+      this.accessory.addService(this.platform.Service.ContactSensor, connectedName, connectedSubType);
+    connected.setCharacteristic(this.platform.Characteristic.Name, connectedName);
+
+    return { fault, connected };
+  }
+
+  private getDisplayName(serviceName: string): string {
+    if (this.platform.config.prefixName !== false) {
+      return `${this.site.name} ${serviceName}`;
+    }
+    return serviceName;
+  }
+
+  destroy(): void {
+    this.cleanupFunctions.forEach((cleanup) => cleanup());
+    this.cleanupFunctions.length = 0;
+    this.connectors.clear();
+  }
+}
