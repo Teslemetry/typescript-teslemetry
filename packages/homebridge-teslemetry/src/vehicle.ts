@@ -23,6 +23,12 @@ import { DoorService } from "./vehicle-services/door.js";
 import { SentryService } from "./vehicle-services/sentry.js";
 import { WakeService } from "./vehicle-services/wake.js";
 import { TonneauService } from "./vehicle-services/tonneau.js";
+import { PresenceService } from "./vehicle-services/presence.js";
+import { TpmsService } from "./vehicle-services/tpms.js";
+
+/** PresenceService doesn't extend BaseService (its OccupancySensor services
+ *  are created lazily per field), but shares the same destroy() contract. */
+type DestroyableService = BaseService | PresenceService;
 
 /**
  * VehicleAccessory
@@ -30,7 +36,7 @@ import { TonneauService } from "./vehicle-services/tonneau.js";
  * Manages all services for a single Tesla vehicle
  */
 export class VehicleAccessory {
-  private readonly services: BaseService[] = [];
+  private readonly services: DestroyableService[] = [];
 
   constructor(
     private readonly platform: TeslemetryPlatform,
@@ -94,6 +100,12 @@ export class VehicleAccessory {
     );
     this.services.push(
       new WakeService(this.platform, this.accessory, this.vehicle),
+    );
+    this.services.push(
+      new TpmsService(this.platform, this.accessory, this.vehicle),
+    );
+    this.services.push(
+      new PresenceService(this.platform, this.accessory, this.vehicle),
     );
     // Tonneau is Cybertruck-only hardware; single-model/config-dependent
     // features gate on vehicle model/config instead of registering

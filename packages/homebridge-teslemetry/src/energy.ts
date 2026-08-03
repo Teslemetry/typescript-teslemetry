@@ -16,6 +16,13 @@ import { BackupReserveService } from "./energy-services/backup-reserve.js";
 import { StormWatchService } from "./energy-services/storm-watch.js";
 import { OperationModeService } from "./energy-services/operation-mode.js";
 import { GridChargingService } from "./energy-services/grid-charging.js";
+import { GridOutageService } from "./energy-services/grid-outage.js";
+import { StormWatchActiveService } from "./energy-services/storm-watch-active.js";
+import { WallConnectorService } from "./energy-services/wall-connector.js";
+
+/** WallConnectorService doesn't extend BaseEnergyService (its contact sensors
+ *  are created lazily per DIN), but shares the same destroy() contract. */
+type DestroyableService = BaseEnergyService | WallConnectorService;
 
 /**
  * EnergyAccessory
@@ -23,7 +30,7 @@ import { GridChargingService } from "./energy-services/grid-charging.js";
  * Manages all services for a single Tesla energy site
  */
 export class EnergyAccessory {
-  private readonly services: BaseEnergyService[] = [];
+  private readonly services: DestroyableService[] = [];
   private pollingCleanup: Array<() => void> = [];
   private streamCleanup: Array<() => void> = [];
 
@@ -72,6 +79,15 @@ export class EnergyAccessory {
     );
     this.services.push(
       new GridChargingService(this.platform, this.accessory, this.site),
+    );
+    this.services.push(
+      new GridOutageService(this.platform, this.accessory, this.site),
+    );
+    this.services.push(
+      new StormWatchActiveService(this.platform, this.accessory, this.site),
+    );
+    this.services.push(
+      new WallConnectorService(this.platform, this.accessory, this.site),
     );
 
     this.platform.log.info(
