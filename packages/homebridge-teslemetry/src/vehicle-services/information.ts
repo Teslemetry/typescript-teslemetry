@@ -61,7 +61,7 @@ export class InformationService extends BaseService {
    * Examples: "John's Model 3" -> "Model 3", "My Model Y" -> "Model Y"
    */
   private extractModel(name: string): string {
-    const modelMatch = name.match(/Model [3SYXC]|Cybertruck|Roadster/i);
+    const modelMatch = name.match(/Model [3SYXC]|Cybertruck|Cybercab|Roadster/i);
     return modelMatch ? modelMatch[0] : "Tesla";
   }
 

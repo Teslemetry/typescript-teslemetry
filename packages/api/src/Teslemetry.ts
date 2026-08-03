@@ -173,6 +173,7 @@ const model_names = {
   Y: "Model Y",
   C: "Cybertruck",
   T: "Semi",
+  A: "Cybercab",
 } as const;
 
 export const useTeslaModel = (vin: string) =>
