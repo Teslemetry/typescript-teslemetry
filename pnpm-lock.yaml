@@ -33,8 +33,8 @@ importers:
         specifier: ^17.2.3
         version: 17.2.3
       tesla-fleet-api:
-        specifier: ^0.2.2
-        version: 0.2.2
+        specifier: ^0.3.0
+        version: 0.3.0
       tsdown:
         specifier: ^0.22.4
         version: 0.22.4(tsx@4.20.6)(typescript@5.9.3)(unrun@0.2.11(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))
@@ -10243,8 +10243,8 @@ packages:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
     engines: {node: '>=8'}
 
-  tesla-fleet-api@0.2.2:
-    resolution: {integrity: sha512-ar/KbloOBHD4si77r2ipUC1OPBZqL22YR1gHTTk3iiJyWzotvwEjLPrZ81MoA1y843rl40VSgRxwU4wZC3LN1w==}
+  tesla-fleet-api@0.3.0:
+    resolution: {integrity: sha512-BLSsFQMbVhNGNwIQSOSMygxvh5t7GiLsMehStOrBmrbJO8P7kqVj3bYLJEuUiN5aIOQmPkECKyFanfC0Oa+ORQ==}
 
   test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
@@ -24360,7 +24360,7 @@ snapshots:
 
   term-size@2.2.1: {}
 
-  tesla-fleet-api@0.2.2:
+  tesla-fleet-api@0.3.0:
     dependencies:
       '@teslemetry/tesla-protocol': 0.5.0
 
