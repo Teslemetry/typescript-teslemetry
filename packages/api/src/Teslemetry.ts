@@ -12,6 +12,7 @@ import { getApiMetadata, getApiTest } from "./client/index.js";
 import { Logger, consoleLogger } from "./logger.js";
 import pkg from "../package.json" with { type: "json" };
 import type { Products } from "./const.js";
+import { Models } from "tesla-fleet-api/dist/types/vehicle.js";
 
 interface TeslemetryOptions {
   region?: "na" | "eu";
@@ -166,15 +167,4 @@ export class Teslemetry {
   }
 }
 
-const model_names = {
-  "3": "Model 3",
-  S: "Model S",
-  X: "Model X",
-  Y: "Model Y",
-  C: "Cybertruck",
-  T: "Semi",
-  A: "Cybercab",
-} as const;
-
-export const useTeslaModel = (vin: string) =>
-  model_names?.[vin[3] as keyof typeof model_names] ?? "Unknown";
+export const useTeslaModel = (vin: string) => Models[vin[3]] ?? "Unknown";
