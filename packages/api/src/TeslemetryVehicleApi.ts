@@ -192,7 +192,10 @@ const ALL_SEATS = {
   8: 8,
 } as const;
 
-type VehicleDataEndpoints =
+// Hand-maintained: the generated client only exposes this endpoint list inside a JSDoc
+// comment string (types.gen.ts, GetApi1VehiclesByVinVehicleDataData query.endpoints), not as
+// a TS type, so there's nothing to derive from. Keep in sync with that comment plus "*".
+export type VehicleDataEndpoints =
   | "*"
   | "charge_state"
   | "climate_state"
@@ -200,6 +203,8 @@ type VehicleDataEndpoints =
   | "drive_state"
   | "gui_settings"
   | "location_data"
+  | "charge_schedule_data"
+  | "preconditioning_schedule_data"
   | "vehicle_config"
   | "vehicle_state"
   | "vehicle_data_combo";
