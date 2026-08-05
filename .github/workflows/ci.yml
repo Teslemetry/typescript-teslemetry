@@ -13,46 +13,4 @@ concurrency:
 jobs:
   build:
     name: Build, Lint & Typecheck
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-          cache: "pnpm"
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Build
-        run: pnpm -r run build
-
-      - name: Typecheck
-        run: pnpm -r --no-bail tsc
-
-      - name: Typecheck (iobroker.teslemetry)
-        run: pnpm --filter iobroker.teslemetry check
-
-      - name: Test
-        run: pnpm test
-
-      - name: Verify API client codegen toolchain
-        # Regenerates into a throwaway directory (not `src/client`, which
-        # openapi-ts deletes and rewrites in place) so a real toolchain
-        # crash - e.g. an incompatible typescript/openapi-ts pairing - is
-        # caught here instead of only being discovered when someone next
-        # runs `pnpm client` by hand.
-        run: |
-          cd packages/api
-          out=$(mktemp -d)
-          node_modules/.bin/openapi-ts --file openapi-ts.config.ts -o "$out"
-          rm -rf "$out"
+    uses: ./.github/workflows/reusable-ci.yml
