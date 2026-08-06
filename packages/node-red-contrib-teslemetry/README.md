@@ -176,6 +176,10 @@ Listen for specific signal changes from a vehicle.
 - **Media**: Set absolute volume (compose relative up/down from the
   `MediaAudioVolume`/`MediaAudioVolumeIncrement` signals in a function node)
 - **Software Update**: Schedule (or install now) or cancel a pending update
+- **Guest Mode**: Enable/disable Guest Mode
+- **Valet Mode**: Enable/disable (requires `msg.password`), plus reset a forgotten valet PIN
+- **PIN to Drive**: Enable/disable (requires `msg.password`), plus admin-clear or reset a lost PIN
+- **Speed Limit Mode**: Activate/deactivate/clear PIN (requires `msg.pin`), admin-clear a lost PIN, or set the limit in mph
 
 ## Available Energy Commands
 

@@ -5,17 +5,22 @@ export interface ValidationRule {
   max?: number;
   allowedValues?: string[];
   integer?: boolean;
+  /** Never echo this parameter's actual value in a thrown validation error (PINs, passwords). */
+  sensitive?: boolean;
 }
 
 export interface ValidationRules {
   [key: string]: ValidationRule;
 }
 
+const REDACTED = "[redacted]";
+
 export function validateParameters(msg: any, rules: ValidationRules): void {
   const errors: string[] = [];
 
   for (const [paramName, rule] of Object.entries(rules)) {
     const value = msg[paramName];
+    const displayValue = rule.sensitive ? REDACTED : value;
 
     // Check if required parameter is missing
     if (
@@ -36,7 +41,7 @@ export function validateParameters(msg: any, rules: ValidationRules): void {
       const numValue = Number(value);
       if (isNaN(numValue)) {
         errors.push(
-          `Parameter '${paramName}' must be a valid number, got '${value}'`,
+          `Parameter '${paramName}' must be a valid number, got '${displayValue}'`,
         );
         continue;
       }
@@ -44,7 +49,7 @@ export function validateParameters(msg: any, rules: ValidationRules): void {
       // Integer validation
       if (rule.integer && !Number.isInteger(numValue)) {
         errors.push(
-          `Parameter '${paramName}' must be an integer, got '${value}'`,
+          `Parameter '${paramName}' must be an integer, got '${displayValue}'`,
         );
         continue;
       }
@@ -52,13 +57,13 @@ export function validateParameters(msg: any, rules: ValidationRules): void {
       // Range validation
       if (rule.min !== undefined && numValue < rule.min) {
         errors.push(
-          `Parameter '${paramName}' must be at least ${rule.min}, got ${numValue}`,
+          `Parameter '${paramName}' must be at least ${rule.min}, got ${rule.sensitive ? REDACTED : numValue}`,
         );
       }
 
       if (rule.max !== undefined && numValue > rule.max) {
         errors.push(
-          `Parameter '${paramName}' must be at most ${rule.max}, got ${numValue}`,
+          `Parameter '${paramName}' must be at most ${rule.max}, got ${rule.sensitive ? REDACTED : numValue}`,
         );
       }
     } else if (rule.type === "string") {
@@ -72,7 +77,7 @@ export function validateParameters(msg: any, rules: ValidationRules): void {
       // Allowed values validation
       if (rule.allowedValues && !rule.allowedValues.includes(value)) {
         errors.push(
-          `Parameter '${paramName}' must be one of: ${rule.allowedValues.join(", ")}, got '${value}'`,
+          `Parameter '${paramName}' must be one of: ${rule.allowedValues.join(", ")}, got '${displayValue}'`,
         );
       }
     } else if (rule.type === "boolean") {
