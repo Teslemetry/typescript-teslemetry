@@ -111,6 +111,9 @@
             <option value="setOffGridVehicleChargingReserve">
                 Set Off-Grid Charge Reserve (msg.percent)
             </option>
+            <option value="setTimeOfUseSettings">
+                Set Time-of-Use Tariff (msg.tariffContentV2)
+            </option>
             <optgroup label="Grid Control">
                 <option value="gridExportEverything">Export Everything</option>
                 <option value="gridExportSolar">Export Solar</option>
@@ -138,6 +141,21 @@
             payload <span class="property-type">object</span>
         </dt>
         <dd>Arguments for commands</dd>
+        <dt class="optional">
+            tariffContentV2 <span class="property-type">object</span>
+        </dt>
+        <dd>
+            Full time-of-use tariff document for
+            <code>setTimeOfUseSettings</code>, matching Tesla's
+            <a
+                href="https://digitalassets-energy.tesla.com/raw/upload/app/fleet-api/example-tariff/PGE-EV2-A.json"
+                target="_blank"
+            >example tariff JSON</a> shape: <code>version</code>,
+            <code>utility</code>, <code>code</code>, <code>name</code>,
+            <code>currency</code>, <code>daily_charges</code>,
+            <code>demand_charges</code>, <code>energy_charges</code> and
+            <code>seasons</code> are required.
+        </dd>
     </dl>
 
     <h3>Outputs</h3>

@@ -91,6 +91,7 @@ Send commands to a Tesla Energy Site or retrieve site status.
 - `msg.command` (string): Command to execute (if not configured).
 - `msg.percentage` (number): Backup reserve percentage for `setBackupReserve`.
 - `msg.percent` (number): Off-grid reserve percentage for `setOffGridVehicleChargingReserve`.
+- `msg.tariffContentV2` (object): Full time-of-use tariff document for `setTimeOfUseSettings`, matching the `TariffContentV2` shape (`version`, `utility`, `code`, `name`, `currency`, `daily_charges`, `demand_charges`, `energy_charges`, `seasons` required).
 
 ### teslemetry-event
 Listen for real-time Server-Sent Events (SSE) from Teslemetry.
