@@ -310,6 +310,78 @@ export default function (RED: NodeAPI) {
             });
             result = await vehicle.adjustVolume(msg.volume);
             break;
+          case "setGuestModeOn":
+            result = await vehicle.setGuestMode(true);
+            break;
+          case "setGuestModeOff":
+            result = await vehicle.setGuestMode(false);
+            break;
+          case "setValetModeOn":
+            validateParameters(msg, {
+              password: { required: true, type: "string", sensitive: true },
+            });
+            result = await vehicle.setValetMode(true, msg.password);
+            break;
+          case "setValetModeOff":
+            validateParameters(msg, {
+              password: { required: true, type: "string", sensitive: true },
+            });
+            result = await vehicle.setValetMode(false, msg.password);
+            break;
+          case "resetValetPin":
+            result = await vehicle.resetValetPin();
+            break;
+          case "setPinToDriveOn":
+            validateParameters(msg, {
+              password: { required: true, type: "string", sensitive: true },
+            });
+            result = await vehicle.setPinToDrive(true, msg.password);
+            break;
+          case "setPinToDriveOff":
+            validateParameters(msg, {
+              password: { required: true, type: "string", sensitive: true },
+            });
+            result = await vehicle.setPinToDrive(false, msg.password);
+            break;
+          case "clearPinToDriveAdmin":
+            result = await vehicle.clearPinToDriveAdmin();
+            break;
+          case "resetPinToDrive":
+            result = await vehicle.resetPinToDrive();
+            break;
+          case "clearPinToDrive":
+            validateParameters(msg, {
+              pin: { required: true, type: "string", sensitive: true },
+            });
+            result = await vehicle.clearPinToDrive(msg.pin);
+            break;
+          case "speedLimitActivate":
+            validateParameters(msg, {
+              pin: { required: true, type: "string", sensitive: true },
+            });
+            result = await vehicle.speedLimitActivate(msg.pin);
+            break;
+          case "speedLimitDeactivate":
+            validateParameters(msg, {
+              pin: { required: true, type: "string", sensitive: true },
+            });
+            result = await vehicle.speedLimitDeactivate(msg.pin);
+            break;
+          case "speedLimitClearPin":
+            validateParameters(msg, {
+              pin: { required: true, type: "string", sensitive: true },
+            });
+            result = await vehicle.speedLimitClearPin(msg.pin);
+            break;
+          case "speedLimitClearPinAdmin":
+            result = await vehicle.speedLimitClearPinAdmin();
+            break;
+          case "speedLimitSetLimit":
+            validateParameters(msg, {
+              limitMph: { required: true, type: "number", min: 50, max: 90 },
+            });
+            result = await vehicle.speedLimitSetLimit(msg.limitMph);
+            break;
           default:
             throw new Error(`Unknown command: ${command}`);
         }
