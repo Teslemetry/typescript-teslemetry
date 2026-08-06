@@ -154,6 +154,21 @@
                 Set Scheduled Departure (msg.enable, msg.departureTime
                 "HH:mm", ...)
             </option>
+            <option value="addChargeSchedule">
+                Add/Update Charge Schedule (msg.daysOfWeek, msg.enabled,
+                msg.startEnabled, msg.endEnabled, msg.lat, msg.lon, ...)
+            </option>
+            <option value="removeChargeSchedule">
+                Remove Charge Schedule (msg.id)
+            </option>
+            <option value="addPreconditionSchedule">
+                Add/Update Precondition Schedule (msg.daysOfWeek,
+                msg.enabled, msg.lat, msg.lon, msg.preconditionTime "HH:mm",
+                ...)
+            </option>
+            <option value="removePreconditionSchedule">
+                Remove Precondition Schedule (msg.id)
+            </option>
             <option value="setSentryModeOn">Enable Sentry Mode</option>
             <option value="setSentryModeOff">Disable Sentry Mode</option>
             <option value="triggerHomelink">
@@ -196,13 +211,35 @@
             Charge Limit)
         </dd>
         <dt class="optional">
-            time / departureTime / endOffPeakTime
+            time / departureTime / endOffPeakTime / startTime / endTime /
+            preconditionTime
             <span class="property-type">string</span>
         </dt>
         <dd>
             24-hour <code>HH:mm</code> time for the scheduled charging/
-            departure commands.
+            departure/charge-schedule/precondition-schedule commands.
         </dd>
+        <dt class="optional">
+            id <span class="property-type">number</span>
+        </dt>
+        <dd>
+            Schedule ID. Omit on <code>addChargeSchedule</code>/
+            <code>addPreconditionSchedule</code> to create a new schedule, or
+            provide the existing schedule's ID to modify it. Required for
+            <code>removeChargeSchedule</code>/<code>removePreconditionSchedule</code>.
+        </dd>
+        <dt class="optional">
+            daysOfWeek <span class="property-type">string</span>
+        </dt>
+        <dd>
+            Comma separated days (e.g. <code>"Monday,Wednesday"</code>), or
+            <code>"All"</code>/<code>"Weekdays"</code>, for the charge/
+            precondition schedule commands.
+        </dd>
+        <dt class="optional">
+            lat / lon <span class="property-type">number</span>
+        </dt>
+        <dd>Location the schedule applies to.</dd>
     </dl>
     <p>
         <code>adjustVolume</code> sets an absolute volume. For volume
