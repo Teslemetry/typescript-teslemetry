@@ -517,6 +517,15 @@ export default function (RED: NodeAPI) {
             });
             result = await vehicle.speedLimitSetLimit(msg.limitMph);
             break;
+          case "mediaTogglePlayback":
+            result = await vehicle.mediaTogglePlayback();
+            break;
+          case "mediaNextTrack":
+            result = await vehicle.mediaNextTrack();
+            break;
+          case "mediaPreviousTrack":
+            result = await vehicle.mediaPreviousTrack();
+            break;
           default:
             throw new Error(`Unknown command: ${command}`);
         }
