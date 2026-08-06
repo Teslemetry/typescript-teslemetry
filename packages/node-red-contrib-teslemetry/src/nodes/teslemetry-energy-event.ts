@@ -1,6 +1,6 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { Teslemetry } from "@teslemetry/api";
-import { getInstance } from "../shared";
+import { attachStreamStatus, getInstance } from "../shared";
 
 const ENERGY_EVENT_TYPES = [
   "live_status",
@@ -58,15 +58,8 @@ export default function (RED: NodeAPI) {
       return { eventType, callback };
     });
 
-    const onConnect = () => {
-      node.status({ fill: "green", shape: "dot", text: "connected" });
-    };
-    const onDisconnect = () => {
-      node.status({ fill: "red", shape: "ring", text: "disconnected" });
-    };
+    const detachStreamStatus = attachStreamStatus(sse, node);
 
-    sse.on("connect", onConnect);
-    sse.on("disconnect", onDisconnect);
     for (const { eventType, callback } of listeners) {
       site.on(eventType, callback);
     }
@@ -76,8 +69,7 @@ export default function (RED: NodeAPI) {
       for (const { eventType, callback } of listeners) {
         site.off(eventType, callback);
       }
-      sse.off("connect", onConnect);
-      sse.off("disconnect", onDisconnect);
+      detachStreamStatus();
       done();
     });
   }
