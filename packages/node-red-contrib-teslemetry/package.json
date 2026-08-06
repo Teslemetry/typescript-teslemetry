@@ -11,6 +11,7 @@
     "build": "tsdown && cp src/nodes/*.html dist/nodes/",
     "dev": "pnpm build && mkdir -p .node-red-home && cd .node-red-home && pnpm install .. && cd .. && node-red -u .node-red-home -s dev-settings.js -p 1880",
     "tsc": "tsc",
+    "test": "tsx --test test/*.test.ts",
     "pack": "npm pack"
   },
   "keywords": [
@@ -60,6 +61,7 @@
     "@types/node-red": "^1.3.5",
     "node-red": "^4.1.1",
     "node-red-dev": "^0.1.6",
-    "tsdown": "^0.22.4"
+    "tsdown": "^0.22.4",
+    "tsx": "^4.20.6"
   }
 }

@@ -220,7 +220,7 @@ export default function (RED: NodeAPI) {
                 integer: true,
               },
             });
-            result = await vehicle.setSeatCooler(msg.seat, msg.level);
+            result = await vehicle.setSeatCooler(msg.seat, Number(msg.level));
             break;
           case "setPreconditioningMaxOn":
             validateParameters(msg, {
@@ -251,7 +251,7 @@ export default function (RED: NodeAPI) {
               },
             });
             result = await vehicle.setClimateKeeperMode(
-              msg.mode as 0 | 1 | 2 | 3,
+              Number(msg.mode) as 0 | 1 | 2 | 3,
             );
             break;
           case "setBioweaponDefenseModeOn":
