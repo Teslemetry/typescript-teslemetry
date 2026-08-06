@@ -1,6 +1,6 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { SseEvent, Teslemetry } from "@teslemetry/api";
-import { getInstance } from "../shared";
+import { attachStreamStatus, getInstance } from "../shared";
 
 export interface TeslemetryEventNodeDef extends NodeDef {
   teslemetryConfig: string;
@@ -50,22 +50,14 @@ export default function (RED: NodeAPI) {
       }
     };
 
-    const onConnect = () => {
-      node.status({ fill: "green", shape: "dot", text: "connected" });
-    };
-    const onDisconnect = () => {
-      node.status({ fill: "red", shape: "ring", text: "disconnected" });
-    };
+    const detachStreamStatus = attachStreamStatus(sse, node);
 
-    sse.on("connect", onConnect);
-    sse.on("disconnect", onDisconnect);
     sse.on(eventType, callback);
     sse.connect();
 
     node.on("close", function (done: any) {
       sse.off(eventType, callback);
-      sse.off("connect", onConnect);
-      sse.off("disconnect", onDisconnect);
+      detachStreamStatus();
       done();
     });
   }
