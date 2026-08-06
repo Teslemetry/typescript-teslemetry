@@ -401,5 +401,72 @@
     "x": 500,
     "y": 400,
     "wires": []
+  },
+  {
+    "id": "inject_set_tou_settings",
+    "type": "inject",
+    "z": "tab1",
+    "name": "Set Flat-Rate TOU Tariff",
+    "props": [
+      { "p": "payload" }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 100,
+    "y": 700,
+    "wires": [["set_tou_settings_params"]]
+  },
+  {
+    "id": "set_tou_settings_params",
+    "type": "change",
+    "z": "tab1",
+    "name": "Example flat-rate tariff",
+    "rules": [
+      {
+        "t": "set",
+        "p": "tariffContentV2",
+        "pt": "msg",
+        "to": "{\"version\":1,\"utility\":\"Example Utility\",\"code\":\"FLAT-RATE\",\"name\":\"Flat Rate Plan\",\"currency\":\"USD\",\"daily_charges\":[{\"name\":\"Charge\",\"amount\":0}],\"demand_charges\":{\"ALL\":{\"ALL\":0}},\"energy_charges\":{\"ALL\":{\"rates\":{\"ALL\":0.15}}},\"seasons\":{\"All Year\":{\"fromMonth\":1,\"toMonth\":12,\"fromDay\":1,\"toDay\":31,\"tou_periods\":{\"ALL\":{\"periods\":[{\"fromDayOfWeek\":0,\"toDayOfWeek\":6,\"fromHour\":0,\"toHour\":24}]}}}}}",
+        "tot": "json"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 300,
+    "y": 700,
+    "wires": [["energy_cmd_set_tou_settings"]]
+  },
+  {
+    "id": "energy_cmd_set_tou_settings",
+    "type": "teslemetry-energy-command",
+    "z": "tab1",
+    "name": "",
+    "teslemetryConfig": "config1",
+    "siteId": "12345",
+    "command": "setTimeOfUseSettings",
+    "x": 500,
+    "y": 700,
+    "wires": [["debug_tou_settings"]]
+  },
+  {
+    "id": "debug_tou_settings",
+    "type": "debug",
+    "z": "tab1",
+    "name": "TOU Settings Result",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "x": 700,
+    "y": 700,
+    "wires": []
   }
 ]

@@ -1,10 +1,12 @@
 export interface ValidationRule {
   required?: boolean;
-  type?: "number" | "string" | "boolean";
+  type?: "number" | "string" | "boolean" | "object";
   min?: number;
   max?: number;
   allowedValues?: string[];
   integer?: boolean;
+  /** Only meaningful with type: "object" - whether the value must be an array (true) or a plain object (false/omitted). */
+  isArray?: boolean;
   /** Never echo this parameter's actual value in a thrown validation error (PINs, passwords). */
   sensitive?: boolean;
 }
@@ -84,6 +86,13 @@ export function validateParameters(msg: any, rules: ValidationRules): void {
       if (typeof value !== "boolean") {
         errors.push(
           `Parameter '${paramName}' must be a boolean, got ${typeof value}`,
+        );
+      }
+    } else if (rule.type === "object") {
+      const isArray = Array.isArray(value);
+      if (typeof value !== "object" || value === null || isArray !== !!rule.isArray) {
+        errors.push(
+          `Parameter '${paramName}' must be ${rule.isArray ? "an array" : "an object"}, got ${isArray ? "array" : typeof value}`,
         );
       }
     }

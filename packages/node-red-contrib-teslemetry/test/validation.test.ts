@@ -54,6 +54,43 @@ test("non-sensitive parameter values are still included in validation error mess
   );
 });
 
+test("object type rejects arrays unless isArray is set", () => {
+  assert.throws(
+    () =>
+      validateParameters(
+        { seasons: [1, 2, 3] },
+        { seasons: { required: true, type: "object" } },
+      ),
+    (err: Error) => {
+      assert.match(err.message, /must be an object, got array/);
+      return true;
+    },
+  );
+});
+
+test("object type with isArray rejects a plain object", () => {
+  assert.throws(
+    () =>
+      validateParameters(
+        { daily_charges: { foo: "bar" } },
+        { daily_charges: { required: true, type: "object", isArray: true } },
+      ),
+    (err: Error) => {
+      assert.match(err.message, /must be an array, got object/);
+      return true;
+    },
+  );
+});
+
+test("object type accepts a plain object", () => {
+  assert.doesNotThrow(() =>
+    validateParameters(
+      { seasons: { winter: {} } },
+      { seasons: { required: true, type: "object" } },
+    ),
+  );
+});
+
 test("missing required sensitive parameter does not leak into the error message", () => {
   assert.throws(
     () =>
