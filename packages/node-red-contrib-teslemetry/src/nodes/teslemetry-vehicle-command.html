@@ -193,7 +193,17 @@
                 Trigger Homelink (msg.lat, msg.lon)
             </option>
             <option value="navigationRequest">
-                Navigation Request (msg.payload)
+                Navigation Request - Address/Share Link (msg.value)
+            </option>
+            <option value="navigationGpsRequest">
+                Navigation Request - GPS Coordinates (msg.lat, msg.lon,
+                msg.order)
+            </option>
+            <option value="navigationSuperchargerRequest">
+                Navigation Request - Supercharger (msg.id, msg.order)
+            </option>
+            <option value="navigationWaypointsRequest">
+                Navigation Request - Waypoints (msg.waypoints)
             </option>
             <option value="adjustVolume">
                 Set Media Volume (msg.volume)
@@ -301,8 +311,46 @@
         <dt class="optional">
             lat / lon <span class="property-type">number</span>
         </dt>
-        <dd>Location the schedule applies to.</dd>
+        <dd>
+            Location the schedule/GPS navigation destination applies to.
+        </dd>
     </dl>
+
+    <h3>Navigation Requests</h3>
+    <p>
+        The vehicle's navigation system accepts a destination in one of
+        several shapes - use whichever command variant matches the input you
+        have:
+    </p>
+    <ul>
+        <li>
+            <b>Navigation Request</b> (<code>navigationRequest</code>) sends
+            a free-form destination as <code>msg.value</code> - a street
+            address, a place name, or a shared navigation link (e.g. from
+            Google Maps). <code>msg.locale</code> is optional.
+        </li>
+        <li>
+            <b>Navigation Request - GPS Coordinates</b> (<code
+                >navigationGpsRequest</code
+            >) sends an exact <code>msg.lat</code>/<code>msg.lon</code> pair.
+            <code>msg.order</code> (integer, 1-based) is the destination's
+            position when combined with other navigation requests; use
+            <code>1</code> for a single destination.
+        </li>
+        <li>
+            <b>Navigation Request - Supercharger</b> (<code
+                >navigationSuperchargerRequest</code
+            >) starts navigation to a Supercharger site by its
+            <code>msg.id</code> (string site ID) and <code>msg.order</code>.
+        </li>
+        <li>
+            <b>Navigation Request - Waypoints</b> (<code
+                >navigationWaypointsRequest</code
+            >) sends a full route as a single <code>msg.waypoints</code>
+            string of semicolon-separated <code>lat,lon</code> pairs (e.g.
+            <code>"37.7749,-122.4194;37.3382,-121.8863"</code>).
+        </li>
+    </ul>
     <p>
         <code>adjustVolume</code> sets an absolute volume. For volume
         up/down, read the <code>MediaAudioVolume</code> and
