@@ -1,5 +1,11 @@
 import { Node } from "node-red";
-import { Products, Teslemetry } from "@teslemetry/api";
+import {
+  Products,
+  Teslemetry,
+  TeslemetryStream,
+  TeslemetryStreamAuthError,
+  TeslemetryStreamErrorEvent,
+} from "@teslemetry/api";
 
 export type Instance = {
   teslemetry: Teslemetry;
@@ -48,6 +54,62 @@ export function getErrorMessage(error: unknown): string {
   }
 
   return String(error);
+}
+
+/** How long to wait before retrying a stream that stopped after repeated
+ *  auth failures. The SDK gives up permanently on `auth_failure` (see
+ *  TeslemetryStream), so a stalled token or a fixed credential needs
+ *  something outside it to resume the stream without a flow redeploy. */
+const AUTH_RETRY_DELAY_MS = 60_000;
+
+/**
+ * Wire a streaming node's status indicator to its shared SSE connection,
+ * distinguishing a bad/expired token (auth_failure, stays red until retried)
+ * from an ordinary reconnecting blip (stream_error, shown transiently while
+ * the SDK's own backoff keeps retrying). Also resumes the stream after
+ * auth_failure, since the SDK stops reconnecting on its own at that point.
+ * @returns cleanup function to call from the node's "close" handler
+ */
+export function attachStreamStatus(sse: TeslemetryStream, node: Node): () => void {
+  let authRetryTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const onConnect = () => {
+    node.status({ fill: "green", shape: "dot", text: "connected" });
+  };
+  const onDisconnect = () => {
+    node.status({ fill: "red", shape: "ring", text: "disconnected" });
+  };
+  const onStreamError = (event: TeslemetryStreamErrorEvent) => {
+    const isAuth = event.error instanceof TeslemetryStreamAuthError;
+    node.status({
+      fill: "yellow",
+      shape: "ring",
+      text: isAuth
+        ? "auth error, retrying"
+        : `reconnecting (attempt ${event.retries})`,
+    });
+  };
+  const onAuthFailure = (error: TeslemetryStreamAuthError) => {
+    node.status({ fill: "red", shape: "dot", text: "auth failed - check token" });
+    node.error(`Teslemetry stream authentication failed: ${error.message}`);
+    authRetryTimer = setTimeout(() => {
+      authRetryTimer = undefined;
+      sse.connect();
+    }, AUTH_RETRY_DELAY_MS);
+  };
+
+  sse.on("connect", onConnect);
+  sse.on("disconnect", onDisconnect);
+  sse.on("stream_error", onStreamError);
+  sse.on("auth_failure", onAuthFailure);
+
+  return () => {
+    if (authRetryTimer) clearTimeout(authRetryTimer);
+    sse.off("connect", onConnect);
+    sse.off("disconnect", onDisconnect);
+    sse.off("stream_error", onStreamError);
+    sse.off("auth_failure", onAuthFailure);
+  };
 }
 
 /**

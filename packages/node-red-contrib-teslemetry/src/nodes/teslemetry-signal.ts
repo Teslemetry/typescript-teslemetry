@@ -1,5 +1,5 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
-import { getInstance } from "../shared";
+import { attachStreamStatus, getInstance } from "../shared";
 import { Teslemetry } from "@teslemetry/api";
 
 export interface TeslemetrySignalNodeDef extends NodeDef {
@@ -42,15 +42,7 @@ export default function (RED: NodeAPI) {
 
     const sse = node.teslemetry.sse;
 
-    const onConnect = () => {
-      node.status({ fill: "green", shape: "dot", text: "connected" });
-    };
-    const onDisconnect = () => {
-      node.status({ fill: "red", shape: "ring", text: "disconnected" });
-    };
-
-    sse.on("connect", onConnect);
-    sse.on("disconnect", onDisconnect);
+    const detachStreamStatus = attachStreamStatus(sse, node);
 
     const cleanup = sse
       .getVehicle(node.vin)
@@ -62,8 +54,7 @@ export default function (RED: NodeAPI) {
 
     node.on("close", function (done: any) {
       if (cleanup) cleanup();
-      sse.off("connect", onConnect);
-      sse.off("disconnect", onDisconnect);
+      detachStreamStatus();
       done();
     });
   }
