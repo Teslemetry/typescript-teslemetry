@@ -139,6 +139,9 @@ importers:
       tsdown:
         specifier: ^0.22.4
         version: 0.22.4(tsx@4.20.6)(typescript@5.9.3)(unrun@0.2.11(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
 
 packages:
 

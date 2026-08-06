@@ -171,6 +171,43 @@
             <option value="cancelSoftwareUpdate">
                 Cancel Software Update
             </option>
+            <option value="setGuestModeOn">Enable Guest Mode</option>
+            <option value="setGuestModeOff">Disable Guest Mode</option>
+            <option value="setValetModeOn">
+                Enable Valet Mode (msg.password)
+            </option>
+            <option value="setValetModeOff">
+                Disable Valet Mode (msg.password)
+            </option>
+            <option value="resetValetPin">Reset Valet PIN</option>
+            <option value="setPinToDriveOn">
+                Enable PIN to Drive (msg.password)
+            </option>
+            <option value="setPinToDriveOff">
+                Disable PIN to Drive (msg.password)
+            </option>
+            <option value="clearPinToDriveAdmin">
+                Clear PIN to Drive (Admin)
+            </option>
+            <option value="resetPinToDrive">Reset PIN to Drive PIN</option>
+            <option value="clearPinToDrive">
+                Clear PIN to Drive (msg.pin)
+            </option>
+            <option value="speedLimitActivate">
+                Activate Speed Limit Mode (msg.pin)
+            </option>
+            <option value="speedLimitDeactivate">
+                Deactivate Speed Limit Mode (msg.pin)
+            </option>
+            <option value="speedLimitClearPin">
+                Clear Speed Limit PIN (msg.pin)
+            </option>
+            <option value="speedLimitClearPinAdmin">
+                Clear Speed Limit PIN (Admin)
+            </option>
+            <option value="speedLimitSetLimit">
+                Set Speed Limit (msg.limitMph, 50-90)
+            </option>
             <option value="vehicleData">Get Vehicle Data</option>
         </select>
     </div>
@@ -210,6 +247,48 @@
         <code>MediaAudioVolumeIncrement</code> fields with a Signal node,
         add/subtract them in a function node, and feed the result into
         <code>msg.volume</code>.
+    </p>
+
+    <h3>Valet Mode, PIN to Drive &amp; Speed Limit Mode</h3>
+    <p>
+        These commands restrict what the vehicle will do until reversed with
+        the matching password/PIN, or an admin-clear/reset command run from
+        an already-authenticated Teslemetry account (no password/PIN
+        required):
+    </p>
+    <ul>
+        <li>
+            <b>Valet Mode</b> (<code>setValetModeOn</code>/<code
+                >setValetModeOff</code
+            >) hides trunk/frunk access, garage door codes, and navigation
+            history from the driver, and caps top speed and acceleration.
+            <code>resetValetPin</code> clears a forgotten valet password
+            without needing the old one.
+        </li>
+        <li>
+            <b>PIN to Drive</b> (<code>setPinToDriveOn</code>/<code
+                >setPinToDriveOff</code
+            >) requires the PIN be entered on the vehicle's touchscreen
+            before it can be driven. <code>clearPinToDriveAdmin</code> and
+            <code>resetPinToDrive</code> are admin-level overrides for a lost
+            PIN.
+        </li>
+        <li>
+            <b>Speed Limit Mode</b> (<code>speedLimitActivate</code>/<code
+                >speedLimitDeactivate</code
+            >) caps the vehicle's top speed at <code>msg.limitMph</code> (set
+            separately via <code>speedLimitSetLimit</code>, 50-90 mph); the
+            same PIN used to activate it is required to deactivate it or
+            change the limit while active. <code>speedLimitClearPinAdmin</code>
+            is the admin-level override for a lost PIN.
+        </li>
+    </ul>
+    <p>
+        <code>msg.password</code>/<code>msg.pin</code> are validated but
+        never echoed back: on a validation failure (missing or wrong type),
+        the node's error/status text redacts the value instead of including
+        it, so a bad PIN or password never ends up in the debug sidebar or
+        Node-RED log.
     </p>
 
     <h3>Outputs</h3>

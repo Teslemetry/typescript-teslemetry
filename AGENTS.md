@@ -351,7 +351,7 @@ The generated OpenAPI client (`packages/api/src/client/**`) is excluded via `ign
 
 `pnpm -r tsc` runs every package's `tsc` script, but `iobroker.teslemetry`'s is named `check` (not `tsc`), so it's silently skipped - run `pnpm --filter iobroker.teslemetry check` separately, or `pnpm -r --no-bail tsc` to see every package's errors instead of stopping at the first failure.
 
-Each package's `test` script runs `tsx --test test/*.test.ts` (Node's built-in test runner, no extra framework) - a convention applied across `api`, `n8n-nodes-teslemetry`, `iobroker.teslemetry`, and `homebridge-teslemetry`. `node-red-contrib-teslemetry` has no test suite yet.
+Each package's `test` script runs `tsx --test test/*.test.ts` (Node's built-in test runner, no extra framework) - a convention applied across all five packages.
 
 ### Test n8n Nodes Locally
 
