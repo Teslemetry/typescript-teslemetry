@@ -170,6 +170,7 @@ Listen for specific signal changes from a vehicle.
 - **Sunroof**: Vent/close/stop (legacy Model S/X with a panoramic sunroof)
 - **Climate Control**: Start/stop HVAC, set temps, seat heaters, steering wheel heater, cabin overheat protection, auto seat/steering-wheel climate
 - **Charging**: Start/stop, open/close port, set limit, set amps, scheduled charging/departure
+- **Charge/Precondition Schedules**: Add/update or remove location-based charge and precondition schedules
 - **Sentry Mode**: Enable/disable Sentry Mode
 - **Homelink**: Trigger Homelink at specific coordinates
 - **Navigation**: Send destination to vehicle navigation

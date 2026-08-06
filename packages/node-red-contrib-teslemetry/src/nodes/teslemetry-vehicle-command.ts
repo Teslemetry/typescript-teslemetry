@@ -270,6 +270,74 @@ export default function (RED: NodeAPI) {
                   : undefined,
             });
             break;
+          case "addChargeSchedule":
+            validateParameters(msg, {
+              id: { type: "number" },
+              name: { type: "string" },
+              daysOfWeek: { required: true, type: "string" },
+              enabled: { required: true, type: "boolean" },
+              startEnabled: { required: true, type: "boolean" },
+              endEnabled: { required: true, type: "boolean" },
+              startTime: { type: "string" },
+              endTime: { type: "string" },
+              lat: { required: true, type: "number", min: -90, max: 90 },
+              lon: { required: true, type: "number", min: -180, max: 180 },
+              oneTime: { type: "boolean" },
+            });
+            result = await vehicle.addChargeSchedule({
+              id: msg.id,
+              name: msg.name,
+              days_of_week: msg.daysOfWeek,
+              enabled: msg.enabled,
+              start_enabled: msg.startEnabled,
+              end_enabled: msg.endEnabled,
+              start_time:
+                msg.startTime !== undefined
+                  ? timeToMinutesOfDay(msg.startTime)
+                  : undefined,
+              end_time:
+                msg.endTime !== undefined
+                  ? timeToMinutesOfDay(msg.endTime)
+                  : undefined,
+              lat: msg.lat,
+              lon: msg.lon,
+              one_time: msg.oneTime,
+            });
+            break;
+          case "removeChargeSchedule":
+            validateParameters(msg, {
+              id: { required: true, type: "number", integer: true },
+            });
+            result = await vehicle.removeChargeSchedule(msg.id);
+            break;
+          case "addPreconditionSchedule":
+            validateParameters(msg, {
+              id: { type: "number" },
+              name: { type: "string" },
+              daysOfWeek: { required: true, type: "string" },
+              enabled: { required: true, type: "boolean" },
+              lat: { required: true, type: "number", min: -90, max: 90 },
+              lon: { required: true, type: "number", min: -180, max: 180 },
+              preconditionTime: { required: true, type: "string" },
+              oneTime: { type: "boolean" },
+            });
+            result = await vehicle.addPreconditionSchedule({
+              id: msg.id,
+              name: msg.name,
+              days_of_week: msg.daysOfWeek,
+              enabled: msg.enabled,
+              lat: msg.lat,
+              lon: msg.lon,
+              precondition_time: timeToMinutesOfDay(msg.preconditionTime),
+              one_time: msg.oneTime,
+            });
+            break;
+          case "removePreconditionSchedule":
+            validateParameters(msg, {
+              id: { required: true, type: "number", integer: true },
+            });
+            result = await vehicle.removePreconditionSchedule(msg.id);
+            break;
           case "setSentryModeOn":
             result = await vehicle.setSentryMode(true);
             break;
