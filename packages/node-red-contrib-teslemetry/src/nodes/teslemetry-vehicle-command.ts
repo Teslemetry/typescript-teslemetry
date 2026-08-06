@@ -439,6 +439,36 @@ export default function (RED: NodeAPI) {
               value: msg?.value,
             });
             break;
+          case "navigationGpsRequest":
+            validateParameters(msg, {
+              lat: { required: true, type: "number", min: -90, max: 90 },
+              lon: { required: true, type: "number", min: -180, max: 180 },
+              order: { required: true, type: "number", integer: true, min: 1 },
+            });
+            result = await vehicle.navigationGpsRequest({
+              lat: Number(msg.lat),
+              lon: Number(msg.lon),
+              order: Number(msg.order),
+            });
+            break;
+          case "navigationSuperchargerRequest":
+            validateParameters(msg, {
+              id: { required: true, type: "string" },
+              order: { required: true, type: "number", integer: true, min: 1 },
+            });
+            result = await vehicle.navigationSuperchargerRequest({
+              id: msg.id,
+              order: Number(msg.order),
+            });
+            break;
+          case "navigationWaypointsRequest":
+            validateParameters(msg, {
+              waypoints: { required: true, type: "string" },
+            });
+            result = await vehicle.navigationWaypointsRequest({
+              waypoints: msg.waypoints,
+            });
+            break;
           case "adjustVolume":
             validateParameters(msg, {
               volume: { required: true, type: "number", min: 0 },
