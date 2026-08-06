@@ -205,6 +205,73 @@ export default function (RED: NodeAPI) {
             });
             result = await vehicle.setAutoSeatClimate(msg.seat, msg.on);
             break;
+          case "setSeatCooler":
+            validateParameters(msg, {
+              seat: {
+                required: true,
+                type: "string",
+                allowedValues: ["front_left", "front_right"],
+              },
+              level: {
+                required: true,
+                type: "number",
+                min: 0,
+                max: 3,
+                integer: true,
+              },
+            });
+            result = await vehicle.setSeatCooler(msg.seat, Number(msg.level));
+            break;
+          case "setPreconditioningMaxOn":
+            validateParameters(msg, {
+              manualOverride: { type: "boolean" },
+            });
+            result = await vehicle.setPreconditioningMax(
+              true,
+              msg.manualOverride ?? false,
+            );
+            break;
+          case "setPreconditioningMaxOff":
+            validateParameters(msg, {
+              manualOverride: { type: "boolean" },
+            });
+            result = await vehicle.setPreconditioningMax(
+              false,
+              msg.manualOverride ?? false,
+            );
+            break;
+          case "setClimateKeeperMode":
+            validateParameters(msg, {
+              mode: {
+                required: true,
+                type: "number",
+                min: 0,
+                max: 3,
+                integer: true,
+              },
+            });
+            result = await vehicle.setClimateKeeperMode(
+              Number(msg.mode) as 0 | 1 | 2 | 3,
+            );
+            break;
+          case "setBioweaponDefenseModeOn":
+            validateParameters(msg, {
+              manualOverride: { type: "boolean" },
+            });
+            result = await vehicle.setBioweaponDefenseMode(
+              true,
+              msg.manualOverride ?? false,
+            );
+            break;
+          case "setBioweaponDefenseModeOff":
+            validateParameters(msg, {
+              manualOverride: { type: "boolean" },
+            });
+            result = await vehicle.setBioweaponDefenseMode(
+              false,
+              msg.manualOverride ?? false,
+            );
+            break;
           case "startCharging":
             result = await vehicle.startCharging();
             break;

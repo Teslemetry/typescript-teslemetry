@@ -137,6 +137,24 @@
             <option value="setSeatHeater">
                 Set Seat Heater (msg.heater, msg.level)
             </option>
+            <option value="setSeatCooler">
+                Set Seat Cooler (msg.seat, msg.level 0-3)
+            </option>
+            <option value="setPreconditioningMaxOn">
+                Enable Preconditioning Max (msg.manualOverride)
+            </option>
+            <option value="setPreconditioningMaxOff">
+                Disable Preconditioning Max (msg.manualOverride)
+            </option>
+            <option value="setClimateKeeperMode">
+                Set Climate Keeper Mode (msg.mode 0-3)
+            </option>
+            <option value="setBioweaponDefenseModeOn">
+                Enable Bioweapon Defense Mode (msg.manualOverride)
+            </option>
+            <option value="setBioweaponDefenseModeOff">
+                Disable Bioweapon Defense Mode (msg.manualOverride)
+            </option>
             <option value="startCharging">Start Charging</option>
             <option value="stopCharging">Stop Charging</option>
             <option value="openChargePort">Open Charge Port</option>
@@ -284,6 +302,13 @@
         <code>MediaAudioVolumeIncrement</code> fields with a Signal node,
         add/subtract them in a function node, and feed the result into
         <code>msg.volume</code>.
+    </p>
+    <p>
+        <code>msg.manualOverride</code> (boolean, optional, default
+        <code>false</code>) applies to the Preconditioning Max and Bioweapon
+        Defense Mode commands - it tells the vehicle the change was
+        explicitly requested rather than automatic, per the underlying
+        Tesla command.
     </p>
 
     <h3>Valet Mode, PIN to Drive &amp; Speed Limit Mode</h3>
