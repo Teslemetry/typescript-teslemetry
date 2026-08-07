@@ -1,5 +1,12 @@
 # @teslemetry/homebridge-teslemetry
 
+## 1.2.1
+
+### Patch Changes
+
+- Updated dependencies [57d1415]
+  - @teslemetry/api@0.11.3
+
 ## 1.2.0
 
 ### Minor Changes
