@@ -50,7 +50,9 @@ export class Teslemetry {
 
     // Log requests and update region
     this.client.interceptors.response.use((response) => {
-      this.logger.debug(`Response from ${response.url}: ${response.status}`);
+      // Query params (e.g. ?token=...) may carry credentials - never log them.
+      const path = response.url ? new URL(response.url).pathname : response.url;
+      this.logger.debug(`Response from ${path}: ${response.status}`);
       if (!this.region) {
         const userRegion = response.headers.get("x-region") as "na" | "eu";
         if (userRegion) {
