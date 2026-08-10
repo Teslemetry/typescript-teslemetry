@@ -37,7 +37,6 @@ export default function (RED: NodeAPI) {
 
     const instance = getInstance(config.teslemetryConfig, node);
     if (!instance) return;
-    if (hasInstanceError(instance, node)) return;
 
     node.teslemetry = instance.teslemetry;
     node.vin = config.vin;
@@ -45,6 +44,14 @@ export default function (RED: NodeAPI) {
     node.status({});
 
     node.on("input", async function (msg: Msg, send, done) {
+      // Re-checked per message rather than once at construction, so a node
+      // built while the products fetch is still failing starts working as
+      // soon as it recovers, without needing a redeploy.
+      if (hasInstanceError(instance, node)) {
+        done();
+        return;
+      }
+
       const vin: string = node.vin || msg.vin || "";
       const command: string = node.command || msg.command || "";
       const vehicle = node.teslemetry!.api.getVehicle(vin);
