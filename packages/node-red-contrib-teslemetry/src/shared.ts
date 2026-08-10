@@ -10,7 +10,7 @@ import {
 export type Instance = {
   teslemetry: Teslemetry;
   products: Promise<Products>;
-  error?: string; // Set when initial auth/products fetch fails
+  error?: string; // Set while the products fetch is failing; cleared on retry success
 };
 
 export const instances = new Map<string, Instance>();
