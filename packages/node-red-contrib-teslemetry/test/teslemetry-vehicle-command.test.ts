@@ -59,6 +59,31 @@ async function runCommand(
   await node.handlers.input(msg as Msg, send, done);
 }
 
+async function runCommandExpectError(
+  vehicle: Record<string, (...args: any[]) => Promise<{ response: unknown }>>,
+  msg: Partial<Msg>,
+): Promise<string[]> {
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+
+  const configId = `cfg-test-${Math.random()}`;
+  instances.set(configId, {
+    teslemetry: { api: { getVehicle: () => vehicle } } as any,
+    products: Promise.resolve({} as any),
+  });
+
+  const node = createFakeNode();
+  const errors: string[] = [];
+  node.error = (msg?: string) => {
+    errors.push(msg || "");
+  };
+  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
+
+  await node.handlers.input(msg as Msg, () => {}, () => {});
+  return errors;
+}
+
 test("setSeatCooler coerces a numeric-string msg.level to a number before calling the SDK", async () => {
   let receivedLevel: unknown;
   const vehicle = {
@@ -94,6 +119,118 @@ test("setClimateKeeperMode coerces a numeric-string msg.mode to a number before 
 
   assert.strictEqual(receivedMode, 3);
   assert.strictEqual(typeof receivedMode, "number");
+});
+
+test("setSeatCooler rejects an out-of-range level", async () => {
+  const vehicle = {
+    setSeatCooler: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors = await runCommandExpectError(vehicle, {
+    command: "setSeatCooler",
+    seat: "front_left",
+    level: 4,
+  });
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /level/i);
+});
+
+test("setSeatCooler rejects a seat position with no cooling hardware", async () => {
+  const vehicle = {
+    setSeatCooler: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors = await runCommandExpectError(vehicle, {
+    command: "setSeatCooler",
+    seat: "rear_left",
+    level: 1,
+  });
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /seat/i);
+});
+
+test("setPreconditioningMaxOn passes msg.manualOverride through to the SDK", async () => {
+  let received: unknown;
+  const vehicle = {
+    setPreconditioningMax: async (on: boolean, manualOverride: boolean) => {
+      received = { on, manualOverride };
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, {
+    command: "setPreconditioningMaxOn",
+    manualOverride: true,
+  });
+
+  assert.deepStrictEqual(received, { on: true, manualOverride: true });
+});
+
+test("setPreconditioningMaxOff defaults msg.manualOverride to false when omitted", async () => {
+  let received: unknown;
+  const vehicle = {
+    setPreconditioningMax: async (on: boolean, manualOverride: boolean) => {
+      received = { on, manualOverride };
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, { command: "setPreconditioningMaxOff" });
+
+  assert.deepStrictEqual(received, { on: false, manualOverride: false });
+});
+
+test("setClimateKeeperMode rejects an out-of-range mode", async () => {
+  const vehicle = {
+    setClimateKeeperMode: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors = await runCommandExpectError(vehicle, {
+    command: "setClimateKeeperMode",
+    mode: 4,
+  });
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /mode/i);
+});
+
+test("setBioweaponDefenseModeOn passes msg.manualOverride through to the SDK", async () => {
+  let received: unknown;
+  const vehicle = {
+    setBioweaponDefenseMode: async (on: boolean, manualOverride: boolean) => {
+      received = { on, manualOverride };
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, {
+    command: "setBioweaponDefenseModeOn",
+    manualOverride: true,
+  });
+
+  assert.deepStrictEqual(received, { on: true, manualOverride: true });
+});
+
+test("setBioweaponDefenseModeOff defaults msg.manualOverride to false when omitted", async () => {
+  let received: unknown;
+  const vehicle = {
+    setBioweaponDefenseMode: async (on: boolean, manualOverride: boolean) => {
+      received = { on, manualOverride };
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, { command: "setBioweaponDefenseModeOff" });
+
+  assert.deepStrictEqual(received, { on: false, manualOverride: false });
 });
 
 test("navigationGpsRequest coerces numeric-string msg.lat/lon/order to numbers before calling the SDK", async () => {
