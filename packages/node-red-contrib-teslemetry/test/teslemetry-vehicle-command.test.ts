@@ -186,3 +186,45 @@ test("navigationGpsRequest rejects a missing msg.order", async () => {
   assert.strictEqual(errors.length, 1);
   assert.match(errors[0], /order/i);
 });
+
+test("mediaTogglePlayback dispatches to the SDK with no arguments", async () => {
+  let called = false;
+  const vehicle = {
+    mediaTogglePlayback: async () => {
+      called = true;
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, { command: "mediaTogglePlayback" });
+
+  assert.strictEqual(called, true);
+});
+
+test("mediaNextTrack dispatches to the SDK with no arguments", async () => {
+  let called = false;
+  const vehicle = {
+    mediaNextTrack: async () => {
+      called = true;
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, { command: "mediaNextTrack" });
+
+  assert.strictEqual(called, true);
+});
+
+test("mediaPreviousTrack dispatches to the SDK with no arguments", async () => {
+  let called = false;
+  const vehicle = {
+    mediaPreviousTrack: async () => {
+      called = true;
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, { command: "mediaPreviousTrack" });
+
+  assert.strictEqual(called, true);
+});
