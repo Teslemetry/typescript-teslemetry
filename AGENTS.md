@@ -23,25 +23,17 @@ typescript-teslemetry/
 └── .github/workflows/publish.yml      # Automated CI/CD
 ```
 
-See each package's own `package.json`/`README.md` for its purpose and structure - don't rely on this file for per-package detail, which goes stale quickly.
+See each package's own `package.json`/`README.md` for its purpose, structure, and current version - don't rely on this file for per-package detail, which goes stale quickly.
+
+All integration packages (`node-red`, `n8n`, `homebridge-teslemetry`, `iobroker.teslemetry`) depend on `@teslemetry/api` via `"@teslemetry/api": "workspace:*"`, so they always build against the local SDK during development.
 
 ## Packages
 
 ### 1. `@teslemetry/api` - Core SDK
 
 **Location**: `packages/api/`
-**Version**: 0.6.7
-**Status**: Stable, actively maintained
 
-**Purpose**: Official TypeScript/JavaScript client library for the Teslemetry API.
-
-**Key Features**:
-- 🚗 Vehicle control (climate, charging, security, navigation)
-- ⚡ Energy site management (Powerwall, Solar)
-- 📡 Real-time streaming via Server-Sent Events (SSE)
-- 🌍 Automatic region detection (NA/EU)
-- 📦 Dual ESM/CommonJS support
-- 🔧 Full TypeScript type definitions
+**Purpose**: Official TypeScript/JavaScript client library for the Teslemetry API - vehicle control, energy site management, real-time SSE streaming, automatic region detection (NA/EU), dual ESM/CJS output.
 
 **Main Source Files**:
 - `src/Teslemetry.ts` - Main entry point
@@ -52,32 +44,24 @@ See each package's own `package.json`/`README.md` for its purpose and structure 
 - `src/TeslemetryVehicleStream.ts` - Vehicle-specific streaming
 - `src/TeslemetryUserApi.ts` - User account operations
 - `src/TeslemetryChargingApi.ts` - Charging-specific operations
-- `src/client/` - Auto-generated OpenAPI client
-
-**Build Output**:
-- `dist/index.cjs` - CommonJS bundle
-- `dist/index.mjs` - ESM bundle
-- `dist/*.d.ts` - TypeScript declarations
+- `src/client/` - Auto-generated OpenAPI client (don't hand-edit)
 
 **Code Generation**:
-- Uses `@hey-api/openapi-ts` to generate client from OpenAPI spec
-- Run: `pnpm --filter @teslemetry/api client` (package.json script is named `client`, not `generate`)
-- The generated client (`src/client/sdk.gen.ts`) often already has functions for endpoints that `TeslemetryVehicleApi.ts`/`TeslemetryEnergyApi.ts` haven't wrapped yet - grep `src/client/sdk.gen.ts` for the endpoint before assuming closing a capability gap needs a spec regen; usually it's just a new hand-written method that calls the existing generated function.
-- `@hey-api/openapi-ts` releases up to and including `0.99.0` crash against `typescript@7.x` (`TypeError: Cannot read properties of undefined (reading 'LineFeed'/'AnyKeyword'/...)`) because they still call into the `typescript` package's compiler-API enums at runtime, and TS7's native rewrite doesn't expose that surface - this is a known upstream gap (hey-api/hey-api#4235), not a repo config issue. The fix landed by dropping the runtime dependency on `typescript` entirely, but only in hey-api's `next` prerelease channel as of 2026-07 (no stable release yet) - hence the `0.0.0-next-*` pin in `packages/api/package.json`'s `@hey-api/openapi-ts` devDependency instead of a stable semver range. Bump to a stable release once one ships with this fix (check `npm view @hey-api/openapi-ts@next dependencies` - once `typescript` disappears from a *stable* tag's dependency tree, the fix has shipped).
-- The `input:` in `openapi-ts.config.ts` fetches the live `api.teslemetry.com/openapi.yaml`, not the api repo's committed `openapi.json` directly - the two can briefly diverge around a deploy, and empirically the live endpoint can even be *ahead* of the api repo's committed snapshot file (which isn't necessarily regenerated on every commit). If regenerating to pick up a specific just-merged api-repo change, prefer fetching that repo's `openapi.json` from its `main` branch over trusting the live endpoint's current deploy state.
-- CI (`.github/workflows/ci.yml`, "Verify API client codegen toolchain" step) regenerates into a throwaway temp directory on every PR specifically to catch a toolchain break like this one at PR time - it does not diff against the committed `src/client/`, since the live spec drifting is expected and not itself a bug.
+- Uses `@hey-api/openapi-ts` to generate the client from the OpenAPI spec. Run: `pnpm --filter @teslemetry/api client` (the package.json script is named `client`, not `generate`).
+- `src/client/sdk.gen.ts` often already has functions for endpoints that `TeslemetryVehicleApi.ts`/`TeslemetryEnergyApi.ts` haven't wrapped yet - grep it for the endpoint before assuming a capability gap needs a spec regen; usually it's just a new hand-written method calling the existing generated function.
+- `@hey-api/openapi-ts` stable releases crash against `typescript@7.x` because they call into the `typescript` package's compiler-API enums at runtime, which TS7's native rewrite doesn't expose - hence the `0.0.0-next-*` pin on `@hey-api/openapi-ts` in `packages/api/package.json` instead of a stable semver range. Bump to a stable release once `npm view @hey-api/openapi-ts@next dependencies` shows `typescript` has dropped out of a *stable* tag's dependency tree.
+- The `input:` in `openapi-ts.config.ts` fetches the live `api.teslemetry.com/openapi.yaml`, not the api repo's committed `openapi.json` - the two can briefly diverge around a deploy, and the live endpoint can be *ahead* of the api repo's committed snapshot. If regenerating to pick up a specific just-merged api-repo change, prefer fetching that repo's `openapi.json` from `main` over trusting the live endpoint's current deploy state.
+- CI's "Verify API client codegen toolchain" step (`.github/workflows/reusable-ci.yml`) regenerates into a throwaway temp directory on every PR to catch toolchain breaks at PR time - it does not diff against the committed `src/client/`, since live-spec drift is expected and not itself a bug.
 
-**Gotcha**: every Teslemetry API request carries the access token as a `?token=...` query parameter, so `response.url`/`request.url` on the generated client's `Client` (`src/client/client/*.ts`) is credential-bearing - `Teslemetry.ts`'s response interceptor logs only `new URL(response.url).pathname`, never the full URL, for exactly this reason. Any future logging, error-reporting, or telemetry code touching a request/response object in `packages/api` must strip the query string (not just a named param) before it reaches a consumer-wired `logger`, since consumers like the Homey app forward `debug`-level logs into user-visible diagnostics.
+**Gotcha**: every Teslemetry API request carries the access token as a `?token=...` query parameter, so `response.url`/`request.url` on the generated client's `Client` (`src/client/client/*.ts`) is credential-bearing - `Teslemetry.ts`'s response interceptor logs only `new URL(response.url).pathname`, never the full URL. Any future logging, error-reporting, or telemetry code touching a request/response object in `packages/api` must strip the query string (not just a named param) before it reaches a consumer-wired `logger`, since consumers like the Homey app forward `debug`-level logs into user-visible diagnostics.
 
-**Gotcha**: `getTariffPeriods`/`TariffContentV2` (`src/tariff.ts`) are bundled in from the published `tesla-fleet-api` npm package rather than hand-ported - tsdown externalizes `dependencies`/`peerDependencies` by default but bundles `devDependencies`, so `tesla-fleet-api` is a `devDependency` here specifically to get inlined into `dist/` with no runtime dependency on it. `src/tariff.ts` deep-imports `tesla-fleet-api/dist/tariff.js` and `tesla-fleet-api/dist/types/site_info.js` directly (not the package root) so tree-shaking never has to prove the rest of that package's vehicle/signing/commands surface is side-effect-free - importing the root would risk dragging all of it in. `tsdown.config.ts`'s `deps.onlyBundle: ["tesla-fleet-api"]` documents that inlining as intentional (silences tsdown's unintentional-bundling hint); adding another bundled devDependency needs a matching entry there. `useTeslaModel()` (`src/Teslemetry.ts`) follows the same deep-import pattern for the VIN-character-to-model-name map: it imports `Models` from `tesla-fleet-api/dist/types/vehicle.js` rather than maintaining a local copy - check that leaf (not the package root, and not `dist/vehicle.js`'s `Vehicle` class, which pulls in the whole signing/protocol graph) before adding a new hand-maintained constant that the library may already export.
+**Gotcha**: `getTariffPeriods`/`TariffContentV2` (`src/tariff.ts`) are bundled in from the published `tesla-fleet-api` npm package rather than hand-ported - tsdown externalizes `dependencies`/`peerDependencies` by default but bundles `devDependencies`, so `tesla-fleet-api` is a `devDependency` here specifically to get inlined into `dist/` with no runtime dependency on it. `src/tariff.ts` deep-imports `tesla-fleet-api/dist/tariff.js` and `tesla-fleet-api/dist/types/site_info.js` directly (not the package root) so tree-shaking never has to prove the rest of that package's vehicle/signing/commands surface is side-effect-free. `tsdown.config.ts`'s `deps.onlyBundle: ["tesla-fleet-api"]` documents that inlining as intentional; adding another bundled devDependency needs a matching entry there. `useTeslaModel()` (`src/Teslemetry.ts`) follows the same deep-import pattern, importing `Models` from `tesla-fleet-api/dist/types/vehicle.js` rather than maintaining a local copy - check that leaf (not the package root, and not `dist/vehicle.js`'s `Vehicle` class, which pulls in the whole signing/protocol graph) before adding a new hand-maintained constant the library may already export.
 
 ### 2. `node-red-contrib-teslemetry` - Node-RED Integration
 
 **Location**: `packages/node-red-contrib-teslemetry/`
-**Version**: 0.1.2
-**Status**: Active
 
-**Purpose**: Provides Node-RED nodes for Tesla vehicle and energy site automation.
+**Purpose**: Node-RED nodes for Tesla vehicle and energy site automation.
 
 **Nodes**:
 1. **teslemetry-config** - Configuration node (stores API credentials)
@@ -88,46 +72,62 @@ See each package's own `package.json`/`README.md` for its purpose and structure 
 6. **teslemetry-signal** - Real-time single vehicle signal field listener (SSE)
 7. **teslemetry-energy-event** - Real-time energy site event listener (SSE: `live_status`/`site_info`/`tariff_content_v2`/`energy_totals`)
 
-**Structure**:
-- Each node has a TypeScript file (`.ts`) and HTML UI file (`.html`)
-- `src/shared.ts` - Shared utilities
-- `src/validation.ts` - Input validation
+**Structure**: each node has a TypeScript file (`.ts`) and HTML UI file (`.html`); `src/shared.ts` holds shared utilities, `src/validation.ts` input validation.
 
-**Gotcha**: `teslemetry-signal`'s field dropdown is populated from `teslemetry.api.getFields()` at edit time (`teslemetry-config.ts`'s `/teslemetry/fields` admin route), i.e. the live API's field registry, not a hand-maintained list - any new vehicle telemetry field the backend exposes is automatically selectable with zero code changes here. Combined with `teslemetry-event`/`teslemetry-energy-event` streaming whole raw payloads, most Homey/Homebridge-style "new capability" work (per-field mapping, units, gating) has no equivalent here: only genuinely new SDK *commands* (wire into `teslemetry-vehicle-command`/`teslemetry-energy-command`'s switch-case) or missing *streams* (as `teslemetry-energy-event` was, until added) are real gaps in this package. Threshold-crossing and lifecycle-transition logic (Homey's Flow trigger cards) has no dedicated node either - it's expected to be composed downstream with core Node-RED `switch`/`change`/`function` nodes over the raw stream, not reimplemented here.
+**Build**: `pnpm --filter node-red-contrib-teslemetry build` runs `tsdown && cp src/nodes/*.html dist/nodes/` - HTML files must be copied manually, tsdown won't do it.
+
+**Gotcha**: `teslemetry-signal`'s field dropdown is populated from `teslemetry.api.getFields()` at edit time (`teslemetry-config.ts`'s `/teslemetry/fields` admin route), i.e. the live API's field registry, not a hand-maintained list - any new vehicle telemetry field the backend exposes is automatically selectable with zero code changes here. Combined with `teslemetry-event`/`teslemetry-energy-event` streaming whole raw payloads, most Homey/Homebridge-style "new capability" work (per-field mapping, units, gating) has no equivalent here: only genuinely new SDK *commands* (wire into `teslemetry-vehicle-command`/`teslemetry-energy-command`'s switch-case) or missing *streams* are real gaps in this package. Threshold-crossing and lifecycle-transition logic (Homey's Flow trigger cards) has no dedicated node either - it's expected to be composed downstream with core Node-RED `switch`/`change`/`function` nodes over the raw stream, not reimplemented here.
 
 **Gotcha**: `TeslemetryStream`'s reconnect loop (`packages/api/src/TeslemetryStream.ts`) gives up permanently after two consecutive `auth_failure`s (`this.active = false`) - a bad/expired token doesn't get the exponential-backoff treatment ordinary `stream_error`s do, and nothing resumes the stream until something outside the SDK calls `connect()` again. `teslemetry-event`/`teslemetry-signal`/`teslemetry-energy-event` share this recovery logic (and the connect/disconnect/stream_error/auth_failure status wiring) through `attachStreamStatus()` in `src/shared.ts` rather than each hand-rolling it - extend that helper for new streaming nodes instead of duplicating the listener wiring.
 
-**Build Process**:
+**Local testing**:
 ```bash
-pnpm --filter node-red-contrib-teslemetry build
-# Runs: tsdown && cp src/nodes/*.html dist/nodes/
+cd packages/node-red-contrib-teslemetry
+pnpm build
+pnpm link --global
+
+# In another terminal
+cd ~/.node-red
+pnpm link --global node-red-contrib-teslemetry
+node-red
 ```
 
 ### 3. `n8n-nodes-teslemetry` - n8n Integration
 
 **Location**: `packages/n8n-nodes-teslemetry/`
-**Status**: Active
 
-**Purpose**: Provides n8n workflow nodes for Tesla automation.
+**Purpose**: n8n workflow nodes for Tesla automation. Builds to a single `dist/index.cjs` entry point.
 
 **Components**:
 - `src/credentials/TeslemetryApi.credentials.ts` - API credential definition
-- `src/nodes/TeslemetryVehicle.node.ts` - Vehicle operations
-- `src/nodes/TeslemetryEnergy.node.ts` - Energy operations
-- `src/nodes/TeslemetryTrigger.node.ts` - Event triggers (Vehicle and Energy Site resources)
+- `src/nodes/TeslemetryVehicle.node.ts` - Vehicle operations (climate/seat automation, closures/windows, charging schedules, software update, volume, wake/lock/charge/sentry, data retrieval)
+- `src/nodes/TeslemetryEnergy.node.ts` - Energy operations (backup reserve, operation mode, storm mode, grid rules, off-grid EV reserve)
+- `src/nodes/TeslemetryTrigger.node.ts` - Event triggers: vehicle SSE events (including a generic per-field Signal listener) and energy site SSE events (live status, site info, tariff content, energy totals)
 
-**Node Capabilities**: see each node's `operation`/`event` option list for the current set - it's grown incrementally and the list goes stale fast. As of the capability-expansion uplift (2026-08), Vehicle covers climate/seat automation, closures/windows, charging schedules, software update, and volume in addition to the original data/wake/lock/charge/sentry set; Energy covers backup reserve, operation mode, storm mode, grid rules, and off-grid EV reserve; Trigger covers both vehicle SSE events (including a generic per-field Signal listener) and energy site SSE events (live status, site info, tariff content, energy totals).
+See each node's `operation`/`event` option list for the exact current set - it grows incrementally and this summary goes stale fast.
 
 **Gotcha**: before adding a new node operation to wrap an SDK command, check whether the capability is already reachable without new code. `TeslemetryVehicleApi`/`TeslemetryEnergyApi` already expose most of the Tesla command surface (grep before assuming a gap, per the `@teslemetry/api` codegen note above), and the Trigger node's generic Signal event type (any field from `teslemetry.api.getFields()`, delivered via `onSignal`) already covers arbitrary read-only vehicle telemetry - unlike Homey/Homebridge, which need a capability/service wired per field, n8n needs no new code to expose a new telemetry field. New operations are only needed for genuinely new **commands** (writes), not for reading data already covered by `vehicleData()`/`getLiveStatus()`/`getSiteInfo()` or the Signal/Energy Site event types.
 
-**Build Output**: `dist/index.cjs` (single entry point)
+**n8n conventions**: node class names must end with `.node.ts`, credential class names with `.credentials.ts`, icons are referenced from `src/`, and the node's `version` field must match `package.json`.
+
+**Local testing**:
+```bash
+cd packages/n8n-nodes-teslemetry
+pnpm build
+pnpm link --global
+
+# In another terminal
+cd ~/.n8n/nodes
+pnpm link --global n8n-nodes-teslemetry
+```
 
 ### 4. `homebridge-teslemetry` - Homebridge Plugin
 
 **Location**: `packages/homebridge-teslemetry/`
-**Status**: Ready to publish to npm as `homebridge-teslemetry` 1.0.0, superseding the legacy hand-published package of the same name via a same-name major hard cut (no dual-maintain, no rename). The first CI publish attempt 404s until npm trusted publishing is registered for the `homebridge-teslemetry` package name on npmjs.com - only an npm org owner can do that; once registered, the existing changesets flow publishes on the next merge to `main` without further repo changes.
 
 **Purpose**: Exposes vehicles and energy sites as HomeKit accessories via `src/vehicle-services/*` and `src/energy-services/*` service classes, each a thin adapter between a HomeKit `Service`/`Characteristic` and the corresponding `@teslemetry/api` method.
+
+**Publishing note**: ships to npm as `homebridge-teslemetry`, superseding the legacy hand-published package of the same name via a same-name major hard cut (no dual-maintain, no rename). CI publish requires npm trusted publishing to be registered for this package name on npmjs.com (only an npm org owner can do that) - once registered, the changesets flow publishes on the next merge to `main` with no further repo changes needed.
 
 **Gotcha**: HomeKit's `Service`/`Characteristic` static members (e.g. `Service.Lightbulb`, `Characteristic.On`) are concrete subclasses with simpler overridden constructors than the base `Service`/`Characteristic` class hap-nodejs types against - generic helpers that accept "any service/characteristic type" need `WithUUID<{ new (...): T }>`-shaped types (see `*-services/base.ts`), not `typeof Service`/`typeof Characteristic` directly, or `addService`/`getCharacteristic` overload resolution breaks.
 
@@ -135,7 +135,7 @@ pnpm --filter node-red-contrib-teslemetry build
 
 **Testing**: `test/fakePlatform.ts`, `test/fakeVehicle.ts`, and `test/fakeEnergySite.ts` provide fakes for the Homebridge/HAP/Teslemetry-SDK objects the services depend on - real hap-nodejs `Service`/`Characteristic` classes are used (not mocks) so characteristic get/set wiring behaves as it does at runtime, driven via `handleSetRequest`/`handleGetRequest` rather than `setValue` (which fires the handler asynchronously with no return value to await). `vehicle.api`/`site.api` are plain stubs, not real `@teslemetry/api` instances, to keep tests free of network I/O.
 
-**Gotcha**: `vehicle-services/climate.ts` maps `CurrentHeatingCoolingState` off the `HvacPower` signal (the schema's actual system power enum: Off/On/Precondition/OverheatProtect), not `HvacACEnabled` (narrowly "is the AC compressor running"). Heating can be active with the AC compressor off, so gating on `HvacACEnabled` alone reported the system OFF while it was heating. `HvacACEnabled` is still subscribed, but only to pick HEAT vs COOL once `HvacPower` already says the system is on - when adding a new signal-driven characteristic, check `packages/api/src/client/types.gen.ts` for whether a narrowly-scoped boolean flag or a proper state enum is the right source of truth.
+**Gotcha**: `vehicle-services/climate.ts` maps `CurrentHeatingCoolingState` off the `HvacPower` signal (the schema's actual system power enum: Off/On/Precondition/OverheatProtect), not `HvacACEnabled` (narrowly "is the AC compressor running") - heating can be active with the AC compressor off. `HvacACEnabled` is still subscribed, but only to pick HEAT vs COOL once `HvacPower` already says the system is on - when adding a new signal-driven characteristic, check `packages/api/src/client/types.gen.ts` for whether a narrowly-scoped boolean flag or a proper state enum is the right source of truth.
 
 **Gotcha**: `energy-services/*` never touch `site.sse` directly - they subscribe to `site.api.on("siteInfo"|"liveStatus", ...)`, an event bus whose REST-response envelope shape (`{ response: {...} }`) they all destructure from. `EnergyAccessory` (`src/energy.ts`) is the only place that touches `site.sse`: it re-wraps incoming `live_status`/`site_info` stream events into that same envelope and re-emits them on `site.api`, so every service keeps working unchanged regardless of whether the data came from REST or the stream. `live_status` fully replaces the cached value (it's the primary continuous-update path, no recurring REST poll); `site_info` shallow-merges into the existing cache instead of replacing it, since the stream's `site_info` payload is a slimmer, evolving subset of the full REST response (e.g. tariff content lives in its own `tariff_v2` topic) - don't build anything in this layer that assumes the stream `site_info` event carries the full REST shape.
 
@@ -148,201 +148,39 @@ pnpm --filter node-red-contrib-teslemetry build
 ### 5. `iobroker.teslemetry` - ioBroker Adapter
 
 **Location**: `packages/iobroker.teslemetry/`
+
 **Status**: Published to npm. Not yet listed in the ioBroker adapter repository (`ioBroker/ioBroker.repositories`) - that listing is a separate, manual submission (repochecker + ioBroker maintainer review) that requires the npm package to already exist.
 
 **Purpose**: ioBroker adapter exposing vehicles and energy sites as ioBroker states/objects (`lib/StateManager.ts`, `lib/VehicleHandler.ts`, `lib/EnergyHandler.ts`, `lib/StreamHandler.ts`).
 
 **Gotcha**: its typecheck script is named `check`, not `tsc` (`pnpm --filter iobroker.teslemetry check`) - `pnpm -r tsc` silently skips it. The `@iobroker/adapter-core` module's own exports don't include an `Adapter` type; the real `ioBroker.Adapter` type comes from the global `ioBroker` namespace ambiently declared by `@iobroker/types` (pulled in transitively) - don't alias a local import to the name `ioBroker`, it shadows that global.
 
-**Gotcha**: `VehicleHandler`/`EnergyHandler` register vehicles/sites via `teslemetry.api.getVehicle(vin)` / `teslemetry.api.getEnergySite(id)` (get-or-create), never `teslemetry.vehicle(vin)` / `teslemetry.energySite(id)` (those construct unconditionally and throw "already exists" once `createProducts()` has already discovered the same VIN/id - this took the adapter down at startup for one release). Keep the handlers' SDK-instance maps typed as `Map<string, TeslemetryVehicleApi>` / `Map<number, TeslemetryEnergyApi>`, not `Map<string, any>` - `any` erases the compiler's ability to catch a wrong method name, which is exactly how the whole handler layer silently called a non-existent snake_case surface for a release. Also mind the two distinct vehicle-data shapes: `vehicle.vehicleData()` (REST) resolves `{ response: { charge_state, climate_state, vehicle_state, ... } }` (nested, snake_case), while the SSE `data` stream event carries a flat PascalCase signal map (`{ BatteryLevel, InsideTemp, Locked, ... }`) - `StateManager` has separate parsers (`updateVehicleData` vs `updateVehicleDataFromSignals`) for exactly this reason; don't route one shape through the other's parser.
+**Gotcha**: `VehicleHandler`/`EnergyHandler` register vehicles/sites via `teslemetry.api.getVehicle(vin)` / `teslemetry.api.getEnergySite(id)` (get-or-create), never `teslemetry.vehicle(vin)` / `teslemetry.energySite(id)` (those construct unconditionally and throw "already exists" once `createProducts()` has already discovered the same VIN/id). Keep the handlers' SDK-instance maps typed as `Map<string, TeslemetryVehicleApi>` / `Map<number, TeslemetryEnergyApi>`, not `Map<string, any>` - `any` erases the compiler's ability to catch a wrong method name. Also mind the two distinct vehicle-data shapes: `vehicle.vehicleData()` (REST) resolves `{ response: { charge_state, climate_state, vehicle_state, ... } }` (nested, snake_case), while the SSE `data` stream event carries a flat PascalCase signal map (`{ BatteryLevel, InsideTemp, Locked, ... }`) - `StateManager` has separate parsers (`updateVehicleData` vs `updateVehicleDataFromSignals`) for exactly this reason; don't route one shape through the other's parser.
 
 **Gotcha**: changesets bumps `package.json`/`CHANGELOG.md` on release but never touches `io-package.json` - its `common.version` and `common.news` need a manual sync on every release or the ioBroker repochecker hard-fails submission to `ioBroker.repositories`. No Teslemetry brand/logo asset lives in this monorepo; the real logo mark lives in the separate `website3` repo (its `public/web-app-manifest-512x512.png` is the highest-res copy) - source icons from there, don't hand-draw a placeholder.
 
 ## Technology Stack
 
-### Package Management
-- **pnpm** 10.18.1 - Fast, disk-space efficient package manager
-- **Workspaces** - Monorepo package linking
-
-### Build Tools
-- **tsdown** (>=0.22) - Primary build tool (bundles via rolldown); its `rolldown-plugin-dts` dependency must support the installed `typescript` major version for declaration emit to work, since that's the actual compiler-API consumer, not tsdown itself
-- **TypeScript** 7.x - Type checking and compilation. TS7's config surface dropped `baseUrl` and the `node`/`node10` `moduleResolution` value, and defaults `types` to `[]` instead of auto-including all `@types/*` packages - any tsconfig relying on the old implicit behavior needs `"types": ["node"]` added explicitly
-- **Oxlint** - Code linting (native TS parsing, no per-package tsconfig project setup needed; config at root `.oxlintrc.json`)
-- **tsx** - TypeScript execution (for scripts)
-
-### Version Management
-- **Changesets** (`@changesets/cli`) - Version bumping and changelog generation
-- **Git-based releases** - Automated via GitHub Actions
-
-### Code Generation
-- **@hey-api/openapi-ts** - Generate TypeScript client from OpenAPI specs
-
-### Platform-Specific
-- **Node-RED** 4.1.1 - For node-red integration
-- **n8n** 1.122.5 - For n8n integration
-- **Homebridge** 1.8+ - For homebridge-teslemetry (uses hap-nodejs for HomeKit types)
-- **ioBroker** - For iobroker.teslemetry (`@iobroker/adapter-core`, `@iobroker/types`)
+- **pnpm** (workspaces) - package management; version pinned via `packageManager` in root `package.json`
+- **tsdown** - primary build tool (bundles via rolldown); its `rolldown-plugin-dts` dependency must support the installed `typescript` major version for declaration emit to work, since that's the actual compiler-API consumer, not tsdown itself
+- **TypeScript** 7.x - type checking and compilation. TS7's config surface dropped `baseUrl` and the `node`/`node10` `moduleResolution` value, and defaults `types` to `[]` instead of auto-including all `@types/*` packages - any tsconfig relying on the old implicit behavior needs `"types": ["node"]` added explicitly
+- **Oxlint** - code linting (native TS parsing, no per-package tsconfig project setup needed; config at root `.oxlintrc.json`)
+- **tsx** - TypeScript execution (scripts, and each package's `test` script: `tsx --test test/*.test.ts`, Node's built-in test runner)
+- **Changesets** (`@changesets/cli`) - version bumping, changelog generation, and publishing
+- **Node-RED**, **n8n**, **Homebridge** (hap-nodejs), **ioBroker** (`@iobroker/adapter-core`, `@iobroker/types`) - platform SDKs for the respective integration package; see each package's `package.json` for the exact supported version
 
 ## Development Workflow
 
-### Initial Setup
-
 ```bash
-# Clone the repository
-git clone <repo-url>
-cd typescript-teslemetry
-
-# Install dependencies
-pnpm install
-
-# Build all packages
-pnpm build
-```
-
-### Working on a Specific Package
-
-```bash
-# Build a specific package
-pnpm --filter @teslemetry/api build
-pnpm --filter node-red-contrib-teslemetry build
-pnpm --filter n8n-nodes-teslemetry build
-pnpm --filter homebridge-teslemetry build
-pnpm --filter iobroker.teslemetry build
-
-# Run tests (if available)
-pnpm --filter @teslemetry/api test
-
-# Generate OpenAPI client
-pnpm --filter @teslemetry/api generate
-```
-
-### Making Changes
-
-1. **Create a feature branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Make your changes** to the relevant package(s)
-
-3. **Build and test**
-   ```bash
-   pnpm build
-   ```
-
-4. **Create a changeset** (for version bumping)
-   ```bash
-   pnpm changeset
-   # Follow the prompts to describe your changes
-   ```
-
-5. **Commit and push**
-   ```bash
-   git add .
-   git commit -m "Description of changes"
-   git push origin feature/your-feature-name
-   ```
-
-## Release Process
-
-The monorepo uses **Changesets** for version management and automated publishing.
-
-### Creating a Release
-
-1. **Add a changeset** when making changes:
-   ```bash
-   pnpm changeset
-   ```
-   - Select which packages changed
-   - Choose semver bump type (major/minor/patch)
-   - Write a description
-
-2. **Commit the changeset**:
-   ```bash
-   git add .changeset/
-   git commit -m "Add changeset for X"
-   ```
-
-3. **Automated Publishing** (via GitHub Actions):
-   - When PR is merged to `main`
-   - Changesets creates a "Version Packages" PR
-   - Merging that PR triggers:
-     - Version bumping
-     - Changelog generation
-     - npm publishing (with --access public)
-     - Discord notifications
-
-See `RELEASE.md` for detailed release documentation.
-
-## Key Architecture Decisions
-
-### 1. Shared Dependency Model
-All integration packages (`node-red`, `n8n`, `homebridge-teslemetry`, `iobroker.teslemetry`) depend on `@teslemetry/api` via workspace references:
-```json
-"dependencies": {
-  "@teslemetry/api": "workspace:*"
-}
-```
-
-This ensures:
-- Code reuse and consistency
-- Single source of truth for API logic
-- Easier maintenance
-
-### 2. Dual Module Format (ESM + CommonJS)
-The core API package outputs both formats:
-- **ESM** (`dist/index.mjs`) - Modern bundlers and Node.js
-- **CommonJS** (`dist/index.cjs`) - Legacy compatibility
-
-### 3. TypeScript Configuration
-- **Root config** (`tsconfig.json`): Base configuration with strict mode
-- **Package configs**: Extend root with package-specific settings
-- **Target**: ES2022 with NodeNext module resolution
-
-### 4. Build Strategy
-- **tsdown**: Lightweight TypeScript compiler using esbuild
-  - Fast compilation
-  - Automatic type declaration generation
-  - Minimal configuration
-
-### 5. Code Generation
-- OpenAPI specs are used to auto-generate client code
-- Keeps SDK in sync with API specifications
-- Located in `packages/api/src/client/`
-
-## Common Tasks
-
-### Add a New Package
-
-1. Create directory in `packages/`
-2. Add `package.json` with workspace dependencies
-3. Add `tsconfig.json` extending root config
-4. Update `pnpm-workspace.yaml` if needed (auto-detects `packages/*`)
-5. Run `pnpm install` to link workspace
-
-### Update Dependencies
-
-```bash
-# Update all dependencies
-pnpm update -r
-
-# Update specific package
-pnpm --filter @teslemetry/api update
-
-# Update dependency across workspace
-pnpm update -r <package-name>
-```
-
-### Lint Code
-
-A single root `oxlint` invocation covers every package in one pass - no per-package config needed since oxlint parses TS natively without a tsconfig project reference.
-
-```bash
-# Run linter across the whole monorepo
-pnpm lint
-
-# Fix auto-fixable issues
-pnpm lint:fix
+pnpm install                              # install all workspace dependencies
+pnpm build                                # build all packages
+pnpm --filter <package-name> build        # build one package
+pnpm --filter <package-name> test         # run one package's tests
+pnpm --filter @teslemetry/api client      # regenerate the OpenAPI client
+pnpm lint                                 # oxlint across the whole monorepo (single root invocation)
+pnpm lint:fix                             # auto-fix lint issues
+pnpm -r --no-bail tsc                     # typecheck every package, don't stop at first failure
+pnpm --filter iobroker.teslemetry check   # iobroker's typecheck script is named `check`, not `tsc` - `pnpm -r tsc` skips it silently
 ```
 
 Config: `.oxlintrc.json` at repo root. Two `overrides` blocks intentionally silence rules that conflict with deliberate patterns rather than bugs:
@@ -351,192 +189,37 @@ Config: `.oxlintrc.json` at repo root. Two `overrides` blocks intentionally sile
 
 The generated OpenAPI client (`packages/api/src/client/**`) is excluded via `ignorePatterns` - don't hand-edit it or add lint overrides for it.
 
-### Typecheck and Test Every Package
+To make a change: branch, edit the relevant package(s), `pnpm build`, add a changeset (`pnpm changeset`), commit (including `.changeset/`), and open a PR.
 
-`pnpm -r tsc` runs every package's `tsc` script, but `iobroker.teslemetry`'s is named `check` (not `tsc`), so it's silently skipped - run `pnpm --filter iobroker.teslemetry check` separately, or `pnpm -r --no-bail tsc` to see every package's errors instead of stopping at the first failure.
+## Release Process
 
-Each package's `test` script runs `tsx --test test/*.test.ts` (Node's built-in test runner, no extra framework) - a convention applied across all five packages.
+Changesets drives version management and automated publishing - see `RELEASE.md` for the detailed process. Summary: `pnpm changeset` records an entry describing which packages changed and the semver bump; merging a PR containing changeset entries to `main` causes a "Version Packages" PR to be created automatically, and merging *that* PR bumps versions, generates changelogs, and publishes to npm (with `--access public`).
 
-### Test n8n Nodes Locally
+## Key Architecture Decisions
 
-```bash
-cd packages/n8n-nodes-teslemetry
-pnpm build
-pnpm link --global
-
-# In another terminal
-cd ~/.n8n/nodes
-pnpm link --global n8n-nodes-teslemetry
-```
-
-### Test Node-RED Nodes Locally
-
-```bash
-cd packages/node-red-contrib-teslemetry
-pnpm build
-pnpm link --global
-
-# In another terminal
-cd ~/.node-red
-pnpm link --global node-red-contrib-teslemetry
-node-red
-```
+- **Shared dependency model**: every integration package depends on `@teslemetry/api` via `workspace:*` for a single source of truth and easier maintenance.
+- **Dual module format**: the core API package ships both ESM (`dist/index.mjs`) and CommonJS (`dist/index.cjs`).
+- **TypeScript**: root `tsconfig.json` sets strict mode, `target: ES2022`, `module: NodeNext`; package configs extend it with their own `outDir`/`include`/platform types.
+- **Code generation**: OpenAPI specs auto-generate the client in `packages/api/src/client/` to keep the SDK in sync with the API.
 
 ## Important Files and Directories
 
-### Root Level
-- `pnpm-workspace.yaml` - Workspace package definitions
-- `tsconfig.json` - Base TypeScript configuration
-- `package.json` - Monorepo scripts and metadata
-- `RELEASE.md` - Release process documentation
-- `.changeset/` - Changeset entries for version management
-
-### API Package
-- `openapi-ts.config.ts` - OpenAPI code generation config
-- `src/client/` - Auto-generated client code (don't edit manually)
-- `src/Teslemetry.ts` - Main SDK entry point
+- `pnpm-workspace.yaml`, root `tsconfig.json`, root `package.json` - workspace/build config
+- `RELEASE.md` - release process documentation
+- `.changeset/` - changeset entries for version management
+- `openapi-ts.config.ts` (api package) - OpenAPI code generation config
 
 **Gotcha**: energy-site SSE event union members are inconsistent about which field identifies the site - `live_status`/`site_info` carry `site_id`, but `energy_totals` (and any future refresh-notification event sharing that uniform `{id, product_type, topic, url, createdAt, isCache}` shape) carries `id` instead. `TeslemetryStream._dispatch()`'s two routing blocks (one per field name) reflect this; adding a new energy SSE event means checking which field the backend's schema actually uses, not assuming `site_id`. Every `on()` override across `TeslemetryStream`/`TeslemetryVehicleStream`/`TeslemetryEnergySiteStream` must call `super.on()` before replaying any cached value to the listener - reversing that order silently breaks `once()` (see `test/energyStream.test.ts`'s dead-listener regression tests).
 
 **Gotcha**: `src/sseTopics.ts`'s `SSE_TOPICS` is the client-side mirror of the API's `src/lib/sseTopics.ts` allowlist - keep both in sync when the backend adds a wire event, or the new topic can never be selected via `stream.topics`. `SSE_TOPIC_PRESETS` entries are SDK-only convenience and are always expanded to exact wire names client-side before the `topics` query parameter is built - never send a preset name or a wildcard over the wire. `tariff_content_v2`'s body is `null` for the server's explicit tariff-removal signal, not merely "no update yet" - `EnergySiteCache.tariff_content_v2` distinguishes that (`null`) from "never received" (`undefined`), and replay/cache logic must preserve the distinction rather than treating `null` as falsy-skip.
 
-### Node-RED Package
-- `src/nodes/*.html` - Node UI definitions (copied to dist/)
-- `src/shared.ts` - Shared utilities for all nodes
+## CI/CD
 
-### n8n Package
-- `src/credentials/` - Credential type definitions
-- `src/nodes/` - Node implementations
-- `src/shared.ts` - Shared state management
+`.github/workflows/reusable-ci.yml` holds the full lint/build/typecheck/test/codegen-verify suite as a `workflow_call` reusable workflow, called by both `ci.yml` (PR/push triggers) and `publish.yml`'s `validate` job, so there is exactly one place to add or change a check. This repo has no branch protection, so `publish.yml`'s `release` job (which enters the `production` environment and runs `changeset publish`) depends on `needs: validate` in the *same workflow run* - that guarantees the full CI suite ran against the exact SHA being published, not a separate/racing CI run on the same push. Don't restore CI as inline steps in `publish.yml` or drop the `needs: validate` gate.
 
-### Homebridge Package
-- `src/vehicle-services/`, `src/energy-services/` - One class per HomeKit service, extending `base.ts`'s `BaseService`/`BaseEnergyService`
-- `src/platform.ts` - Discovers vehicles/energy sites and registers HomeKit accessories
+`publish.yml`'s "Upgrade npm for OIDC support" step always installs `npm@latest`, whose `engines.node` requirement can rise ahead of the workflow's `actions/setup-node` pin. If publish starts failing with `EBADENGINE`, check `npm view npm@latest engines` against the pinned `node-version` first.
 
-### ioBroker Package
-- `lib/StateManager.ts` - Creates/updates ioBroker states and parses incoming state-change IDs back into vehicle/site commands
-- `src/main.ts` - Adapter entry point; augments the ambient `ioBroker.AdapterConfig` type to match `io-package.json`'s native config schema
-
-### CI/CD
-- `.github/workflows/reusable-ci.yml` holds the full lint/build/typecheck/test/codegen-verify suite as a `workflow_call` reusable workflow. Both `ci.yml` (PR/push triggers) and `publish.yml`'s `validate` job call it, so there is exactly one place to add or change a check. This repo has no branch protection, so `publish.yml`'s `release` job (the one that enters the `production` environment and runs `changeset publish`) depends on `needs: validate` in the *same workflow run* - that guarantees the full CI suite ran against the exact SHA being published, not a separate/racing CI run on the same push. Don't restore CI as inline steps in `publish.yml` or drop the `needs: validate` gate; that reopens the fail-open gap this closed.
-- `.github/workflows/publish.yml` - Automated build, test, and publish. Its "Upgrade npm for OIDC support" step always installs `npm@latest`, whose `engines.node` requirement can rise ahead of the workflow's `actions/setup-node` pin (this happened 2026-07: npm 12 required node ^22.22.2/^24.15.0/>=26, but the workflow was pinned to Node 20, breaking every publish with EBADENGINE). If publish starts failing, check `npm view npm@latest engines` against the pinned `node-version` first.
-- `pnpm/action-setup` in `publish.yml`/`ci.yml` must use `@v4` with no hardcoded `version:` (it then reads the `packageManager` field in root `package.json`). A `@v2`/hardcoded-major pin that drifts from `packageManager` (e.g. installing pnpm 9 while `packageManager` says `pnpm@10.x`) makes `changeset publish` silently fall through to a plain `npm publish` that rejects the `--git-checks` flag changesets passes for the pnpm path, failing with `EUNKNOWNCONFIG` - this looks like a changesets/flag bug but is actually a pnpm-version mismatch. Keep root `packageManager` and both workflow files' pnpm major in sync (see the sibling `tesla-protocol` repo's `publish.yml` for the working reference shape).
-
-## Integration-Specific Notes
-
-### n8n Integration (Active Development Area)
-
-**Current State**: Early but functional
-- Has 3 node types (Vehicle, Energy, Trigger)
-- Credential management implemented
-- Basic operations available
-
-**Development Focus**:
-- This is the package being actively developed
-- Located at `packages/n8n-nodes-teslemetry/`
-- Uses n8n's node framework
-- Builds to single `dist/index.cjs` entry point
-
-**Testing**:
-```bash
-cd packages/n8n-nodes-teslemetry
-pnpm build
-pnpm link --global  # Makes available to local n8n instance
-```
-
-**Key Files**:
-- `src/nodes/TeslemetryVehicle.node.ts` - Main vehicle operations node
-- `src/nodes/TeslemetryEnergy.node.ts` - Energy site operations
-- `src/nodes/TeslemetryTrigger.node.ts` - Event-based triggers
-- `src/credentials/TeslemetryApi.credentials.ts` - Authentication
-
-**n8n Conventions**:
-- Node class names must end with `.node.ts`
-- Credential class names must end with `.credentials.ts`
-- Icons referenced from `src/` directory
-- Version field must match package.json
-
-### Node-RED Integration
-- Most mature integration
-- 5 node types with full HTML UI
-- HTML files must be manually copied during build
-- Node-RED specific conventions in `.html` files
-
-## TypeScript Configuration
-
-### Root `tsconfig.json`
-```json
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true
-  }
-}
-```
-
-### Package-Specific Configs
-Each package extends the root config and adds:
-- Custom `outDir` paths
-- Package-specific `include` patterns
-- Platform-specific type definitions
-
-## Dependencies Between Packages
-
-```
-@teslemetry/api (core SDK)
-    ↑
-    ├── node-red-contrib-teslemetry (depends on API)
-    ├── n8n-nodes-teslemetry (depends on API)
-    ├── homebridge-teslemetry (depends on API)
-    └── iobroker.teslemetry (depends on API)
-```
-
-All integrations use `"@teslemetry/api": "workspace:*"` to ensure they use the local version during development.
-
-## Helpful Commands Reference
-
-```bash
-# Install all dependencies
-pnpm install
-
-# Build all packages
-pnpm build
-
-# Build specific package
-pnpm --filter <package-name> build
-
-# Create changeset
-pnpm changeset
-
-# Version packages (apply changesets)
-pnpm changeset version
-
-# Publish packages
-pnpm changeset publish
-
-# Run script in specific package
-pnpm --filter <package-name> <script-name>
-
-# Add dependency to specific package
-pnpm --filter <package-name> add <dependency>
-
-# Remove dependency from specific package
-pnpm --filter <package-name> remove <dependency>
-
-# Update all dependencies
-pnpm update -r
-
-# Clean node_modules
-pnpm clean  # (if script exists)
-rm -rf node_modules packages/*/node_modules
-
-# Fresh install
-rm -rf node_modules packages/*/node_modules pnpm-lock.yaml
-pnpm install
-```
+`pnpm/action-setup` in `publish.yml`/`ci.yml` must use `@v4` with no hardcoded `version:` (it then reads the `packageManager` field in root `package.json`). A hardcoded-major pin that drifts from `packageManager` makes `changeset publish` silently fall through to a plain `npm publish` that rejects the `--git-checks` flag changesets passes for the pnpm path, failing with `EUNKNOWNCONFIG` - this looks like a changesets/flag bug but is actually a pnpm-version mismatch. Keep root `packageManager` and both workflow files' pnpm major in sync.
 
 ## Resources
 
@@ -547,22 +230,6 @@ pnpm install
 - **n8n**: https://docs.n8n.io/integrations/creating-nodes/
 - **Homebridge Plugin Dev**: https://developers.homebridge.io/
 - **ioBroker Adapter Dev**: https://www.iobroker.net/#en/documentation/dev/adapterdev.md
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add a changeset (`pnpm changeset`)
-5. Submit a pull request
-
-See individual package READMEs for package-specific contribution guidelines.
-
----
-
-**Last Updated**: 2026-07-11
-**Monorepo Version**: pnpm workspaces
-**Primary Maintainer**: Teslemetry
 
 ## Maintaining this file
 
