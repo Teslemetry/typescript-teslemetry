@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import type { NodeAPI } from "node-red";
 import commandNodeModule from "../src/nodes/teslemetry-vehicle-command.js";
 import { instances } from "../src/shared.js";
+import type { Instance } from "../src/shared.js";
 import type { Msg } from "../src/types.js";
 
 interface FakeNode {
@@ -83,6 +84,66 @@ async function runCommandExpectError(
   await node.handlers.input(msg as Msg, () => {}, () => {});
   return errors;
 }
+
+test("a node constructed while the products fetch is failing processes messages once it recovers", async () => {
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+
+  let receivedVin: unknown;
+  const vehicle = {
+    wakeUp: async () => {
+      receivedVin = "called";
+      return { response: {} };
+    },
+  };
+
+  const configId = "cfg-recovery-test";
+  const instance: Instance = {
+    teslemetry: { api: { getVehicle: () => vehicle } } as any,
+    products: Promise.resolve({} as any),
+    error: "invalid token",
+  };
+  instances.set(configId, instance);
+
+  const errors: string[] = [];
+  const node = createFakeNode();
+  node.error = (msg?: string) => {
+    if (msg !== undefined) errors.push(msg);
+  };
+  ctor.call(node, {
+    teslemetryConfig: configId,
+    vin: "TEST_VIN",
+    command: "wakeUp",
+  });
+
+  // Still failing: the message is rejected, not processed.
+  let sentWhileFailing = false;
+  await node.handlers.input(
+    {} as Msg,
+    () => {
+      sentWhileFailing = true;
+    },
+    () => {},
+  );
+  assert.equal(sentWhileFailing, false);
+  assert.equal(receivedVin, undefined);
+  assert.ok(errors.some((e) => e.includes("invalid token")));
+
+  // The products fetch recovers in the background, without a redeploy.
+  instance.error = undefined;
+
+  let sentAfterRecovery = false;
+  await node.handlers.input(
+    {} as Msg,
+    () => {
+      sentAfterRecovery = true;
+    },
+    () => {},
+  );
+  assert.equal(sentAfterRecovery, true);
+  assert.equal(receivedVin, "called");
+});
 
 test("setSeatCooler coerces a numeric-string msg.level to a number before calling the SDK", async () => {
   let receivedLevel: unknown;

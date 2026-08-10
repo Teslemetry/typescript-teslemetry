@@ -34,7 +34,6 @@ export default function (RED: NodeAPI) {
 
     const instance = getInstance(config.teslemetryConfig, node);
     if (!instance) return;
-    if (hasInstanceError(instance, node)) return;
 
     node.teslemetry = instance.teslemetry;
     node.siteId = config.siteId;
@@ -46,6 +45,14 @@ export default function (RED: NodeAPI) {
     node.status({});
 
     node.on("input", async function (msg: Msg, send, done) {
+      // Re-checked per message rather than once at construction, so a node
+      // built while the products fetch is still failing starts working as
+      // soon as it recovers, without needing a redeploy.
+      if (hasInstanceError(instance, node)) {
+        done();
+        return;
+      }
+
       const siteId: string = node.siteId || (msg.siteId as string) || "";
       const historyType: string =
         node.historyType || (msg.historyType as string) || "energy";
