@@ -508,6 +508,299 @@ test("setGuestModeOn/Off call the SDK with the right boolean", async () => {
   assert.deepStrictEqual(calls, [true, false]);
 });
 
+test("addChargeSchedule converts HH:mm times and passes days_of_week/enabled flags through to the SDK", async () => {
+  let received: unknown;
+  const vehicle = {
+    addChargeSchedule: async (body: unknown) => {
+      received = body;
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, {
+    command: "addChargeSchedule",
+    id: 5,
+    name: "Weeknights",
+    daysOfWeek: "Weekdays",
+    enabled: true,
+    startEnabled: true,
+    endEnabled: true,
+    startTime: "23:00",
+    endTime: "06:00",
+    lat: 37.7749,
+    lon: -122.4194,
+  } as any);
+
+  assert.deepStrictEqual(received, {
+    id: 5,
+    name: "Weeknights",
+    days_of_week: "Weekdays",
+    enabled: true,
+    start_enabled: true,
+    end_enabled: true,
+    start_time: 1380,
+    end_time: 360,
+    lat: 37.7749,
+    lon: -122.4194,
+    one_time: undefined,
+  });
+});
+
+test("addChargeSchedule rejects a missing msg.lat", async () => {
+  const vehicle = {
+    addChargeSchedule: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors: string[] = [];
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+
+  const configId = "cfg-add-charge-schedule";
+  instances.set(configId, {
+    teslemetry: { api: { getVehicle: () => vehicle } } as any,
+    products: Promise.resolve({} as any),
+  });
+
+  const node = createFakeNode();
+  node.error = (msg?: string) => {
+    errors.push(msg || "");
+  };
+  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
+
+  await node.handlers.input(
+    {
+      command: "addChargeSchedule",
+      daysOfWeek: "Weekdays",
+      enabled: true,
+      startEnabled: true,
+      endEnabled: true,
+      lon: -122.4194,
+    } as any,
+    () => {},
+    () => {},
+  );
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /lat/i);
+});
+
+test("addChargeSchedule rejects an out-of-range msg.startTime", async () => {
+  const vehicle = {
+    addChargeSchedule: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors: string[] = [];
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+
+  const configId = "cfg-add-charge-schedule-bad-time";
+  instances.set(configId, {
+    teslemetry: { api: { getVehicle: () => vehicle } } as any,
+    products: Promise.resolve({} as any),
+  });
+
+  const node = createFakeNode();
+  node.error = (msg?: string) => {
+    errors.push(msg || "");
+  };
+  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
+
+  await node.handlers.input(
+    {
+      command: "addChargeSchedule",
+      daysOfWeek: "Weekdays",
+      enabled: true,
+      startEnabled: true,
+      endEnabled: true,
+      startTime: "25:99",
+      lat: 37.7749,
+      lon: -122.4194,
+    } as any,
+    () => {},
+    () => {},
+  );
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /HH:mm/i);
+});
+
+test("removeChargeSchedule passes msg.id through to the SDK", async () => {
+  let received: unknown;
+  const vehicle = {
+    removeChargeSchedule: async (id: number) => {
+      received = id;
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, { command: "removeChargeSchedule", id: 5 } as any);
+
+  assert.strictEqual(received, 5);
+});
+
+test("removeChargeSchedule rejects a missing msg.id", async () => {
+  const vehicle = {
+    removeChargeSchedule: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors: string[] = [];
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+
+  const configId = "cfg-remove-charge-schedule";
+  instances.set(configId, {
+    teslemetry: { api: { getVehicle: () => vehicle } } as any,
+    products: Promise.resolve({} as any),
+  });
+
+  const node = createFakeNode();
+  node.error = (msg?: string) => {
+    errors.push(msg || "");
+  };
+  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
+
+  await node.handlers.input(
+    { command: "removeChargeSchedule" } as any,
+    () => {},
+    () => {},
+  );
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /id/i);
+});
+
+test("addPreconditionSchedule converts msg.preconditionTime and passes fields through to the SDK", async () => {
+  let received: unknown;
+  const vehicle = {
+    addPreconditionSchedule: async (body: unknown) => {
+      received = body;
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, {
+    command: "addPreconditionSchedule",
+    id: 2,
+    name: "Ready by 7am",
+    daysOfWeek: "Weekdays",
+    enabled: true,
+    lat: 37.7749,
+    lon: -122.4194,
+    preconditionTime: "07:00",
+  } as any);
+
+  assert.deepStrictEqual(received, {
+    id: 2,
+    name: "Ready by 7am",
+    days_of_week: "Weekdays",
+    enabled: true,
+    lat: 37.7749,
+    lon: -122.4194,
+    precondition_time: 420,
+    one_time: undefined,
+  });
+});
+
+test("addPreconditionSchedule rejects a missing msg.preconditionTime", async () => {
+  const vehicle = {
+    addPreconditionSchedule: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors: string[] = [];
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+
+  const configId = "cfg-add-precondition-schedule";
+  instances.set(configId, {
+    teslemetry: { api: { getVehicle: () => vehicle } } as any,
+    products: Promise.resolve({} as any),
+  });
+
+  const node = createFakeNode();
+  node.error = (msg?: string) => {
+    errors.push(msg || "");
+  };
+  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
+
+  await node.handlers.input(
+    {
+      command: "addPreconditionSchedule",
+      daysOfWeek: "Weekdays",
+      enabled: true,
+      lat: 37.7749,
+      lon: -122.4194,
+    } as any,
+    () => {},
+    () => {},
+  );
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /preconditionTime/i);
+});
+
+test("removePreconditionSchedule passes msg.id through to the SDK", async () => {
+  let received: unknown;
+  const vehicle = {
+    removePreconditionSchedule: async (id: number) => {
+      received = id;
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, {
+    command: "removePreconditionSchedule",
+    id: 2,
+  } as any);
+
+  assert.strictEqual(received, 2);
+});
+
+test("removePreconditionSchedule rejects a non-integer msg.id", async () => {
+  const vehicle = {
+    removePreconditionSchedule: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors: string[] = [];
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+
+  const configId = "cfg-remove-precondition-schedule";
+  instances.set(configId, {
+    teslemetry: { api: { getVehicle: () => vehicle } } as any,
+    products: Promise.resolve({} as any),
+  });
+
+  const node = createFakeNode();
+  node.error = (msg?: string) => {
+    errors.push(msg || "");
+  };
+  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
+
+  await node.handlers.input(
+    { command: "removePreconditionSchedule", id: 2.5 } as any,
+    () => {},
+    () => {},
+  );
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /integer/i);
+});
+
 test("navigationGpsRequest rejects a missing msg.order", async () => {
   const vehicle = {
     navigationGpsRequest: async () => {
