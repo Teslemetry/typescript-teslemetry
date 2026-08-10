@@ -1,6 +1,6 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { Teslemetry } from "@teslemetry/api";
-import { instances, getErrorMessage } from "../shared";
+import { instances, getErrorMessage, Instance } from "../shared";
 
 export interface TeslemetryConfigNodeDef extends NodeDef {
   token: string;
@@ -10,12 +10,62 @@ export interface TeslemetryConfigNode extends Node {
   credentials: { token: string };
 }
 
+/** How long to wait before retrying a failed initial products fetch, so a
+ *  transient API/network blip clears on its own instead of leaving `error`
+ *  set for the rest of the node's life. */
+export const PRODUCTS_RETRY_DELAY_MS = 60_000;
+
+type Logger = { error(msg: string): void };
+
+/**
+ * Fetch `instance.teslemetry`'s products, retrying with a fixed delay on
+ * failure until it succeeds or `stop()` is called. Each attempt replaces
+ * `instance.products`/`instance.error` in place so any caller re-reading
+ * them (e.g. the admin routes below) sees the latest state.
+ * @returns stop function to call from the node's "close" handler
+ */
+export function createProductsFetcher(
+  log: Logger,
+  instance: Instance,
+  retryDelayMs: number = PRODUCTS_RETRY_DELAY_MS,
+): () => void {
+  let stopped = false;
+  let retryTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function attempt() {
+    instance.products = instance.teslemetry
+      .createProducts()
+      .then((products) => {
+        instance.error = undefined;
+        return products;
+      })
+      .catch((error: unknown) => {
+        const message = getErrorMessage(error);
+        log.error(`Teslemetry error: ${message}`);
+        instance.error = message;
+        if (!stopped) {
+          retryTimer = setTimeout(attempt, retryDelayMs);
+        }
+        return { vehicles: {}, energySites: {} };
+      });
+  }
+
+  attempt();
+
+  return function stop() {
+    stopped = true;
+    if (retryTimer) clearTimeout(retryTimer);
+  };
+}
+
 export default function (RED: NodeAPI) {
   function TeslemetryConfigNode(
     this: TeslemetryConfigNode,
     config: TeslemetryConfigNodeDef,
   ) {
     RED.nodes.createNode(this, config);
+    const node = this;
+    let stopFetching = () => {};
 
     if (this.credentials && this.credentials.token) {
       const teslemetry = new Teslemetry(this.credentials.token, {
@@ -23,27 +73,19 @@ export default function (RED: NodeAPI) {
         stream: { cache: false },
       });
 
-      // Create instance first so it can be referenced in catch handler
-      const instance = {
+      const instance: Instance = {
         teslemetry,
         products: Promise.resolve({ vehicles: {}, energySites: {} }),
-        error: undefined as string | undefined,
+        error: undefined,
       };
-      instances.set(this.id, instance);
-
-      // Fetch products and track errors
-      instance.products = teslemetry
-        .createProducts()
-        .catch((error: unknown) => {
-          const message = getErrorMessage(error);
-          RED.log.error(`Teslemetry error: ${message}`);
-          instance.error = message;
-          return { vehicles: {}, energySites: {} };
-        });
+      instances.set(node.id, instance);
+      stopFetching = createProductsFetcher(RED.log, instance);
     }
 
     this.on("close", (done: () => void) => {
-      instances.get(this.id)?.teslemetry.sse.disconnect();
+      stopFetching();
+      instances.get(node.id)?.teslemetry.sse.disconnect();
+      instances.delete(node.id);
       done();
     });
   }

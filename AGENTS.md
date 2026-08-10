@@ -80,6 +80,8 @@ All integration packages (`node-red`, `n8n`, `homebridge-teslemetry`, `iobroker.
 
 **Gotcha**: `TeslemetryStream`'s reconnect loop (`packages/api/src/TeslemetryStream.ts`) gives up permanently after two consecutive `auth_failure`s (`this.active = false`) - a bad/expired token doesn't get the exponential-backoff treatment ordinary `stream_error`s do, and nothing resumes the stream until something outside the SDK calls `connect()` again. `teslemetry-event`/`teslemetry-signal`/`teslemetry-energy-event` share this recovery logic (and the connect/disconnect/stream_error/auth_failure status wiring) through `attachStreamStatus()` in `src/shared.ts` rather than each hand-rolling it - extend that helper for new streaming nodes instead of duplicating the listener wiring.
 
+**Gotcha**: `teslemetry-config.ts`'s initial `createProducts()` fetch (populates the vehicle/energy-site dropdowns and gates `hasInstanceError()`) self-heals via `createProductsFetcher()` - on failure it retries on a fixed timer and clears `Instance.error` on the next success, rather than caching the first failure for the node's lifetime. A corrected token still requires a redeploy (it's baked into the `Teslemetry` client at construction), but a transient fetch failure recovers on its own without one.
+
 **Local testing**:
 ```bash
 cd packages/node-red-contrib-teslemetry
