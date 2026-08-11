@@ -112,7 +112,8 @@
                 Set Off-Grid Charge Reserve (msg.percent)
             </option>
             <option value="setTimeOfUseSettings">
-                Set Time-of-Use Tariff (msg.tariffContentV2)
+                Set Time-of-Use Tariff (msg.tariffContentV2) - REPLACES
+                entire schedule
             </option>
             <optgroup label="Grid Control">
                 <option value="gridExportEverything">Export Everything</option>
@@ -155,6 +156,10 @@
             <code>currency</code>, <code>daily_charges</code>,
             <code>demand_charges</code>, <code>energy_charges</code> and
             <code>seasons</code> are required.
+            <strong>This document REPLACES the site's entire time-of-use
+            schedule</strong> - it is not merged with the existing
+            schedule, so a partial document will drop any rules it
+            omits.
         </dd>
     </dl>
 
