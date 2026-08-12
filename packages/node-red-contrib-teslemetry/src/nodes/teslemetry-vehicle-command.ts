@@ -27,6 +27,30 @@ function timeToMinutesOfDay(time: string): number {
   return Number(match[1]) * 60 + Number(match[2]);
 }
 
+const DAYS_OF_WEEK = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+const DAYS_OF_WEEK_KEYWORDS = new Set(["All", "Weekdays"]);
+
+/** Rejects anything but "All", "Weekdays", or a comma separated list of day names before it reaches the API. */
+function validateDaysOfWeek(daysOfWeek: string): void {
+  if (DAYS_OF_WEEK_KEYWORDS.has(daysOfWeek)) return;
+
+  const days = daysOfWeek.split(",");
+  const invalid = days.filter((day) => !DAYS_OF_WEEK.includes(day));
+  if (invalid.length > 0) {
+    throw new Error(
+      `Parameter 'daysOfWeek' must be "All", "Weekdays", or a comma separated list of ${DAYS_OF_WEEK.join(", ")}, got '${daysOfWeek}'`,
+    );
+  }
+}
+
 export default function (RED: NodeAPI) {
   function CommandNode(
     this: TeslemetryVehicleCommandNode,
@@ -358,6 +382,7 @@ export default function (RED: NodeAPI) {
               lon: { required: true, type: "number", min: -180, max: 180 },
               oneTime: { type: "boolean" },
             });
+            validateDaysOfWeek(msg.daysOfWeek);
             result = await vehicle.addChargeSchedule({
               id: msg.id,
               name: msg.name,
@@ -395,6 +420,7 @@ export default function (RED: NodeAPI) {
               preconditionTime: { required: true, type: "string" },
               oneTime: { type: "boolean" },
             });
+            validateDaysOfWeek(msg.daysOfWeek);
             result = await vehicle.addPreconditionSchedule({
               id: msg.id,
               name: msg.name,
