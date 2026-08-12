@@ -630,6 +630,49 @@ test("addChargeSchedule rejects an out-of-range msg.startTime", async () => {
   assert.match(errors[0], /HH:mm/i);
 });
 
+test("addChargeSchedule rejects an invalid msg.daysOfWeek", async () => {
+  const vehicle = {
+    addChargeSchedule: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors = await runCommandExpectError(vehicle, {
+    command: "addChargeSchedule",
+    daysOfWeek: "Someday",
+    enabled: true,
+    startEnabled: true,
+    endEnabled: true,
+    lat: 37.7749,
+    lon: -122.4194,
+  } as any);
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /daysOfWeek/i);
+});
+
+test("addChargeSchedule accepts a comma separated list of day names", async () => {
+  let received: unknown;
+  const vehicle = {
+    addChargeSchedule: async (body: unknown) => {
+      received = body;
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, {
+    command: "addChargeSchedule",
+    daysOfWeek: "Monday,Wednesday",
+    enabled: true,
+    startEnabled: true,
+    endEnabled: true,
+    lat: 37.7749,
+    lon: -122.4194,
+  } as any);
+
+  assert.strictEqual((received as any).days_of_week, "Monday,Wednesday");
+});
+
 test("removeChargeSchedule passes msg.id through to the SDK", async () => {
   let received: unknown;
   const vehicle = {
@@ -748,6 +791,47 @@ test("addPreconditionSchedule rejects a missing msg.preconditionTime", async () 
 
   assert.strictEqual(errors.length, 1);
   assert.match(errors[0], /preconditionTime/i);
+});
+
+test("addPreconditionSchedule rejects an invalid msg.daysOfWeek", async () => {
+  const vehicle = {
+    addPreconditionSchedule: async () => {
+      throw new Error("should not be called");
+    },
+  };
+
+  const errors = await runCommandExpectError(vehicle, {
+    command: "addPreconditionSchedule",
+    daysOfWeek: "monday",
+    enabled: true,
+    lat: 37.7749,
+    lon: -122.4194,
+    preconditionTime: "07:00",
+  } as any);
+
+  assert.strictEqual(errors.length, 1);
+  assert.match(errors[0], /daysOfWeek/i);
+});
+
+test("addPreconditionSchedule accepts \"All\"", async () => {
+  let received: unknown;
+  const vehicle = {
+    addPreconditionSchedule: async (body: unknown) => {
+      received = body;
+      return { response: {} };
+    },
+  };
+
+  await runCommand(vehicle, {
+    command: "addPreconditionSchedule",
+    daysOfWeek: "All",
+    enabled: true,
+    lat: 37.7749,
+    lon: -122.4194,
+    preconditionTime: "07:00",
+  } as any);
+
+  assert.strictEqual((received as any).days_of_week, "All");
 });
 
 test("removePreconditionSchedule passes msg.id through to the SDK", async () => {
