@@ -82,6 +82,8 @@ All integration packages (`node-red`, `n8n`, `homebridge-teslemetry`, `iobroker.
 
 **Gotcha**: `teslemetry-config.ts`'s initial `createProducts()` fetch (populates the vehicle/energy-site dropdowns and gates `hasInstanceError()`) self-heals via `createProductsFetcher()` - on failure it retries on a fixed timer and clears `Instance.error` on the next success, rather than caching the first failure for the node's lifetime. A corrected token still requires a redeploy (it's baked into the `Teslemetry` client at construction), but a transient fetch failure recovers on its own without one.
 
+The config node's editor has a "Test credentials" button (`POST /teslemetry/test-credentials`) that validates a token pre-save via a throwaway `Teslemetry` client and `teslemetry.api.test()` (the lightest-weight authenticated call, `GET /api/test`) - `testCredentials()` in `teslemetry-config.ts` captures the response status via a client response interceptor to distinguish a 401/403 auth failure from any other error, since the generated client's thrown errors don't carry `.status` themselves.
+
 **Local testing**:
 ```bash
 cd packages/node-red-contrib-teslemetry

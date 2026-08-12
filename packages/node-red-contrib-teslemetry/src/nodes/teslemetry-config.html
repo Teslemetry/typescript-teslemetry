@@ -9,6 +9,42 @@
         },
         label: function () {
             return this.name || "Teslemetry Config";
+        },
+        oneditprepare: function () {
+            const resultSpan = $("#node-config-test-credentials-result");
+
+            $("#node-config-test-credentials-button").on("click", function () {
+                const token = $("#node-config-input-token").val();
+                if (!token) {
+                    resultSpan
+                        .text("Enter an access token first")
+                        .css("color", "red");
+                    return;
+                }
+
+                resultSpan.text("Testing...").css("color", "");
+
+                $.ajax({
+                    url: "teslemetry/test-credentials",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ token: token }),
+                })
+                    .done(function (result) {
+                        if (result.ok) {
+                            resultSpan.text("Success").css("color", "green");
+                        } else {
+                            resultSpan
+                                .text(result.message || "Invalid credentials")
+                                .css("color", "red");
+                        }
+                    })
+                    .fail(function () {
+                        resultSpan
+                            .text("Failed to reach Teslemetry API")
+                            .css("color", "red");
+                    });
+            });
         }
     });
 </script>
@@ -22,9 +58,16 @@
         <label for="node-config-input-token"><i class="fa fa-key"></i> Access Token</label>
         <input type="password" id="node-config-input-token">
     </div>
+    <div class="form-row">
+        <button type="button" id="node-config-test-credentials-button" class="red-ui-button">Test credentials</button>
+        <span id="node-config-test-credentials-result" style="margin-left: 10px;"></span>
+    </div>
 </script>
 
 <script type="text/html" data-help-name="teslemetry-config">
     <p>Configuration node for Teslemetry API.</p>
     <p>Enter your Teslemetry Access Token here.</p>
+    <p>Use <b>Test credentials</b> to check a token before saving. If a deployed
+    config's token expires, streaming nodes show an "auth failed" status until
+    the token is fixed here and the flow is redeployed.</p>
 </script>

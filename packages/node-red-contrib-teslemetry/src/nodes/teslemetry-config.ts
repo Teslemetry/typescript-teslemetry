@@ -58,6 +58,39 @@ export function createProductsFetcher(
   };
 }
 
+export type CredentialTestResult =
+  | { ok: true }
+  | { ok: false; auth: boolean; message: string };
+
+/**
+ * Validate a Teslemetry client's credentials with a lightweight API call,
+ * distinguishing an auth failure (401/403) from any other error so the
+ * config editor can tell "bad token" apart from a transient/network issue.
+ */
+export async function testCredentials(
+  teslemetry: Pick<Teslemetry, "client" | "api">,
+): Promise<CredentialTestResult> {
+  let status: number | undefined;
+  teslemetry.client.interceptors.response.use((response) => {
+    status = response.status;
+    return response;
+  });
+
+  try {
+    await teslemetry.api.test();
+    return { ok: true };
+  } catch (error: unknown) {
+    const isAuth = status === 401 || status === 403;
+    return {
+      ok: false,
+      auth: isAuth,
+      message: isAuth
+        ? "Invalid or expired access token"
+        : getErrorMessage(error),
+    };
+  }
+}
+
 export default function (RED: NodeAPI) {
   function TeslemetryConfigNode(
     this: TeslemetryConfigNode,
@@ -154,6 +187,20 @@ export default function (RED: NodeAPI) {
       res.status(500).send("Failed to fetch energy sites");
     }
   });
+
+  RED.httpAdmin.post(
+    "/teslemetry/test-credentials",
+    async (req: any, res: any) => {
+      const token = req.body?.token;
+      if (!token) {
+        res.status(400).json({ ok: false, message: "Missing token" });
+        return;
+      }
+
+      const teslemetry = new Teslemetry(token, { logger: RED.log });
+      res.json(await testCredentials(teslemetry));
+    },
+  );
 
   RED.httpAdmin.get("/teslemetry/fields", async (req: any, res: any) => {
     try {
