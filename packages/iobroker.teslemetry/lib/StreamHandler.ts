@@ -1,5 +1,6 @@
 import { Teslemetry } from '@teslemetry/api';
 import { StateManager } from './StateManager.js';
+import { EnergyHandler } from './EnergyHandler.js';
 
 export class StreamHandler {
 	private reconnectAttempts = 0;
@@ -10,7 +11,8 @@ export class StreamHandler {
 	constructor(
 		private adapter: ioBroker.Adapter,
 		private teslemetry: Teslemetry,
-		private stateManager: StateManager
+		private stateManager: StateManager,
+		private energyHandler: EnergyHandler
 	) {}
 
 	/**
@@ -166,8 +168,13 @@ export class StreamHandler {
 				return;
 			}
 
+			const siteId = Number(site_id);
+			if (!this.energyHandler.getRegisteredSites().includes(siteId)) {
+				return;
+			}
+
 			this.adapter.log.debug(`Received live_status event for energy site ${site_id}`);
-			await this.stateManager.updateEnergySiteData(Number(site_id), live_status);
+			await this.stateManager.updateEnergySiteData(siteId, live_status);
 		} catch (error: any) {
 			this.adapter.log.error(`Error handling live_status event: ${error.message}`);
 		}
@@ -184,8 +191,13 @@ export class StreamHandler {
 				return;
 			}
 
+			const siteId = Number(site_id);
+			if (!this.energyHandler.getRegisteredSites().includes(siteId)) {
+				return;
+			}
+
 			this.adapter.log.debug(`Received site_info event for energy site ${site_id}`);
-			await this.stateManager.updateEnergySiteData(Number(site_id), site_info);
+			await this.stateManager.updateEnergySiteData(siteId, site_info);
 		} catch (error: any) {
 			this.adapter.log.error(`Error handling site_info event: ${error.message}`);
 		}

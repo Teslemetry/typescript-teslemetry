@@ -115,7 +115,7 @@ class TeslemetryAdapter extends utils.Adapter {
 			// Set up streaming or polling
 			if (this.config.enableStreaming !== false) {
 				this.log.info('Starting SSE streaming...');
-				this.streamHandler = new StreamHandler(this, this.teslemetry, this.stateManager);
+				this.streamHandler = new StreamHandler(this, this.teslemetry, this.stateManager, this.energyHandler);
 				await this.streamHandler.connect();
 			} else {
 				this.log.info('SSE streaming disabled, using polling');

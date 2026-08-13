@@ -15,7 +15,8 @@ test('data events update states via the SSE flat-signal parser', async () => {
 	(teslemetry.sse as any).connect = () => Promise.resolve();
 
 	const { adapter, states } = createFakeAdapter();
-	const streamHandler = new StreamHandler(adapter, teslemetry, new StateManager(adapter));
+	const stateManager = new StateManager(adapter);
+	const streamHandler = new StreamHandler(adapter, teslemetry, stateManager, new EnergyHandler(adapter, teslemetry, stateManager));
 	await streamHandler.connect();
 
 	teslemetry.sse.emit('data', { vin: VIN, data: { BatteryLevel: 71 } } as any);
@@ -30,7 +31,8 @@ test('alert events log each alert from the `alerts` array (regression: destructu
 	(teslemetry.sse as any).connect = () => Promise.resolve();
 
 	const { adapter, logs } = createFakeAdapter();
-	const streamHandler = new StreamHandler(adapter, teslemetry, new StateManager(adapter));
+	const stateManager = new StateManager(adapter);
+	const streamHandler = new StreamHandler(adapter, teslemetry, stateManager, new EnergyHandler(adapter, teslemetry, stateManager));
 	await streamHandler.connect();
 
 	teslemetry.sse.emit('alerts', {
@@ -50,7 +52,10 @@ test('live_status events update energy live-power states (regression: default st
 	(teslemetry.sse as any).connect = () => Promise.resolve();
 
 	const { adapter, states } = createFakeAdapter();
-	const streamHandler = new StreamHandler(adapter, teslemetry, new StateManager(adapter));
+	const stateManager = new StateManager(adapter);
+	const energyHandler = new EnergyHandler(adapter, teslemetry, stateManager);
+	energyHandler.registerSite(SITE_ID);
+	const streamHandler = new StreamHandler(adapter, teslemetry, stateManager, energyHandler);
 	await streamHandler.connect();
 
 	teslemetry.sse.emit('live_status', { site_id: String(SITE_ID), live_status: { solar_power: 900, grid_status: 'Active' } } as any);
@@ -65,7 +70,10 @@ test('site_info events update energy operation states', async () => {
 	(teslemetry.sse as any).connect = () => Promise.resolve();
 
 	const { adapter, states } = createFakeAdapter();
-	const streamHandler = new StreamHandler(adapter, teslemetry, new StateManager(adapter));
+	const stateManager = new StateManager(adapter);
+	const energyHandler = new EnergyHandler(adapter, teslemetry, stateManager);
+	energyHandler.registerSite(SITE_ID);
+	const streamHandler = new StreamHandler(adapter, teslemetry, stateManager, energyHandler);
 	await streamHandler.connect();
 
 	teslemetry.sse.emit('site_info', { site_id: String(SITE_ID), site_info: { default_real_mode: 'backup', backup_reserve_percent: 35 } } as any);
@@ -93,11 +101,29 @@ test('energy live values change after the REST startup seed via live_status stre
 	assert.equal(states.get(`energy.${SITE_ID}.live.solar_power`), 500);
 
 	// The stream - not a poll interval - delivers the next value
-	const streamHandler = new StreamHandler(adapter, teslemetry, stateManager);
+	const streamHandler = new StreamHandler(adapter, teslemetry, stateManager, energyHandler);
 	await streamHandler.connect();
 
 	teslemetry.sse.emit('live_status', { site_id: String(SITE_ID), live_status: { solar_power: 1200 } } as any);
 	await new Promise((resolve) => setTimeout(resolve, 0));
 
 	assert.equal(states.get(`energy.${SITE_ID}.live.solar_power`), 1200);
+});
+
+test('live_status events for an unselected/unregistered energy site are ignored (regression: account-level stream delivers every accessible site, not just the ones this instance registered)', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	(teslemetry.sse as any).connect = () => Promise.resolve();
+
+	const { adapter, states } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	// Registers a different site; SITE_ID below was never selected for this instance.
+	const energyHandler = new EnergyHandler(adapter, teslemetry, stateManager);
+	energyHandler.registerSite(SITE_ID + 1);
+	const streamHandler = new StreamHandler(adapter, teslemetry, stateManager, energyHandler);
+	await streamHandler.connect();
+
+	teslemetry.sse.emit('live_status', { site_id: String(SITE_ID), live_status: { solar_power: 900 } } as any);
+	await new Promise((resolve) => setTimeout(resolve, 0));
+
+	assert.equal(states.get(`energy.${SITE_ID}.live.solar_power`), undefined);
 });
