@@ -146,6 +146,11 @@ Each energy site appears as its own set of accessories:
 3. Restart Homebridge
 4. Check firewall settings (SSE requires persistent connections)
 
+If the log shows streaming authentication failed twice in a row, the stream has stopped
+permanently (contact sensors that support a fault state, e.g. doors and TPMS, will show
+faulted). Fix the access token in your config and restart Homebridge - the plugin does not
+retry a dead token on its own.
+
 ### Accessories Not Responding
 
 1. Check if vehicle is asleep (may take a moment to wake)

@@ -33,6 +33,11 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
   private teslemetry?: Teslemetry;
   private products?: Products;
 
+  // True once the stream has stopped permanently (two consecutive auth
+  // failures); cleared only by a subsequent "connect", since the SDK never
+  // reconnects on its own from this state.
+  private streamFaulted = false;
+
   // Accessory management
   private readonly accessories: PlatformAccessory[] = [];
   private readonly vehicleAccessories: Map<string, VehicleAccessory> = new Map();
@@ -153,12 +158,51 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     }
 
     this.teslemetry.sse.on("connect", () => {
-      this.log.info("✓ Streaming API connected");
+      if (this.streamFaulted) {
+        this.log.info("✓ Streaming API reconnected - clearing fault state");
+        this.streamFaulted = false;
+        this.markStreamFault(false);
+      } else {
+        this.log.info("✓ Streaming API connected");
+      }
     });
 
+    // A disconnect on its own doesn't say whether the SDK will retry or has
+    // stopped for good - that distinction only arrives via stream_error/
+    // auth_failure below, so this log makes no promise either way.
     this.teslemetry.sse.on("disconnect", () => {
-      this.log.warn("✗ Streaming API disconnected - will attempt to reconnect");
+      this.log.warn("✗ Streaming API disconnected");
     });
+
+    this.teslemetry.sse.on("stream_error", ({ error, status, retries }) => {
+      const message = error instanceof Error ? error.message : String(error);
+      this.log.warn(
+        `Streaming API error (status ${status ?? "unknown"}, attempt ${retries}): ${message}`,
+      );
+    });
+
+    this.teslemetry.sse.on("auth_failure", (error) => {
+      this.log.error(
+        "Streaming API authentication failed twice in a row and has stopped permanently - " +
+          "characteristics will no longer update. Fix the access token in this plugin's " +
+          "config and restart Homebridge to resume streaming.",
+        error,
+      );
+      this.streamFaulted = true;
+      this.markStreamFault(true);
+    });
+  }
+
+  /**
+   * Reflect terminal stream health on every registered vehicle/energy site.
+   */
+  private markStreamFault(faulted: boolean): void {
+    for (const vehicleAccessory of this.vehicleAccessories.values()) {
+      vehicleAccessory.setStreamFault(faulted);
+    }
+    for (const energyAccessory of this.energyAccessories.values()) {
+      energyAccessory.setStreamFault(faulted);
+    }
   }
 
   /**

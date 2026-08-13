@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { Characteristic, Service } from "hap-nodejs";
 import { EnergyAccessory } from "../src/energy.js";
 import { createFakeAccessory, createFakePlatform } from "./fakePlatform.js";
 import { createFakeEnergySite } from "./fakeEnergySite.js";
@@ -69,4 +70,35 @@ test("destroy() stops polling and detaches all service and stream event listener
 	assert.equal(api.listenerCount("liveStatus"), 0);
 	assert.equal(sse.listenerCount("live_status"), 0);
 	assert.equal(sse.listenerCount("site_info"), 0);
+});
+
+test("setStreamFault(true) marks GridOutage/StormWatchActive faulted and leaves non-sensor services untouched", () => {
+	const { accessory, energyAccessory } = setup();
+	const gridOutage = accessory.getServiceById(Service.ContactSensor, "grid-outage")!;
+	const stormWatchActive = accessory.getServiceById(Service.ContactSensor, "storm-watch-active")!;
+	const backupReserve = accessory.getService(Service.Battery)!;
+
+	energyAccessory.setStreamFault(true);
+
+	for (const service of [gridOutage, stormWatchActive]) {
+		assert.equal(
+			service.getCharacteristic(Characteristic.StatusFault).value,
+			Characteristic.StatusFault.GENERAL_FAULT,
+		);
+	}
+	// Battery doesn't declare StatusFault as optional; must not be force-added.
+	assert.equal(backupReserve.testCharacteristic(Characteristic.StatusFault), false);
+});
+
+test("setStreamFault(false) clears fault back to NO_FAULT", () => {
+	const { accessory, energyAccessory } = setup();
+	const gridOutage = accessory.getServiceById(Service.ContactSensor, "grid-outage")!;
+
+	energyAccessory.setStreamFault(true);
+	energyAccessory.setStreamFault(false);
+
+	assert.equal(
+		gridOutage.getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.NO_FAULT,
+	);
 });

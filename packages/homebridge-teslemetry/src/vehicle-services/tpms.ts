@@ -112,6 +112,13 @@ export class TpmsService extends BaseService {
     }
   }
 
+  setStreamFault(faulted: boolean): void {
+    super.setStreamFault(faulted);
+    for (const service of this.softWarningServices.values()) {
+      this.applyStreamFault(service, faulted);
+    }
+  }
+
   destroy(): void {
     super.destroy();
     this.softWarningServices.clear();

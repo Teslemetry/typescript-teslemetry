@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { Characteristic, Service } from "hap-nodejs";
 import { TeslemetryPlatform } from "../src/platform.js";
+import { VehicleAccessory } from "../src/vehicle.js";
 import { createFakeAccessory } from "./fakePlatform.js";
+import { createFakeVehicle } from "./fakeVehicle.js";
 
 // discoverDevices() talks to the real Teslemetry SDK (network + SSE), so these
 // tests only cover the network-free constructor/lifecycle wiring; the SDK
@@ -73,4 +75,78 @@ test("configureAccessory caches the accessory and logs it", () => {
 	platform.configureAccessory(accessory);
 
 	assert.ok(logs.some((l) => l.level === "info" && l.args[1] === "Cached Vehicle"));
+});
+
+// setupStreamingHandlers()/vehicleAccessories are private; discoverDevices()
+// can't be driven here without real network I/O (see the file-level comment
+// above), so these tests reach past the private boundary the same way the
+// production code does: construct a real accessory, register it, then wire
+// up a fake sse EventEmitter in place of the real Teslemetry client's.
+function setupWithVehicle(platform: TeslemetryPlatform) {
+	const accessory = createFakeAccessory("Test Vehicle");
+	const { vehicle } = createFakeVehicle();
+	const vehicleAccessory = new VehicleAccessory(platform, accessory, vehicle);
+	(platform as unknown as { vehicleAccessories: Map<string, VehicleAccessory> }).vehicleAccessories.set(
+		vehicle.vin,
+		vehicleAccessory,
+	);
+
+	const sse = new EventEmitter();
+	(platform as unknown as { teslemetry: { sse: EventEmitter } }).teslemetry = { sse };
+	(platform as unknown as { setupStreamingHandlers: () => void }).setupStreamingHandlers();
+
+	return { accessory, sse };
+}
+
+test("two consecutive auth failures fault every registered accessory and log a terminal message", () => {
+	const { log, logs } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+	const { accessory, sse } = setupWithVehicle(platform);
+	const doorService = accessory.getServiceById(Service.ContactSensor, "door-driver-front")!;
+
+	sse.emit("stream_error", { error: new Error("unauthorized"), status: 401, retries: 1 });
+	sse.emit("stream_error", { error: new Error("unauthorized"), status: 401, retries: 2 });
+	sse.emit("auth_failure", new Error("Stream authentication failed twice in a row"));
+
+	assert.equal(
+		doorService.getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.GENERAL_FAULT,
+	);
+	assert.ok(
+		logs.some((l) => l.level === "error" && String(l.args[0]).includes("stopped permanently")),
+	);
+});
+
+test("a connect after a terminal auth failure clears the fault and logs recovery", () => {
+	const { log, logs } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+	const { accessory, sse } = setupWithVehicle(platform);
+	const doorService = accessory.getServiceById(Service.ContactSensor, "door-driver-front")!;
+
+	sse.emit("stream_error", { error: new Error("unauthorized"), status: 401, retries: 1 });
+	sse.emit("stream_error", { error: new Error("unauthorized"), status: 401, retries: 2 });
+	sse.emit("auth_failure", new Error("Stream authentication failed twice in a row"));
+
+	sse.emit("connect");
+
+	assert.equal(
+		doorService.getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.NO_FAULT,
+	);
+	assert.ok(logs.some((l) => l.level === "info" && String(l.args[0]).includes("reconnected")));
+});
+
+test("disconnect alone does not claim reconnection will happen, since it may be terminal", () => {
+	const { log, logs } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+	const { sse } = setupWithVehicle(platform);
+
+	sse.emit("disconnect");
+
+	const disconnectLog = logs.find((l) => l.level === "warn" && String(l.args[0]).includes("disconnected"));
+	assert.ok(disconnectLog);
+	assert.ok(!String(disconnectLog.args[0]).includes("will attempt to reconnect"));
 });

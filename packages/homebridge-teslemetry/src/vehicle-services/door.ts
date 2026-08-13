@@ -99,6 +99,12 @@ export class DoorService extends BaseService {
     }
   }
 
+  setStreamFault(faulted: boolean): void {
+    for (const service of this.doorServices.values()) {
+      this.applyStreamFault(service, faulted);
+    }
+  }
+
   /**
    * Override destroy to clean up all door services
    */
