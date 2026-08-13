@@ -85,6 +85,30 @@ test("a non-boolean signal value is ignored without throwing", () => {
 	assert.doesNotThrow(() => sse.emitSignal("LocatedAtHome", null));
 });
 
+test("setStreamFault(true) faults every discovered sensor; a fresh signal for it clears it", () => {
+	const { accessory, sse, presence } = setup();
+	sse.emitSignal("LocatedAtHome", true);
+	const home = accessory.getServiceById(Service.OccupancySensor, "presence-home")!;
+
+	presence.setStreamFault(true);
+	assert.equal(
+		home.getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.GENERAL_FAULT,
+	);
+
+	sse.emitSignal("LocatedAtHome", true);
+	assert.equal(
+		home.getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.NO_FAULT,
+	);
+});
+
+test("setStreamFault(true) has nothing to fault before any signal has been discovered", () => {
+	const { accessory, presence } = setup();
+	assert.doesNotThrow(() => presence.setStreamFault(true));
+	assert.equal(accessory.services.filter((s) => s.UUID === Service.OccupancySensor.UUID).length, 0);
+});
+
 test("destroy() detaches signal subscriptions and clears pending debounce timers", (t) => {
 	t.mock.timers.enable({ apis: ["setTimeout"] });
 	const { sse, presence } = setup();
