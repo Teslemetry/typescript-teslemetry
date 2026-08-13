@@ -114,6 +114,29 @@ test('handleStateChange for driver_temp_setting calls setTemps(driver, passenger
 	assert.deepEqual(calledWith, [22, 19]);
 });
 
+test('handleStateChange for driver_temp_setting on a RHD vehicle sends setTemps(left, right) with the driver value in the right-side slot, preserving the other temp (regression: was always putting driver first)', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	const vehicle = teslemetry.api.getVehicle(VIN);
+
+	let calledWith: any[] | undefined;
+	(vehicle as any).setTemps = (...args: any[]) => {
+		calledWith = args;
+		return Promise.resolve({});
+	};
+
+	const { adapter } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	await stateManager.createVehicleStates({ vin: VIN, display_name: 'Test Car', rhd: true });
+	await adapter.setStateAsync(`vehicles.${VIN}.climate.passenger_temp_setting`, 19, true);
+
+	const handler = new VehicleHandler(adapter, teslemetry, stateManager);
+	handler.registerVehicle(VIN);
+
+	await handler.handleStateChange(VIN, 'climate', 'driver_temp_setting', 22);
+
+	assert.deepEqual(calledWith, [19, 22]);
+});
+
 test('fetchVehicleData reads state from the response wrapper and skips vehicleData() while asleep', async () => {
 	const teslemetry = new Teslemetry('fake-token');
 	const vehicle = teslemetry.api.getVehicle(VIN);
