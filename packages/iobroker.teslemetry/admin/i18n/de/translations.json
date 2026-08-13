@@ -1,0 +1,22 @@
+{
+	"Teslemetry Configuration": "Teslemetry-Konfiguration",
+	"Access Token": "Zugriffstoken",
+	"Your Teslemetry API access token. Get it from https://teslemetry.com/console": "Ihr Teslemetry-API-Zugriffstoken. Erhältlich unter https://teslemetry.com/console",
+	"Test Connection": "Verbindung testen",
+	"Region": "Region",
+	"Auto-detect": "Automatisch erkennen",
+	"North America": "Nordamerika",
+	"Europe": "Europa",
+	"Tesla API region. Use auto-detect unless you have connection issues.": "Tesla-API-Region. Verwenden Sie die automatische Erkennung, außer bei Verbindungsproblemen.",
+	"Data Updates": "Datenaktualisierung",
+	"Enable real-time streaming (SSE)": "Echtzeit-Streaming aktivieren (SSE)",
+	"Use Server-Sent Events for real-time updates. Recommended for best performance.": "Server-Sent Events für Echtzeit-Updates verwenden. Für beste Leistung empfohlen.",
+	"Poll interval (seconds)": "Abfrageintervall (Sekunden)",
+	"How often to fetch data when streaming is disabled. Minimum 30 seconds to avoid rate limits.": "Wie oft Daten abgerufen werden, wenn Streaming deaktiviert ist. Mindestens 30 Sekunden, um Ratenbegrenzungen zu vermeiden.",
+	"Device Selection": "Geräteauswahl",
+	"By default, all vehicles and energy sites are included. You can optionally select specific devices to monitor.": "Standardmäßig sind alle Fahrzeuge und Energieanlagen enthalten. Sie können optional bestimmte Geräte zur Überwachung auswählen.",
+	"Selected Vehicles (VINs)": "Ausgewählte Fahrzeuge (FIN)",
+	"Leave empty to include all vehicles. Add VIN numbers to include only specific vehicles.": "Leer lassen, um alle Fahrzeuge einzubeziehen. FIN hinzufügen, um nur bestimmte Fahrzeuge einzubeziehen.",
+	"Selected Energy Sites (IDs)": "Ausgewählte Energieanlagen (IDs)",
+	"Leave empty to include all energy sites. Add site IDs to include only specific sites.": "Leer lassen, um alle Energieanlagen einzubeziehen. Standort-IDs hinzufügen, um nur bestimmte Standorte einzubeziehen."
+}

@@ -56,13 +56,6 @@ Before installing this adapter, you need:
 5. Wait for installation to complete
 6. Click on the adapter instance to configure it
 
-### Manual Installation (for development)
-
-```bash
-cd /opt/iobroker
-npm install iobroker.teslemetry
-```
-
 ## Configuration
 
 ### Access Token
@@ -347,20 +340,37 @@ pnpm test
 
 ## Changelog
 
-### 0.1.0 (2026-01-08)
-- Initial release
-- Vehicle control (climate, charging, locks, etc.)
-- Energy site management (power flow, operation modes)
-- Real-time SSE streaming support
-- Polling fallback mode
-- Multi-language support (English, German)
+### 0.2.5
+- Dependency updates
 
-## License
+### 0.2.4
+- Dependency updates
 
-Apache-2.0 © 2026 Teslemetry
+### 0.2.3
+- Dependency updates
+
+### 0.2.2
+- Dependency updates
+
+### 0.2.1
+- Dependency updates
+
+### 0.2.0
+- Site time-of-use tariff (`tariff_id`, `tariff_content`, `tariff_content_v2`) is now exposed as read-only states under `energy.{SITE_ID}.tariff`
+
+### 0.1.11
+- Published to npm
+
+Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
 ## Credits
 
 - Developed by [Teslemetry](https://teslemetry.com)
 - Built on [@teslemetry/api](https://www.npmjs.com/package/@teslemetry/api)
 - Part of the ioBroker ecosystem
+
+## License
+
+Apache-2.0
+
+Copyright (c) 2026 Teslemetry

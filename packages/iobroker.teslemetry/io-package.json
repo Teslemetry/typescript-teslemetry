@@ -1,61 +1,125 @@
 {
   "common": {
     "name": "teslemetry",
-    "version": "0.1.10",
+    "version": "0.2.5",
     "news": {
-      "0.1.10": {
+      "0.2.5": {
         "en": "Dependency updates",
-        "de": "Abhängigkeiten aktualisiert"
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "Обновления зависимостей",
+        "pt": "Atualizações de dependências",
+        "nl": "Afhankelijkheden bijgewerkt",
+        "fr": "Mises à jour des dépendances",
+        "it": "Aggiornamenti delle dipendenze",
+        "es": "Actualizaciones de dependencias",
+        "pl": "Aktualizacje zależności",
+        "uk": "Оновлення залежностей",
+        "zh-cn": "依赖更新"
       },
-      "0.1.9": {
+      "0.2.4": {
         "en": "Dependency updates",
-        "de": "Abhängigkeiten aktualisiert"
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "Обновления зависимостей",
+        "pt": "Atualizações de dependências",
+        "nl": "Afhankelijkheden bijgewerkt",
+        "fr": "Mises à jour des dépendances",
+        "it": "Aggiornamenti delle dipendenze",
+        "es": "Actualizaciones de dependencias",
+        "pl": "Aktualizacje zależności",
+        "uk": "Оновлення залежностей",
+        "zh-cn": "依赖更新"
       },
-      "0.1.8": {
+      "0.2.3": {
         "en": "Dependency updates",
-        "de": "Abhängigkeiten aktualisiert"
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "Обновления зависимостей",
+        "pt": "Atualizações de dependências",
+        "nl": "Afhankelijkheden bijgewerkt",
+        "fr": "Mises à jour des dépendances",
+        "it": "Aggiornamenti delle dipendenze",
+        "es": "Actualizaciones de dependencias",
+        "pl": "Aktualizacje zależności",
+        "uk": "Оновлення залежностей",
+        "zh-cn": "依赖更新"
       },
-      "0.1.7": {
+      "0.2.2": {
         "en": "Dependency updates",
-        "de": "Abhängigkeiten aktualisiert"
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "Обновления зависимостей",
+        "pt": "Atualizações de dependências",
+        "nl": "Afhankelijkheden bijgewerkt",
+        "fr": "Mises à jour des dépendances",
+        "it": "Aggiornamenti delle dipendenze",
+        "es": "Actualizaciones de dependencias",
+        "pl": "Aktualizacje zależności",
+        "uk": "Оновлення залежностей",
+        "zh-cn": "依赖更新"
       },
-      "0.1.6": {
+      "0.2.1": {
         "en": "Dependency updates",
-        "de": "Abhängigkeiten aktualisiert"
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "Обновления зависимостей",
+        "pt": "Atualizações de dependências",
+        "nl": "Afhankelijkheden bijgewerkt",
+        "fr": "Mises à jour des dépendances",
+        "it": "Aggiornamenti delle dipendenze",
+        "es": "Actualizaciones de dependencias",
+        "pl": "Aktualizacje zależności",
+        "uk": "Оновлення залежностей",
+        "zh-cn": "依赖更新"
       },
-      "0.1.5": {
-        "en": "Dependency updates",
-        "de": "Abhängigkeiten aktualisiert"
+      "0.2.0": {
+        "en": "Site time-of-use tariff (tariff_id, tariff_content, tariff_content_v2) is now exposed as read-only states under energy.{SITE_ID}.tariff",
+        "de": "Der Zeittarif der Anlage (tariff_id, tariff_content, tariff_content_v2) wird jetzt als schreibgeschützte Zustände unter energy.{SITE_ID}.tariff bereitgestellt",
+        "ru": "Погодинний тариф объекта (tariff_id, tariff_content, tariff_content_v2) теперь доступен только для чтения в energy.{SITE_ID}.tariff",
+        "pt": "A tarifa horária do local (tariff_id, tariff_content, tariff_content_v2) agora é exposta como estados somente leitura em energy.{SITE_ID}.tariff",
+        "nl": "De tijdstariefinstelling van de locatie (tariff_id, tariff_content, tariff_content_v2) is nu beschikbaar als alleen-lezen status onder energy.{SITE_ID}.tariff",
+        "fr": "Le tarif horaire du site (tariff_id, tariff_content, tariff_content_v2) est désormais exposé en lecture seule sous energy.{SITE_ID}.tariff",
+        "it": "La tariffa oraria del sito (tariff_id, tariff_content, tariff_content_v2) è ora esposta come stati di sola lettura in energy.{SITE_ID}.tariff",
+        "es": "La tarifa horaria del sitio (tariff_id, tariff_content, tariff_content_v2) ahora se expone como estados de solo lectura en energy.{SITE_ID}.tariff",
+        "pl": "Taryfa czasowa lokalizacji (tariff_id, tariff_content, tariff_content_v2) jest teraz udostępniana jako stany tylko do odczytu w energy.{SITE_ID}.tariff",
+        "uk": "Погодинний тариф об'єкта (tariff_id, tariff_content, tariff_content_v2) тепер доступний лише для читання в energy.{SITE_ID}.tariff",
+        "zh-cn": "站点分时电价 (tariff_id, tariff_content, tariff_content_v2) 现在以只读状态形式在 energy.{SITE_ID}.tariff 下提供"
       },
-      "0.1.4": {
-        "en": "Dependency updates",
-        "de": "Abhängigkeiten aktualisiert"
-      },
-      "0.1.3": {
-        "en": "SSE event handling now uses the standard EventEmitter pattern",
-        "de": "SSE-Ereignisbehandlung verwendet jetzt das Standard-EventEmitter-Muster"
-      },
-      "0.1.2": {
-        "en": "Dependency updates",
-        "de": "Abhängigkeiten aktualisiert"
-      },
-      "0.1.1": {
-        "en": "Dependency updates",
-        "de": "Abhängigkeiten aktualisiert"
-      },
-      "0.1.0": {
-        "en": "Initial release",
-        "de": "Erstveröffentlichung"
+      "0.1.11": {
+        "en": "Published to npm",
+        "de": "Auf npm veröffentlicht",
+        "ru": "Опубликовано в npm",
+        "pt": "Publicado no npm",
+        "nl": "Gepubliceerd op npm",
+        "fr": "Publié sur npm",
+        "it": "Pubblicato su npm",
+        "es": "Publicado en npm",
+        "pl": "Opublikowano w npm",
+        "uk": "Опубліковано в npm",
+        "zh-cn": "已发布到 npm"
       }
     },
-    "title": "Teslemetry",
     "titleLang": {
       "en": "Teslemetry",
-      "de": "Teslemetry"
+      "de": "Teslemetry",
+      "ru": "Teslemetry",
+      "pt": "Teslemetry",
+      "nl": "Teslemetry",
+      "fr": "Teslemetry",
+      "it": "Teslemetry",
+      "es": "Teslemetry",
+      "pl": "Teslemetry",
+      "uk": "Teslemetry",
+      "zh-cn": "Teslemetry"
     },
     "desc": {
       "en": "Control Tesla vehicles and energy sites via Teslemetry API",
-      "de": "Steuerung von Tesla-Fahrzeugen und Energieanlagen über Teslemetry API"
+      "de": "Steuerung von Tesla-Fahrzeugen und Energieanlagen über Teslemetry API",
+      "ru": "Управление автомобилями Tesla и энергетическими объектами через API Teslemetry",
+      "pt": "Controle veículos Tesla e sistemas de energia através da API Teslemetry",
+      "nl": "Bedien Tesla-voertuigen en energiesystemen via de Teslemetry API",
+      "fr": "Contrôlez les véhicules Tesla et les sites énergétiques via l'API Teslemetry",
+      "it": "Controlla veicoli Tesla e impianti energetici tramite l'API Teslemetry",
+      "es": "Controla vehículos Tesla y sistemas de energía a través de la API de Teslemetry",
+      "pl": "Steruj pojazdami Tesla i instalacjami energetycznymi za pomocą API Teslemetry",
+      "uk": "Керуйте автомобілями Tesla та енергетичними об'єктами через API Teslemetry",
+      "zh-cn": "通过 Teslemetry API 控制特斯拉车辆和能源站点"
     },
     "authors": [
       "Teslemetry <hello@teslemetry.com>"
@@ -66,12 +130,9 @@
       "energy",
       "powerwall",
       "solar",
-      "iot",
-      "smart home"
+      "iot"
     ],
-    "license": "Apache-2.0",
     "platform": "Javascript/Node.js",
-    "main": "build/src/main.cjs",
     "icon": "teslemetry.png",
     "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/Teslemetry/typescript-teslemetry/main/packages/iobroker.teslemetry/admin/teslemetry.png",
@@ -88,12 +149,12 @@
     },
     "dependencies": [
       {
-        "js-controller": ">=5.0.0"
+        "js-controller": ">=6.0.11"
       }
     ],
     "globalDependencies": [
       {
-        "admin": ">=6.0.0"
+        "admin": ">=7.6.20"
       }
     ],
     "licenseInformation": {
@@ -101,6 +162,8 @@
       "license": "Apache-2.0"
     }
   },
+  "protectedNative": ["accessToken"],
+  "encryptedNative": ["accessToken"],
   "native": {
     "accessToken": "",
     "region": "auto",

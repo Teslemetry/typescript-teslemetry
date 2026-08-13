@@ -1,0 +1,22 @@
+{
+	"Teslemetry Configuration": "Teslemetry Configuration",
+	"Access Token": "Access Token",
+	"Your Teslemetry API access token. Get it from https://teslemetry.com/console": "Your Teslemetry API access token. Get it from https://teslemetry.com/console",
+	"Test Connection": "Test Connection",
+	"Region": "Region",
+	"Auto-detect": "Auto-detect",
+	"North America": "North America",
+	"Europe": "Europe",
+	"Tesla API region. Use auto-detect unless you have connection issues.": "Tesla API region. Use auto-detect unless you have connection issues.",
+	"Data Updates": "Data Updates",
+	"Enable real-time streaming (SSE)": "Enable real-time streaming (SSE)",
+	"Use Server-Sent Events for real-time updates. Recommended for best performance.": "Use Server-Sent Events for real-time updates. Recommended for best performance.",
+	"Poll interval (seconds)": "Poll interval (seconds)",
+	"How often to fetch data when streaming is disabled. Minimum 30 seconds to avoid rate limits.": "How often to fetch data when streaming is disabled. Minimum 30 seconds to avoid rate limits.",
+	"Device Selection": "Device Selection",
+	"By default, all vehicles and energy sites are included. You can optionally select specific devices to monitor.": "By default, all vehicles and energy sites are included. You can optionally select specific devices to monitor.",
+	"Selected Vehicles (VINs)": "Selected Vehicles (VINs)",
+	"Leave empty to include all vehicles. Add VIN numbers to include only specific vehicles.": "Leave empty to include all vehicles. Add VIN numbers to include only specific vehicles.",
+	"Selected Energy Sites (IDs)": "Selected Energy Sites (IDs)",
+	"Leave empty to include all energy sites. Add site IDs to include only specific sites.": "Leave empty to include all energy sites. Add site IDs to include only specific sites."
+}
