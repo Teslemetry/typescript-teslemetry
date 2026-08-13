@@ -31,9 +31,39 @@ export class WallConnectorService {
     private readonly accessory: PlatformAccessory,
     private readonly site: EnergyDetails,
   ) {
+    // Per-DIN services from a prior run persist in Homebridge's accessory
+    // cache, but `connectors` was otherwise only ever populated by
+    // live_status - hydrate it from any already-cached services up front so
+    // a setStreamFault() call this run (including one that already happened
+    // before this accessory was constructed) reaches them too.
+    this.hydrateFromCache();
+    if (this.platform.streamFault) {
+      this.setStreamFault(true);
+    }
+
     const listener = (data: any) => this.handleLiveStatus(data);
     this.site.api.on("liveStatus", listener);
     this.cleanupFunctions.push(() => this.site.api.off("liveStatus", listener));
+  }
+
+  private hydrateFromCache(): void {
+    const faultPrefix = "wall-connector-fault-";
+    const connectedPrefix = "wall-connector-connected-";
+
+    for (const service of this.accessory.services) {
+      if (service.UUID !== this.platform.Service.ContactSensor.UUID) continue;
+      const subtype = service.subtype;
+      if (!subtype) continue;
+
+      const din = subtype.startsWith(faultPrefix)
+        ? subtype.slice(faultPrefix.length)
+        : subtype.startsWith(connectedPrefix)
+          ? subtype.slice(connectedPrefix.length)
+          : undefined;
+      if (din === undefined || this.connectors.has(din)) continue;
+
+      this.connectors.set(din, this.createConnectorServices(din));
+    }
   }
 
   private handleLiveStatus(data: any): void {

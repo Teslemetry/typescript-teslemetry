@@ -75,6 +75,11 @@ export class PresenceService {
 
     const service = this.services.get(definition.field)!;
 
+    // The signal just arrived, proving the stream is alive right now -
+    // clear any fault independent of the debounced occupancy transition
+    // below, which only governs when the *value* change is applied.
+    this.applyStreamFault(service, false);
+
     const existingTimer = this.pendingTimers.get(definition.field);
     if (existingTimer) clearTimeout(existingTimer);
 
@@ -97,6 +102,7 @@ export class PresenceService {
 
     service.setCharacteristic(this.platform.Characteristic.Name, displayName);
     this.applyOccupancy(service, initialValue);
+    this.applyStreamFault(service, false);
     return service;
   }
 
@@ -106,6 +112,25 @@ export class PresenceService {
       OccupancyDetected,
       value ? OccupancyDetected.OCCUPANCY_DETECTED : OccupancyDetected.OCCUPANCY_NOT_DETECTED,
     );
+  }
+
+  /**
+   * Reflect terminal stream health on every occupancy sensor created so far.
+   * OccupancySensor declares StatusFault as an optional characteristic, so
+   * this is an honest signal (same convention as the contact-sensor-backed
+   * services) - a sensor not yet created (its field has never reported a
+   * value) has nothing to fault and is simply skipped, the same as every
+   * other lazily-created sensor in this package.
+   */
+  setStreamFault(faulted: boolean): void {
+    for (const service of this.services.values()) {
+      this.applyStreamFault(service, faulted);
+    }
+  }
+
+  private applyStreamFault(service: Service, faulted: boolean): void {
+    const { StatusFault } = this.platform.Characteristic;
+    service.updateCharacteristic(StatusFault, faulted ? StatusFault.GENERAL_FAULT : StatusFault.NO_FAULT);
   }
 
   private getDisplayName(serviceName: string): string {

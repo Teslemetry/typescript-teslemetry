@@ -138,8 +138,7 @@ export class VehicleAccessory {
 
   /**
    * Reflect terminal stream health across every service that has an honest
-   * HomeKit fault characteristic (PresenceService's lazily-created sensors
-   * don't implement this and are skipped).
+   * HomeKit fault characteristic.
    */
   setStreamFault(faulted: boolean): void {
     for (const service of this.services) {
