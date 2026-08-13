@@ -31,6 +31,44 @@ test("ChargeLimitSoc below 50 is clamped to 50", () => {
 	assert.equal(hapService.getCharacteristic(Characteristic.Brightness).value, 50);
 });
 
+test("the Brightness characteristic's props are bounded to the vehicle's supported charge limit range", () => {
+	const { hapService } = setup();
+	const props = hapService.getCharacteristic(Characteristic.Brightness).props;
+	assert.equal(props.minValue, 50);
+	assert.equal(props.maxValue, 100);
+	assert.equal(props.minStep, 1);
+});
+
+test("a client write above the max is rejected by HAP before reaching setChargeLimit()", async () => {
+	const { hapService, vehicle } = setup();
+	let apiCalled = false;
+	(vehicle.api as any).setChargeLimit = () => {
+		apiCalled = true;
+		return Promise.resolve({});
+	};
+
+	await assert.rejects(
+		hapService.getCharacteristic(Characteristic.Brightness).handleSetRequest(150 as never, {} as never),
+	);
+
+	assert.equal(apiCalled, false);
+});
+
+test("a client write below the min is rejected by HAP before reaching setChargeLimit()", async () => {
+	const { hapService, vehicle } = setup();
+	let apiCalled = false;
+	(vehicle.api as any).setChargeLimit = () => {
+		apiCalled = true;
+		return Promise.resolve({});
+	};
+
+	await assert.rejects(
+		hapService.getCharacteristic(Characteristic.Brightness).handleSetRequest(10 as never, {} as never),
+	);
+
+	assert.equal(apiCalled, false);
+});
+
 test("setting Brightness rounds the value and calls setChargeLimit()", async () => {
 	const { hapService, vehicle } = setup();
 	let received: unknown;
