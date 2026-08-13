@@ -153,13 +153,11 @@ class TeslemetryAdapter extends utils.Adapter {
 				this.pollInterval = undefined;
 			}
 
-			// Disconnect streaming
+			// Disconnect streaming (StreamHandler.disconnect() also closes the
+			// underlying SSE connection - no separate teslemetry.sse.disconnect() needed)
 			if (this.streamHandler) {
 				this.streamHandler.disconnect();
-			}
-
-			// Disconnect SSE
-			if (this.teslemetry) {
+			} else if (this.teslemetry) {
 				this.teslemetry.sse.disconnect();
 			}
 
