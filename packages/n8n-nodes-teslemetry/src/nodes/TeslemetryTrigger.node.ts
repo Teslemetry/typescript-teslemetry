@@ -180,9 +180,6 @@ export class TeslemetryTrigger implements INodeType {
 		const teslemetry = new Teslemetry(credentials.accessToken as string);
 		const sse = teslemetry.sse;
 
-		// Start connection
-		sse.connect();
-
 		let cleanup: () => void;
 
 		const emit = (data: any) => {
@@ -244,9 +241,34 @@ export class TeslemetryTrigger implements INodeType {
 			}
 		}
 
+		// Registered before connect() so a terminal auth failure on the very first
+		// attempt still reaches emitError instead of racing an unattached stream.
+		const onStreamError = (payload: { error: unknown; status?: number; retries: number }) => {
+			this.logger.warn(
+				`Teslemetry stream error (attempt ${payload.retries}): ${String(payload.error)}`,
+			);
+		};
+		const onDisconnect = () => {
+			this.logger.warn('Teslemetry stream disconnected');
+		};
+		const onAuthFailure = (error: Error) => {
+			this.emitError(error);
+		};
+		sse.on('stream_error', onStreamError);
+		sse.on('disconnect', onDisconnect);
+		sse.on('auth_failure', onAuthFailure);
+
+		sse.connect();
+
+		let closed = false;
 		async function closeFunction() {
+			if (closed) return;
+			closed = true;
 			if (cleanup) cleanup();
-			sse.disconnect();
+			sse.off('stream_error', onStreamError);
+			sse.off('disconnect', onDisconnect);
+			sse.off('auth_failure', onAuthFailure);
+			await sse.disconnect();
 		}
 
 		return {
