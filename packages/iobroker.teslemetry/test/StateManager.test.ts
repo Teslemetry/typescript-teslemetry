@@ -35,6 +35,34 @@ test('updateVehicleDataFromSignals reads the SSE flat PascalCase signal map (reg
 	assert.equal(states.get('vehicles.VIN1.state.sentry_mode'), true);
 });
 
+test('updateVehicleDataFromSignals maps HvacLeft/HvacRightTemperatureRequest to driver/passenger on an LHD vehicle', async () => {
+	const { adapter, states } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	await stateManager.createVehicleStates({ vin: 'VIN1', display_name: 'Test Car', rhd: false });
+
+	await stateManager.updateVehicleDataFromSignals('VIN1', {
+		HvacLeftTemperatureRequest: 22,
+		HvacRightTemperatureRequest: 19,
+	});
+
+	assert.equal(states.get('vehicles.VIN1.climate.driver_temp_setting'), 22);
+	assert.equal(states.get('vehicles.VIN1.climate.passenger_temp_setting'), 19);
+});
+
+test('updateVehicleDataFromSignals maps HvacLeft/HvacRightTemperatureRequest to passenger/driver on a RHD vehicle (regression: was always treating left as driver)', async () => {
+	const { adapter, states } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	await stateManager.createVehicleStates({ vin: 'VIN1', display_name: 'Test Car', rhd: true });
+
+	await stateManager.updateVehicleDataFromSignals('VIN1', {
+		HvacLeftTemperatureRequest: 22,
+		HvacRightTemperatureRequest: 19,
+	});
+
+	assert.equal(states.get('vehicles.VIN1.climate.passenger_temp_setting'), 22);
+	assert.equal(states.get('vehicles.VIN1.climate.driver_temp_setting'), 19);
+});
+
 test('updateEnergySiteData reads the flat getLiveStatus()/getSiteInfo() response shape (regression: was reading a non-existent `live_status` wrapper)', async () => {
 	const { adapter, states } = createFakeAdapter();
 	const stateManager = new StateManager(adapter);

@@ -82,6 +82,7 @@ class TeslemetryAdapter extends utils.Adapter {
 						await this.stateManager.createVehicleStates({
 							vin,
 							display_name: vehicle.name,
+							rhd: vehicle.metadata.config?.rhd ?? undefined,
 						});
 						this.vehicleHandler.registerVehicle(vin);
 					}
