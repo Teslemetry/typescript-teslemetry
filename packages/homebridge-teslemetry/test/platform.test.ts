@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { Characteristic, Service } from "hap-nodejs";
+import type { PlatformAccessory } from "homebridge";
 import { TeslemetryPlatform } from "../src/platform.js";
 import { VehicleAccessory } from "../src/vehicle.js";
 import { createFakeAccessory } from "./fakePlatform.js";
@@ -172,4 +173,111 @@ test("disconnect alone does not claim reconnection will happen, since it may be 
 	const disconnectLog = logs.find((l) => l.level === "warn" && String(l.args[0]).includes("disconnected"));
 	assert.ok(disconnectLog);
 	assert.ok(!String(disconnectLog.args[0]).includes("will attempt to reconnect"));
+});
+
+// fetchProductsWithRetry() and reconcileAccessories() are private, exercised
+// past the private boundary the same way the stream-health tests above do.
+type FetchProductsWithRetry = (
+	teslemetry: { createProducts: () => Promise<unknown> },
+	signal: AbortSignal,
+) => Promise<unknown>;
+
+test("fetchProductsWithRetry retries a transient createProducts() failure and returns once it succeeds", async () => {
+	const { log } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+
+	let calls = 0;
+	const fakeTeslemetry = {
+		createProducts: async () => {
+			calls++;
+			if (calls === 1) throw new Error("network blip");
+			return { vehicles: {}, energySites: {} };
+		},
+	};
+
+	const products = await (
+		platform as unknown as { fetchProductsWithRetry: FetchProductsWithRetry }
+	).fetchProductsWithRetry(fakeTeslemetry, new AbortController().signal);
+
+	assert.equal(calls, 2);
+	assert.deepEqual(products, { vehicles: {}, energySites: {} });
+});
+
+test("fetchProductsWithRetry stops retrying immediately once its abort signal is aborted", async () => {
+	const { log } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+
+	let calls = 0;
+	const fakeTeslemetry = {
+		createProducts: async () => {
+			calls++;
+			throw new Error("still down");
+		},
+	};
+
+	const controller = new AbortController();
+	controller.abort();
+
+	await assert.rejects(
+		(platform as unknown as { fetchProductsWithRetry: FetchProductsWithRetry }).fetchProductsWithRetry(
+			fakeTeslemetry,
+			controller.signal,
+		),
+		/still down/,
+	);
+	assert.equal(calls, 1);
+});
+
+test("reconcileAccessories evicts a stale cached vehicle accessory and destroys its listeners", () => {
+	const { log } = createFakeLog();
+	const unregistered: PlatformAccessory[] = [];
+	const api = createFakeApi();
+	(api as unknown as { unregisterPlatformAccessories: (plugin: string, platformName: string, accs: PlatformAccessory[]) => void })
+		.unregisterPlatformAccessories = (_plugin, _platformName, accs) => unregistered.push(...accs);
+
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+
+	const keptAccessory = createFakeAccessory("Kept Vehicle");
+	(keptAccessory.context as { vehicle?: { vin: string } }).vehicle = { vin: "KEEP" };
+	const staleAccessory = createFakeAccessory("Stale Vehicle");
+	(staleAccessory.context as { vehicle?: { vin: string } }).vehicle = { vin: "STALE" };
+
+	platform.configureAccessory(keptAccessory);
+	platform.configureAccessory(staleAccessory);
+
+	const { vehicle: staleVehicle, sse: staleSse } = createFakeVehicle({ vin: "STALE" });
+	const staleVehicleAccessory = new VehicleAccessory(platform, staleAccessory, staleVehicle);
+	(platform as unknown as { vehicleAccessories: Map<string, VehicleAccessory> }).vehicleAccessories.set(
+		"STALE",
+		staleVehicleAccessory,
+	);
+
+	staleSse.emitSignal("BatteryLevel", 40);
+	const staleBattery = staleAccessory.getService(Service.Battery)!;
+	assert.equal(staleBattery.getCharacteristic(Characteristic.BatteryLevel).value, 40);
+
+	(platform as unknown as { reconcileAccessories: (keep: Set<string>) => void }).reconcileAccessories(
+		new Set([keptAccessory.UUID]),
+	);
+
+	assert.deepEqual(unregistered, [staleAccessory]);
+	assert.equal(
+		(platform as unknown as { vehicleAccessories: Map<string, VehicleAccessory> }).vehicleAccessories.has("STALE"),
+		false,
+	);
+	assert.equal(
+		(platform as unknown as { accessories: PlatformAccessory[] }).accessories.includes(staleAccessory),
+		false,
+	);
+	assert.equal(
+		(platform as unknown as { accessories: PlatformAccessory[] }).accessories.includes(keptAccessory),
+		true,
+	);
+
+	// The stale accessory's services were destroyed before eviction, so a
+	// later SSE signal for it no longer updates its (now-unregistered) characteristic.
+	staleSse.emitSignal("BatteryLevel", 90);
+	assert.equal(staleBattery.getCharacteristic(Characteristic.BatteryLevel).value, 40);
 });

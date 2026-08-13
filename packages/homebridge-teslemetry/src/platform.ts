@@ -43,6 +43,10 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
   private readonly vehicleAccessories: Map<string, VehicleAccessory> = new Map();
   private readonly energyAccessories: Map<number, EnergyAccessory> = new Map();
 
+  // Aborts an in-progress createProducts() retry backoff on shutdown, so
+  // Homebridge doesn't hang around waiting for a timer that no longer matters.
+  private discoveryAbort?: AbortController;
+
   constructor(
     public readonly log: Logging,
     public readonly config: PlatformConfig & TeslemetryPlatformConfig,
@@ -68,6 +72,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     // Handle shutdown gracefully
     this.api.on("shutdown", () => {
       this.log.info("Homebridge is shutting down, closing Teslemetry connection...");
+      this.discoveryAbort?.abort();
       this.teslemetry?.sse.close();
     });
   }
@@ -101,7 +106,8 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
 
       // Get all products (vehicles and energy sites)
       this.log.info("Fetching Tesla products...");
-      this.products = await this.teslemetry.createProducts();
+      this.discoveryAbort = new AbortController();
+      this.products = await this.fetchProductsWithRetry(this.teslemetry, this.discoveryAbort.signal);
 
       // Connect to streaming API
       this.log.info("Connecting to streaming API...");
@@ -119,6 +125,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
       );
 
       // Register vehicles
+      const keepUuids = new Set<string>();
       for (const vin of vehicleVins) {
         // Check if vehicle should be ignored
         if (this.config.ignoreVehicles?.includes(vin)) {
@@ -127,7 +134,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
         }
 
         const vehicle = this.products.vehicles[vin];
-        this.registerVehicle(vehicle);
+        keepUuids.add(this.registerVehicle(vehicle));
       }
 
       // Register energy sites
@@ -141,8 +148,12 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
         }
 
         const site = this.products.energySites[siteIdStr];
-        this.registerEnergySite(site);
+        keepUuids.add(this.registerEnergySite(site));
       }
+
+      // Anything cached from a previous run that wasn't just registered
+      // above is either gone from the account or newly ignored - evict it.
+      this.reconcileAccessories(keepUuids);
     } catch (error) {
       this.log.error("Failed to discover devices:", error);
       this.log.error("Please check your access token and network connection.");
@@ -212,9 +223,10 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
   }
 
   /**
-   * Register a vehicle as a HomeKit accessory
+   * Register a vehicle as a HomeKit accessory. Returns the accessory's UUID
+   * so callers can tell reconcileAccessories() which cached accessories to keep.
    */
-  private registerVehicle(vehicle: VehicleDetails): void {
+  private registerVehicle(vehicle: VehicleDetails): string {
     const uuid = this.api.hap.uuid.generate(vehicle.vin);
     const displayName = this.config.prefixName !== false
       ? vehicle.name
@@ -260,12 +272,14 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     }
 
     this.log.info(`✓ Vehicle registered: ${displayName} (${vehicle.vin})`);
+    return uuid;
   }
 
   /**
-   * Register an energy site as a HomeKit accessory
+   * Register an energy site as a HomeKit accessory. Returns the accessory's
+   * UUID so callers can tell reconcileAccessories() which cached accessories to keep.
    */
-  private registerEnergySite(site: EnergyDetails): void {
+  private registerEnergySite(site: EnergyDetails): string {
     const uuid = this.api.hap.uuid.generate(`energy-${site.id}`);
     const displayName = this.config.prefixName !== false
       ? site.name
@@ -311,6 +325,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     }
 
     this.log.info(`✓ Energy site registered: ${displayName} (ID: ${site.id})`);
+    return uuid;
   }
 
   /**
@@ -326,4 +341,80 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
       this.accessories.splice(index, 1);
     }
   }
+
+  /**
+   * Evict every cached accessory that wasn't just registered this discovery
+   * pass - it's either gone from the account or newly config-ignored.
+   * Destroys its live services (and their SSE listeners) before unregistering
+   * it, the same teardown a normal shutdown performs.
+   */
+  private reconcileAccessories(keepUuids: Set<string>): void {
+    for (const accessory of this.accessories.slice()) {
+      if (keepUuids.has(accessory.UUID)) {
+        continue;
+      }
+
+      const vin = (accessory.context as { vehicle?: { vin: string } }).vehicle?.vin;
+      if (vin !== undefined) {
+        this.vehicleAccessories.get(vin)?.destroy();
+        this.vehicleAccessories.delete(vin);
+      }
+
+      const siteId = (accessory.context as { site?: { id: number } }).site?.id;
+      if (siteId !== undefined) {
+        this.energyAccessories.get(siteId)?.destroy();
+        this.energyAccessories.delete(siteId);
+      }
+
+      this.log.info("Evicting stale cached accessory (no longer returned or now ignored):", accessory.displayName);
+      this.removeAccessory(accessory);
+    }
+  }
+
+  /**
+   * Fetch products, retrying transient failures with capped exponential
+   * backoff so a momentary API/network blip doesn't require a Homebridge
+   * restart to recover from.
+   */
+  private async fetchProductsWithRetry(teslemetry: Teslemetry, signal: AbortSignal): Promise<Products> {
+    const maxAttempts = 5;
+    let attempt = 0;
+    while (true) {
+      try {
+        return await teslemetry.createProducts();
+      } catch (error) {
+        attempt++;
+        if (attempt >= maxAttempts || signal.aborted) {
+          throw error;
+        }
+
+        const delayMs = Math.min(2 ** attempt, 30) * 1000;
+        const message = error instanceof Error ? error.message : String(error);
+        this.log.warn(
+          `Fetching Tesla products failed (attempt ${attempt}/${maxAttempts}): ${message}. Retrying in ${delayMs / 1000}s...`,
+        );
+        await sleep(delayMs, signal);
+      }
+    }
+  }
+}
+
+/** Resolves after `ms`, or immediately if `signal` aborts first - the abort
+ *  path also clears the pending timer so it never fires. */
+function sleep(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
 }
