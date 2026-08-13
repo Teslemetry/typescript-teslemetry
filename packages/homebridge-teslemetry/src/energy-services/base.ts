@@ -143,6 +143,28 @@ export abstract class BaseEnergyService {
   }
 
   /**
+   * Reflect terminal stream health as StatusFault. Only sensor-type HomeKit
+   * services (e.g. ContactSensor) declare StatusFault as optional; forcing it
+   * onto a service type that doesn't would add an out-of-spec characteristic,
+   * so those are left untouched rather than given a misleading fault signal.
+   */
+  setStreamFault(faulted: boolean): void {
+    this.applyStreamFault(this.service, faulted);
+  }
+
+  protected applyStreamFault(service: Service, faulted: boolean): void {
+    const { StatusFault } = this.platform.Characteristic;
+    // testCharacteristic() only reports characteristics already added, not
+    // ones the service type merely permits - check the declared optional
+    // list instead so a not-yet-added StatusFault still gets recognized.
+    const supportsStatusFault = service.optionalCharacteristics.some(
+      (characteristic) => characteristic.UUID === StatusFault.UUID,
+    );
+    if (!supportsStatusFault) return;
+    service.updateCharacteristic(StatusFault, faulted ? StatusFault.GENERAL_FAULT : StatusFault.NO_FAULT);
+  }
+
+  /**
    * Cleanup all subscriptions
    * Should be called when the service is being removed
    */

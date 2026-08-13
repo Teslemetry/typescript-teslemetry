@@ -72,3 +72,35 @@ test("an unrecognized SSE state value is ignored without throwing or logging", (
 	assert.doesNotThrow(() => sse.emit("state", { state: "offline" } as never));
 	assert.equal(logs.length, before);
 });
+
+test("setStreamFault(true) marks every StatusFault-capable service and leaves others untouched", () => {
+	const { accessory, vehicleAccessory } = setup();
+	const doorService = accessory.getServiceById(Service.ContactSensor, "door-driver-front")!;
+	const tpmsHard = accessory.getServiceById(Service.ContactSensor, "tpms-hard")!;
+	const tpmsSoft = accessory.getServiceById(Service.ContactSensor, "tpms-soft-front-left")!;
+	const lockService = accessory.getService(Service.LockMechanism)!;
+
+	vehicleAccessory.setStreamFault(true);
+
+	for (const service of [doorService, tpmsHard, tpmsSoft]) {
+		assert.equal(
+			service.getCharacteristic(Characteristic.StatusFault).value,
+			Characteristic.StatusFault.GENERAL_FAULT,
+		);
+	}
+	// LockMechanism doesn't declare StatusFault as optional; must not be force-added.
+	assert.equal(lockService.testCharacteristic(Characteristic.StatusFault), false);
+});
+
+test("setStreamFault(false) clears fault back to NO_FAULT", () => {
+	const { accessory, vehicleAccessory } = setup();
+	const doorService = accessory.getServiceById(Service.ContactSensor, "door-driver-front")!;
+
+	vehicleAccessory.setStreamFault(true);
+	vehicleAccessory.setStreamFault(false);
+
+	assert.equal(
+		doorService.getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.NO_FAULT,
+	);
+});

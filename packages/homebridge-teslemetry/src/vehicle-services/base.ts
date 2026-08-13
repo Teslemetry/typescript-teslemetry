@@ -99,6 +99,10 @@ export abstract class BaseService {
           characteristic,
           mappedValue as Nullable<CharacteristicValue>,
         );
+        // A real reading just arrived - clear any fault a prior terminal
+        // stream failure left set (see setStreamFault()). A no-op for
+        // service types that don't support StatusFault.
+        this.applyStreamFault(this.service, false);
       } catch (error) {
         this.platform.log.error(
           `Error updating characteristic for signal ${signal}:`,
@@ -156,6 +160,30 @@ export abstract class BaseService {
           );
         }
       });
+  }
+
+  /**
+   * Reflect terminal stream health as StatusFault. Only sensor-type HomeKit
+   * services (e.g. ContactSensor) declare StatusFault as optional; forcing it
+   * onto a service type that doesn't (Lock, Switch, Thermostat, Battery)
+   * would add an out-of-spec characteristic, so those are left untouched
+   * rather than given a misleading fault signal.
+   */
+  setStreamFault(faulted: boolean): void {
+    this.applyStreamFault(this.service, faulted);
+  }
+
+  protected applyStreamFault(service: Service, faulted: boolean): void {
+    const { StatusFault } = this.platform.Characteristic;
+    // testCharacteristic() only reports characteristics already added, not
+    // ones the service type merely permits - check the declared optional
+    // list instead so a not-yet-added StatusFault (e.g. Door, which never
+    // touches it during normal operation) still gets recognized.
+    const supportsStatusFault = service.optionalCharacteristics.some(
+      (characteristic) => characteristic.UUID === StatusFault.UUID,
+    );
+    if (!supportsStatusFault) return;
+    service.updateCharacteristic(StatusFault, faulted ? StatusFault.GENERAL_FAULT : StatusFault.NO_FAULT);
   }
 
   /**
