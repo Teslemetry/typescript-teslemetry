@@ -71,6 +71,7 @@ All integration packages (`node-red`, `n8n`, `homebridge-teslemetry`, `iobroker.
 5. **teslemetry-event** - Real-time vehicle event listener (SSE)
 6. **teslemetry-signal** - Real-time single vehicle signal field listener (SSE)
 7. **teslemetry-energy-event** - Real-time energy site event listener (SSE: `live_status`/`site_info`/`tariff_content_v2`/`energy_totals`)
+8. **teslemetry-wall-connector** - Splits a `live_status` payload's `wall_connectors[]` into one message per connector, keyed by DIN, with an optional DIN filter
 
 **Structure**: each node has a TypeScript file (`.ts`) and HTML UI file (`.html`); `src/shared.ts` holds shared utilities, `src/validation.ts` input validation.
 

@@ -127,6 +127,23 @@ Listen for specific signal changes from a vehicle.
 - `msg.topic`: `signal`
 - `msg.field`: The name of the field
 
+### teslemetry-wall-connector
+Splits an Energy Site's `wall_connectors` array (e.g. from a `teslemetry-energy-event` `live_status` message) into one message per connector.
+
+**Configuration:**
+- **DIN Filter**: Only emit the connector matching this DIN, or leave empty to emit all (optional; can also come from `msg.din`).
+
+**Inputs:**
+- `msg.payload` (object | array): A `live_status`-shaped object with a `wall_connectors` array, or that array directly.
+- `msg.din` (string, optional): Restrict output to one DIN for this message.
+
+**Outputs (one per matching connector):**
+- `msg.payload`: The connector's raw object
+- `msg.topic`: The connector's DIN
+- `msg.din`: The connector's DIN
+
+A DIN absent from the input emits nothing for that DIN - it does not send a synthetic "offline" event.
+
 ## Usage Examples
 
 ### Example 1: Lock Vehicle When Leaving Home
