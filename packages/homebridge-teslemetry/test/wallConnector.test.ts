@@ -95,3 +95,38 @@ test("destroy() detaches the liveStatus listener", () => {
 	service.destroy();
 	assert.equal(api.listenerCount("liveStatus"), 0);
 });
+
+test("setStreamFault(true) faults every discovered connector's sensors; a fresh reading for its DIN clears it", () => {
+	const { accessory, api, service } = setup();
+	api.emit("liveStatus", {
+		response: { wall_connectors: [{ din: "din-1", wall_connector_state: 1, wall_connector_fault_state: 0 }] },
+	});
+	const fault = accessory.getServiceById(Service.ContactSensor, "wall-connector-fault-din-1")!;
+	const connected = accessory.getServiceById(Service.ContactSensor, "wall-connector-connected-din-1")!;
+
+	service.setStreamFault(true);
+
+	for (const sensor of [fault, connected]) {
+		assert.equal(
+			sensor.getCharacteristic(Characteristic.StatusFault).value,
+			Characteristic.StatusFault.GENERAL_FAULT,
+		);
+	}
+
+	api.emit("liveStatus", {
+		response: { wall_connectors: [{ din: "din-1", wall_connector_state: 1, wall_connector_fault_state: 0 }] },
+	});
+
+	for (const sensor of [fault, connected]) {
+		assert.equal(
+			sensor.getCharacteristic(Characteristic.StatusFault).value,
+			Characteristic.StatusFault.NO_FAULT,
+		);
+	}
+});
+
+test("setStreamFault(true) has nothing to fault before any DIN has been discovered", () => {
+	const { accessory, service } = setup();
+	assert.doesNotThrow(() => service.setStreamFault(true));
+	assert.equal(accessory.services.filter((s) => s.UUID === Service.ContactSensor.UUID).length, 0);
+});

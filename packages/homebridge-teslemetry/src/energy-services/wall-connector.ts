@@ -69,6 +69,29 @@ export class WallConnectorService {
       ContactSensorState,
       isConnected ? ContactSensorState.CONTACT_DETECTED : ContactSensorState.CONTACT_NOT_DETECTED,
     );
+
+    // A real reading just arrived for this DIN - clear any fault a prior
+    // terminal stream failure left set (see setStreamFault()).
+    this.applyStreamFault(services, false);
+  }
+
+  /**
+   * Reflect terminal stream health. Only DINs already discovered (i.e. with
+   * services created) can be marked - a DIN never seen has no sensors to
+   * fault yet, matching the same lazy-creation contract as everything else
+   * here.
+   */
+  setStreamFault(faulted: boolean): void {
+    for (const services of this.connectors.values()) {
+      this.applyStreamFault(services, faulted);
+    }
+  }
+
+  private applyStreamFault(services: ConnectorServices, faulted: boolean): void {
+    const { StatusFault } = this.platform.Characteristic;
+    const value = faulted ? StatusFault.GENERAL_FAULT : StatusFault.NO_FAULT;
+    services.fault.updateCharacteristic(StatusFault, value);
+    services.connected.updateCharacteristic(StatusFault, value);
   }
 
   private createConnectorServices(din: string): ConnectorServices {
