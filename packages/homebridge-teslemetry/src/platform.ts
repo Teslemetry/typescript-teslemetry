@@ -157,11 +157,17 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
       return;
     }
 
+    // "connect" fires as soon as the SSE handshake completes, before any
+    // event is consumed - clearing StatusFault here would show last-known
+    // (possibly stale/default) sensor state as healthy again with no proof
+    // fresh data has actually arrived. Each faulted service instead clears
+    // its own StatusFault the next time it receives a real payload (the
+    // same "unknown/faulted until a real reading lands" convention already
+    // used for TPMS/grid-outage/storm-watch at startup).
     this.teslemetry.sse.on("connect", () => {
       if (this.streamFaulted) {
-        this.log.info("✓ Streaming API reconnected - clearing fault state");
+        this.log.info("✓ Streaming API reconnected");
         this.streamFaulted = false;
-        this.markStreamFault(false);
       } else {
         this.log.info("✓ Streaming API connected");
       }

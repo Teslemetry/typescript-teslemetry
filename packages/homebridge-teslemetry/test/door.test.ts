@@ -11,10 +11,10 @@ function setup(canActuateTrunks = true) {
 	const { vehicle, sse } = createFakeVehicle({
 		metadata: { config: { can_actuate_trunks: canActuateTrunks } } as never,
 	});
-	new DoorService(platform as never, accessory, vehicle);
+	const doorService = new DoorService(platform as never, accessory, vehicle);
 
 	const doorState = (subtype: string) => accessory.getServiceById(Service.ContactSensor, subtype)!;
-	return { accessory, logs, sse, doorState };
+	return { accessory, logs, sse, doorState, doorService };
 }
 
 test("creates a contact sensor for each of the six doors/trunks when the vehicle can actuate trunks", () => {
@@ -60,4 +60,25 @@ test("a non-object DoorState payload (missing/malformed data) is ignored without
 	const { sse } = setup();
 	assert.doesNotThrow(() => sse.emitSignal("DoorState", null));
 	assert.doesNotThrow(() => sse.emitSignal("DoorState", "unexpected"));
+});
+
+test("a fresh DoorState reading clears a fault left by a prior terminal stream failure", () => {
+	const { doorState, sse, doorService } = setup();
+	doorService.setStreamFault(true);
+	assert.equal(
+		doorState("door-driver-front").getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.GENERAL_FAULT,
+	);
+
+	sse.emitSignal("DoorState", { DriverFront: true });
+
+	assert.equal(
+		doorState("door-driver-front").getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.NO_FAULT,
+	);
+	// A door absent from this payload has received no fresh reading yet - its fault must stand.
+	assert.equal(
+		doorState("door-PassengerFront").getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.GENERAL_FAULT,
+	);
 });

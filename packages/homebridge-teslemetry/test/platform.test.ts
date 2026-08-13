@@ -84,7 +84,7 @@ test("configureAccessory caches the accessory and logs it", () => {
 // up a fake sse EventEmitter in place of the real Teslemetry client's.
 function setupWithVehicle(platform: TeslemetryPlatform) {
 	const accessory = createFakeAccessory("Test Vehicle");
-	const { vehicle } = createFakeVehicle();
+	const { vehicle, sse: vehicleSse } = createFakeVehicle();
 	const vehicleAccessory = new VehicleAccessory(platform, accessory, vehicle);
 	(platform as unknown as { vehicleAccessories: Map<string, VehicleAccessory> }).vehicleAccessories.set(
 		vehicle.vin,
@@ -95,7 +95,7 @@ function setupWithVehicle(platform: TeslemetryPlatform) {
 	(platform as unknown as { teslemetry: { sse: EventEmitter } }).teslemetry = { sse };
 	(platform as unknown as { setupStreamingHandlers: () => void }).setupStreamingHandlers();
 
-	return { accessory, sse };
+	return { accessory, sse, vehicleSse };
 }
 
 test("two consecutive auth failures fault every registered accessory and log a terminal message", () => {
@@ -118,7 +118,10 @@ test("two consecutive auth failures fault every registered accessory and log a t
 	);
 });
 
-test("a connect after a terminal auth failure clears the fault and logs recovery", () => {
+test("a bare connect after a terminal auth failure logs recovery but does not itself clear the fault", () => {
+	// "connect" fires as soon as the SSE handshake completes, before any event
+	// is consumed - clearing StatusFault here would show stale/default sensor
+	// state as healthy with no proof fresh data has actually arrived.
 	const { log, logs } = createFakeLog();
 	const api = createFakeApi();
 	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
@@ -133,9 +136,29 @@ test("a connect after a terminal auth failure clears the fault and logs recovery
 
 	assert.equal(
 		doorService.getCharacteristic(Characteristic.StatusFault).value,
-		Characteristic.StatusFault.NO_FAULT,
+		Characteristic.StatusFault.GENERAL_FAULT,
 	);
 	assert.ok(logs.some((l) => l.level === "info" && String(l.args[0]).includes("reconnected")));
+});
+
+test("a fault clears only once its own service receives a fresh reading after reconnect", () => {
+	const { log } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+	const { accessory, sse, vehicleSse } = setupWithVehicle(platform);
+	const doorService = accessory.getServiceById(Service.ContactSensor, "door-driver-front")!;
+
+	sse.emit("stream_error", { error: new Error("unauthorized"), status: 401, retries: 1 });
+	sse.emit("stream_error", { error: new Error("unauthorized"), status: 401, retries: 2 });
+	sse.emit("auth_failure", new Error("Stream authentication failed twice in a row"));
+	sse.emit("connect");
+
+	vehicleSse.emitSignal("DoorState", { DriverFront: false });
+
+	assert.equal(
+		doorService.getCharacteristic(Characteristic.StatusFault).value,
+		Characteristic.StatusFault.NO_FAULT,
+	);
 });
 
 test("disconnect alone does not claim reconnection will happen, since it may be terminal", () => {

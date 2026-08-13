@@ -95,6 +95,9 @@ export class DoorService extends BaseService {
             ? ContactSensorState.CONTACT_NOT_DETECTED // Door open
             : ContactSensorState.CONTACT_DETECTED, // Door closed
         );
+        // A real reading just arrived for this door - clear any fault a
+        // prior terminal stream failure left set (see setStreamFault()).
+        this.applyStreamFault(service, false);
       }
     }
   }
