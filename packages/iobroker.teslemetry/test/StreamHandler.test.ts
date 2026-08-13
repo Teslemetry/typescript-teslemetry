@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import { Teslemetry } from '@teslemetry/api';
 import { StreamHandler } from '../lib/StreamHandler.js';
 import { StateManager } from '../lib/StateManager.js';
+import { EnergyHandler } from '../lib/EnergyHandler.js';
 import { createFakeAdapter } from './fakeAdapter.js';
 
 const VIN = '5YJSA1E14FF000000';
+const SITE_ID = 123;
 
 test('data events update states via the SSE flat-signal parser', async () => {
 	const teslemetry = new Teslemetry('fake-token');
@@ -41,4 +43,61 @@ test('alert events log each alert from the `alerts` array (regression: destructu
 		logs.some((l) => l.level === 'info' && l.message.includes('TPMS_low_pressure') && l.message.includes('started')),
 		`expected an alert log line, got: ${JSON.stringify(logs)}`,
 	);
+});
+
+test('live_status events update energy live-power states (regression: default streaming mode never wired up energy topics)', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	(teslemetry.sse as any).connect = () => Promise.resolve();
+
+	const { adapter, states } = createFakeAdapter();
+	const streamHandler = new StreamHandler(adapter, teslemetry, new StateManager(adapter));
+	await streamHandler.connect();
+
+	teslemetry.sse.emit('live_status', { site_id: String(SITE_ID), live_status: { solar_power: 900, grid_status: 'Active' } } as any);
+	await new Promise((resolve) => setTimeout(resolve, 0));
+
+	assert.equal(states.get(`energy.${SITE_ID}.live.solar_power`), 900);
+	assert.equal(states.get(`energy.${SITE_ID}.live.grid_status`), 'Active');
+});
+
+test('site_info events update energy operation states', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	(teslemetry.sse as any).connect = () => Promise.resolve();
+
+	const { adapter, states } = createFakeAdapter();
+	const streamHandler = new StreamHandler(adapter, teslemetry, new StateManager(adapter));
+	await streamHandler.connect();
+
+	teslemetry.sse.emit('site_info', { site_id: String(SITE_ID), site_info: { default_real_mode: 'backup', backup_reserve_percent: 35 } } as any);
+	await new Promise((resolve) => setTimeout(resolve, 0));
+
+	assert.equal(states.get(`energy.${SITE_ID}.operation.mode`), 'backup');
+	assert.equal(states.get(`energy.${SITE_ID}.operation.backup_reserve_percent`), 35);
+});
+
+test('energy live values change after the REST startup seed via live_status stream events, without polling (regression: default streaming mode left energy frozen after startup)', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	(teslemetry.sse as any).connect = () => Promise.resolve();
+
+	const site = teslemetry.api.getEnergySite(SITE_ID);
+	(site as any).getLiveStatus = () => Promise.resolve({ response: { solar_power: 500 } });
+	(site as any).getSiteInfo = () => Promise.resolve({ response: {} });
+
+	const { adapter, states } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	const energyHandler = new EnergyHandler(adapter, teslemetry, stateManager);
+	energyHandler.registerSite(SITE_ID);
+
+	// Deterministic REST seed at startup
+	await energyHandler.fetchSiteData(SITE_ID);
+	assert.equal(states.get(`energy.${SITE_ID}.live.solar_power`), 500);
+
+	// The stream - not a poll interval - delivers the next value
+	const streamHandler = new StreamHandler(adapter, teslemetry, stateManager);
+	await streamHandler.connect();
+
+	teslemetry.sse.emit('live_status', { site_id: String(SITE_ID), live_status: { solar_power: 1200 } } as any);
+	await new Promise((resolve) => setTimeout(resolve, 0));
+
+	assert.equal(states.get(`energy.${SITE_ID}.live.solar_power`), 1200);
 });

@@ -58,6 +58,16 @@ export class StreamHandler {
 				this.handleAlertEvent(event);
 			});
 
+			// Handle energy site live power/battery/grid updates
+			sse.on('live_status', (event: any) => {
+				this.handleLiveStatusEvent(event);
+			});
+
+			// Handle energy site settings updates (operation mode, reserves, ...)
+			sse.on('site_info', (event: any) => {
+				this.handleSiteInfoEvent(event);
+			});
+
 			// Connect to stream
 			await sse.connect();
 		} catch (error: any) {
@@ -142,6 +152,42 @@ export class StreamHandler {
 			// For now, just log it
 		} catch (error: any) {
 			this.adapter.log.error(`Error handling alert event: ${error.message}`);
+		}
+	}
+
+	/**
+	 * Handle energy site `live_status` events (solar/battery/grid/load power, SOC)
+	 */
+	private async handleLiveStatusEvent(event: any): Promise<void> {
+		try {
+			const { site_id, live_status } = event;
+
+			if (!site_id || !live_status) {
+				return;
+			}
+
+			this.adapter.log.debug(`Received live_status event for energy site ${site_id}`);
+			await this.stateManager.updateEnergySiteData(Number(site_id), live_status);
+		} catch (error: any) {
+			this.adapter.log.error(`Error handling live_status event: ${error.message}`);
+		}
+	}
+
+	/**
+	 * Handle energy site `site_info` events (operation mode, reserves, tariff id, ...)
+	 */
+	private async handleSiteInfoEvent(event: any): Promise<void> {
+		try {
+			const { site_id, site_info } = event;
+
+			if (!site_id || !site_info) {
+				return;
+			}
+
+			this.adapter.log.debug(`Received site_info event for energy site ${site_id}`);
+			await this.stateManager.updateEnergySiteData(Number(site_id), site_info);
+		} catch (error: any) {
+			this.adapter.log.error(`Error handling site_info event: ${error.message}`);
 		}
 	}
 
