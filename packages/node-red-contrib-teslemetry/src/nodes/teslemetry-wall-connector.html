@@ -1,0 +1,80 @@
+<script type="text/javascript">
+    RED.nodes.registerType("teslemetry-wall-connector", {
+        category: "Teslemetry Energy",
+        paletteLabel: "Wall Connector",
+        color: "#e6e600",
+        defaults: {
+            name: { value: "" },
+            din: { value: "" },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "font-awesome/fa-plug",
+        label: function () {
+            return this.name || "Wall Connector" + (this.din ? ": " + this.din : "");
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="teslemetry-wall-connector">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-din">
+            <i class="fa fa-filter"></i> DIN Filter
+        </label>
+        <input
+            type="text"
+            id="node-input-din"
+            placeholder="From msg.din (leave blank for all connectors)"
+        />
+    </div>
+</script>
+
+<script type="text/html" data-help-name="teslemetry-wall-connector">
+    <p>
+        Splits an Energy Site's <code>wall_connectors</code> array into one
+        message per Wall Connector, keyed by DIN. Takes the <code>live_status</code>
+        payload from a Teslemetry Energy Event node (or any msg carrying the
+        same shape) and fans it out.
+    </p>
+    <p>
+        This is a plain splitter: it does no polling or caching, and only acts
+        on the array it's handed. A DIN missing from a given payload simply
+        emits no message for that DIN this round - it does not synthesize an
+        "offline" event.
+    </p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object | array</span></dt>
+        <dd>
+            Either a <code>live_status</code>-shaped object with a
+            <code>wall_connectors</code> array, or that array directly.
+        </dd>
+        <dt class="optional">
+            din <span class="property-type">string</span>
+        </dt>
+        <dd>
+            Restrict output to one DIN for this message (if no DIN Filter is
+            set in the node's config).
+        </dd>
+    </dl>
+
+    <h3>Outputs</h3>
+    <p>One message per matching Wall Connector:</p>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>The connector's raw, untouched object.</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>The connector's DIN.</dd>
+        <dt>din <span class="property-type">string</span></dt>
+        <dd>The connector's DIN (same value as topic).</dd>
+    </dl>
+    <p>
+        If <code>wall_connectors</code> is missing, empty, or no connector
+        matches the DIN filter, no messages are sent.
+    </p>
+</script>
