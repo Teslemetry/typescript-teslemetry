@@ -3,10 +3,12 @@ import { StateManager } from './StateManager.js';
 import { EnergyHandler } from './EnergyHandler.js';
 
 export class StreamHandler {
-	private reconnectAttempts = 0;
-	private maxReconnectAttempts = 5;
-	private reconnectTimer?: NodeJS.Timeout;
-	private isConnecting = false;
+	// The SDK's TeslemetryStream owns reconnection (unbounded exponential
+	// backoff, then a permanent stop after two consecutive auth failures) -
+	// this class only listens and reflects that state, it never schedules
+	// its own reconnect. Listeners are registered once; sse.on() replays
+	// cached values into the handler and re-listening would double-dispatch.
+	private listenersRegistered = false;
 
 	constructor(
 		private adapter: ioBroker.Adapter,
@@ -16,67 +18,74 @@ export class StreamHandler {
 	) {}
 
 	/**
-	 * Connect to SSE stream and set up event handlers
+	 * Register stream event handlers (once) and connect to the SSE stream.
+	 * Safe to call again after a connect: the SDK's connect() is a no-op
+	 * while already active.
 	 */
 	async connect(): Promise<void> {
-		if (this.isConnecting) {
-			this.adapter.log.debug('Stream connection already in progress');
-			return;
+		const sse = this.teslemetry.sse;
+
+		if (!this.listenersRegistered) {
+			this.listenersRegistered = true;
+			this.registerListeners(sse);
 		}
 
-		this.isConnecting = true;
 		this.adapter.log.info('Connecting to Teslemetry SSE stream...');
+		await sse.connect();
+	}
 
-		try {
-			const sse = this.teslemetry.sse;
+	private registerListeners(sse: Teslemetry['sse']): void {
+		sse.on('connect', () => {
+			this.adapter.log.info('SSE stream connected');
+			this.adapter.setStateAsync('info.connection', true, true);
+		});
 
-			// Set up event handlers
-			sse.on('connect', () => {
-				this.adapter.log.info('SSE stream connected');
-				this.reconnectAttempts = 0;
-				this.isConnecting = false;
-				this.adapter.setStateAsync('info.connection', true, true);
-			});
+		// The SDK retries transient disconnects on its own; this only reflects
+		// current connectivity; it does not imply a terminal stop.
+		sse.on('disconnect', () => {
+			this.adapter.log.warn('SSE stream disconnected');
+			this.adapter.setStateAsync('info.connection', false, true);
+		});
 
-			sse.on('disconnect', () => {
-				this.adapter.log.warn('SSE stream disconnected');
-				this.isConnecting = false;
-				this.adapter.setStateAsync('info.connection', false, true);
-				this.scheduleReconnect();
-			});
+		sse.on('stream_error', ({ error, status, retries }) => {
+			const message = error instanceof Error ? error.message : String(error);
+			this.adapter.log.warn(
+				`SSE stream error (status ${status ?? 'unknown'}, attempt ${retries}): ${message}`
+			);
+		});
 
-			// Handle vehicle data updates
-			sse.on('data', (event: any) => {
-				this.handleDataEvent(event);
-			});
+		sse.on('auth_failure', (error) => {
+			this.adapter.log.error(
+				`SSE stream authentication failed twice in a row and has stopped permanently: ${error.message}. ` +
+					'Fix the access token and restart the adapter to resume streaming.'
+			);
+			this.adapter.setStateAsync('info.connection', false, true);
+		});
 
-			// Handle vehicle state changes (online/asleep/offline)
-			sse.on('state', (event: any) => {
-				this.handleStateEvent(event);
-			});
+		// Handle vehicle data updates
+		sse.on('data', (event: any) => {
+			this.handleDataEvent(event);
+		});
 
-			// Handle alerts
-			sse.on('alerts', (event: any) => {
-				this.handleAlertEvent(event);
-			});
+		// Handle vehicle state changes (online/asleep/offline)
+		sse.on('state', (event: any) => {
+			this.handleStateEvent(event);
+		});
 
-			// Handle energy site live power/battery/grid updates
-			sse.on('live_status', (event: any) => {
-				this.handleLiveStatusEvent(event);
-			});
+		// Handle alerts
+		sse.on('alerts', (event: any) => {
+			this.handleAlertEvent(event);
+		});
 
-			// Handle energy site settings updates (operation mode, reserves, ...)
-			sse.on('site_info', (event: any) => {
-				this.handleSiteInfoEvent(event);
-			});
+		// Handle energy site live power/battery/grid updates
+		sse.on('live_status', (event: any) => {
+			this.handleLiveStatusEvent(event);
+		});
 
-			// Connect to stream
-			await sse.connect();
-		} catch (error: any) {
-			this.adapter.log.error(`Failed to connect to SSE stream: ${error.message}`);
-			this.isConnecting = false;
-			this.scheduleReconnect();
-		}
+		// Handle energy site settings updates (operation mode, reserves, ...)
+		sse.on('site_info', (event: any) => {
+			this.handleSiteInfoEvent(event);
+		});
 	}
 
 	/**
@@ -84,11 +93,6 @@ export class StreamHandler {
 	 */
 	disconnect(): void {
 		this.adapter.log.info('Disconnecting from SSE stream...');
-
-		if (this.reconnectTimer) {
-			clearTimeout(this.reconnectTimer);
-			this.reconnectTimer = undefined;
-		}
 
 		try {
 			this.teslemetry.sse.disconnect();
@@ -201,39 +205,5 @@ export class StreamHandler {
 		} catch (error: any) {
 			this.adapter.log.error(`Error handling site_info event: ${error.message}`);
 		}
-	}
-
-	/**
-	 * Schedule automatic reconnection with exponential backoff
-	 */
-	private scheduleReconnect(): void {
-		if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-			this.adapter.log.error(
-				`Max reconnection attempts (${this.maxReconnectAttempts}) reached. Stopping reconnection attempts.`
-			);
-			return;
-		}
-
-		if (this.reconnectTimer) {
-			clearTimeout(this.reconnectTimer);
-		}
-
-		const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
-		this.reconnectAttempts++;
-
-		this.adapter.log.info(
-			`Scheduling reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay / 1000}s`
-		);
-
-		this.reconnectTimer = setTimeout(() => {
-			this.connect();
-		}, delay);
-	}
-
-	/**
-	 * Reset reconnection attempts (call this after successful manual reconnection)
-	 */
-	resetReconnectAttempts(): void {
-		this.reconnectAttempts = 0;
 	}
 }
