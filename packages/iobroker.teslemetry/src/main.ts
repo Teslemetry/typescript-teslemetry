@@ -25,7 +25,7 @@ class TeslemetryAdapter extends utils.Adapter {
 	private vehicleHandler?: VehicleHandler;
 	private energyHandler?: EnergyHandler;
 	private streamHandler?: StreamHandler;
-	private pollInterval?: NodeJS.Timeout;
+	private pollInterval?: ioBroker.Interval;
 
 	public constructor(options: Partial<utils.AdapterOptions> = {}) {
 		super({
@@ -150,7 +150,7 @@ class TeslemetryAdapter extends utils.Adapter {
 
 			// Stop polling
 			if (this.pollInterval) {
-				clearInterval(this.pollInterval);
+				this.clearInterval(this.pollInterval);
 				this.pollInterval = undefined;
 			}
 
@@ -257,7 +257,7 @@ class TeslemetryAdapter extends utils.Adapter {
 		const interval = (this.config.pollInterval || 60) * 1000;
 		this.log.info(`Starting polling with interval: ${interval / 1000}s`);
 
-		this.pollInterval = setInterval(async () => {
+		this.pollInterval = this.setInterval(async () => {
 			try {
 				await this.vehicleHandler?.fetchAllVehicleData(false);
 				await this.energyHandler?.fetchAllSiteData();
