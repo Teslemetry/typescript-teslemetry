@@ -1,5 +1,6 @@
 import { Teslemetry } from '@teslemetry/api';
 import { StateManager } from './StateManager.js';
+import { EnergyHandler } from './EnergyHandler.js';
 
 export class StreamHandler {
 	private reconnectAttempts = 0;
@@ -10,7 +11,8 @@ export class StreamHandler {
 	constructor(
 		private adapter: ioBroker.Adapter,
 		private teslemetry: Teslemetry,
-		private stateManager: StateManager
+		private stateManager: StateManager,
+		private energyHandler: EnergyHandler
 	) {}
 
 	/**
@@ -56,6 +58,16 @@ export class StreamHandler {
 			// Handle alerts
 			sse.on('alerts', (event: any) => {
 				this.handleAlertEvent(event);
+			});
+
+			// Handle energy site live power/battery/grid updates
+			sse.on('live_status', (event: any) => {
+				this.handleLiveStatusEvent(event);
+			});
+
+			// Handle energy site settings updates (operation mode, reserves, ...)
+			sse.on('site_info', (event: any) => {
+				this.handleSiteInfoEvent(event);
 			});
 
 			// Connect to stream
@@ -142,6 +154,52 @@ export class StreamHandler {
 			// For now, just log it
 		} catch (error: any) {
 			this.adapter.log.error(`Error handling alert event: ${error.message}`);
+		}
+	}
+
+	/**
+	 * Handle energy site `live_status` events (solar/battery/grid/load power, SOC)
+	 */
+	private async handleLiveStatusEvent(event: any): Promise<void> {
+		try {
+			const { site_id, live_status } = event;
+
+			if (!site_id || !live_status) {
+				return;
+			}
+
+			const siteId = Number(site_id);
+			if (!this.energyHandler.getRegisteredSites().includes(siteId)) {
+				return;
+			}
+
+			this.adapter.log.debug(`Received live_status event for energy site ${site_id}`);
+			await this.stateManager.updateEnergySiteData(siteId, live_status);
+		} catch (error: any) {
+			this.adapter.log.error(`Error handling live_status event: ${error.message}`);
+		}
+	}
+
+	/**
+	 * Handle energy site `site_info` events (operation mode, reserves, tariff id, ...)
+	 */
+	private async handleSiteInfoEvent(event: any): Promise<void> {
+		try {
+			const { site_id, site_info } = event;
+
+			if (!site_id || !site_info) {
+				return;
+			}
+
+			const siteId = Number(site_id);
+			if (!this.energyHandler.getRegisteredSites().includes(siteId)) {
+				return;
+			}
+
+			this.adapter.log.debug(`Received site_info event for energy site ${site_id}`);
+			await this.stateManager.updateEnergySiteData(siteId, site_info);
+		} catch (error: any) {
+			this.adapter.log.error(`Error handling site_info event: ${error.message}`);
 		}
 	}
 

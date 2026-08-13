@@ -243,8 +243,11 @@ export class StateManager {
 	}
 
 	/**
-	 * Update energy site data from the merged { ...siteInfo.response, ...liveStatus.response }
-	 * of getSiteInfo() and getLiveStatus() - both are flat, no `live_status` wrapper.
+	 * Update energy site data from a flat object matching the REST getSiteInfo()/getLiveStatus()
+	 * response shape - either their merged `{ ...siteInfo.response, ...liveStatus.response }`
+	 * (the REST seed), or a single SSE `live_status`/`site_info` event's payload (both are
+	 * flat, no wrapper, and use the same field names as their REST counterparts). Every field
+	 * is optional, so a partial single-topic payload only touches the states it carries.
 	 */
 	async updateEnergySiteData(siteId: number, data: any): Promise<void> {
 		const base = `energy.${siteId}`;
