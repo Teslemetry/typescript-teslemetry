@@ -99,6 +99,10 @@ export abstract class BaseService {
           characteristic,
           mappedValue as Nullable<CharacteristicValue>,
         );
+        // A real reading just arrived - clear any fault a prior terminal
+        // stream failure left set (see setStreamFault()). A no-op for
+        // service types that don't support StatusFault.
+        this.applyStreamFault(this.service, false);
       } catch (error) {
         this.platform.log.error(
           `Error updating characteristic for signal ${signal}:`,
