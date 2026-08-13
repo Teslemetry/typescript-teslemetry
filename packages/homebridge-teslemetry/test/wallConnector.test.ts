@@ -130,3 +130,42 @@ test("setStreamFault(true) has nothing to fault before any DIN has been discover
 	assert.doesNotThrow(() => service.setStreamFault(true));
 	assert.equal(accessory.services.filter((s) => s.UUID === Service.ContactSensor.UUID).length, 0);
 });
+
+test("hydrates a DIN's sensors that already exist on the accessory (restored from Homebridge's cache) before any live_status arrives this run", () => {
+	const { platform } = createFakePlatform();
+	const accessory = createFakeAccessory("Test Site");
+	accessory.addService(Service.ContactSensor, "Wall Connector cached Fault", "wall-connector-fault-cached");
+	accessory.addService(Service.ContactSensor, "Wall Connector cached Vehicle Connected", "wall-connector-connected-cached");
+	const { site } = createFakeEnergySite();
+
+	const service = new WallConnectorService(platform as never, accessory, site);
+	assert.doesNotThrow(() => service.setStreamFault(true));
+
+	const fault = accessory.getServiceById(Service.ContactSensor, "wall-connector-fault-cached")!;
+	const connected = accessory.getServiceById(Service.ContactSensor, "wall-connector-connected-cached")!;
+	for (const sensor of [fault, connected]) {
+		assert.equal(
+			sensor.getCharacteristic(Characteristic.StatusFault).value,
+			Characteristic.StatusFault.GENERAL_FAULT,
+		);
+	}
+});
+
+test("applies a stream fault that was already raised before this accessory was constructed to sensors restored from cache", () => {
+	const { platform } = createFakePlatform({}, { streamFault: true });
+	const accessory = createFakeAccessory("Test Site");
+	accessory.addService(Service.ContactSensor, "Wall Connector cached Fault", "wall-connector-fault-cached");
+	accessory.addService(Service.ContactSensor, "Wall Connector cached Vehicle Connected", "wall-connector-connected-cached");
+	const { site } = createFakeEnergySite();
+
+	new WallConnectorService(platform as never, accessory, site);
+
+	const fault = accessory.getServiceById(Service.ContactSensor, "wall-connector-fault-cached")!;
+	const connected = accessory.getServiceById(Service.ContactSensor, "wall-connector-connected-cached")!;
+	for (const sensor of [fault, connected]) {
+		assert.equal(
+			sensor.getCharacteristic(Characteristic.StatusFault).value,
+			Characteristic.StatusFault.GENERAL_FAULT,
+		);
+	}
+});

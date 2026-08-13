@@ -38,6 +38,14 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
   // reconnects on its own from this state.
   private streamFaulted = false;
 
+  /** Current terminal-stream-fault state, so a service constructed after the
+   *  fault was raised (e.g. hydrating services from Homebridge's persisted
+   *  accessory cache) can apply it immediately instead of waiting for the
+   *  next markStreamFault() call that will never come until reconnect. */
+  get streamFault(): boolean {
+    return this.streamFaulted;
+  }
+
   // Accessory management
   private readonly accessories: PlatformAccessory[] = [];
   private readonly vehicleAccessories: Map<string, VehicleAccessory> = new Map();
