@@ -21,6 +21,22 @@ export class EnergyHandler {
 	}
 
 	/**
+	 * Runs a write against the energy site, acking the requested value on success.
+	 * A rejected write restores the last confirmed value so the object state never
+	 * shows a requested value that was never actually applied.
+	 */
+	private async writeAndReconcile(id: string, value: any, write: () => Promise<any>): Promise<void> {
+		const prior = await this.adapter.getStateAsync(id);
+		try {
+			await write();
+		} catch (error) {
+			await this.adapter.setStateAsync(id, prior?.val ?? null, true);
+			throw error;
+		}
+		await this.adapter.setStateAsync(id, value, true);
+	}
+
+	/**
 	 * Execute an energy site command
 	 */
 	async executeCommand(siteId: number, command: string, params?: any): Promise<void> {
@@ -32,21 +48,16 @@ export class EnergyHandler {
 
 		this.adapter.log.debug(`Executing command ${command} for energy site ${siteId}`);
 
-		try {
-			switch (command) {
-				case 'storm_mode':
-					if (params?.enabled !== undefined) {
-						await site.setStormMode(params.enabled);
-						this.adapter.log.info(`Set storm mode to ${params.enabled} for site ${siteId}`);
-					}
-					break;
+		switch (command) {
+			case 'storm_mode':
+				if (params?.enabled !== undefined) {
+					await site.setStormMode(params.enabled);
+					this.adapter.log.info(`Set storm mode to ${params.enabled} for site ${siteId}`);
+				}
+				break;
 
-				default:
-					this.adapter.log.warn(`Unknown command: ${command}`);
-			}
-		} catch (error: any) {
-			this.adapter.log.error(`Error executing command ${command} for site ${siteId}: ${error.message}`);
-			throw error;
+			default:
+				this.adapter.log.warn(`Unknown command: ${command}`);
 		}
 	}
 
@@ -60,30 +71,28 @@ export class EnergyHandler {
 			return;
 		}
 
-		try {
-			// Handle commands
-			if (category === 'commands') {
-				if (stateName === 'storm_mode') {
-					await this.executeCommand(siteId, 'storm_mode', { enabled: value });
-				}
-				return;
+		// Handle commands
+		if (category === 'commands') {
+			if (stateName === 'storm_mode') {
+				await this.executeCommand(siteId, 'storm_mode', { enabled: value });
 			}
+			return;
+		}
 
-			// Handle writable operation states
-			if (category === 'operation') {
-				if (stateName === 'mode') {
-					await site.setOperationMode(value);
-					this.adapter.log.info(`Set operation mode to ${value} for site ${siteId}`);
-				} else if (stateName === 'backup_reserve_percent') {
-					await site.setBackupReserve(value);
-					this.adapter.log.info(`Set backup reserve to ${value}% for site ${siteId}`);
-				} else if (stateName === 'off_grid_reserve_percent') {
-					await site.setOffGridVehicleChargingReserve(value);
-					this.adapter.log.info(`Set off-grid reserve to ${value}% for site ${siteId}`);
-				}
+		// Handle writable operation states
+		if (category === 'operation') {
+			if (stateName === 'mode') {
+				await this.writeAndReconcile(`energy.${siteId}.operation.mode`, value, () => site.setOperationMode(value));
+				this.adapter.log.info(`Set operation mode to ${value} for site ${siteId}`);
+			} else if (stateName === 'backup_reserve_percent') {
+				await this.writeAndReconcile(`energy.${siteId}.operation.backup_reserve_percent`, value, () => site.setBackupReserve(value));
+				this.adapter.log.info(`Set backup reserve to ${value}% for site ${siteId}`);
+			} else if (stateName === 'off_grid_reserve_percent') {
+				await this.writeAndReconcile(`energy.${siteId}.operation.off_grid_reserve_percent`, value, () =>
+					site.setOffGridVehicleChargingReserve(value)
+				);
+				this.adapter.log.info(`Set off-grid reserve to ${value}% for site ${siteId}`);
 			}
-		} catch (error: any) {
-			this.adapter.log.error(`Error handling state change for ${siteId}.${category}.${stateName}: ${error.message}`);
 		}
 	}
 
