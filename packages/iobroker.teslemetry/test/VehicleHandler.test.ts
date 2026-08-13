@@ -137,6 +137,63 @@ test('handleStateChange for driver_temp_setting on a RHD vehicle sends setTemps(
 	assert.deepEqual(calledWith, [19, 22]);
 });
 
+test('a rejected lock command restores state.locked to its prior value and propagates once, unlogged, to the caller', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	const vehicle = teslemetry.api.getVehicle(VIN);
+	(vehicle as any).lockDoors = () => Promise.reject(new Error('vehicle unreachable'));
+
+	const { adapter, states, logs } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	await stateManager.createVehicleStates({ vin: VIN, display_name: 'Test Car' });
+	await adapter.setStateAsync(`vehicles.${VIN}.state.locked`, false, true);
+
+	const handler = new VehicleHandler(adapter, teslemetry, stateManager);
+	handler.registerVehicle(VIN);
+
+	await assert.rejects(() => handler.handleStateChange(VIN, 'commands', 'lock', true), /vehicle unreachable/);
+
+	assert.equal(states.get(`vehicles.${VIN}.state.locked`), false);
+	assert.equal(logs.filter((l) => l.level === 'error').length, 0);
+});
+
+test('a successful lock command acks state.locked to true', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	const vehicle = teslemetry.api.getVehicle(VIN);
+	(vehicle as any).lockDoors = () => Promise.resolve({});
+
+	const { adapter, states } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	await stateManager.createVehicleStates({ vin: VIN, display_name: 'Test Car' });
+	await adapter.setStateAsync(`vehicles.${VIN}.state.locked`, false, true);
+
+	const handler = new VehicleHandler(adapter, teslemetry, stateManager);
+	handler.registerVehicle(VIN);
+
+	await handler.handleStateChange(VIN, 'commands', 'lock', true);
+
+	assert.equal(states.get(`vehicles.${VIN}.state.locked`), true);
+});
+
+test('a rejected temperature write restores driver_temp_setting to its prior value and propagates once, unlogged, to the caller', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	const vehicle = teslemetry.api.getVehicle(VIN);
+	(vehicle as any).setTemps = () => Promise.reject(new Error('command rejected'));
+
+	const { adapter, states, logs } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	await stateManager.createVehicleStates({ vin: VIN, display_name: 'Test Car' });
+	await adapter.setStateAsync(`vehicles.${VIN}.climate.driver_temp_setting`, 21, true);
+	await adapter.setStateAsync(`vehicles.${VIN}.climate.passenger_temp_setting`, 19, true);
+
+	const handler = new VehicleHandler(adapter, teslemetry, stateManager);
+	handler.registerVehicle(VIN);
+
+	await assert.rejects(() => handler.handleStateChange(VIN, 'climate', 'driver_temp_setting', 25), /command rejected/);
+
+	assert.equal(states.get(`vehicles.${VIN}.climate.driver_temp_setting`), 21);
+	assert.equal(logs.filter((l) => l.level === 'error').length, 0);
+});
+
 test('fetchVehicleData reads state from the response wrapper and skips vehicleData() while asleep', async () => {
 	const teslemetry = new Teslemetry('fake-token');
 	const vehicle = teslemetry.api.getVehicle(VIN);

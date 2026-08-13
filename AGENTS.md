@@ -168,6 +168,8 @@ pnpm link --global n8n-nodes-teslemetry
 
 **Gotcha**: the `HvacLeft`/`HvacRightTemperatureRequest` SSE signals and `TeslemetryVehicleApi.setTemps()`'s positional args are physical left/right seats, not driver/passenger - on RHD vehicles the driver sits on the right. `StateManager` stores each vehicle's `config.rhd` (from `VehicleDetails.metadata`, passed in at `createVehicleStates()`) and exposes it via `isRhd(vin)`, which both the SSE mapping in `updateVehicleDataFromSignals` and the `setTemps()` write in `VehicleHandler.handleStateChange` consult to pick the correct side - mirrors the Homebridge plugin's `ClimateService.isRHD` pattern.
 
+**Gotcha**: `VehicleHandler`/`EnergyHandler.handleStateChange()` don't catch their own write failures - a rejected SDK write propagates up to `main.ts`'s `onStateChange()`, the single place that logs it, so a new write branch must not add its own catch/log or the failure logs twice. Each write goes through `writeAndReconcile(id, value, write)` (private to each handler), which acks the requested value on success and re-acks the last confirmed value on failure, so a rejected command never leaves the ioBroker object state looking like it applied.
+
 **Gotcha**: changesets bumps `package.json`/`CHANGELOG.md` on release but never touches `io-package.json` - its `common.version` and `common.news` need a manual sync on every release or the ioBroker repochecker hard-fails submission to `ioBroker.repositories`. No Teslemetry brand/logo asset lives in this monorepo; the real logo mark lives in the separate `website3` repo (its `public/web-app-manifest-512x512.png` is the highest-res copy) - source icons from there, don't hand-draw a placeholder.
 
 ## Technology Stack

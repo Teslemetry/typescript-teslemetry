@@ -21,6 +21,22 @@ export class VehicleHandler {
 	}
 
 	/**
+	 * Runs a write against the vehicle, acking the requested value on success. A
+	 * rejected write restores the last confirmed value so the object state never
+	 * shows a requested value that was never actually applied.
+	 */
+	private async writeAndReconcile(id: string, value: any, write: () => Promise<any>): Promise<void> {
+		const prior = await this.adapter.getStateAsync(id);
+		try {
+			await write();
+		} catch (error) {
+			await this.adapter.setStateAsync(id, prior?.val ?? null, true);
+			throw error;
+		}
+		await this.adapter.setStateAsync(id, value, true);
+	}
+
+	/**
 	 * Execute a vehicle command
 	 */
 	async executeCommand(vin: string, command: string, _params?: any): Promise<void> {
@@ -32,73 +48,64 @@ export class VehicleHandler {
 
 		this.adapter.log.debug(`Executing command ${command} for vehicle ${vin}`);
 
-		try {
-			switch (command) {
-				case 'wake':
-					await vehicle.wakeUp();
-					this.adapter.log.info(`Woke up vehicle ${vin}`);
-					break;
+		switch (command) {
+			case 'wake':
+				await vehicle.wakeUp();
+				this.adapter.log.info(`Woke up vehicle ${vin}`);
+				break;
 
-				case 'lock':
-					await vehicle.lockDoors();
-					this.adapter.log.info(`Locked vehicle ${vin}`);
-					await this.adapter.setStateAsync(`vehicles.${vin}.state.locked`, true, true);
-					break;
+			case 'lock':
+				await this.writeAndReconcile(`vehicles.${vin}.state.locked`, true, () => vehicle.lockDoors());
+				this.adapter.log.info(`Locked vehicle ${vin}`);
+				break;
 
-				case 'unlock':
-					await vehicle.unlockDoors();
-					this.adapter.log.info(`Unlocked vehicle ${vin}`);
-					await this.adapter.setStateAsync(`vehicles.${vin}.state.locked`, false, true);
-					break;
+			case 'unlock':
+				await this.writeAndReconcile(`vehicles.${vin}.state.locked`, false, () => vehicle.unlockDoors());
+				this.adapter.log.info(`Unlocked vehicle ${vin}`);
+				break;
 
-				case 'start_climate':
-					await vehicle.startAutoConditioning();
-					this.adapter.log.info(`Started climate for vehicle ${vin}`);
-					await this.adapter.setStateAsync(`vehicles.${vin}.climate.is_climate_on`, true, true);
-					break;
+			case 'start_climate':
+				await this.writeAndReconcile(`vehicles.${vin}.climate.is_climate_on`, true, () => vehicle.startAutoConditioning());
+				this.adapter.log.info(`Started climate for vehicle ${vin}`);
+				break;
 
-				case 'stop_climate':
-					await vehicle.stopAutoConditioning();
-					this.adapter.log.info(`Stopped climate for vehicle ${vin}`);
-					await this.adapter.setStateAsync(`vehicles.${vin}.climate.is_climate_on`, false, true);
-					break;
+			case 'stop_climate':
+				await this.writeAndReconcile(`vehicles.${vin}.climate.is_climate_on`, false, () => vehicle.stopAutoConditioning());
+				this.adapter.log.info(`Stopped climate for vehicle ${vin}`);
+				break;
 
-				case 'start_charging':
-					await vehicle.startCharging();
-					this.adapter.log.info(`Started charging for vehicle ${vin}`);
-					break;
+			case 'start_charging':
+				await vehicle.startCharging();
+				this.adapter.log.info(`Started charging for vehicle ${vin}`);
+				break;
 
-				case 'stop_charging':
-					await vehicle.stopCharging();
-					this.adapter.log.info(`Stopped charging for vehicle ${vin}`);
-					break;
+			case 'stop_charging':
+				await vehicle.stopCharging();
+				this.adapter.log.info(`Stopped charging for vehicle ${vin}`);
+				break;
 
-				case 'flash_lights':
-					await vehicle.flashLights();
-					this.adapter.log.info(`Flashed lights for vehicle ${vin}`);
-					break;
+			case 'flash_lights':
+				await vehicle.flashLights();
+				this.adapter.log.info(`Flashed lights for vehicle ${vin}`);
+				break;
 
-				case 'honk_horn':
-					await vehicle.honkHorn();
-					this.adapter.log.info(`Honked horn for vehicle ${vin}`);
-					break;
+			case 'honk_horn':
+				await vehicle.honkHorn();
+				this.adapter.log.info(`Honked horn for vehicle ${vin}`);
+				break;
 
-				case 'open_frunk':
-					await vehicle.actuateTrunk('front');
-					this.adapter.log.info(`Opened frunk for vehicle ${vin}`);
-					break;
+			case 'open_frunk':
+				await vehicle.actuateTrunk('front');
+				this.adapter.log.info(`Opened frunk for vehicle ${vin}`);
+				break;
 
-				case 'open_trunk':
-					await vehicle.actuateTrunk('rear');
-					this.adapter.log.info(`Opened trunk for vehicle ${vin}`);
-					break;
+			case 'open_trunk':
+				await vehicle.actuateTrunk('rear');
+				this.adapter.log.info(`Opened trunk for vehicle ${vin}`);
+				break;
 
-				default:
-					this.adapter.log.warn(`Unknown command: ${command}`);
-			}
-		} catch (error: any) {
-			this.adapter.log.error(`Error executing command ${command} for vehicle ${vin}: ${error.message}`);
-			throw error;
+			default:
+				this.adapter.log.warn(`Unknown command: ${command}`);
 		}
 	}
 
@@ -112,47 +119,43 @@ export class VehicleHandler {
 			return;
 		}
 
-		try {
-			// Handle commands
-			if (category === 'commands') {
-				if (value === true || value === 'true') {
-					await this.executeCommand(vin, stateName);
-				}
-				return;
+		// Handle commands
+		if (category === 'commands') {
+			if (value === true || value === 'true') {
+				await this.executeCommand(vin, stateName);
 			}
+			return;
+		}
 
-			// Handle writable states
-			if (category === 'climate') {
-				if (stateName === 'driver_temp_setting' || stateName === 'passenger_temp_setting') {
-					// setTemps takes both temps positionally, so read the other one's
-					// current value to avoid clobbering it.
-					const [driverState, passengerState] = await Promise.all([
-						this.adapter.getStateAsync(`vehicles.${vin}.climate.driver_temp_setting`),
-						this.adapter.getStateAsync(`vehicles.${vin}.climate.passenger_temp_setting`),
-					]);
-					const driverTemp = stateName === 'driver_temp_setting' ? value : (driverState?.val ?? 21);
-					const passengerTemp = stateName === 'passenger_temp_setting' ? value : (passengerState?.val ?? 21);
-					// setTemps's positional args are physical left/right seats, not driver/passenger -
-					// on RHD vehicles the driver sits on the right.
-					const rhd = this.stateManager.isRhd(vin);
-					const leftTemp = rhd ? passengerTemp : driverTemp;
-					const rightTemp = rhd ? driverTemp : passengerTemp;
-					await vehicle.setTemps(leftTemp, rightTemp);
-					this.adapter.log.info(`Set temps to ${driverTemp}/${passengerTemp}°C for vehicle ${vin}`);
-				}
-			} else if (category === 'charge') {
-				if (stateName === 'charge_limit_soc') {
-					await vehicle.setChargeLimit(value);
-					this.adapter.log.info(`Set charge limit to ${value}% for vehicle ${vin}`);
-				}
-			} else if (category === 'state') {
-				if (stateName === 'sentry_mode') {
-					await vehicle.setSentryMode(!!value);
-					this.adapter.log.info(`Set sentry mode to ${value} for vehicle ${vin}`);
-				}
+		// Handle writable states
+		if (category === 'climate') {
+			if (stateName === 'driver_temp_setting' || stateName === 'passenger_temp_setting') {
+				// setTemps takes both temps positionally, so read the other one's
+				// current value to avoid clobbering it.
+				const [driverState, passengerState] = await Promise.all([
+					this.adapter.getStateAsync(`vehicles.${vin}.climate.driver_temp_setting`),
+					this.adapter.getStateAsync(`vehicles.${vin}.climate.passenger_temp_setting`),
+				]);
+				const driverTemp = stateName === 'driver_temp_setting' ? value : (driverState?.val ?? 21);
+				const passengerTemp = stateName === 'passenger_temp_setting' ? value : (passengerState?.val ?? 21);
+				// setTemps's positional args are physical left/right seats, not driver/passenger -
+				// on RHD vehicles the driver sits on the right.
+				const rhd = this.stateManager.isRhd(vin);
+				const leftTemp = rhd ? passengerTemp : driverTemp;
+				const rightTemp = rhd ? driverTemp : passengerTemp;
+				await this.writeAndReconcile(`vehicles.${vin}.climate.${stateName}`, value, () => vehicle.setTemps(leftTemp, rightTemp));
+				this.adapter.log.info(`Set temps to ${driverTemp}/${passengerTemp}°C for vehicle ${vin}`);
 			}
-		} catch (error: any) {
-			this.adapter.log.error(`Error handling state change for ${vin}.${category}.${stateName}: ${error.message}`);
+		} else if (category === 'charge') {
+			if (stateName === 'charge_limit_soc') {
+				await this.writeAndReconcile(`vehicles.${vin}.charge.charge_limit_soc`, value, () => vehicle.setChargeLimit(value));
+				this.adapter.log.info(`Set charge limit to ${value}% for vehicle ${vin}`);
+			}
+		} else if (category === 'state') {
+			if (stateName === 'sentry_mode') {
+				await this.writeAndReconcile(`vehicles.${vin}.state.sentry_mode`, !!value, () => vehicle.setSentryMode(!!value));
+				this.adapter.log.info(`Set sentry mode to ${value} for vehicle ${vin}`);
+			}
 		}
 	}
 

@@ -64,6 +64,46 @@ for (const [stateName, method, value] of OPERATION_CASES) {
 	});
 }
 
+test('a rejected backup_reserve_percent write restores the prior value and propagates once, unlogged, to the caller', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	const site = teslemetry.api.getEnergySite(SITE_ID);
+	(site as any).setBackupReserve = () => Promise.reject(new Error('site unreachable'));
+
+	const { adapter, states, logs } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	await stateManager.createEnergySiteStates({ id: SITE_ID, site_name: 'Home' });
+	await adapter.setStateAsync(`energy.${SITE_ID}.operation.backup_reserve_percent`, 20, true);
+
+	const handler = new EnergyHandler(adapter, teslemetry, stateManager);
+	handler.registerSite(SITE_ID);
+
+	await assert.rejects(
+		() => handler.handleStateChange(SITE_ID, 'operation', 'backup_reserve_percent', 50),
+		/site unreachable/
+	);
+
+	assert.equal(states.get(`energy.${SITE_ID}.operation.backup_reserve_percent`), 20);
+	assert.equal(logs.filter((l) => l.level === 'error').length, 0);
+});
+
+test('a successful backup_reserve_percent write acks the new value', async () => {
+	const teslemetry = new Teslemetry('fake-token');
+	const site = teslemetry.api.getEnergySite(SITE_ID);
+	(site as any).setBackupReserve = () => Promise.resolve({});
+
+	const { adapter, states } = createFakeAdapter();
+	const stateManager = new StateManager(adapter);
+	await stateManager.createEnergySiteStates({ id: SITE_ID, site_name: 'Home' });
+	await adapter.setStateAsync(`energy.${SITE_ID}.operation.backup_reserve_percent`, 20, true);
+
+	const handler = new EnergyHandler(adapter, teslemetry, stateManager);
+	handler.registerSite(SITE_ID);
+
+	await handler.handleStateChange(SITE_ID, 'operation', 'backup_reserve_percent', 50);
+
+	assert.equal(states.get(`energy.${SITE_ID}.operation.backup_reserve_percent`), 50);
+});
+
 test('fetchSiteData calls getLiveStatus()/getSiteInfo() and updates states from their response wrappers', async () => {
 	const teslemetry = new Teslemetry('fake-token');
 	const site = teslemetry.api.getEnergySite(SITE_ID);
