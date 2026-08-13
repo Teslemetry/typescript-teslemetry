@@ -8,25 +8,20 @@
       "size": 3
     },
     "accessToken": {
-      "type": "text",
+      "type": "password",
       "label": "Access Token",
+      "xs": 12,
       "sm": 12,
       "md": 12,
       "lg": 12,
-      "password": true,
-      "required": true,
-      "help": "Your Teslemetry API access token. Get it from https://teslemetry.com/console",
-      "placeholder": "teslemetry_access_token_..."
+      "xl": 12,
+      "help": "Your Teslemetry API access token. Get it from https://teslemetry.com/console"
     },
     "testConnection": {
       "type": "sendTo",
       "command": "testConnection",
       "jsonData": "{\"accessToken\": \"${data.accessToken}\"}",
-      "button": {
-        "text": "Test Connection",
-        "variant": "contained",
-        "color": "primary"
-      },
+      "label": "Test Connection",
       "result": {
         "success": {
           "text": "${data.message}"
@@ -35,9 +30,11 @@
           "text": "${data.error}"
         }
       },
+      "xs": 12,
       "sm": 12,
       "md": 6,
-      "lg": 4
+      "lg": 4,
+      "xl": 4
     },
     "_spacer1": {
       "type": "divider"
@@ -61,9 +58,11 @@
       ],
       "default": "auto",
       "help": "Tesla API region. Use auto-detect unless you have connection issues.",
+      "xs": 12,
       "sm": 12,
       "md": 6,
-      "lg": 4
+      "lg": 4,
+      "xl": 4
     },
     "_spacer2": {
       "type": "divider"
@@ -78,9 +77,11 @@
       "label": "Enable real-time streaming (SSE)",
       "default": true,
       "help": "Use Server-Sent Events for real-time updates. Recommended for best performance.",
+      "xs": 12,
       "sm": 12,
       "md": 6,
-      "lg": 4
+      "lg": 4,
+      "xl": 4
     },
     "pollInterval": {
       "type": "number",
@@ -90,9 +91,11 @@
       "default": 60,
       "help": "How often to fetch data when streaming is disabled. Minimum 30 seconds to avoid rate limits.",
       "hidden": "data.enableStreaming === true",
+      "xs": 12,
       "sm": 12,
       "md": 6,
-      "lg": 4
+      "lg": 4,
+      "xl": 4
     },
     "_spacer3": {
       "type": "divider"
@@ -105,23 +108,31 @@
     "_deviceSelectionHelp": {
       "type": "staticText",
       "text": "By default, all vehicles and energy sites are included. You can optionally select specific devices to monitor.",
-      "sm": 12
+      "xs": 12,
+      "sm": 12,
+      "md": 12,
+      "lg": 12,
+      "xl": 12
     },
     "selectedVehicles": {
       "type": "chips",
       "label": "Selected Vehicles (VINs)",
       "help": "Leave empty to include all vehicles. Add VIN numbers to include only specific vehicles.",
+      "xs": 12,
       "sm": 12,
       "md": 12,
-      "lg": 12
+      "lg": 12,
+      "xl": 12
     },
     "selectedEnergySites": {
       "type": "chips",
       "label": "Selected Energy Sites (IDs)",
       "help": "Leave empty to include all energy sites. Add site IDs to include only specific sites.",
+      "xs": 12,
       "sm": 12,
       "md": 12,
-      "lg": 12
+      "lg": 12,
+      "xl": 12
     }
   }
 }

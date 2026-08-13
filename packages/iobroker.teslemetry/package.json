@@ -9,7 +9,7 @@
   "homepage": "https://github.com/Teslemetry/typescript-teslemetry",
   "license": "Apache-2.0",
   "keywords": [
-    "iobroker",
+    "ioBroker",
     "tesla",
     "teslemetry",
     "smart-home",
@@ -24,7 +24,7 @@
     "directory": "packages/iobroker.teslemetry"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "os": [
     "linux",
@@ -48,14 +48,12 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@iobroker/adapter-core": "^3.3.0",
+    "@iobroker/adapter-core": "^3.4.1",
     "@teslemetry/api": "workspace:*"
   },
   "devDependencies": {
-    "@iobroker/testing": "^5.0.0",
+    "@iobroker/testing": "^5.2.2",
     "@types/node": "^22.10.2",
-    "chai": "^4.5.0",
-    "mocha": "^10.8.2",
     "nyc": "^17.1.0",
     "tsdown": "^0.22.4",
     "tsx": "^4.20.6",
