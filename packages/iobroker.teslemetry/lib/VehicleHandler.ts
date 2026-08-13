@@ -132,7 +132,12 @@ export class VehicleHandler {
 					]);
 					const driverTemp = stateName === 'driver_temp_setting' ? value : (driverState?.val ?? 21);
 					const passengerTemp = stateName === 'passenger_temp_setting' ? value : (passengerState?.val ?? 21);
-					await vehicle.setTemps(driverTemp, passengerTemp);
+					// setTemps's positional args are physical left/right seats, not driver/passenger -
+					// on RHD vehicles the driver sits on the right.
+					const rhd = this.stateManager.isRhd(vin);
+					const leftTemp = rhd ? passengerTemp : driverTemp;
+					const rightTemp = rhd ? driverTemp : passengerTemp;
+					await vehicle.setTemps(leftTemp, rightTemp);
 					this.adapter.log.info(`Set temps to ${driverTemp}/${passengerTemp}°C for vehicle ${vin}`);
 				}
 			} else if (category === 'charge') {

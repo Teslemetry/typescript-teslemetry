@@ -3,6 +3,7 @@ export interface VehicleMetadata {
 	display_name: string;
 	model?: string;
 	state?: string;
+	rhd?: boolean;
 }
 
 export interface EnergySiteMetadata {
@@ -12,13 +13,18 @@ export interface EnergySiteMetadata {
 }
 
 export class StateManager {
+	// Right-hand-drive vehicles have their driver seat on the physical right, so the
+	// HvacLeft/HvacRightTemperatureRequest signals map to the opposite driver/passenger side.
+	private rhdByVin = new Map<string, boolean>();
+
 	constructor(private adapter: ioBroker.Adapter) {}
 
 	/**
 	 * Create state hierarchy for a vehicle
 	 */
 	async createVehicleStates(metadata: VehicleMetadata): Promise<void> {
-		const { vin, display_name, model } = metadata;
+		const { vin, display_name, model, rhd } = metadata;
+		this.rhdByVin.set(vin, !!rhd);
 		const base = `vehicles.${vin}`;
 
 		// Create device
@@ -87,6 +93,13 @@ export class StateManager {
 		await this.createState(`${base}.commands.honk_horn`, 'Honk Horn', 'boolean', 'button', false, true, false);
 		await this.createState(`${base}.commands.open_frunk`, 'Open Frunk', 'boolean', 'button', false, true, false);
 		await this.createState(`${base}.commands.open_trunk`, 'Open Trunk', 'boolean', 'button', false, true, false);
+	}
+
+	/**
+	 * Whether a registered vehicle is right-hand drive, per its metadata at registration.
+	 */
+	isRhd(vin: string): boolean {
+		return this.rhdByVin.get(vin) ?? false;
 	}
 
 	/**
@@ -221,10 +234,13 @@ export class StateManager {
 
 			if (signals.InsideTemp !== undefined) await this.setStateAsync(`${base}.climate.inside_temp`, signals.InsideTemp);
 			if (signals.OutsideTemp !== undefined) await this.setStateAsync(`${base}.climate.outside_temp`, signals.OutsideTemp);
+			// The Left/Right signals are physical seat positions, not driver/passenger -
+			// on RHD vehicles the driver sits on the right.
+			const rhd = this.isRhd(vin);
 			if (signals.HvacLeftTemperatureRequest !== undefined)
-				await this.setStateAsync(`${base}.climate.driver_temp_setting`, signals.HvacLeftTemperatureRequest);
+				await this.setStateAsync(`${base}.climate.${rhd ? 'passenger' : 'driver'}_temp_setting`, signals.HvacLeftTemperatureRequest);
 			if (signals.HvacRightTemperatureRequest !== undefined)
-				await this.setStateAsync(`${base}.climate.passenger_temp_setting`, signals.HvacRightTemperatureRequest);
+				await this.setStateAsync(`${base}.climate.${rhd ? 'driver' : 'passenger'}_temp_setting`, signals.HvacRightTemperatureRequest);
 			if (signals.HvacPower !== undefined)
 				await this.setStateAsync(`${base}.climate.is_climate_on`, signals.HvacPower !== 'HvacPowerStateOff');
 
