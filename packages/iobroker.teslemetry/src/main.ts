@@ -112,6 +112,12 @@ class TeslemetryAdapter extends utils.Adapter {
 			// Subscribe to all state changes
 			this.subscribeStates('*');
 
+			// Seed energy state before opening the stream - connect() only starts the SDK's
+			// background loop and returns immediately, so a stream event could otherwise land
+			// before this REST fetch resolves and get overwritten by the stale snapshot.
+			this.log.info('Fetching initial energy site data...');
+			await this.energyHandler.fetchAllSiteData();
+
 			// Set up streaming or polling
 			if (this.config.enableStreaming !== false) {
 				this.log.info('Starting SSE streaming...');
@@ -122,12 +128,9 @@ class TeslemetryAdapter extends utils.Adapter {
 				this.startPolling();
 			}
 
-			// Do initial data fetch
+			// Do initial vehicle data fetch
 			this.log.info('Fetching initial vehicle data...');
 			await this.vehicleHandler.fetchAllVehicleData(false);
-
-			this.log.info('Fetching initial energy site data...');
-			await this.energyHandler.fetchAllSiteData();
 
 			this.log.info('Teslemetry adapter started successfully');
 			await this.setStateAsync('info.connection', true, true);
