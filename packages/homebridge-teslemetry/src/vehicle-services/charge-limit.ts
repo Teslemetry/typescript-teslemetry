@@ -30,6 +30,14 @@ export class ChargeLimitService extends BaseService {
     // Charge limit is always "on" (we just control the brightness/percentage)
     this.service.updateCharacteristic(this.platform.Characteristic.On, true);
 
+    // Match the Brightness characteristic's bounds to the telemetry clamp
+    // below so HomeKit rejects/bounds writes outside the vehicle's supported range.
+    this.service.getCharacteristic(this.platform.Characteristic.Brightness).setProps({
+      minValue: 50,
+      maxValue: 100,
+      minStep: 1,
+    });
+
     // Subscribe to charge limit updates
     this.subscribeSignal(
       "ChargeLimitSoc",
