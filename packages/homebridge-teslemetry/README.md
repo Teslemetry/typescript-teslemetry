@@ -217,7 +217,7 @@ Apache-2.0 - see [LICENSE](./LICENSE) for details.
 - [@teslemetry/api](../api) - Core TypeScript SDK
 - [node-red-contrib-teslemetry](../node-red-contrib-teslemetry) - Node-RED integration
 - [n8n-nodes-teslemetry](../n8n-nodes-teslemetry) - n8n workflow integration
-- [iobroker.teslemetry](../iobroker.teslemetry) - ioBroker adapter
+- [ioBroker.teslemetry](https://github.com/Teslemetry/ioBroker.teslemetry) - ioBroker adapter
 
 ## Changelog
 
