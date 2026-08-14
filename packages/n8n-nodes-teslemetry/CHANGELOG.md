@@ -1,5 +1,12 @@
 # @teslemetry/n8n-nodes-teslemetry
 
+## 0.4.1
+
+### Patch Changes
+
+- b61aef4: Add regression coverage for the Vehicle and Energy nodes' operation dispatch (endpoint and argument shape for every switch-case), Continue On Fail behavior, and the Trigger node's VIN/site filtering and signal-field validation. No product code changes.
+- 76ebb96: Surface a terminal Teslemetry stream auth failure on the Trigger node as a workflow-visible error instead of leaving the trigger apparently active but silently producing no more items. Stream health handlers are now registered before the stream connects, and `closeFunction` cleanup is idempotent.
+
 ## 0.4.0
 
 ### Minor Changes
@@ -34,9 +41,11 @@
 - e0978a1: Uplift n8n integration to feature-complete status, ready for publishing
 
   **New Features:**
+
   - Added "errors" event type to Teslemetry Trigger node for monitoring vehicle error events
 
   **Improvements:**
+
   - Enhanced package.json with better metadata, author info, and keywords (including n8n-community-node-package)
   - Added node engine requirement (>=18.0.0)
   - Comprehensive README update with:
@@ -46,6 +55,7 @@
     - Links to resources and support
 
   **Status:**
+
   - Feature parity with Node-RED integration achieved
   - All vehicle operations (22/22) implemented
   - All energy operations (7/7) implemented
