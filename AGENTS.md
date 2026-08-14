@@ -14,8 +14,7 @@ typescript-teslemetry/
 │   ├── api/                           # Core TypeScript/JavaScript SDK
 │   ├── node-red-contrib-teslemetry/   # Node-RED integration
 │   ├── n8n-nodes-teslemetry/          # n8n workflow integration
-│   ├── homebridge-teslemetry/         # Homebridge plugin (published to npm)
-│   └── iobroker.teslemetry/           # ioBroker adapter (published to npm)
+│   └── homebridge-teslemetry/         # Homebridge plugin (published to npm)
 ├── pnpm-workspace.yaml                # Workspace configuration
 ├── tsconfig.json                      # Root TypeScript config
 ├── package.json                       # Monorepo root package
@@ -25,7 +24,9 @@ typescript-teslemetry/
 
 See each package's own `package.json`/`README.md` for its purpose, structure, and current version - don't rely on this file for per-package detail, which goes stale quickly.
 
-All integration packages (`node-red`, `n8n`, `homebridge-teslemetry`, `iobroker.teslemetry`) depend on `@teslemetry/api` via `"@teslemetry/api": "workspace:*"`, so they always build against the local SDK during development.
+The ioBroker adapter (`iobroker.teslemetry`) lives in its own repo, [Teslemetry/ioBroker.teslemetry](https://github.com/Teslemetry/ioBroker.teslemetry) - not in this monorepo.
+
+All integration packages (`node-red`, `n8n`, `homebridge-teslemetry`) depend on `@teslemetry/api` via `"@teslemetry/api": "workspace:*"`, so they always build against the local SDK during development.
 
 ## Packages
 
@@ -154,26 +155,6 @@ pnpm link --global n8n-nodes-teslemetry
 
 **Gotcha**: `WallConnectorService`'s `connectors` map is otherwise only populated by `live_status`, so per-DIN sensors that already exist in Homebridge's persisted accessory cache from a prior run are invisible to `setStreamFault()` until this run's first `live_status` - its constructor hydrates `connectors` from any matching cached `ContactSensor` services up front (parsed off their `wall-connector-{fault,connected}-<din>` subtype) and immediately applies `TeslemetryPlatform.streamFault` (a public getter over the platform's private terminal-fault flag), so a fault already raised before this accessory was constructed still reaches them. Any other lazily-hydrated per-entity service map should follow the same hydrate-from-cache-at-construction pattern rather than assuming the live stream is the only source of a map's keys.
 
-### 5. `iobroker.teslemetry` - ioBroker Adapter
-
-**Location**: `packages/iobroker.teslemetry/`
-
-**Status**: Published to npm. Not yet listed in the ioBroker adapter repository (`ioBroker/ioBroker.repositories`) - that listing is a separate, manual submission (repochecker + ioBroker maintainer review) that requires the npm package to already exist.
-
-**Purpose**: ioBroker adapter exposing vehicles and energy sites as ioBroker states/objects (`lib/StateManager.ts`, `lib/VehicleHandler.ts`, `lib/EnergyHandler.ts`, `lib/StreamHandler.ts`).
-
-**Gotcha**: its typecheck script is named `check`, not `tsc` (`pnpm --filter iobroker.teslemetry check`) - `pnpm -r tsc` silently skips it. The `@iobroker/adapter-core` module's own exports don't include an `Adapter` type; the real `ioBroker.Adapter` type comes from the global `ioBroker` namespace ambiently declared by `@iobroker/types` (pulled in transitively) - don't alias a local import to the name `ioBroker`, it shadows that global.
-
-**Gotcha**: `VehicleHandler`/`EnergyHandler` register vehicles/sites via `teslemetry.api.getVehicle(vin)` / `teslemetry.api.getEnergySite(id)` (get-or-create), never `teslemetry.vehicle(vin)` / `teslemetry.energySite(id)` (those construct unconditionally and throw "already exists" once `createProducts()` has already discovered the same VIN/id). Keep the handlers' SDK-instance maps typed as `Map<string, TeslemetryVehicleApi>` / `Map<number, TeslemetryEnergyApi>`, not `Map<string, any>` - `any` erases the compiler's ability to catch a wrong method name. Also mind the two distinct vehicle-data shapes: `vehicle.vehicleData()` (REST) resolves `{ response: { charge_state, climate_state, vehicle_state, ... } }` (nested, snake_case), while the SSE `data` stream event carries a flat PascalCase signal map (`{ BatteryLevel, InsideTemp, Locked, ... }`) - `StateManager` has separate parsers (`updateVehicleData` vs `updateVehicleDataFromSignals`) for exactly this reason; don't route one shape through the other's parser.
-
-**Gotcha**: the `HvacLeft`/`HvacRightTemperatureRequest` SSE signals and `TeslemetryVehicleApi.setTemps()`'s positional args are physical left/right seats, not driver/passenger - on RHD vehicles the driver sits on the right. `StateManager` stores each vehicle's `config.rhd` (from `VehicleDetails.metadata`, passed in at `createVehicleStates()`) and exposes it via `isRhd(vin)`, which both the SSE mapping in `updateVehicleDataFromSignals` and the `setTemps()` write in `VehicleHandler.handleStateChange` consult to pick the correct side - mirrors the Homebridge plugin's `ClimateService.isRHD` pattern.
-
-**Gotcha**: `VehicleHandler`/`EnergyHandler.handleStateChange()` don't catch their own write failures - a rejected SDK write propagates up to `main.ts`'s `onStateChange()`, the single place that logs it, so a new write branch must not add its own catch/log or the failure logs twice. Each write goes through `writeAndReconcile(id, value, write)` (private to each handler), which acks the requested value on success and re-acks the last confirmed value on failure, so a rejected command never leaves the ioBroker object state looking like it applied.
-
-**Gotcha**: changesets bumps `package.json`/`CHANGELOG.md` on release but never touches `io-package.json` - its `common.version` and `common.news` need a manual sync on every release (`test/packageVersionParity.test.ts` fails CI if they drift, but does not fix them for you) or the ioBroker repochecker hard-fails submission to `ioBroker.repositories`. `common.news` is truncated to the newest 7 entries by the repo builder - trim older ones when adding a new release. No Teslemetry brand/logo asset lives in this monorepo; the real logo mark lives in the separate `website3` repo (its `public/web-app-manifest-512x512.png` is the highest-res copy) - source icons from there, don't hand-draw a placeholder.
-
-**Gotcha**: `npx @iobroker/repochecker <repo-url> --local` (run from `packages/iobroker.teslemetry/`) validates against local files but still resolves the adapter identity from the GitHub repo URL - since this repo is a monorepo (not a dedicated `ioBroker.<adapter>` repo), it always reports spurious `E0002`/`E0004`/`E0007`/`E0020`/`E1003`/`E2000`/`W4001` (repo/package naming) and a false-positive `E9007` (build dir tracked) from reading the filesystem instead of git. Only a dedicated single-adapter repo (a real submission concern, not a code fix) resolves those. `admin/i18n` only has `en`/`de` translations - the repochecker's other 9 suggested languages (`E5010`) are a known, intentionally-deferred gap.
-
 ## Technology Stack
 
 - **pnpm** (workspaces) - package management; version pinned via `packageManager` in root `package.json`
@@ -182,7 +163,7 @@ pnpm link --global n8n-nodes-teslemetry
 - **Oxlint** - code linting (native TS parsing, no per-package tsconfig project setup needed; config at root `.oxlintrc.json`)
 - **tsx** - TypeScript execution (scripts, and each package's `test` script: `tsx --test test/*.test.ts`, Node's built-in test runner)
 - **Changesets** (`@changesets/cli`) - version bumping, changelog generation, and publishing
-- **Node-RED**, **n8n**, **Homebridge** (hap-nodejs), **ioBroker** (`@iobroker/adapter-core`, `@iobroker/types`) - platform SDKs for the respective integration package; see each package's `package.json` for the exact supported version
+- **Node-RED**, **n8n**, **Homebridge** (hap-nodejs) - platform SDKs for the respective integration package; see each package's `package.json` for the exact supported version
 
 ## Development Workflow
 
@@ -195,7 +176,6 @@ pnpm --filter @teslemetry/api client      # regenerate the OpenAPI client
 pnpm lint                                 # oxlint across the whole monorepo (single root invocation)
 pnpm lint:fix                             # auto-fix lint issues
 pnpm -r --no-bail tsc                     # typecheck every package, don't stop at first failure
-pnpm --filter iobroker.teslemetry check   # iobroker's typecheck script is named `check`, not `tsc` - `pnpm -r tsc` skips it silently
 ```
 
 Config: `.oxlintrc.json` at repo root. Two `overrides` blocks intentionally silence rules that conflict with deliberate patterns rather than bugs:
@@ -244,7 +224,6 @@ Changesets drives version management and automated publishing - see `RELEASE.md`
 - **Node-RED**: https://nodered.org/docs/creating-nodes/
 - **n8n**: https://docs.n8n.io/integrations/creating-nodes/
 - **Homebridge Plugin Dev**: https://developers.homebridge.io/
-- **ioBroker Adapter Dev**: https://www.iobroker.net/#en/documentation/dev/adapterdev.md
 
 ## Maintaining this file
 
