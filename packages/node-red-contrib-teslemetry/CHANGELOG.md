@@ -1,5 +1,19 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.6.0
+
+### Minor Changes
+
+- 3a03573: Add a "Test credentials" button to the config node's editor, backed by a new `POST /teslemetry/test-credentials` admin route, so a token can be validated before saving instead of only failing after deploy. The route distinguishes an invalid/expired token (401/403) from any other error.
+- e82e608: Add a `teslemetry-wall-connector` node that splits an Energy Site's `wall_connectors[]` array (e.g. from `teslemetry-energy-event`'s `live_status` payload) into one message per connector, keyed by DIN, with an optional DIN filter to isolate a single connector.
+
+### Patch Changes
+
+- 77b0db2: Retry the config node's initial vehicle/energy-site fetch on failure instead of caching that error for the node's whole lifetime - a transient API/network blip now clears on its own, and a corrected token recovers cleanly on the next redeploy instead of leaving stale state behind.
+- 4191f24: Fix vehicle-command, energy-command, and energy-history nodes staying permanently inert when constructed while the config node's initial products fetch is still failing - they now re-check that error per message instead of once at construction, so a node built during that window becomes functional as soon as the fetch recovers, with no redeploy needed.
+- 023be46: Reject an invalid `msg.daysOfWeek` on `addChargeSchedule`/`addPreconditionSchedule` before calling the API, instead of only checking that it's a non-empty string. Accepts `"All"`, `"Weekdays"`, or a comma separated list of day names (e.g. `"Monday,Wednesday"`).
+- 7f873a8: Document that `setTimeOfUseSettings` replaces the site's entire time-of-use schedule rather than merging with it, in the node's help text, command dropdown, and README.
+
 ## 0.5.0
 
 ### Minor Changes
