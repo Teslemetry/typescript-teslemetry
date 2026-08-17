@@ -18,7 +18,8 @@ export class ChargeFromGrid extends BaseService {
 
     this.parent.emitter.on("site_info", (data) => {
       if (typeof data.components.disallow_charge_from_grid_with_solar_installed === "boolean") {
-        on.updateValue(data.components.disallow_charge_from_grid_with_solar_installed);
+        // This switch is the inverse of the API value
+        on.updateValue(!data.components.disallow_charge_from_grid_with_solar_installed);
       }
     });
   }

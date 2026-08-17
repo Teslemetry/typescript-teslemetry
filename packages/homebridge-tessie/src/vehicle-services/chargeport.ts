@@ -29,7 +29,7 @@ export class ChargePortService extends BaseService {
       });
 
     this.parent.emitter.on("vehicle_data", (data) => {
-      const state = (data.charge_state.charge_port_latch === "Engaged") ? 1 : 0;
+      const state = data.charge_state.charge_port_door_open ? 0 : 1;
       currentState.updateValue(state);
       targetState.updateValue(state);
     });

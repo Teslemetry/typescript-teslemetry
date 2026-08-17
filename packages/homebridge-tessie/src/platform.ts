@@ -42,7 +42,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
 
     this.TeslaFleetApi = new Tessie(this.config.accessToken);
 
-    this.log.debug("Finished initializing platform:", this.config.accessToken);
+    this.log.debug("Finished initializing platform:", this.config.name);
 
     // Homebridge 1.8.0 introduced a `log.success` method that can be used to log success messages
     // For users that are on a version prior to 1.8.0, we need a 'polyfill' for this method
@@ -65,6 +65,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
               const newAccessories: PlatformAccessory<
                 VehicleContext | EnergyContext
               >[] = [];
+              const activeUuids = new Set<string>();
               if (scopes.includes("vehicle_device_data")) {
                 //const newVehicleAccessories: PlatformAccessory<VehicleContext>[] = [];
                 vehicles.forEach(async (product) => {
@@ -76,6 +77,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                   const uuid = this.api.hap.uuid.generate(
                     `${PLATFORM_NAME}:${product.vin}`,
                   );
+                  activeUuids.add(uuid);
                   let accessory = this.accessories.find(
                     (accessory) => accessory.UUID === uuid,
                   ) as PlatformAccessory<VehicleContext> | undefined;
@@ -107,7 +109,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                 //const newEnergyAccessories: PlatformAccessory<EnergyContext>[] = [];
                 energy_sites.forEach((product) => {
                   if (
-                    this.config?.ignore_site?.includes(product.asset_site_id)
+                    this.config?.ignore_site?.includes(product.energy_site_id)
                   ) {
                     this.log.info(
                       "Ignoring energy site",
@@ -119,6 +121,7 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                   const uuid = this.api.hap.uuid.generate(
                     `${PLATFORM_NAME}:${product.id}`,
                   );
+                  activeUuids.add(uuid);
                   let accessory = this.accessories.find(
                     (accessory) => accessory.UUID === uuid,
                   ) as PlatformAccessory<EnergyContext> | undefined;
@@ -148,17 +151,40 @@ export class TeslaFleetApiPlatform implements DynamicPlatformPlugin {
                 });
               }
 
-              return newAccessories;
+              return { newAccessories, activeUuids };
             },
           ),
         )
         .then(
-          (newAccessories) => {
+          ({ newAccessories, activeUuids }) => {
             this.api.registerPlatformAccessories(
               PLUGIN_NAME,
               PLATFORM_NAME,
               newAccessories,
             );
+
+            const staleAccessories = this.accessories.filter(
+              (accessory) => !activeUuids.has(accessory.UUID),
+            );
+            if (staleAccessories.length) {
+              staleAccessories.forEach((accessory) => {
+                this.log.info(
+                  "Removing accessory no longer present or now ignored:",
+                  accessory.displayName,
+                );
+              });
+              this.api.unregisterPlatformAccessories(
+                PLUGIN_NAME,
+                PLATFORM_NAME,
+                staleAccessories,
+              );
+              const staleUuids = new Set(staleAccessories.map((accessory) => accessory.UUID));
+              this.accessories.splice(
+                0,
+                this.accessories.length,
+                ...this.accessories.filter((accessory) => !staleUuids.has(accessory.UUID)),
+              );
+            }
           },
           (error) => {
             this.log.error(error?.data?.error ?? error);

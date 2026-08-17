@@ -12,7 +12,7 @@ export class HomelinkService extends BaseService {
     const target = this.service
       .getCharacteristic(this.platform.Characteristic.TargetDoorState)
       .onSet(async (value) => {
-        if (value) {
+        if (value === this.platform.hap.Characteristic.TargetDoorState.OPEN) {
           target.updateValue(value);
           await this.parent.wakeUpAndWait()
             .then(() => this.vehicle.trigger_homelink(this.platform.config.latitude, this.platform.config.longitude))
