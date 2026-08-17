@@ -1,0 +1,47 @@
+import { VehicleDataResponse } from "tesla-fleet-api/dist/types/vehicle_data.js";
+import { VehicleAccessory } from "../vehicle.js";
+import { BaseService } from "./base.js";
+
+export class BatteryService extends BaseService {
+  constructor(parent: VehicleAccessory) {
+    super(parent, parent.platform.Service.Battery, "Battery", "soc");
+
+    const batteryLevel = this.service
+      .getCharacteristic(this.parent.platform.Characteristic.BatteryLevel);
+
+    const chargingState = this.service
+      .getCharacteristic(this.parent.platform.Characteristic.ChargingState);
+
+    const lowBattery = this.service
+      .getCharacteristic(this.parent.platform.Characteristic.StatusLowBattery);
+
+    this.parent.emitter.on("vehicle_data", (data) => {
+      batteryLevel.updateValue(this.getLevel(data));
+      chargingState.updateValue(this.getChargingState(data));
+      lowBattery.updateValue(this.getLowBattery(data));
+    });
+  }
+
+  getLevel(data: VehicleDataResponse): number {
+    return data.charge_state?.battery_level ?? 50;
+  }
+
+  getChargingState(data: VehicleDataResponse): number {
+    switch (data.charge_state?.charging_state) {
+      case "Starting":
+        return this.parent.platform.hap.Characteristic.ChargingState.CHARGING;
+      case "Charging":
+        return this.parent.platform.hap.Characteristic.ChargingState.CHARGING;
+      case "Disconnected":
+        return this.parent.platform.hap.Characteristic.ChargingState.NOT_CHARGEABLE;
+      case "NoPower":
+        return this.parent.platform.hap.Characteristic.ChargingState.NOT_CHARGEABLE;
+      default:
+        return this.parent.platform.hap.Characteristic.ChargingState.NOT_CHARGING;
+    }
+  }
+
+  getLowBattery(data: VehicleDataResponse): boolean {
+    return this.getLevel(data) <= 20;
+  }
+}

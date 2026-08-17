@@ -1,0 +1,57 @@
+{
+  "pluginAlias": "Tessie",
+  "pluginType": "platform",
+  "singular": false,
+  "headerDisplay": "Requires an active subscription to Tessie. Please login and create an access token at https://my.tessie.com/settings/api",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Name",
+        "description": "A unique name for the platform",
+        "type": "string",
+        "required": true,
+        "default": "Tessie"
+      },
+      "accessToken": {
+        "title": "Access Token",
+        "type": "string",
+        "required": true
+      },
+      "prefixName": {
+        "title": "Prefix Name",
+        "description": "Prefix the name of each service with the name of the vehicle",
+        "type": "boolean",
+        "default": true
+      },
+      "latitude": {
+        "title": "Latitude",
+        "type": "string",
+        "default": "",
+        "description": "Latitude of your Homelink device. Required to use Homelink."
+      },
+      "longitude": {
+        "title": "Longitude",
+        "type": "string",
+        "default": "",
+        "description": "Longitude of your Homelink device. Required to use Homelink."
+      },
+      "ignore_vin": {
+        "title": "Ignore Vehicles",
+        "type": "array",
+        "items": {
+          "title": "VIN",
+          "type": "string"
+        }
+      },
+      "ignore_site": {
+        "title": "Ignore Energy Site",
+        "type": "array",
+        "items": {
+          "title": "Site ID",
+          "type": "number"
+        }
+      }
+    }
+  }
+}

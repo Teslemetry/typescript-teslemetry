@@ -14,7 +14,8 @@ typescript-teslemetry/
 │   ├── api/                           # Core TypeScript/JavaScript SDK
 │   ├── node-red-contrib-teslemetry/   # Node-RED integration
 │   ├── n8n-nodes-teslemetry/          # n8n workflow integration
-│   └── homebridge-teslemetry/         # Homebridge plugin (published to npm)
+│   ├── homebridge-teslemetry/         # Homebridge plugin for Teslemetry (published to npm)
+│   └── homebridge-tessie/             # Homebridge plugin for Tessie (published to npm)
 ├── pnpm-workspace.yaml                # Workspace configuration
 ├── tsconfig.json                      # Root TypeScript config
 ├── package.json                       # Monorepo root package
@@ -26,7 +27,7 @@ See each package's own `package.json`/`README.md` for its purpose, structure, an
 
 The ioBroker adapter (`iobroker.teslemetry`) lives in its own repo, [Teslemetry/ioBroker.teslemetry](https://github.com/Teslemetry/ioBroker.teslemetry) - not in this monorepo.
 
-All integration packages (`node-red`, `n8n`, `homebridge-teslemetry`) depend on `@teslemetry/api` via `"@teslemetry/api": "workspace:*"`, so they always build against the local SDK during development.
+`node-red`, `n8n`, and `homebridge-teslemetry` depend on `@teslemetry/api` via `"@teslemetry/api": "workspace:*"`, so they always build against the local SDK during development. `homebridge-tessie` is the exception: it talks to the Tessie service (a different backend from Teslemetry) via the standalone `tesla-fleet-api` npm package directly, not `@teslemetry/api` - don't wire it onto the shared SDK.
 
 ## Packages
 
@@ -154,6 +155,16 @@ pnpm link --global n8n-nodes-teslemetry
 **Gotcha**: `BaseService`/`BaseEnergyService.setStreamFault()` (called from `VehicleAccessory`/`EnergyAccessory`/`TeslemetryPlatform` to reflect terminal account-stream health) only marks a service's `StatusFault` when that HomeKit service type actually declares it as an optional characteristic (checked via `service.optionalCharacteristics`, not `service.testCharacteristic()` - the latter only reports characteristics already added, which excludes `StatusFault` on a service like `DoorService` that never touches it during normal operation). Only sensor-type services (`ContactSensor`, `OccupancySensor`, and similar) declare `StatusFault` at all; core control services (`LockMechanism`, `Switch`, `Thermostat`, `Battery`) don't, and forcing it onto them via `getCharacteristic()` would silently add an out-of-spec characteristic with a HAP warning - `setStreamFault()` is a no-op for those rather than inventing a misleading fault signal. Services owning more than one HAP `Service` instance (`TpmsService`, `DoorService`) override `setStreamFault()` to loop over all of them, not just the primary `this.service`. `PresenceService`/`WallConnectorService` don't extend `BaseService`/`BaseEnergyService` (see above) but hand-implement the same `setStreamFault()` contract over their own lazily-created sensor maps, clearing a sensor's fault the moment its own signal/DIN reading arrives - independent of any debounce applied to the reading's *value*.
 
 **Gotcha**: `WallConnectorService`'s `connectors` map is otherwise only populated by `live_status`, so per-DIN sensors that already exist in Homebridge's persisted accessory cache from a prior run are invisible to `setStreamFault()` until this run's first `live_status` - its constructor hydrates `connectors` from any matching cached `ContactSensor` services up front (parsed off their `wall-connector-{fault,connected}-<din>` subtype) and immediately applies `TeslemetryPlatform.streamFault` (a public getter over the platform's private terminal-fault flag), so a fault already raised before this accessory was constructed still reaches them. Any other lazily-hydrated per-entity service map should follow the same hydrate-from-cache-at-construction pattern rather than assuming the live stream is the only source of a map's keys.
+
+### 5. `homebridge-tessie` - Homebridge Plugin for Tessie
+
+**Location**: `packages/homebridge-tessie/`
+
+**Purpose**: Exposes vehicles and energy sites as HomeKit accessories for users of the [Tessie](https://tessie.com) service, structurally parallel to `homebridge-teslemetry` (service classes under `src/vehicle-services/*`/`src/energy-services/*`) but talking to Tessie's API surface via `tesla-fleet-api`'s `Tessie` client instead of `@teslemetry/api`.
+
+**Publishing note**: migrated from a standalone hand-published repo; ships to npm as `homebridge-tessie`, superseding that legacy package via a same-name hard cut (no dual-maintain, no rename), same as `homebridge-teslemetry`'s cutover. CI publish requires npm trusted publishing to be registered for this package name on npmjs.com (only an npm org owner can do that) before the changesets flow can publish it.
+
+**No shared code with `homebridge-teslemetry`** beyond following the same file layout by convention - the two plugins target different backend APIs (Tessie vs. Teslemetry) with different client libraries, so service classes are not deduplicated between them despite the structural similarity.
 
 ## Technology Stack
 
