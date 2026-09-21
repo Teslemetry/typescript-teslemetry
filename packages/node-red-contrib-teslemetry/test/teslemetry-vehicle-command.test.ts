@@ -313,7 +313,7 @@ test("navigationGpsRequest coerces numeric-string msg.lat/lon/order to numbers b
   assert.deepStrictEqual(received, { lat: 37.7749, lon: -122.4194, order: 1 });
 });
 
-test("navigationSuperchargerRequest coerces a numeric-string msg.order to a number before calling the SDK", async () => {
+test("navigationSuperchargerRequest coerces numeric-string msg.id/order to numbers before calling the SDK", async () => {
   let received: unknown;
   const vehicle = {
     navigationSuperchargerRequest: async (body: unknown) => {
@@ -324,11 +324,11 @@ test("navigationSuperchargerRequest coerces a numeric-string msg.order to a numb
 
   await runCommand(vehicle, {
     command: "navigationSuperchargerRequest",
-    id: "sc-123",
+    id: "123" as any,
     order: "1" as any,
   });
 
-  assert.deepStrictEqual(received, { id: "sc-123", order: 1 });
+  assert.deepStrictEqual(received, { id: 123, order: 1 });
 });
 
 test("navigationWaypointsRequest passes msg.waypoints through to the SDK", async () => {

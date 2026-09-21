@@ -231,6 +231,7 @@ test("emits energy_totals on the stream and the scoped energy site, routed by id
       {
         createdAt: "2026-01-01T00:00:00.000Z",
         id: siteId,
+        date: "2026-01-01",
         totals,
       },
     ]),
@@ -259,6 +260,7 @@ test("startLocalCache replays a cached energy_totals event to new listeners", as
       {
         createdAt: "2026-01-01T00:00:00.000Z",
         id: siteId,
+        date: "2026-01-01",
         totals,
       },
     ]),
@@ -273,6 +275,7 @@ test("startLocalCache replays a cached energy_totals event to new listeners", as
   siteStream.on("energy_totals", (event) => replayed.push(event.totals));
 
   assert.deepEqual(replayed, [totals]);
+  assert.equal(teslemetry.sse.energyCache[siteId]?.energy_totals?.date, "2026-01-01");
 });
 
 test("once() on a cached energy_totals event fires exactly once and does not leak a dead listener", async () => {
@@ -283,6 +286,7 @@ test("once() on a cached energy_totals event fires exactly once and does not lea
       {
         createdAt: "2026-01-01T00:00:00.000Z",
         id: siteId,
+        date: "2026-01-01",
         totals,
       },
     ]),
@@ -302,6 +306,7 @@ test("once() on a cached energy_totals event fires exactly once and does not lea
   siteStream.emit("energy_totals", {
     createdAt: "2026-01-01T00:00:01.000Z",
     id: siteId,
+    date: "2026-01-01",
     totals: makeTotals({ total_home_usage: 999 }),
   });
   assert.deepEqual(received, [totals]);
