@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.12.0
+
+### Minor Changes
+
+- e15de8e: Updated to match upstream schema
+
 ## 0.11.3
 
 ### Patch Changes

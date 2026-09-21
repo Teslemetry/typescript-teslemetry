@@ -1,5 +1,17 @@
 # @teslemetry/homebridge-teslemetry
 
+## 1.2.2
+
+### Patch Changes
+
+- 4f09d2f: Set the Brightness characteristic's min/max/step on the charge-limit control to 50-100 (step 1), matching the telemetry clamp already applied to `ChargeLimitSoc` readings, so HomeKit itself rejects a client write outside the vehicle's supported charge-limit range instead of forwarding it to the API.
+- 2faedf7: Retry a transient `createProducts()` failure during startup discovery with capped exponential backoff instead of failing discovery outright, and evict any cached accessory for a product no longer returned by the account or newly added to the ignore list, destroying its services (and their SSE listeners) before unregistering it.
+- 6e7431f: Close two gaps left by the terminal stream health fault propagation: PresenceService's occupancy sensors now fault on a terminal stream failure and clear again once their signal reports a fresh value, and WallConnectorService's per-DIN sensors restored from Homebridge's accessory cache (before any `live_status` has arrived this run) are now hydrated and fault-checked immediately instead of being invisible to `setStreamFault()` until their first reading.
+- 52abef2: Remove the unearned "verified-by-homebridge" badge from the README (the plugin is not yet on the official verified-plugins list) and correct the energy site description: `live_status` (power flow, etc.) is delivered via real-time SSE streaming, not periodic polling — only `site_info` (backup reserve, operation mode, etc.) is polled.
+- 6056af9: Handle `stream_error` and terminal `auth_failure` from the account stream: a stream disconnect no longer logs a blanket "will attempt to reconnect" (it may be terminal), and two consecutive auth failures now mark every contact sensor that supports a HomeKit fault state (doors, TPMS, grid outage, storm watch active) as faulted instead of leaving them on their last cached value forever. A later reconnect clears the fault. See the README's Streaming Connection Issues section for recovery steps.
+- Updated dependencies [e15de8e]
+  - @teslemetry/api@0.12.0
+
 ## 1.2.1
 
 ### Patch Changes
