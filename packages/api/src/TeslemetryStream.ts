@@ -108,6 +108,7 @@ export interface EnergySiteCache {
   tariff_content_v2?: SseTariffContentV2["tariff_content_v2"];
   energy_totals?: {
     totals: SseEnergyTotals["totals"];
+    date: SseEnergyTotals["date"];
   };
 }
 
@@ -262,6 +263,7 @@ export class TeslemetryStream extends EventEmitter {
       listener({
         createdAt: new Date().toISOString(),
         id: siteId,
+        date: siteCache.energy_totals.date,
         totals: siteCache.energy_totals.totals,
         isCache: true,
       } satisfies SseEnergyTotals);
@@ -445,7 +447,7 @@ export class TeslemetryStream extends EventEmitter {
     this.emit("all", event);
 
     if ("site_id" in event) {
-      const site = this.energySites.get(event.site_id);
+      const site = this.energySites.get(String(event.site_id));
       if (site) {
         if ("live_status" in event) {
           site.emit("live_status", event);
@@ -459,7 +461,7 @@ export class TeslemetryStream extends EventEmitter {
     }
 
     if ("totals" in event) {
-      const site = this.energySites.get(event.id);
+      const site = this.energySites.get(String(event.id));
       if (site) {
         site.emit("energy_totals", event as SseEnergyTotals);
       }
@@ -528,24 +530,29 @@ export class TeslemetryStream extends EventEmitter {
   };
 
   private cacheLiveStatus = (event: SseLiveStatus): void => {
-    this.energyCache[event.site_id] ??= {};
-    this.energyCache[event.site_id].live_status = event.live_status;
+    const siteId = String(event.site_id);
+    this.energyCache[siteId] ??= {};
+    this.energyCache[siteId].live_status = event.live_status;
   };
 
   private cacheSiteInfo = (event: SseSiteInfo): void => {
-    this.energyCache[event.site_id] ??= {};
-    this.energyCache[event.site_id].site_info = event.site_info;
+    const siteId = String(event.site_id);
+    this.energyCache[siteId] ??= {};
+    this.energyCache[siteId].site_info = event.site_info;
   };
 
   private cacheTariffContentV2 = (event: SseTariffContentV2): void => {
-    this.energyCache[event.site_id] ??= {};
-    this.energyCache[event.site_id].tariff_content_v2 = event.tariff_content_v2;
+    const siteId = String(event.site_id);
+    this.energyCache[siteId] ??= {};
+    this.energyCache[siteId].tariff_content_v2 = event.tariff_content_v2;
   };
 
   private cacheEnergyTotals = (event: SseEnergyTotals): void => {
-    this.energyCache[event.id] ??= {};
-    this.energyCache[event.id].energy_totals = {
+    const siteId = String(event.id);
+    this.energyCache[siteId] ??= {};
+    this.energyCache[siteId].energy_totals = {
       totals: event.totals,
+      date: event.date,
     };
   };
 

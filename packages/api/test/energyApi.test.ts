@@ -149,7 +149,7 @@ test("sendCommand posts the category/command_name/params body to the site's comm
   assert.equal(receivedMethod, "POST");
   assert.match(
     receivedUrl ?? "",
-    new RegExp(`/api/1/energy_sites/${siteId}/command/(?:[?].*)?$`),
+    new RegExp(`/api/1/energy_sites/${siteId}/command(?:/)?(?:[?].*)?$`),
   );
   assert.deepEqual(receivedBody, body);
   assert.deepEqual(result, { response: { ok: true } });
