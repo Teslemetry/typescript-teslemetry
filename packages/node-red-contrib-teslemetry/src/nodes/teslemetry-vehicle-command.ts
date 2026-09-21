@@ -486,12 +486,18 @@ export default function (RED: NodeAPI) {
             break;
           case "navigationSuperchargerRequest":
             validateParameters(msg, {
-              id: { required: true, type: "string" },
-              order: { required: true, type: "number", integer: true, min: 1 },
+              id: { required: true, type: "number", integer: true, min: 1 },
+              order: {
+                required: true,
+                type: "number",
+                integer: true,
+                min: 0,
+                max: 3,
+              },
             });
             result = await vehicle.navigationSuperchargerRequest({
-              id: msg.id,
-              order: Number(msg.order),
+              id: Number(msg.id),
+              order: Number(msg.order) as 0 | 1 | 2 | 3,
             });
             break;
           case "navigationWaypointsRequest":
