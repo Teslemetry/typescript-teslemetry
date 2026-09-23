@@ -49,3 +49,9 @@ jobs:
           out=$(mktemp -d)
           node_modules/.bin/openapi-ts --file openapi-ts.config.ts -o "$out"
           rm -rf "$out"
+
+      - name: Verify API client carries only public routes
+        # The committed client must only reference routes the live public spec
+        # serves - the internal-surface OpenAPI documents describe routes
+        # production never exposes, and generating from one would publish them.
+        run: pnpm --filter @teslemetry/api verify:client
