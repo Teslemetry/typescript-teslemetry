@@ -334,6 +334,12 @@ export class TeslemetryStream extends EventEmitter {
           },
           sseMaxRetryAttempts: 1,
           signal,
+          // Fires for every SSE chunk, including blank keep-alives that
+          // never reach the iterator below: any traffic proves the connection
+          // is up, so a later drop restarts the backoff from scratch.
+          onSseEvent: () => {
+            retries = 0;
+          },
           onSseError: (error) => {
             streamError = error;
           },

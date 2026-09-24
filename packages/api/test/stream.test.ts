@@ -292,3 +292,40 @@ test("connect() after close() reinitializes the stream", async () => {
 
   await teslemetry.sse.close();
 });
+
+test("any SSE traffic, even a keep-alive, resets the backoff before a later reset", async () => {
+  let fetches = 0;
+  const teslemetry = makeTeslemetry(async () => {
+    fetches++;
+    if (fetches <= 2) throw new TypeError("network down");
+    if (fetches === 3) {
+      // Connects, receives only a blank keep-alive, then the socket is reset
+      const body = new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(":\n\n"));
+        },
+        async pull(controller) {
+          await new Promise((resolve) => setTimeout(resolve, 20));
+          controller.error(new TypeError("ECONNRESET"));
+        },
+      });
+      return new Response(body, {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" },
+      });
+    }
+    return new Response(null, { status: 500 });
+  });
+
+  const streamErrors: TeslemetryStreamErrorEvent[] = [];
+  teslemetry.sse.on("stream_error", (event) => streamErrors.push(event));
+
+  await teslemetry.sse.connect();
+  await waitFor(() => streamErrors.length >= 3, 10000);
+
+  assert.equal(streamErrors[1].retries, 2);
+  // Without the reset this would be 3 (an 8 second wait)
+  assert.equal(streamErrors[2].retries, 1);
+
+  await teslemetry.sse.disconnect();
+});
