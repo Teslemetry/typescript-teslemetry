@@ -293,17 +293,19 @@ test("connect() after close() reinitializes the stream", async () => {
   await teslemetry.sse.close();
 });
 
-test("a connection that stayed up resets the backoff so a later reset retries quickly", async (t) => {
-  t.mock.timers.enable({ apis: ["Date"] });
+test("any SSE traffic, even a keep-alive, resets the backoff before a later reset", async () => {
   let fetches = 0;
   const teslemetry = makeTeslemetry(async () => {
     fetches++;
     if (fetches <= 2) throw new TypeError("network down");
     if (fetches === 3) {
-      // Connects, idles for a while, then the socket is reset
+      // Connects, receives only a blank keep-alive, then the socket is reset
       const body = new ReadableStream({
         start(controller) {
-          t.mock.timers.setTime(Date.now() + 120_000);
+          controller.enqueue(new TextEncoder().encode(":\n\n"));
+        },
+        async pull(controller) {
+          await new Promise((resolve) => setTimeout(resolve, 20));
           controller.error(new TypeError("ECONNRESET"));
         },
       });
