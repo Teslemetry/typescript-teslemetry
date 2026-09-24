@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.12.1
+
+### Patch Changes
+
+- d2263b2: Reset the stream reconnect backoff as soon as any traffic (including a blank keep-alive) arrives on the SSE connection, so a single dropped socket after earlier failures no longer causes a long gap before reconnecting.
+
 ## 0.12.0
 
 ### Minor Changes
