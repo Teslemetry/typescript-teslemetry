@@ -127,6 +127,8 @@ export function composeEnergySiteInfo(
 
 type EnergyCache = Record<string, EnergySiteCache>;
 
+const HEALTHY_CONNECTION_MS = 60_000;
+
 export class TeslemetryStream extends EventEmitter {
   private root: Teslemetry;
   public active: boolean = false;
@@ -324,6 +326,7 @@ export class TeslemetryStream extends EventEmitter {
       // then flows through this loop, which re-resolves auth (a refreshed
       // token is picked up on reconnect) and applies the policy below.
       let streamError: unknown;
+      const attemptStart = Date.now();
       try {
         const sse = await getSseById_({
           client: this.root.client,
@@ -358,6 +361,12 @@ export class TeslemetryStream extends EventEmitter {
 
         this.connected = false;
         this.emit("disconnect");
+
+        // The SDK exposes no "connected" signal and keepalives are not
+        // events, so an idle but healthy connection never resets `retries`
+        // above. Treat an attempt that stayed up this long as a working
+        // connection, so one later reset restarts the backoff from scratch.
+        if (Date.now() - attemptStart >= HEALTHY_CONNECTION_MS) retries = 0;
 
         retries++;
         const status = parseSseStatus(error);

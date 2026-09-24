@@ -292,3 +292,38 @@ test("connect() after close() reinitializes the stream", async () => {
 
   await teslemetry.sse.close();
 });
+
+test("a connection that stayed up resets the backoff so a later reset retries quickly", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"] });
+  let fetches = 0;
+  const teslemetry = makeTeslemetry(async () => {
+    fetches++;
+    if (fetches <= 2) throw new TypeError("network down");
+    if (fetches === 3) {
+      // Connects, idles for a while, then the socket is reset
+      const body = new ReadableStream({
+        start(controller) {
+          t.mock.timers.setTime(Date.now() + 120_000);
+          controller.error(new TypeError("ECONNRESET"));
+        },
+      });
+      return new Response(body, {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" },
+      });
+    }
+    return new Response(null, { status: 500 });
+  });
+
+  const streamErrors: TeslemetryStreamErrorEvent[] = [];
+  teslemetry.sse.on("stream_error", (event) => streamErrors.push(event));
+
+  await teslemetry.sse.connect();
+  await waitFor(() => streamErrors.length >= 3, 10000);
+
+  assert.equal(streamErrors[1].retries, 2);
+  // Without the reset this would be 3 (an 8 second wait)
+  assert.equal(streamErrors[2].retries, 1);
+
+  await teslemetry.sse.disconnect();
+});
