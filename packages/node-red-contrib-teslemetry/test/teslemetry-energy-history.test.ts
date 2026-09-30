@@ -27,6 +27,13 @@ function createFakeNode(errors: string[] = []): FakeNode {
   };
 }
 
+/** Node-RED's `done(err)` raises `err` through `node.error(err, msg)`. */
+function failTo(node: FakeNode) {
+  return (err?: unknown) => {
+    if (err !== undefined) node.error(err as string);
+  };
+}
+
 function createFakeRED(): { RED: NodeAPI; registered: Record<string, Function> } {
   const registered: Record<string, Function> = {};
   const RED = {
@@ -40,7 +47,7 @@ function createFakeRED(): { RED: NodeAPI; registered: Record<string, Function> }
   return { RED, registered };
 }
 
-test("a node constructed while the products fetch is failing processes messages once it recovers", async () => {
+test("a node constructed while the products fetch is failing still sends the message to the API", async () => {
   const { RED, registered } = createFakeRED();
   historyNodeModule(RED);
   const ctor = registered["teslemetry-energy-history"];
@@ -70,28 +77,18 @@ test("a node constructed while the products fetch is failing processes messages 
     period: "day",
   });
 
-  let sentWhileFailing = false;
+  // The failed account check must not swallow the command: the API gives
+  // its own answer.
+  let sent = false;
   await node.handlers.input(
     {} as Msg,
     () => {
-      sentWhileFailing = true;
+      sent = true;
     },
-    () => {},
+    failTo(node),
   );
-  assert.equal(sentWhileFailing, false);
-  assert.equal(called, false);
-  assert.ok(errors.some((e) => e.includes("invalid token")));
-
-  instance.error = undefined;
-
-  let sentAfterRecovery = false;
-  await node.handlers.input(
-    {} as Msg,
-    () => {
-      sentAfterRecovery = true;
-    },
-    () => {},
-  );
-  assert.equal(sentAfterRecovery, true);
   assert.equal(called, true);
+  assert.equal(sent, true);
+  // Only the construction-time report of the failed check, no input error.
+  assert.deepEqual(errors, ["Teslemetry error: invalid token"]);
 });

@@ -1,6 +1,6 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { Teslemetry } from "@teslemetry/api";
-import { getInstance, hasInstanceError } from "../shared";
+import { failInput, getInstance } from "../shared";
 import { validateParameters, ValidationRules } from "../validation";
 import { Msg } from "../types";
 
@@ -75,14 +75,6 @@ export default function (RED: NodeAPI) {
     node.status({});
 
     node.on("input", async function (msg: Msg, send, done) {
-      // Re-checked per message rather than once at construction, so a node
-      // built while the products fetch is still failing starts working as
-      // soon as it recovers, without needing a redeploy.
-      if (hasInstanceError(instance, node)) {
-        done();
-        return;
-      }
-
       const siteId: string = node.siteId || (msg.siteId as string) || "";
       const command: string = node.command || (msg.command as string) || "";
       const site = node.teslemetry!.api.getEnergySite(Number(siteId));
@@ -171,10 +163,8 @@ export default function (RED: NodeAPI) {
         node.status({});
         send(msg);
         done();
-      } catch (err: any) {
-        node.status({ fill: "red", shape: "ring", text: err.message });
-        node.error(err.message || "Teslemetry API Error", msg);
-        done();
+      } catch (err: unknown) {
+        failInput(node, done, err);
       }
     });
   }
