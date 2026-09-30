@@ -329,3 +329,119 @@ test("any SSE traffic, even a keep-alive, resets the backoff before a later rese
 
   await teslemetry.sse.disconnect();
 });
+
+test("a clean end of the stream is a disconnect that backs off before reconnecting", async () => {
+  let fetches = 0;
+  // What the server does while shutting down: 200, the opening `retry:`
+  // chunk, then a clean end of the response
+  const teslemetry = makeTeslemetry(async () => {
+    fetches++;
+    return new Response("retry: 1000\n\n", {
+      status: 200,
+      headers: { "Content-Type": "text/event-stream" },
+    });
+  });
+
+  const events: string[] = [];
+  const streamErrors: TeslemetryStreamErrorEvent[] = [];
+  teslemetry.sse.on("connect", () => events.push("connect"));
+  teslemetry.sse.on("disconnect", () => events.push("disconnect"));
+  teslemetry.sse.on("stream_error", (event) => {
+    events.push("stream_error");
+    streamErrors.push(event);
+  });
+
+  await teslemetry.sse.connect();
+  await waitFor(() => streamErrors.length >= 1);
+
+  assert.deepEqual(events, ["connect", "disconnect", "stream_error"]);
+  assert.equal(streamErrors[0].retries, 1);
+  assert.equal(streamErrors[0].status, undefined);
+  assert.equal(teslemetry.sse.connected, false);
+  assert.equal(teslemetry.sse.active, true);
+
+  // The base backoff is 2s: no tight reconnect loop in the meantime
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  assert.equal(fetches, 1);
+
+  await teslemetry.sse.close();
+});
+
+test("connect is emitted on the first chunk, not before the server answers", async () => {
+  let fetches = 0;
+  let answer: (response: Response) => void = () => {};
+  const teslemetry = makeTeslemetry(async () => {
+    fetches++;
+    if (fetches === 1) {
+      return new Response(null, { status: 500 });
+    }
+    return new Promise<Response>((resolve) => {
+      answer = resolve;
+    });
+  });
+
+  let connects = 0;
+  teslemetry.sse.on("connect", () => connects++);
+  const streamErrors: TeslemetryStreamErrorEvent[] = [];
+  teslemetry.sse.on("stream_error", (event) => streamErrors.push(event));
+
+  await teslemetry.sse.connect();
+
+  // A rejected attempt never announces a connection
+  await waitFor(() => streamErrors.length >= 1);
+  assert.equal(connects, 0);
+  assert.equal(teslemetry.sse.connected, false);
+
+  // Nor does a request that is still waiting for its response
+  await waitFor(() => fetches >= 2, 5000);
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  assert.equal(connects, 0);
+  assert.equal(teslemetry.sse.connected, false);
+
+  answer(
+    openSseResponse({
+      createdAt: "2026-01-01T00:00:00.000Z",
+      vin: "TESTVIN0000000000",
+      state: "online",
+    }),
+  );
+  await waitFor(() => connects >= 1);
+  assert.equal(connects, 1);
+  assert.equal(teslemetry.sse.connected, true);
+
+  await teslemetry.sse.close();
+});
+
+test("the reconnect backoff is capped at 60 seconds", async () => {
+  const teslemetry = makeTeslemetry(
+    async () => new Response(null, { status: 500 }),
+  );
+  const streamErrors: TeslemetryStreamErrorEvent[] = [];
+  teslemetry.sse.on("stream_error", (event) => streamErrors.push(event));
+
+  // Record each backoff wait and let it elapse at once, so the whole ramp
+  // runs in milliseconds; shorter timers (this file's own polling) pass
+  // through untouched.
+  const realSetTimeout = globalThis.setTimeout;
+  const waits: number[] = [];
+  globalThis.setTimeout = ((fn: () => void, ms?: number) => {
+    if (ms !== undefined && ms >= 1000) {
+      waits.push(ms);
+      return realSetTimeout(fn, 0);
+    }
+    return realSetTimeout(fn, ms);
+  }) as typeof setTimeout;
+
+  try {
+    await teslemetry.sse.connect();
+    await waitFor(() => streamErrors.length >= 8);
+    await teslemetry.sse.close();
+  } finally {
+    globalThis.setTimeout = realSetTimeout;
+  }
+
+  assert.deepEqual(
+    waits.slice(0, 7),
+    [2000, 4000, 8000, 16000, 32000, 60000, 60000],
+  );
+});

@@ -127,6 +127,11 @@ export function composeEnergySiteInfo(
 
 type EnergyCache = Record<string, EnergySiteCache>;
 
+/** Ceiling for the exponential reconnect backoff: long enough to spread a
+ *  fleet's reconnects after an outage, short enough that recovery does not
+ *  trail the server coming back by more than a minute. */
+const MAX_BACKOFF_SECONDS = 60;
+
 export class TeslemetryStream extends EventEmitter {
   private root: Teslemetry;
   public active: boolean = false;
@@ -336,18 +341,22 @@ export class TeslemetryStream extends EventEmitter {
           signal,
           // Fires for every SSE chunk, including blank keep-alives that
           // never reach the iterator below: any traffic proves the connection
-          // is up, so a later drop restarts the backoff from scratch.
+          // is up, so a later drop restarts the backoff from scratch. It is
+          // also the first proof the server answered at all - getSseById_
+          // only builds a lazy generator, the request is not sent until the
+          // loop below starts reading - so "connect" is announced here (the
+          // server opens every stream with a `retry:` chunk).
           onSseEvent: () => {
             retries = 0;
+            if (this.connected || !this.active) return;
+            this.logger.info(`Connected to stream`);
+            this.connected = true;
+            this.emit("connect");
           },
           onSseError: (error) => {
             streamError = error;
           },
         });
-
-        this.logger.info(`Connected to stream`);
-        this.connected = true;
-        this.emit("connect");
 
         if (sse.stream) {
           for await (const event of sse.stream) {
@@ -358,7 +367,11 @@ export class TeslemetryStream extends EventEmitter {
           }
         }
 
-        if (streamError !== undefined) throw streamError;
+        // The server ending the response without an error (it does so for
+        // every open stream when it shuts down for a deploy) is a lost
+        // connection like any other: report it and back off before retrying
+        // rather than reconnecting in a tight loop.
+        throw streamError ?? new Error("SSE stream ended by the server");
       } catch (error) {
         if (!this.active) break;
 
@@ -394,7 +407,7 @@ export class TeslemetryStream extends EventEmitter {
           continue;
         }
 
-        const delay = Math.min(2 ** retries, 600) * 1000;
+        const delay = Math.min(2 ** retries, MAX_BACKOFF_SECONDS) * 1000;
         this.logger.info(`Reconnecting in ${delay / 1000} seconds...`);
 
         await sleep(delay, signal);
