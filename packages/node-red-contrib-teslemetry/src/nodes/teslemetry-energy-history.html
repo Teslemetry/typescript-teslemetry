@@ -21,7 +21,7 @@
         outputs: 1,
         icon: "font-awesome/fa-line-chart",
         label: function () {
-            return this.name || "Energy: " + (this.historyType || "History");
+            return this.name || "Energy: " + (this.historyType || "msg.historyType");
         },
         oneditprepare: function () {
             const node = this;
@@ -116,6 +116,7 @@
             <i class="fa fa-database"></i> History Type
         </label>
         <select id="node-input-historyType">
+            <option value="">From msg.historyType</option>
             <option value="energy">Energy History</option>
             <option value="backup">Backup History</option>
             <option value="telemetry">Telemetry (Charging)</option>
@@ -126,6 +127,7 @@
             <i class="fa fa-calendar"></i> Period
         </label>
         <select id="node-input-period">
+            <option value="">From msg.period</option>
             <option value="day">Day</option>
             <option value="week">Week</option>
             <option value="month">Month</option>
@@ -196,11 +198,21 @@
         <dt class="optional">
             historyType <span class="property-type">string</span>
         </dt>
-        <dd>Type of history: "energy", "backup", or "telemetry"</dd>
+        <dd>
+            Type of history: "energy", "backup", or "telemetry". Only used
+            when History Type is set to <b>From msg.historyType</b> (defaults
+            to "energy" if the message has none); a type selected in the node
+            takes precedence.
+        </dd>
         <dt class="optional">
             period <span class="property-type">string</span>
         </dt>
-        <dd>Aggregation period: "day", "week", "month", or "year"</dd>
+        <dd>
+            Aggregation period: "day", "week", "month", or "year". Only used
+            when Period is set to <b>From msg.period</b> (defaults to "day" if
+            the message has none); a period selected in the node takes
+            precedence.
+        </dd>
         <dt class="optional">
             startDate <span class="property-type">string</span>
         </dt>

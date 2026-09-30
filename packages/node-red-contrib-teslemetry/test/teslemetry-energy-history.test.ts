@@ -95,3 +95,49 @@ test("a node constructed while the products fetch is failing processes messages 
   assert.equal(sentAfterRecovery, true);
   assert.equal(called, true);
 });
+
+test("msg.historyType and msg.period are used when the node's selects are 'From msg…' (empty)", async () => {
+  const { RED, registered } = createFakeRED();
+  historyNodeModule(RED);
+  const ctor = registered["teslemetry-energy-history"];
+
+  const calls: unknown[][] = [];
+  const site = {
+    getCalendarHistory: async (...args: unknown[]) => {
+      calls.push(args);
+      return { response: {} };
+    },
+  };
+
+  const configId = "cfg-from-msg-test";
+  instances.set(configId, {
+    teslemetry: { api: { getEnergySite: () => site } } as any,
+    products: Promise.resolve({} as any),
+  });
+
+  const errors: string[] = [];
+  const node = createFakeNode(errors);
+  ctor.call(node, {
+    teslemetryConfig: configId,
+    siteId: "12345",
+    historyType: "",
+    period: "",
+  });
+
+  await node.handlers.input(
+    { historyType: "backup", period: "month" } as Partial<Msg> as Msg,
+    () => {},
+    () => {},
+  );
+  // No msg values: falls back to the documented energy/day defaults.
+  await node.handlers.input({} as Msg, () => {}, () => {});
+
+  assert.deepEqual(errors, []);
+  assert.deepEqual(
+    calls.map(([kind, period]) => [kind, period]),
+    [
+      ["backup", "month"],
+      ["energy", "day"],
+    ],
+  );
+});

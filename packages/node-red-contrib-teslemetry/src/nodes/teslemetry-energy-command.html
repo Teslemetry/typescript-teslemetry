@@ -17,7 +17,7 @@
         outputs: 1,
         icon: "font-awesome/fa-bolt",
         label: function () {
-            return this.name || "Energy: " + (this.command || "Status");
+            return this.name || "Energy: " + (this.command || "msg.command");
         },
         oneditprepare: function () {
             const node = this;
@@ -95,6 +95,7 @@
             <i class="fa fa-cogs"></i> Command
         </label>
         <select id="node-input-command">
+            <option value="">From msg.command</option>
             <option value="getLiveStatus">Get Live Status</option>
             <option value="getSiteInfo">Get Site Info</option>
             <option value="getTariff">Get Tariff (TOU rates)</option>
@@ -106,7 +107,7 @@
             <option value="setStormModeOn">Enable Storm Mode</option>
             <option value="setStormModeOff">Disable Storm Mode</option>
             <option value="setBackupReserve">
-                Set Backup Reserve (msg.percent)
+                Set Backup Reserve (msg.percentage)
             </option>
             <option value="setOffGridVehicleChargingReserve">
                 Set Off-Grid Charge Reserve (msg.percent)
@@ -137,11 +138,20 @@
         <dt class="optional">
             command <span class="property-type">string</span>
         </dt>
-        <dd>Command to execute</dd>
+        <dd>
+            Command to execute, e.g. <code>setStormModeOn</code>. Only used
+            when Command is set to <b>From msg.command</b>; a command selected
+            in the node takes precedence.
+        </dd>
         <dt class="optional">
-            payload <span class="property-type">object</span>
+            percentage / percent <span class="property-type">number</span>
         </dt>
-        <dd>Arguments for commands</dd>
+        <dd>
+            Command arguments are read from the top level of the message, not
+            from <code>msg.payload</code>: <code>msg.percentage</code> (0-100)
+            for <code>setBackupReserve</code> and <code>msg.percent</code>
+            (0-100) for <code>setOffGridVehicleChargingReserve</code>.
+        </dd>
         <dt class="optional">
             tariffContentV2 <span class="property-type">object</span>
         </dt>

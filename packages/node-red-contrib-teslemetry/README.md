@@ -64,11 +64,13 @@ Send commands to a specific vehicle or retrieve vehicle data.
 
 **Configuration:**
 - **VIN**: Select a vehicle or leave empty to use `msg.vin`.
-- **Command**: Select a command or leave empty to use `msg.command`.
+- **Command**: Select a command, or choose **From msg.command** to take it from each message.
+
+A VIN or command selected in the node always wins; `msg.vin` and `msg.command` are only read when the matching dropdown is set to its **From msg…** option. Command arguments are read from the top level of the message (`msg.percent`, not `msg.payload.percent`).
 
 **Inputs:**
-- `msg.vin` (string): VIN of the vehicle (if not configured).
-- `msg.command` (string): Command to execute (if not configured).
+- `msg.vin` (string): VIN of the vehicle (when VIN is **From msg.vin**).
+- `msg.command` (string): Command to execute, e.g. `lockDoors` (when Command is **From msg.command**).
 - `msg.driver_temp` (number): Driver temperature for `setTemps`.
 - `msg.passenger_temp` (number): Passenger temperature for `setTemps`.
 - `msg.seat` (string): Seat position for `setSeatHeater` (e.g., `front_left`).
@@ -84,14 +86,56 @@ Send commands to a Tesla Energy Site or retrieve site status.
 
 **Configuration:**
 - **Site ID**: Select a site or leave empty to use `msg.siteId`.
-- **Command**: Select a command or leave empty to use `msg.command`.
+- **Command**: Select a command, or choose **From msg.command** to take it from each message.
+
+A site or command selected in the node always wins; `msg.siteId` and `msg.command` are only read when the matching dropdown is set to its **From msg…** option. Command arguments are read from the top level of the message, not from `msg.payload`.
 
 **Inputs:**
-- `msg.siteId` (number): Energy Site ID (if not configured).
-- `msg.command` (string): Command to execute (if not configured).
+- `msg.siteId` (number): Energy Site ID (when Site ID is **From msg.siteId**).
+- `msg.command` (string): Command to execute, e.g. `setStormModeOn` (when Command is **From msg.command**).
 - `msg.percentage` (number): Backup reserve percentage for `setBackupReserve`.
 - `msg.percent` (number): Off-grid reserve percentage for `setOffGridVehicleChargingReserve`.
 - `msg.tariffContentV2` (object): Full time-of-use tariff document for `setTimeOfUseSettings`, matching the `TariffContentV2` shape (`version`, `utility`, `code`, `name`, `currency`, `daily_charges`, `demand_charges`, `energy_charges`, `seasons` required). **Replaces the site's entire time-of-use schedule** - it is not merged with the existing schedule.
+
+### teslemetry-energy-history
+Retrieve historical data for a Tesla Energy Site.
+
+**Configuration:**
+- **Site ID**: Select a site, or choose **From msg.siteId**.
+- **History Type**: **Energy History** (solar, battery and grid energy), **Backup History** (off-grid events) or **Telemetry (Charging)** (Wall Connector charging history), or choose **From msg.historyType**.
+- **Period**: Day, Week, Month or Year, or choose **From msg.period**. Not used for Telemetry (Charging).
+- **Start Date** / **End Date** / **Time Zone**: Leave empty to use `msg.startDate` / `msg.endDate` / `msg.timeZone`.
+
+A value set in the node always wins; the matching message property is only read when the node's own value is empty or **From msg…**.
+
+**Inputs:**
+- `msg.siteId` (number): Energy Site ID.
+- `msg.historyType` (string): `energy`, `backup` or `telemetry` (defaults to `energy`).
+- `msg.period` (string): `day`, `week`, `month` or `year` (defaults to `day`).
+- `msg.startDate` / `msg.endDate` (string): Date-time with a UTC offset, e.g. `2026-01-15T00:00:00-08:00`.
+- `msg.timeZone` (string): IANA time zone, e.g. `America/Los_Angeles`.
+
+**Outputs:**
+- `msg.payload`: The history response from the API.
+
+### teslemetry-energy-event
+Listen for real-time Server-Sent Events (SSE) from one Tesla Energy Site.
+
+**Configuration:**
+- **Site ID**: The site to listen to (required - this node cannot listen across all sites).
+- **Event Type**: The type of event to listen for.
+
+**Event Types:**
+- **all**: Every event type below
+- **live_status**: Live power flow (solar, battery, grid, load, Wall Connectors)
+- **site_info**: Site configuration changes
+- **tariff_content_v2**: Time-of-use tariff changes; `null` means the tariff was removed
+- **energy_totals**: Daily energy totals
+
+**Outputs:**
+- `msg.payload`: The whole event object. Its data sits under a key named after the event type - e.g. `msg.payload.live_status.solar_power` - except `energy_totals`, which carries `date` and `totals` at the top level.
+- `msg.topic`: The event type that fired
+- `msg.siteId`: The Energy Site ID the event belongs to
 
 ### teslemetry-event
 Listen for real-time Server-Sent Events (SSE) from Teslemetry.
@@ -120,12 +164,22 @@ Listen for specific signal changes from a vehicle.
 
 **Configuration:**
 - **VIN**: The vehicle to monitor
-- **Field**: The specific signal field to listen for (e.g., `speed`, `odometer`, `battery_level`)
+- **Field**: The specific signal field to listen for (e.g., `VehicleSpeed`, `Odometer`, `BatteryLevel`). Both are chosen in the node - it has no input, so neither can come from a message.
 
 **Outputs:**
 - `msg.payload`: The new value of the signal
 - `msg.topic`: `signal`
 - `msg.field`: The name of the field
+
+Signal fields use the streaming names shown in the dropdown, which differ from the `vehicle_data` names returned by **Get Vehicle Data** (`BatteryLevel` there is `charge_state.battery_level`).
+
+### Units and `null` values
+
+Values are passed through exactly as the vehicle or site reports them; nothing is converted to your locale.
+
+- Vehicle distances are in miles and speeds in mph regardless of the car's display setting - `Odometer` is miles, `VehicleSpeed` is mph. `BatteryLevel` is a percentage (0-100).
+- Energy site values are likewise the raw numbers Tesla reports.
+- Any signal value can be `null` when the vehicle has no reading for that field. Check for it before comparing: in JavaScript `null < 20` is `true`.
 
 ### teslemetry-wall-connector
 Splits an Energy Site's `wall_connectors` array (e.g. from a `teslemetry-energy-event` `live_status` message) into one message per connector.
@@ -150,7 +204,7 @@ A DIN absent from the input emits nothing for that DIN - it does not send a synt
 
 1. Add a **geofence** or **location** trigger node
 2. Add a **function** node to set `msg.command = "lockDoors"`
-3. Add a **teslemetry-vehicle-command** node with your VIN configured
+3. Add a **teslemetry-vehicle-command** node with your VIN configured and Command set to **From msg.command**
 4. Connect them together
 
 ### Example 2: Start Climate Control on Schedule
@@ -171,8 +225,8 @@ A DIN absent from the input emits nothing for that DIN - it does not send a synt
 ### Example 4: Alert on Low Battery
 
 1. Add a **teslemetry-signal** node
-2. Set Field to `battery_level`
-3. Add a **switch** node to check if value < 20
+2. Set Field to `BatteryLevel`
+3. Add a **switch** node to check if value is not `null` and < 20
 4. Add notification node (email/SMS/Pushover)
 
 ## Available Vehicle Commands
@@ -183,7 +237,7 @@ A DIN absent from the input emits nothing for that DIN - it does not send a synt
 - **Honk Horn**: Honks the horn
 - **Lock/Unlock Doors**: Controls door locks
 - **Remote Start**: Enables keyless driving
-- **Actuate Trunk**: Opens/closes front or rear trunk
+- **Actuate Trunk**: Opens the front trunk; toggles the rear trunk (a powered rear trunk that is open closes)
 - **Tonneau**: Opens/closes the tonneau cover (Cybertruck)
 - **Sunroof**: Vent/close/stop (legacy Model S/X with a panoramic sunroof)
 - **Climate Control**: Start/stop HVAC, set temps, seat heaters, steering wheel heater, cabin overheat protection, auto seat/steering-wheel climate
