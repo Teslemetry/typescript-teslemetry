@@ -13,6 +13,9 @@ const BENIGN_REASONS = new Set(["already_set", "not_charging", "requested"]);
  */
 const SET_ANSWER_MS = 8000;
 
+/** Number of SET writes each characteristic has received, to tell the newest apart. */
+const writeCounts = new WeakMap<Characteristic, number>();
+
 /**
  * Await a command and throw when the API refused it. A refused command is
  * answered with HTTP 200 and `{ response: { result: false, reason } }`, so it
@@ -42,6 +45,8 @@ export async function runSetHandler(
 ): Promise<void> {
   // HAP only stores a written value once the handler has returned.
   const previous = characteristic.value;
+  const write = (writeCounts.get(characteristic) ?? 0) + 1;
+  writeCounts.set(characteristic, write);
   const running = handler(value);
   let timer: ReturnType<typeof setTimeout> | undefined;
   const stillRunning = await Promise.race([
@@ -54,7 +59,9 @@ export async function runSetHandler(
 
   running.catch((error) => {
     onLateFailure(error);
-    // Leave a value that telemetry or a newer write has since replaced.
+    // Leave a value that telemetry has since replaced, and one a newer write
+    // owns: a repeat of the same value is otherwise indistinguishable.
+    if (writeCounts.get(characteristic) !== write) return;
     if (characteristic.value === value) characteristic.updateValue(previous);
   });
 }

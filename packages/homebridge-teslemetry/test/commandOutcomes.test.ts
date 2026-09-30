@@ -157,6 +157,20 @@ test("a command refused after HomeKit was answered puts the characteristic back"
 	assert.equal(hapService.getCharacteristic(LockCurrentState).value, LockCurrentState.UNSECURED);
 });
 
+test("a late failure leaves a newer successful write of the same value in place", async (t) => {
+	const { hapService, target, api, finish, answer } = await startSlowLock(t);
+	assert.equal(answer(), "success");
+
+	api.lockDoors = () => Promise.resolve({ response: { result: true, reason: "" } });
+	await target.handleSetRequest(LockTargetState.SECURED as never);
+
+	finish.reject(new Error("vehicle offline"));
+	await settle();
+
+	assert.equal(target.value, LockTargetState.SECURED);
+	assert.equal(hapService.getCharacteristic(LockCurrentState).value, LockCurrentState.SECURED);
+});
+
 // --- "always on" controls ---
 
 test("turning the Charge Limit bulb off leaves it on once the write has completed", async () => {
