@@ -2,7 +2,6 @@
   "name": "@teslemetry/node-red-contrib-teslemetry",
   "version": "0.6.0",
   "description": "Node-RED nodes for controlling Tesla vehicles and energy sites via Teslemetry API",
-  "main": "dist/index.cjs",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -47,14 +46,14 @@
   "node-red": {
     "version": ">=3.0.0",
     "nodes": {
-      "teslemetry-config": "dist/nodes/teslemetry-config.cjs",
-      "teslemetry-vehicle-command": "dist/nodes/teslemetry-vehicle-command.cjs",
-      "teslemetry-event": "dist/nodes/teslemetry-event.cjs",
-      "teslemetry-signal": "dist/nodes/teslemetry-signal.cjs",
-      "teslemetry-energy-command": "dist/nodes/teslemetry-energy-command.cjs",
-      "teslemetry-energy-history": "dist/nodes/teslemetry-energy-history.cjs",
-      "teslemetry-energy-event": "dist/nodes/teslemetry-energy-event.cjs",
-      "teslemetry-wall-connector": "dist/nodes/teslemetry-wall-connector.cjs"
+      "teslemetry-config": "dist/nodes/teslemetry-config.js",
+      "teslemetry-vehicle-command": "dist/nodes/teslemetry-vehicle-command.js",
+      "teslemetry-event": "dist/nodes/teslemetry-event.js",
+      "teslemetry-signal": "dist/nodes/teslemetry-signal.js",
+      "teslemetry-energy-command": "dist/nodes/teslemetry-energy-command.js",
+      "teslemetry-energy-history": "dist/nodes/teslemetry-energy-history.js",
+      "teslemetry-energy-event": "dist/nodes/teslemetry-energy-event.js",
+      "teslemetry-wall-connector": "dist/nodes/teslemetry-wall-connector.js"
     }
   },
   "devDependencies": {
