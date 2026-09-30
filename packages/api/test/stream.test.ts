@@ -3,7 +3,11 @@ import assert from "node:assert/strict";
 import { once } from "node:events";
 import { Teslemetry } from "../src/Teslemetry.js";
 import { TeslemetryStreamAuthError } from "../src/exceptions.js";
-import type { TeslemetryStreamErrorEvent } from "../src/TeslemetryStream.js";
+import { TeslemetryStream } from "../src/TeslemetryStream.js";
+import type {
+  TeslemetryStreamErrorEvent,
+  TeslemetryStreamOptions,
+} from "../src/TeslemetryStream.js";
 import type { Logger } from "../src/logger.js";
 
 const silentLogger: Logger = {
@@ -444,4 +448,61 @@ test("the reconnect backoff is capped at 60 seconds", async () => {
     waits.slice(0, 7),
     [2000, 4000, 8000, 16000, 32000, 60000, 60000],
   );
+});
+
+/** Opens a stream with the given options and returns the first request URL. */
+async function streamRequestUrl(
+  stream?: TeslemetryStreamOptions,
+): Promise<URL> {
+  let url: URL | undefined;
+  const teslemetry = makeTeslemetry(async (request) => {
+    url ??= new URL(request.url);
+    // Held open until disconnect() aborts it, so the loop never reconnects
+    return openSseResponse({
+      createdAt: "2026-01-01T00:00:00.000Z",
+      vin: "TESTVIN0000000000",
+      state: "online",
+    });
+  });
+  const sse = new TeslemetryStream(teslemetry, stream);
+
+  await sse.connect();
+  await waitFor(() => url !== undefined);
+  await sse.disconnect();
+  return url!;
+}
+
+test("the stream URL carries a well-formed cache query: true when unset", async () => {
+  const url = await streamRequestUrl();
+
+  assert.equal(url.pathname, "/sse/");
+  assert.ok(!url.search.startsWith("??"), url.search);
+  assert.equal(url.searchParams.get("cache"), "true");
+  assert.equal(url.searchParams.has("?cache"), false);
+});
+
+test("the stream URL carries cache=true when cache is true", async () => {
+  const url = await streamRequestUrl({ cache: true });
+
+  assert.equal(url.searchParams.get("cache"), "true");
+  assert.equal(url.searchParams.has("?cache"), false);
+});
+
+test("the stream URL carries cache=false when cache is false", async () => {
+  const url = await streamRequestUrl({ cache: false });
+
+  assert.equal(url.searchParams.get("cache"), "false");
+  assert.equal(url.searchParams.has("?cache"), false);
+});
+
+test("cache.cloud alone decides the cache query, and a vin goes in the path", async () => {
+  const url = await streamRequestUrl({
+    vin: "5YJ3E1EA0KF000000",
+    cache: { cloud: false, local: true },
+    topics: ["state"],
+  });
+
+  assert.equal(url.pathname, "/sse/5YJ3E1EA0KF000000");
+  assert.equal(url.searchParams.get("cache"), "false");
+  assert.equal(url.searchParams.get("topics"), "state");
 });

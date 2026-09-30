@@ -2,7 +2,8 @@
     RED.nodes.registerType('teslemetry-config', {
         category: 'config',
         defaults: {
-            name: { value: "" }
+            name: { value: "" },
+            replay: { value: false }
         },
         credentials: {
             token: { type: "password" }
@@ -62,6 +63,10 @@
         <button type="button" id="node-config-test-credentials-button" class="red-ui-button">Test credentials</button>
         <span id="node-config-test-credentials-result" style="margin-left: 10px;"></span>
     </div>
+    <div class="form-row">
+        <label for="node-config-input-replay" style="width: auto;"><i class="fa fa-history"></i> Replay last known values on connect</label>
+        <input type="checkbox" id="node-config-input-replay" style="display: inline-block; width: auto; vertical-align: top; margin-left: 10px;">
+    </div>
 </script>
 
 <script type="text/html" data-help-name="teslemetry-config">
@@ -70,4 +75,11 @@
     <p>Use <b>Test credentials</b> to check a token before saving. If a deployed
     config's token expires, streaming nodes show an "auth failed" status until
     the token is fixed here and the flow is redeployed.</p>
+    <p><b>Replay last known values on connect</b> is off by default: nodes stay
+    silent until a value next changes. Tick it to have Teslemetry send its last
+    known state each time the stream connects or reconnects, so flows start with
+    current values. Replayed events carry <code>isCache: true</code> in the
+    payload of the event nodes; a Signal node outputs only the value, so a
+    replayed value there has no marker. Flows that notify on an event will
+    fire again on every reconnect unless they check <code>isCache</code>.</p>
 </script>

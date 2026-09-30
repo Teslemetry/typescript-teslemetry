@@ -59,6 +59,10 @@ npm install /path/to/packages/node-red-contrib-teslemetry
 ### teslemetry-config
 Configuration node to store your Teslemetry Access Token.
 
+**Configuration:**
+- **Access Token**: Your Teslemetry access token.
+- **Replay last known values on connect**: Off by default, so nodes stay silent until a value next changes. When ticked, Teslemetry sends its last known state each time the stream connects or reconnects. Replayed events carry `isCache: true` in the payload of the event nodes; a Signal node outputs only the value, so a replayed value there has no marker.
+
 ### teslemetry-vehicle-command
 Send commands to a specific vehicle or retrieve vehicle data.
 

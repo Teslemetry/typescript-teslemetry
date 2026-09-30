@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   createProductsFetcher,
   PRODUCTS_RETRY_DELAY_MS,
+  streamOptions,
   testCredentials,
 } from "../src/nodes/teslemetry-config.js";
 import type { Instance } from "../src/shared.js";
@@ -150,4 +151,17 @@ test("testCredentials treats a non-auth failure as recoverable, not an auth erro
   assert.equal(result.ok, false);
   assert.equal((result as any).auth, false);
   assert.match((result as any).message, /upstream unavailable/);
+});
+
+test("replay is off unless the config node explicitly ticks it", () => {
+  // A config node saved before the option existed has no `replay` property
+  assert.deepEqual(streamOptions({}), {
+    cache: { cloud: false, local: false },
+  });
+  assert.deepEqual(streamOptions({ replay: false }), {
+    cache: { cloud: false, local: false },
+  });
+  assert.deepEqual(streamOptions({ replay: true }), {
+    cache: { cloud: true, local: false },
+  });
 });
