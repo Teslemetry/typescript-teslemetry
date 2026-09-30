@@ -1,7 +1,20 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TeslemetryTrigger } from "../src/nodes/TeslemetryTrigger.node.js";
-import { withMockedFetch } from "./testHelpers.js";
+import { fakeNode, withMockedFetch as withFetch } from "./testHelpers.js";
+
+// trigger() checks the token against /api/test before it opens the stream.
+const withMockedFetch: typeof withFetch = (handler, run) =>
+  withFetch(
+    (request) =>
+      new URL(request.url).pathname === "/api/test"
+        ? new Response(JSON.stringify({ response: true }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          })
+        : handler(request),
+    run,
+  );
 
 function sseResponse(events: Array<Record<string, unknown>>) {
   const body = events.map((e) => `data: ${JSON.stringify(e)}\n\n`).join("");
@@ -19,6 +32,8 @@ function fakeTriggerContext(params: Record<string, unknown>) {
       name in params ? params[name] : fallback,
     emit: (data: unknown) => emitted.push(data),
     emitError: () => {},
+    getNode: () => fakeNode,
+    getMode: () => "trigger",
     logger: { info: () => {}, warn: () => {}, error: () => {}, debug: () => {} },
     helpers: { returnJsonArray: (data: unknown) => data },
   };

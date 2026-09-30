@@ -1,4 +1,3 @@
-import { Teslemetry } from '@teslemetry/api';
 import {
 	IExecuteFunctions,
 	ILoadOptionsFunctions,
@@ -6,13 +5,15 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
+	NodeOperationError,
 } from 'n8n-workflow';
+import { commandFailure, createTeslemetry, errorText, loadWithTeslemetry, toNodeError } from '../shared';
 
 export class TeslemetryVehicle implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Teslemetry Vehicle',
 		name: 'teslemetryVehicle',
-		icon: 'fa:car',
+		icon: 'file:teslemetryVehicle.svg',
 		group: ['transform'],
 		version: 1,
 		description: 'Interact with Teslemetry Vehicle API',
@@ -726,15 +727,15 @@ export class TeslemetryVehicle implements INodeType {
 	methods = {
 		loadOptions: {
 			async getVins(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const credentials = await this.getCredentials('teslemetryApi');
-				const teslemetry = new Teslemetry(credentials.accessToken as string);
-				const response = await teslemetry.api.getVehicles();
-				// The API returns { response: [...], count: ... }
-				const vehicles = response.response || [];
-				return vehicles.map((v: any) => ({
-					name: `${v.display_name} (${v.vin})`,
-					value: v.vin,
-				}));
+				return loadWithTeslemetry(this, async (teslemetry) => {
+					const response = await teslemetry.api.getVehicles();
+					// The API returns { response: [...], count: ... }
+					const vehicles = response.response || [];
+					return vehicles.map((v: any) => ({
+						name: `${v.display_name} (${v.vin})`,
+						value: v.vin,
+					}));
+				});
 			},
 		},
 	};
@@ -743,14 +744,13 @@ export class TeslemetryVehicle implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 
+		const credentials = await this.getCredentials('teslemetryApi');
+		const teslemetry = createTeslemetry(credentials.accessToken as string, this.logger);
+
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			const operation = this.getNodeParameter('operation', itemIndex) as string;
 			const vin = this.getNodeParameter('vin', itemIndex) as string;
 
-			const credentials = await this.getCredentials('teslemetryApi');
-			const accessToken = credentials.accessToken as string;
-
-			const teslemetry = new Teslemetry(accessToken);
 			const vehicle = teslemetry.getVehicle(vin).api;
 
 			let result;
@@ -967,17 +967,20 @@ export class TeslemetryVehicle implements INodeType {
 						break;
 					}
 					default:
-						throw new Error(`Unknown operation: ${operation}`);
+						throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`, { itemIndex });
+				}
+				const failure = commandFailure(result);
+				if (failure) {
+					throw new NodeOperationError(this.getNode(), failure, { itemIndex });
 				}
 				returnData.push({ json: result });
 
 			} catch (error: unknown) {
 				if (this.continueOnFail()) {
-					const json = error instanceof Error ? { error: error.message } : { error: String(error) };
-					returnData.push({ json });
+					returnData.push({ json: { error: errorText(error) } });
 					continue;
 				}
-				throw error;
+				throw toNodeError(this.getNode(), error, itemIndex);
 			}
 		}
 		return this.prepareOutputData(returnData);

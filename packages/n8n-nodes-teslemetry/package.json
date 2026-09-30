@@ -2,13 +2,13 @@
   "name": "@teslemetry/n8n-nodes-teslemetry",
   "version": "0.4.1",
   "description": "n8n nodes for controlling Tesla vehicles and energy sites via Teslemetry API",
-  "main": "dist/index.cjs",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
     "test": "tsx --test test/*.test.ts",
-    "build": "tsdown src/index.ts --format cjs",
+    "build": "tsdown && cp src/nodes/*.svg dist/nodes/",
+    "verify:package": "tsx scripts/verify-package.ts",
     "dev2": "pnpm build && mkdir -p .n8n-home/nodes && ln -sf $(pwd) .n8n-home/nodes/teslemetry && N8N_LOG_OUTPUT=console N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true N8N_USER_FOLDER=$(pwd)/.n8n-home ./node_modules/.bin/n8n start",
     "tsc": "tsc",
     "validate": "n8n-node lint",
@@ -36,6 +36,7 @@
     "url": "https://github.com/Teslemetry/typescript-teslemetry"
   },
   "bugs": "https://github.com/Teslemetry/typescript-teslemetry/issues/new?template=n8n_bug.yml",
+  "homepage": "https://github.com/Teslemetry/typescript-teslemetry/tree/main/packages/n8n-nodes-teslemetry#readme",
   "publishConfig": {
     "access": "public",
     "provenance": true
@@ -44,12 +45,18 @@
     "dist"
   ],
   "n8n": {
+    "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/index.cjs"
+      "dist/credentials/TeslemetryApi.credentials.js"
     ],
     "nodes": [
-      "dist/index.cjs"
+      "dist/nodes/TeslemetryVehicle.node.js",
+      "dist/nodes/TeslemetryEnergy.node.js",
+      "dist/nodes/TeslemetryTrigger.node.js"
     ]
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
   },
   "devDependencies": {
     "@n8n/node-cli": "^0.17.0",

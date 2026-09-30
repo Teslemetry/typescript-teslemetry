@@ -3,10 +3,13 @@ import assert from "node:assert/strict";
 import { TeslemetryVehicle } from "../src/nodes/TeslemetryVehicle.node.js";
 import { TeslemetryEnergy } from "../src/nodes/TeslemetryEnergy.node.js";
 import { TeslemetryTrigger } from "../src/nodes/TeslemetryTrigger.node.js";
+import { API_FAILURES, assertApiFailure, fakeLogger, fakeNode } from "./testHelpers.js";
 
-// Minimal ILoadOptionsFunctions stand-in: these loadOptions methods only use getCredentials.
+// Minimal ILoadOptionsFunctions stand-in for the loadOptions methods.
 const fakeLoadOptionsContext = {
   getCredentials: async () => ({ accessToken: "token" }),
+  getNode: () => fakeNode,
+  logger: fakeLogger().logger,
 } as never;
 
 function withMockedFetch<T>(
@@ -113,3 +116,22 @@ test("TeslemetryTrigger.getFields calls a real TeslemetryApi method (regression:
     { name: "Locked", value: "Locked" },
   ]);
 });
+
+const LOADERS = [
+  { name: "TeslemetryVehicle.getVins", load: () => new TeslemetryVehicle().methods.loadOptions.getVins },
+  { name: "TeslemetryEnergy.getSites", load: () => new TeslemetryEnergy().methods.loadOptions.getSites },
+  { name: "TeslemetryTrigger.getVins", load: () => new TeslemetryTrigger().methods.loadOptions.getVins },
+  { name: "TeslemetryTrigger.getSites", load: () => new TeslemetryTrigger().methods.loadOptions.getSites },
+  { name: "TeslemetryTrigger.getFields", load: () => new TeslemetryTrigger().methods.loadOptions.getFields },
+];
+
+for (const loader of LOADERS) {
+  for (const failure of API_FAILURES) {
+    test(`${loader.name} shows the api's text for ${failure.name}`, async () => {
+      await assert.rejects(
+        () => withMockedFetch(failure.response, () => loader.load().call(fakeLoadOptionsContext)),
+        (error) => assertApiFailure(error, failure),
+      );
+    });
+  }
+}

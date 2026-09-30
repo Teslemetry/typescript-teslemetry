@@ -1,4 +1,3 @@
-import { Teslemetry } from '@teslemetry/api';
 import {
 	IExecuteFunctions,
 	ILoadOptionsFunctions,
@@ -6,7 +5,9 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
+	NodeOperationError,
 } from 'n8n-workflow';
+import { createTeslemetry, errorText, loadWithTeslemetry, toNodeError } from '../shared';
 
 export class TeslemetryEnergy implements INodeType {
 	description: INodeTypeDescription = {
@@ -173,15 +174,15 @@ export class TeslemetryEnergy implements INodeType {
 	methods = {
 		loadOptions: {
 			async getSites(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const credentials = await this.getCredentials('teslemetryApi');
-				const teslemetry = new Teslemetry(credentials.accessToken as string);
-				const response = await teslemetry.api.getProducts();
-                const products = response.response || [];
-                const sites = products.filter((p: any) => p.resource_type === "battery" || p.resource_type === "solar" || "energy_site_id" in p);
-				return sites.map((s: any) => ({
-					name: `${s.site_name || s.energy_site_id} (${s.energy_site_id})`,
-					value: s.energy_site_id,
-				}));
+				return loadWithTeslemetry(this, async (teslemetry) => {
+					const response = await teslemetry.api.getProducts();
+					const products = response.response || [];
+					const sites = products.filter((p: any) => p.resource_type === "battery" || p.resource_type === "solar" || "energy_site_id" in p);
+					return sites.map((s: any) => ({
+						name: `${s.site_name || s.energy_site_id} (${s.energy_site_id})`,
+						value: s.energy_site_id,
+					}));
+				});
 			},
 		},
 	};
@@ -190,15 +191,14 @@ export class TeslemetryEnergy implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 
+		const credentials = await this.getCredentials('teslemetryApi');
+		const teslemetry = createTeslemetry(credentials.accessToken as string, this.logger);
+
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 			const operation = this.getNodeParameter('operation', itemIndex) as string;
 			const siteId = this.getNodeParameter('siteId', itemIndex) as number;
 
-			const credentials = await this.getCredentials('teslemetryApi');
-			const accessToken = credentials.accessToken as string;
-
-			const teslemetry = new Teslemetry(accessToken);
-			const energy = teslemetry.energySite(siteId);
+			const energy = teslemetry.api.getEnergySite(siteId);
 
 			let result;
 
@@ -235,16 +235,15 @@ export class TeslemetryEnergy implements INodeType {
 						result = await energy.setOffGridVehicleChargingReserve(offGridReserve);
 						break;
 					default:
-						throw new Error(`Unknown operation: ${operation}`);
+						throw new NodeOperationError(this.getNode(), `Unknown operation: ${operation}`, { itemIndex });
 				}
 				returnData.push({ json: result });
 			} catch (error: unknown) {
 				if (this.continueOnFail()) {
-					const json = error instanceof Error ? { error: error.message } : { error: String(error) };
-					returnData.push({ json });
+					returnData.push({ json: { error: errorText(error) } });
 					continue;
 				}
-				throw error;
+				throw toNodeError(this.getNode(), error, itemIndex);
 			}
 		}
 		return this.prepareOutputData(returnData);

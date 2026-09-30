@@ -1,4 +1,4 @@
-import { SseEvent, Teslemetry } from '@teslemetry/api';
+import { SseEvent } from '@teslemetry/api';
 import {
 	ILoadOptionsFunctions,
 	INodePropertyOptions,
@@ -6,7 +6,19 @@ import {
 	INodeTypeDescription,
 	ITriggerFunctions,
 	ITriggerResponse,
+	NodeOperationError,
 } from 'n8n-workflow';
+import { createTeslemetry, errorText, loadWithTeslemetry, TeslemetryRequestError, toNodeError } from '../shared';
+
+// Answers the user has to act on, by status. 429 is here because the API
+// answers repeated bad-token attempts with it, and because the stream caps the
+// number of connections per account.
+const STREAM_REFUSALS: Record<number, string> = {
+	401: 'Teslemetry rejected the access token',
+	403: 'Teslemetry rejected the access token',
+	402: 'Teslemetry requires an active subscription',
+	429: 'Teslemetry is limiting requests or stream connections for this account',
+};
 
 export class TeslemetryTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -132,42 +144,42 @@ export class TeslemetryTrigger implements INodeType {
 	methods = {
 		loadOptions: {
 			async getVins(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const credentials = await this.getCredentials('teslemetryApi');
-				const teslemetry = new Teslemetry(credentials.accessToken as string);
-				const response = await teslemetry.api.getVehicles();
-				const vehicles = response.response || [];
-				return [
-					{ name: 'All Vehicles', value: '' },
-					...vehicles.map((v: any) => ({
-						name: `${v.display_name} (${v.vin})`,
-						value: v.vin,
-					})),
-				];
+				return loadWithTeslemetry(this, async (teslemetry) => {
+					const response = await teslemetry.api.getVehicles();
+					const vehicles = response.response || [];
+					return [
+						{ name: 'All Vehicles', value: '' },
+						...vehicles.map((v: any) => ({
+							name: `${v.display_name} (${v.vin})`,
+							value: v.vin,
+						})),
+					];
+				});
 			},
 			async getSites(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const credentials = await this.getCredentials('teslemetryApi');
-				const teslemetry = new Teslemetry(credentials.accessToken as string);
-				const response = await teslemetry.api.getProducts();
-				const products = response.response || [];
-				const sites = products.filter(
-					(p: any) => p.resource_type === 'battery' || p.resource_type === 'solar' || 'energy_site_id' in p,
-				);
-				return [
-					{ name: 'All Sites', value: '' },
-					...sites.map((s: any) => ({
-						name: `${s.site_name || s.energy_site_id} (${s.energy_site_id})`,
-						value: s.energy_site_id,
-					})),
-				];
+				return loadWithTeslemetry(this, async (teslemetry) => {
+					const response = await teslemetry.api.getProducts();
+					const products = response.response || [];
+					const sites = products.filter(
+						(p: any) => p.resource_type === 'battery' || p.resource_type === 'solar' || 'energy_site_id' in p,
+					);
+					return [
+						{ name: 'All Sites', value: '' },
+						...sites.map((s: any) => ({
+							name: `${s.site_name || s.energy_site_id} (${s.energy_site_id})`,
+							value: s.energy_site_id,
+						})),
+					];
+				});
 			},
 			async getFields(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const credentials = await this.getCredentials('teslemetryApi');
-				const teslemetry = new Teslemetry(credentials.accessToken as string);
-				const fields = await teslemetry.api.getFields();
-				return Object.keys(fields).map((f) => ({
-					name: f,
-					value: f,
-				}));
+				return loadWithTeslemetry(this, async (teslemetry) => {
+					const fields = await teslemetry.api.getFields();
+					return Object.keys(fields).map((f) => ({
+						name: f,
+						value: f,
+					}));
+				});
 			},
 		},
 	};
@@ -177,8 +189,33 @@ export class TeslemetryTrigger implements INodeType {
 		const resource = this.getNodeParameter('resource') as string;
 		const event = this.getNodeParameter('event') as string;
 
-		const teslemetry = new Teslemetry(credentials.accessToken as string);
+		if (resource !== 'energySite' && event === 'signal') {
+			if (!this.getNodeParameter('vin')) {
+				throw new NodeOperationError(this.getNode(), 'VIN is required for Signal events');
+			}
+			if (!this.getNodeParameter('field', '')) {
+				throw new NodeOperationError(this.getNode(), 'Field is required for Signal events');
+			}
+		}
+
+		const teslemetry = createTeslemetry(credentials.accessToken as string, this.logger);
 		const sse = teslemetry.sse;
+
+		// connect() returns before the stream answers, so without this check a
+		// trigger with a bad token activates, fails at runtime, and is reactivated
+		// by n8n in a loop. Failing here makes activation itself fail, which n8n
+		// reports to the user and retries with its own backoff. The test endpoint
+		// has the stream's requirements: a valid token and an active subscription.
+		try {
+			await teslemetry.api.test();
+		} catch (error) {
+			const refusal = error instanceof TeslemetryRequestError && error.status && STREAM_REFUSALS[error.status];
+			if (refusal) {
+				throw toNodeError(this.getNode(), error, undefined, `${refusal}: ${errorText(error)}`);
+			}
+			// Anything else (an outage, a network drop) is left to the stream's own retries.
+			this.logger.warn(`Teslemetry check before connecting failed: ${errorText(error)}`);
+		}
 
 		let cleanup: () => void;
 
@@ -205,12 +242,6 @@ export class TeslemetryTrigger implements INodeType {
 			const field = this.getNodeParameter('field', '') as string;
 
 			if (event === 'signal') {
-				if (!vin) {
-					throw new Error('VIN is required for Signal events');
-				}
-				if (!field) {
-					throw new Error('Field is required for Signal events');
-				}
 				cleanup = sse
 					.getVehicle(vin)
 					.onSignal(field as any, (value: any) => {
@@ -243,7 +274,26 @@ export class TeslemetryTrigger implements INodeType {
 
 		// Registered before connect() so a terminal auth failure on the very first
 		// attempt still reaches emitError instead of racing an unattached stream.
+		let reportedRefusal: number | undefined;
 		const onStreamError = (payload: { error: unknown; status?: number; retries: number }) => {
+			const { status } = payload;
+			// A subscription that lapses or a connection cap reached while the
+			// stream is running: the SDK keeps retrying, so name it once instead of
+			// on every attempt.
+			if (status === 402 || status === 429) {
+				if (reportedRefusal === status) return;
+				reportedRefusal = status;
+				const error = new NodeOperationError(this.getNode(), `${STREAM_REFUSALS[status]} (HTTP ${status})`);
+				// The check in trigger() catches 402 but cannot see the stream's
+				// connection cap, so in an active workflow a 429 reported through
+				// emitError would be reactivated straight back into the same 429.
+				if (status === 402 || this.getMode() === 'manual') {
+					this.emitError(error);
+				} else {
+					this.logger.error(`${error.message}. The stream keeps retrying.`);
+				}
+				return;
+			}
 			this.logger.warn(
 				`Teslemetry stream error (attempt ${payload.retries}): ${String(payload.error)}`,
 			);
@@ -251,8 +301,9 @@ export class TeslemetryTrigger implements INodeType {
 		const onDisconnect = () => {
 			this.logger.warn('Teslemetry stream disconnected');
 		};
-		const onAuthFailure = (error: Error) => {
-			this.emitError(error);
+		const onAuthFailure = (error: Error & { status?: number }) => {
+			const status = error.status ?? 401;
+			this.emitError(new NodeOperationError(this.getNode(), `${STREAM_REFUSALS[status]} (HTTP ${status})`));
 		};
 		sse.on('stream_error', onStreamError);
 		sse.on('disconnect', onDisconnect);
