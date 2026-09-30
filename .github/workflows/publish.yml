@@ -87,13 +87,6 @@ jobs:
           -d "{\"username\": \"Teslemetry Release\", \"content\": \"🚀 **New Release**\n**@teslemetry/node-red-contrib-teslemetry** version **$VERSION** is now available!\"}" \
           $DISCORD_WEBHOOK
 
-      - name: Refresh Node-RED Flow Library
-        if: steps.check_releases.outputs.node_red_version
-        run: |
-          curl -X POST https://flows.nodered.org/hooks/npm \
-            -H "Content-Type: application/json" \
-            -d '{"name": "@teslemetry/node-red-contrib-teslemetry"}'
-
       - name: Discord Notification (n8n)
         if: steps.check_releases.outputs.n8n_version
         env:
@@ -103,3 +96,34 @@ jobs:
           curl -H "Content-Type: application/json" \
           -d "{\"username\": \"Teslemetry Release\", \"content\": \"🚀 **New Release**\n**@teslemetry/n8n-nodes-teslemetry** version **$VERSION** is now available!\"}" \
           $DISCORD_WEBHOOK
+
+      # Last, so a failed refresh cannot skip the notifications above.
+      - name: Refresh Node-RED Flow Library
+        if: steps.check_releases.outputs.node_red_version
+        env:
+          MODULE: "@teslemetry/node-red-contrib-teslemetry"
+          VERSION: ${{ steps.check_releases.outputs.node_red_version }}
+        run: |
+          # flows.nodered.org does not watch npm: an entry only changes when its
+          # "add node" form is submitted, which makes the server re-read the npm
+          # registry. So wait until the registry serves the new version first.
+          for _ in $(seq 30); do
+            latest=$(curl --fail --silent "https://registry.npmjs.org/$MODULE" | jq -r '."dist-tags".latest') || latest=
+            [ "$latest" = "$VERSION" ] && break
+            sleep 10
+          done
+          [ "$latest" = "$VERSION" ] || { echo "::error::npm registry serves '$latest', not $VERSION"; exit 1; }
+
+          jar=$(mktemp)
+          body=$(mktemp)
+          csrf=$(curl --fail --silent --show-error --cookie-jar "$jar" https://flows.nodered.org/add/node \
+            | sed -n 's/.*name="_csrf"[^>]*value="\([^"]*\)".*/\1/p')
+          [ -n "$csrf" ] || { echo "::error::flows.nodered.org served no CSRF token"; exit 1; }
+          status=$(curl --silent --show-error --cookie "$jar" --output "$body" --write-out '%{http_code}' \
+            --data-urlencode "_csrf=$csrf" --data-urlencode "module=$MODULE" https://flows.nodered.org/add/node)
+          cat "$body"; echo
+          # 200 answers with the module's URL; 400 "already at latest version"
+          # means the library picked this release up before we asked.
+          if [ "$status" = 200 ] && grep -q "^/node/$MODULE" "$body"; then exit 0; fi
+          if [ "$status" = 400 ] && grep -qi "already at latest version" "$body"; then exit 0; fi
+          echo "::error::Flow Library refresh failed (HTTP $status)"; exit 1

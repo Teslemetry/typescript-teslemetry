@@ -5,4 +5,5 @@ export default defineConfig({
   outDir: "dist/nodes",
   format: "cjs",
   platform: "node",
+  fixedExtension: false,
 });
