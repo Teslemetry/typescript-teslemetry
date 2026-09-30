@@ -134,7 +134,7 @@ Splits an Energy Site's `wall_connectors` array (e.g. from a `teslemetry-energy-
 - **DIN Filter**: Only emit the connector matching this DIN, or leave empty to emit all (optional; can also come from `msg.din`).
 
 **Inputs:**
-- `msg.payload` (object | array): A `live_status`-shaped object with a `wall_connectors` array, or that array directly.
+- `msg.payload` (object | array): A `teslemetry-energy-event` `live_status` message (array at `payload.live_status.wall_connectors`), a `live_status`-shaped object with a `wall_connectors` array, or that array directly.
 - `msg.din` (string, optional): Restrict output to one DIN for this message.
 
 **Outputs (one per matching connector):**

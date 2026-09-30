@@ -51,8 +51,11 @@
     <dl class="message-properties">
         <dt>payload <span class="property-type">object | array</span></dt>
         <dd>
-            Either a <code>live_status</code>-shaped object with a
-            <code>wall_connectors</code> array, or that array directly.
+            A Teslemetry Energy Event <code>live_status</code> message (the
+            array is at <code>payload.live_status.wall_connectors</code>), a
+            <code>live_status</code>-shaped object with a
+            <code>wall_connectors</code> array (e.g. Energy Command's Get
+            Live Status), or that array directly.
         </dd>
         <dt class="optional">
             din <span class="property-type">string</span>

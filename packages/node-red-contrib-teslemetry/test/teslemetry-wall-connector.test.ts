@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { NodeAPI } from "node-red";
+import { Teslemetry } from "@teslemetry/api";
+import energyEventNodeModule from "../src/nodes/teslemetry-energy-event.js";
 import wallConnectorNodeModule from "../src/nodes/teslemetry-wall-connector.js";
+import { instances } from "../src/shared.js";
 import type { Msg } from "../src/types.js";
 
 interface FakeNode {
@@ -45,12 +48,16 @@ function buildNode(config: Record<string, unknown> = {}) {
   return node;
 }
 
+// Returns what leaves the node's single output, using Node-RED's send()
+// semantics: a top-level array is one entry per output, and an entry may
+// itself be an array of messages for that output.
 async function runInput(node: FakeNode, msg: Partial<Msg>): Promise<any[]> {
   let sent: any[] = [];
   await node.handlers.input(
     msg as Msg,
     (out: any) => {
-      sent = Array.isArray(out) ? out : [out];
+      const firstOutput = Array.isArray(out) ? out[0] : out;
+      sent = Array.isArray(firstOutput) ? firstOutput : firstOutput ? [firstOutput] : [];
     },
     () => {},
   );
@@ -77,6 +84,84 @@ test("fans out wall_connectors[] from a live_status-shaped payload into per-DIN 
     wall_connector_power: 5000,
   });
   assert.equal(sent[1].din, "BBB-222");
+});
+
+// Regression: the node used to be tested only against hand-written payloads
+// and missed that the Energy Event node nests the array under
+// `payload.live_status`. This drives the real Energy Event node off the real
+// SDK stream parser and pipes whatever it sends straight into this node.
+test("fans out the Energy Event node's real live_status output", async () => {
+  const siteId = "12345";
+  const configId = "wall-connector-upstream";
+  const encoder = new TextEncoder();
+  const teslemetry = new Teslemetry(async () => "token", {
+    region: "na",
+    logger: { info() {}, warn() {}, error() {}, debug() {} },
+  });
+  // Left open after the fixture event: a closed body makes the SDK reconnect.
+  teslemetry.client.setConfig({
+    fetch: (async () =>
+      new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            const event = {
+              createdAt: "2026-01-01T00:00:00.000Z",
+              site_id: siteId,
+              live_status: {
+                solar_power: 0,
+                wall_connectors: [
+                  { din: "AAA-111", wall_connector_state: 1, wall_connector_power: 5000 },
+                  { din: "BBB-222", wall_connector_state: 2, wall_connector_power: 0 },
+                ],
+              },
+            };
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "text/event-stream" } },
+      )) as typeof fetch,
+  });
+  instances.set(configId, {
+    teslemetry,
+    products: Promise.resolve({ vehicles: {}, energySites: {} }),
+  });
+
+  const { RED, registered } = createFakeRED();
+  energyEventNodeModule(RED);
+  const upstreamSent: Msg[] = [];
+  const upstream = createFakeNode();
+  upstream.send = (msg: Msg) => upstreamSent.push(msg);
+
+  try {
+    registered["teslemetry-energy-event"].call(upstream, {
+      teslemetryConfig: configId,
+      siteId,
+      event: "live_status",
+    });
+    const deadline = Date.now() + 2000;
+    while (upstreamSent.length === 0) {
+      assert.ok(Date.now() < deadline, "Energy Event node never sent a message");
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    const sent = await runInput(buildNode(), upstreamSent[0]);
+
+    assert.deepEqual(
+      sent.map((msg) => msg.din),
+      ["AAA-111", "BBB-222"],
+    );
+    assert.deepEqual(sent[0].payload, {
+      din: "AAA-111",
+      wall_connector_state: 1,
+      wall_connector_power: 5000,
+    });
+    assert.equal(sent[0].topic, "AAA-111");
+    assert.equal(sent[0].siteId, siteId);
+  } finally {
+    await new Promise<void>((resolve) => upstream.handlers.close(resolve));
+    await teslemetry.sse.disconnect();
+    instances.delete(configId);
+  }
 });
 
 test("accepts the wall_connectors array directly as payload", async () => {
