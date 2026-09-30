@@ -52,7 +52,7 @@ export class BackupReserveService extends BaseEnergyService {
           `Setting backup reserve to ${reserve}% for ${site.name}`,
         );
 
-        await site.api.setBackupReserve(reserve);
+        await this.command(site.api.setBackupReserve(reserve));
       },
     );
 
@@ -61,11 +61,14 @@ export class BackupReserveService extends BaseEnergyService {
       this.platform.Characteristic.On,
       async (value) => {
         if (!value) {
-          // If user tries to turn it off, turn it back on
-          this.service.updateCharacteristic(
-            this.platform.Characteristic.On,
-            true,
-          );
+          // If user tries to turn it off, turn it back on. HAP stores the
+          // written value once this handler returns, so restore it after that.
+          setImmediate(() => {
+            this.service.updateCharacteristic(
+              this.platform.Characteristic.On,
+              true,
+            );
+          });
           this.platform.log.warn(
             `Backup reserve cannot be turned off (${site.name})`,
           );

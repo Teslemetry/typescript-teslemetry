@@ -57,7 +57,7 @@ export class LockService extends BaseService {
 
         if (value === LockTargetState.SECURED) {
           this.platform.log.info(`Locking ${vehicle.name}`);
-          await vehicle.api.lockDoors();
+          await this.command(vehicle.api.lockDoors());
 
           // Optimistically update current state
           this.service.updateCharacteristic(
@@ -66,7 +66,7 @@ export class LockService extends BaseService {
           );
         } else {
           this.platform.log.info(`Unlocking ${vehicle.name}`);
-          await vehicle.api.unlockDoors();
+          await this.command(vehicle.api.unlockDoors());
 
           // Optimistically update current state
           this.service.updateCharacteristic(

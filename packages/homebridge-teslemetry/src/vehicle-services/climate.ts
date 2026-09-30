@@ -115,7 +115,7 @@ export class ClimateService extends BaseService {
 
         if (value === TargetHeatingCoolingState.OFF) {
           this.platform.log.info(`Turning off climate for ${vehicle.name}`);
-          await vehicle.api.stopAutoConditioning();
+          await this.command(vehicle.api.stopAutoConditioning());
 
           // Optimistically update current state
           this.service.updateCharacteristic(
@@ -125,7 +125,7 @@ export class ClimateService extends BaseService {
         } else {
           // AUTO, HEAT, or COOL all just turn on climate
           this.platform.log.info(`Turning on climate for ${vehicle.name}`);
-          await vehicle.api.startAutoConditioning();
+          await this.command(vehicle.api.startAutoConditioning());
 
           // Optimistically update current state
           this.service.updateCharacteristic(
@@ -146,7 +146,7 @@ export class ClimateService extends BaseService {
         );
 
         // Set both driver and passenger temps to the same value
-        await vehicle.api.setTemps(temp, temp);
+        await this.command(vehicle.api.setTemps(temp, temp));
 
         this.targetTemperature = temp;
       },

@@ -43,11 +43,11 @@ export class SentryService extends BaseService {
         if (value) {
           // Turn on sentry mode
           this.platform.log.info(`Turning on sentry mode for ${vehicle.name}`);
-          await vehicle.api.setSentryMode(true);
+          await this.command(vehicle.api.setSentryMode(true));
         } else {
           // Turn off sentry mode
           this.platform.log.info(`Turning off sentry mode for ${vehicle.name}`);
-          await vehicle.api.setSentryMode(false);
+          await this.command(vehicle.api.setSentryMode(false));
         }
       },
     );

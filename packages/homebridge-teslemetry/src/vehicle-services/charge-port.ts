@@ -56,7 +56,7 @@ export class ChargePortService extends BaseService {
         if (value === LockTargetState.UNSECURED) {
           // Open charge port
           this.platform.log.info(`Opening charge port for ${vehicle.name}`);
-          await vehicle.api.openChargePort();
+          await this.command(vehicle.api.openChargePort());
 
           // Optimistically update current state
           this.service.updateCharacteristic(
@@ -66,7 +66,7 @@ export class ChargePortService extends BaseService {
         } else {
           // Close charge port
           this.platform.log.info(`Closing charge port for ${vehicle.name}`);
-          await vehicle.api.closeChargePort();
+          await this.command(vehicle.api.closeChargePort());
 
           // Optimistically update current state
           this.service.updateCharacteristic(

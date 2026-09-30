@@ -57,7 +57,7 @@ export class ChargeLimitService extends BaseService {
           `Setting charge limit to ${limit}% for ${vehicle.name}`,
         );
 
-        await vehicle.api.setChargeLimit(limit);
+        await this.command(vehicle.api.setChargeLimit(limit));
       },
     );
 
@@ -66,11 +66,14 @@ export class ChargeLimitService extends BaseService {
       this.platform.Characteristic.On,
       async (value) => {
         if (!value) {
-          // If user tries to turn it off, turn it back on
-          this.service.updateCharacteristic(
-            this.platform.Characteristic.On,
-            true,
-          );
+          // If user tries to turn it off, turn it back on. HAP stores the
+          // written value once this handler returns, so restore it after that.
+          setImmediate(() => {
+            this.service.updateCharacteristic(
+              this.platform.Characteristic.On,
+              true,
+            );
+          });
           this.platform.log.warn(
             `Charge limit cannot be turned off (${vehicle.name})`,
           );

@@ -43,11 +43,11 @@ export class DefrostService extends BaseService {
         if (value) {
           // Turn on max defrost
           this.platform.log.info(`Turning on max defrost for ${vehicle.name}`);
-          await vehicle.api.setPreconditioningMax(true, true);
+          await this.command(vehicle.api.setPreconditioningMax(true, true));
         } else {
           // Turn off max defrost
           this.platform.log.info(`Turning off max defrost for ${vehicle.name}`);
-          await vehicle.api.setPreconditioningMax(false, true);
+          await this.command(vehicle.api.setPreconditioningMax(false, true));
         }
       },
     );
