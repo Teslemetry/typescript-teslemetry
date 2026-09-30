@@ -1,6 +1,6 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { Teslemetry } from "@teslemetry/api";
-import { instances, getErrorMessage, Instance } from "../shared";
+import { createLogger, instances, getErrorMessage, Instance } from "../shared";
 
 export interface TeslemetryConfigNodeDef extends NodeDef {
   token: string;
@@ -102,7 +102,7 @@ export default function (RED: NodeAPI) {
 
     if (this.credentials && this.credentials.token) {
       const teslemetry = new Teslemetry(this.credentials.token, {
-        logger: RED.log,
+        logger: createLogger(RED.log),
         stream: { cache: false },
       });
 
@@ -197,7 +197,7 @@ export default function (RED: NodeAPI) {
         return;
       }
 
-      const teslemetry = new Teslemetry(token, { logger: RED.log });
+      const teslemetry = new Teslemetry(token, { logger: createLogger(RED.log) });
       res.json(await testCredentials(teslemetry));
     },
   );
