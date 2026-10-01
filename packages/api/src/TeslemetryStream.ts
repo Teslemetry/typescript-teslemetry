@@ -337,6 +337,12 @@ export class TeslemetryStream extends EventEmitter {
             cache: this.cloudCache,
             ...(this.topicsParam ? { topics: this.topicsParam } : {}),
           },
+          // The public spec publishes this route as the literal path
+          // `/sse/{id}?`, so the generated `url` ends in a `?` and the query
+          // was sent as `/sse/??cache=...`: the server parsed the first key
+          // as `?cache` and never saw `cache`. Options spread after the
+          // generated `url`, which is not part of their type.
+          ...({ url: "/sse/{id}" } as object),
           sseMaxRetryAttempts: 1,
           signal,
           // Fires for every SSE chunk, including blank keep-alives that

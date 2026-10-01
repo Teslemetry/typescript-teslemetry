@@ -3,7 +3,10 @@
 export { Teslemetry, useTeslaModel } from "./Teslemetry.js";
 export type { DateInput } from "./dateHelper.js";
 export { TeslemetryStream } from "./TeslemetryStream.js";
-export type { TeslemetryStreamErrorEvent } from "./TeslemetryStream.js";
+export type {
+  TeslemetryStreamErrorEvent,
+  TeslemetryStreamOptions,
+} from "./TeslemetryStream.js";
 export { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
 export { TeslemetryEnergySiteStream } from "./TeslemetryEnergySiteStream.js";
 export { TeslemetryApi } from "./TeslemetryApi.js";

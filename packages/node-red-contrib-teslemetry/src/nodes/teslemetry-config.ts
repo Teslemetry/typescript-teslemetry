@@ -1,9 +1,12 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
-import { Teslemetry } from "@teslemetry/api";
+import { Teslemetry, TeslemetryStreamOptions } from "@teslemetry/api";
 import { createLogger, instances, getErrorMessage, Instance } from "../shared";
 
 export interface TeslemetryConfigNodeDef extends NodeDef {
   token: string;
+  /** Ask the server to replay its last known values when the stream
+   *  connects. Absent on config nodes saved before the option existed. */
+  replay?: boolean;
 }
 
 export interface TeslemetryConfigNode extends Node {
@@ -91,6 +94,18 @@ export async function testCredentials(
   }
 }
 
+/**
+ * Stream options for a config node. Replay is opt-in: only an explicit
+ * `replay: true` asks the server for its last known values, so a config node
+ * saved before the option existed gets none. The SDK's local cache stays off
+ * either way - it would replay to listeners with no marker on Signal nodes.
+ */
+export function streamOptions(
+  config: Pick<TeslemetryConfigNodeDef, "replay">,
+): TeslemetryStreamOptions {
+  return { cache: { cloud: config.replay === true, local: false } };
+}
+
 export default function (RED: NodeAPI) {
   function TeslemetryConfigNode(
     this: TeslemetryConfigNode,
@@ -103,7 +118,7 @@ export default function (RED: NodeAPI) {
     if (this.credentials && this.credentials.token) {
       const teslemetry = new Teslemetry(this.credentials.token, {
         logger: createLogger(RED.log),
-        stream: { cache: false },
+        stream: streamOptions(config),
       });
 
       const instance: Instance = {
