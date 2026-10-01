@@ -1,6 +1,6 @@
 {
   "name": "@teslemetry/node-red-contrib-teslemetry",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Node-RED nodes for controlling Tesla vehicles and energy sites via Teslemetry API",
   "engines": {
     "node": ">=18.0.0"

@@ -1,5 +1,20 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.7.0
+
+### Minor Changes
+
+- d321ce1: Nodes no longer receive Teslemetry's last known values when the stream connects, unless the new "Replay last known values on connect" checkbox on the config node is ticked. The config node always asked for no replay, but a malformed stream URL meant the server never saw that and replayed anyway, so flows may have come to depend on it: after this update a node stays silent until a value next changes. Tick the new option (off by default, and off for existing config nodes) to get the replay back; replayed events carry `isCache: true` in the payload of the event nodes.
+
+### Patch Changes
+
+- c9e48e6: Make `msg.command`, `msg.historyType` and `msg.period` usable: the vehicle and energy command nodes gain a "From msg.command" option and the energy history node gains "From msg.historyType" / "From msg.period" options (a value selected in the node still takes precedence, and existing nodes are unchanged). Correct the editor labels, help text and README that named message properties and fields that do not exist (`msg.seat` for Set Seat Heater, `msg.percentage` for Set Backup Reserve, `msg.passenger_temp` for Set Temps, top-level arguments rather than `msg.payload`, the `VehicleSpeed`/`Odometer`/`BatteryLevel` signal names, the Signal node's non-existent `msg.field`, and the rear trunk toggle), and document the energy history and energy event nodes, raw units and `null` values.
+- ea6514c: Show the API's own reason when a vehicle command, energy command or energy history request fails. The node status and the Catch node's `msg.error.message` now carry the text the API returned (for example "Insufficient credits. Balance: 0" or "vehicle unavailable") instead of a blank status and the fixed text "Teslemetry API Error", and a network failure names its cause. A failed request no longer triggers Complete nodes. Messages are no longer dropped while the account check (`/api/metadata`) is failing: the request is sent and any failure reaches Catch nodes.
+- acefe95: Ship the node files as `.js` instead of `.cjs` so the nodes appear in the editor palette on Node-RED 3.x and 4.0.x. Those releases locate a node's editor file by replacing `.js` with `.html`, so the `.cjs` files left the palette empty on every Node-RED before 4.1.0 even though the package installed and its nodes ran.
+- e4c11f9: Make streaming node statuses and the Node-RED log say why a stream is not connected. A refused connection now names the reason (`subscription required` for a lapsed subscription, `too many connections` for the connection cap, otherwise the HTTP status) instead of only `reconnecting (attempt N)`; `auth failed - check token` is no longer replaced by `disconnected` a moment later; a streaming node added to an already-running stream gets a status instead of a blank; and log lines such as `SSE error:` now include the reason that used to be dropped.
+- 19832b3: Fix the stream reconnect loop. A connection the server ends cleanly (as it does to every open stream on shutdown) is now treated as a disconnect: `disconnect` and `stream_error` are emitted and the reconnect waits for the backoff, instead of reconnecting in a tight loop with no events. `connect` is now emitted when the server's first chunk arrives rather than before the request is sent, so a rejected or hanging attempt no longer reports a connection. The reconnect backoff is capped at 60 seconds instead of 10 minutes.
+- 4284477: Fix the Wall Connector node emitting nothing when wired to the Energy Event node: it now reads the connectors from `payload.live_status.wall_connectors` (the Energy Event node's `live_status` message) as well as from `payload.wall_connectors` and a bare array. It also now sends every connector on its output; previously only the first connector of a site with several Wall Connectors was emitted.
+
 ## 0.6.0
 
 ### Minor Changes
