@@ -42,10 +42,10 @@ export class StormWatchService extends BaseEnergyService {
       async (value) => {
         if (value) {
           this.platform.log.info(`Enabling Storm Watch for ${site.name}`);
-          await site.api.setStormMode(true);
+          await this.command(site.api.setStormMode(true));
         } else {
           this.platform.log.info(`Disabling Storm Watch for ${site.name}`);
-          await site.api.setStormMode(false);
+          await this.command(site.api.setStormMode(false));
         }
       },
     );

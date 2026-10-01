@@ -9,6 +9,7 @@
 import type { PlatformAccessory, Service, Characteristic, WithUUID } from "homebridge";
 import type { TeslemetryPlatform } from "../platform.js";
 import type { EnergyDetails } from "@teslemetry/api";
+import { runCommand, runSetHandler } from "../command.js";
 
 /** All standard HomeKit Characteristic subclasses override the base constructor to take no arguments. */
 type CharacteristicConstructor = WithUUID<{ new (): Characteristic }>;
@@ -101,21 +102,34 @@ export abstract class BaseEnergyService {
     characteristic: CharacteristicConstructor,
     handler: (value: any) => Promise<void>,
   ): void {
-    this.service
-      .getCharacteristic(characteristic)
-      .onSet(async (value) => {
-        try {
-          await handler(value);
-        } catch (error) {
+    const target = this.service.getCharacteristic(characteristic);
+    target.onSet(async (value) => {
+      try {
+        await runSetHandler(target, value, handler, (error) => {
           this.platform.log.error(
-            `Error handling SET for characteristic:`,
+            `Command failed after HomeKit was answered; restoring ${target.displayName}:`,
             error,
           );
-          throw new this.platform.api.hap.HapStatusError(
-            this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE,
-          );
-        }
-      });
+        });
+      } catch (error) {
+        // A handler that rejects the written value picks its own HAP status.
+        if (error instanceof this.platform.api.hap.HapStatusError) throw error;
+        this.platform.log.error(
+          `Error handling SET for characteristic:`,
+          error,
+        );
+        throw new this.platform.api.hap.HapStatusError(
+          this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE,
+        );
+      }
+    });
+  }
+
+  /**
+   * Await an API command, throwing when the API refused it (`result: false`)
+   */
+  protected command<T>(command: Promise<T>): Promise<T> {
+    return runCommand(command);
   }
 
   /**

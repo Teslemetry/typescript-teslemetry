@@ -15,7 +15,7 @@ test("OperationModeService never calls setOperationMode with time_based_control 
 
 	const characteristic = accessory.getService(Service.Fan)!.getCharacteristic(Characteristic.RotationSpeed);
 	// 100% rotation speed maps to "time_based_control" in SPEED_TO_MODE
-	await characteristic.handleSetRequest(100 as never);
+	await assert.rejects(() => characteristic.handleSetRequest(100 as never));
 
 	assert.deepEqual(api.calls, []);
 });

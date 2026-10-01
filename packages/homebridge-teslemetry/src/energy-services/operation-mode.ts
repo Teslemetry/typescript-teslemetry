@@ -94,16 +94,18 @@ export class OperationModeService extends BaseEnergyService {
           // The Fleet API command only accepts backup/autonomous/self_consumption;
           // time_based_control is a read-only telemetry state, not a settable mode.
           this.platform.log.warn(
-            `Time-Based Control cannot be set via HomeKit; ignoring for ${site.name}`,
+            `Time-Based Control cannot be set via HomeKit; rejecting for ${site.name}`,
           );
-          return;
+          throw new this.platform.api.hap.HapStatusError(
+            this.platform.api.hap.HAPStatus.INVALID_VALUE_IN_REQUEST,
+          );
         }
 
         this.platform.log.info(
           `Setting operation mode to ${mode} (${speed}%) for ${site.name}`,
         );
 
-        await site.api.setOperationMode(mode);
+        await this.command(site.api.setOperationMode(mode));
         this.currentMode = mode;
       },
     );
@@ -113,10 +115,14 @@ export class OperationModeService extends BaseEnergyService {
       this.platform.Characteristic.On,
       async (value) => {
         if (!value) {
-          this.service.updateCharacteristic(
-            this.platform.Characteristic.On,
-            true,
-          );
+          // HAP stores the written value once this handler returns, so
+          // restore it after that.
+          setImmediate(() => {
+            this.service.updateCharacteristic(
+              this.platform.Characteristic.On,
+              true,
+            );
+          });
           this.platform.log.warn(
             `Operation mode cannot be turned off (${site.name})`,
           );

@@ -63,9 +63,11 @@ export class TonneauService extends BaseService {
         this.platform.log.info(
           `Setting tonneau to ${percent === 0 ? "closed" : "open"} for ${vehicle.name}`,
         );
-        await vehicle.api.closure({
-          tonneau: percent === 0 ? "close" : "open",
-        });
+        await this.command(
+          vehicle.api.closure({
+            tonneau: percent === 0 ? "close" : "open",
+          }),
+        );
       },
     );
 

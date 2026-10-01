@@ -64,10 +64,10 @@ export class GridChargingService extends BaseEnergyService {
 
         // The API requires both export and import (disallow charging) settings
         // We maintain the current export setting and toggle the charging setting
-        await site.api.gridImportExport(
+        await this.command(site.api.gridImportExport(
           this.currentExportSetting,
           !allowed, // disallow_charge_from_grid
-        );
+        ));
       },
     );
 

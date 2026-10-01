@@ -40,12 +40,14 @@ for (const [raw, expectedMode] of [
 			return Promise.resolve({});
 		};
 
-		await hapService.getCharacteristic(Characteristic.RotationSpeed).handleSetRequest(raw as never);
+		const write = hapService.getCharacteristic(Characteristic.RotationSpeed).handleSetRequest(raw as never);
 
 		if (expectedMode === "time_based_control") {
-			// Read-only telemetry state: the API must not be called.
+			// Read-only telemetry state: the write fails and the API must not be called.
+			await assert.rejects(() => write);
 			assert.equal(mode, undefined);
 		} else {
+			await write;
 			assert.equal(mode, expectedMode);
 		}
 	});
@@ -59,7 +61,9 @@ test("attempting to set time_based_control (speed 100) is rejected without calli
 		return Promise.resolve({});
 	};
 
-	await hapService.getCharacteristic(Characteristic.RotationSpeed).handleSetRequest(100 as never);
+	await assert.rejects(() =>
+		hapService.getCharacteristic(Characteristic.RotationSpeed).handleSetRequest(100 as never),
+	);
 
 	assert.equal(apiCalled, false);
 	assert.ok(logs.some((l) => l.level === "warn"));

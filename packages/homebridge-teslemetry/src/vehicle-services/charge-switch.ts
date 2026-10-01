@@ -46,11 +46,11 @@ export class ChargeSwitchService extends BaseService {
         if (value) {
           // Start charging
           this.platform.log.info(`Starting charging for ${vehicle.name}`);
-          await vehicle.api.startCharging();
+          await this.command(vehicle.api.startCharging());
         } else {
           // Stop charging
           this.platform.log.info(`Stopping charging for ${vehicle.name}`);
-          await vehicle.api.stopCharging();
+          await this.command(vehicle.api.stopCharging());
         }
       },
     );

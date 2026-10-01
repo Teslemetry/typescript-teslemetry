@@ -43,9 +43,15 @@ export function createFakePlatform(
 		},
 		api: {
 			// HAPStatus is a const enum: only property access (not a whole-object
-			// reference) survives isolatedModules, so only the member the base
-			// service classes actually read is forwarded here.
-			hap: { HapStatusError, HAPStatus: { SERVICE_COMMUNICATION_FAILURE: HAPStatus.SERVICE_COMMUNICATION_FAILURE } },
+			// reference) survives isolatedModules, so only the members the
+			// services actually read are forwarded here.
+			hap: {
+				HapStatusError,
+				HAPStatus: {
+					SERVICE_COMMUNICATION_FAILURE: HAPStatus.SERVICE_COMMUNICATION_FAILURE,
+					INVALID_VALUE_IN_REQUEST: HAPStatus.INVALID_VALUE_IN_REQUEST,
+				},
+			},
 		},
 	};
 
