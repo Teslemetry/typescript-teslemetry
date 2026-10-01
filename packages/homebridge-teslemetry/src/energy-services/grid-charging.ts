@@ -12,8 +12,6 @@ import { BaseEnergyService } from "./base.js";
  * Represents grid charging permission as a switch
  */
 export class GridChargingService extends BaseEnergyService {
-  private currentExportSetting: "battery_ok" | "never" | "pv_only" = "battery_ok";
-
   constructor(
     platform: import("../platform.js").TeslemetryPlatform,
     accessory: import("homebridge").PlatformAccessory,
@@ -40,15 +38,6 @@ export class GridChargingService extends BaseEnergyService {
           this.platform.Characteristic.On,
           isAllowed,
         );
-
-        // Store current export setting for API calls
-        if (components.customer_preferred_export_rule !== undefined ||
-            components.non_export_configured !== undefined) {
-          this.currentExportSetting =
-            (components.customer_preferred_export_rule ?? components.non_export_configured)
-              ? "never"
-              : "battery_ok";
-        }
       }
     });
 
@@ -62,10 +51,11 @@ export class GridChargingService extends BaseEnergyService {
           `${allowed ? "Enabling" : "Disabling"} grid charging for ${site.name}`,
         );
 
-        // The API requires both export and import (disallow charging) settings
-        // We maintain the current export setting and toggle the charging setting
+        // Send only the grid charging flag: the export rule is a separate
+        // setting this switch must never rewrite. The cast is needed because
+        // the SDK signature still makes the rule mandatory; the API does not.
         await this.command(site.api.gridImportExport(
-          this.currentExportSetting,
+          undefined as never,
           !allowed, // disallow_charge_from_grid
         ));
       },

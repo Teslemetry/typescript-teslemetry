@@ -33,17 +33,30 @@ test("OperationModeService calls setOperationMode for a settable mode", async ()
 	assert.deepEqual(api.calls, [{ method: "setOperationMode", args: ["autonomous"] }]);
 });
 
-test("GridChargingService.currentExportSetting stays within the literal union accepted by gridImportExport", async () => {
-	const { platform } = createFakePlatform();
-	const accessory = createFakeAccessory("grid-charging-site");
-	const { site, api } = createFakeEnergySite();
+// Regression (HB01): the switch used to send an export rule derived from a
+// truthiness check on site info, silently flipping exporting sites to "never"
+// and inventing "battery_ok" for a site that reports no rule.
+for (const [shape, components] of [
+	["battery_ok", { customer_preferred_export_rule: "battery_ok" }],
+	["pv_only", { customer_preferred_export_rule: "pv_only" }],
+	["never", { customer_preferred_export_rule: "never" }],
+	["no rule", {}],
+] as const) {
+	test(`GridChargingService sends only the grid charging flag, never an export rule (site: ${shape})`, async () => {
+		const { platform } = createFakePlatform();
+		const accessory = createFakeAccessory(`grid-charging-site-${shape}`);
+		const { site, api } = createFakeEnergySite();
 
-	new GridChargingService(platform, accessory, site);
+		new GridChargingService(platform, accessory, site);
+		api.emit("siteInfo", { response: { components } });
 
-	const characteristic = accessory.getService(Service.Switch)!.getCharacteristic(Characteristic.On);
-	await characteristic.handleSetRequest(true as never);
+		const characteristic = accessory.getService(Service.Switch)!.getCharacteristic(Characteristic.On);
+		await characteristic.handleSetRequest(false as never);
+		await characteristic.handleSetRequest(true as never);
 
-	assert.equal(api.calls.length, 1);
-	assert.equal(api.calls[0].method, "gridImportExport");
-	assert.equal(api.calls[0].args[0], "battery_ok");
-});
+		assert.deepEqual(api.calls, [
+			{ method: "gridImportExport", args: [undefined, true] },
+			{ method: "gridImportExport", args: [undefined, false] },
+		]);
+	});
+}
