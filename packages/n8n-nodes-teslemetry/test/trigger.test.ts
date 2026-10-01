@@ -229,7 +229,9 @@ test("TeslemetryTrigger sends the SDK's log lines to n8n's logger, never the con
 
   assert.deepEqual(consoleCalls, []);
   assert.ok(lines.includes("debug: Response from /api/test: 200"), lines.join("\n"));
-  assert.ok(lines.includes("debug: Connected to stream"), lines.join("\n"));
+  // A rejected attempt never announces a connection: the SDK logs it only on
+  // the stream's first chunk.
+  assert.ok(!lines.includes("debug: Connected to stream"), lines.join("\n"));
   assert.ok(lines.includes("error: SSE error: Error: SSE failed: 500 Server Error"), lines.join("\n"));
   assert.ok(!lines.some((line) => line.includes(TOKEN) || line.includes("token=")), lines.join("\n"));
 });

@@ -205,6 +205,15 @@ test("createLogger never lets a URL's query string, which carries the token, rea
   for (const line of lines) assert.doesNotMatch(line, /SECRET/);
 });
 
+test("createLogger strips the query string from an upper-case URL too", () => {
+  const { log, lines } = createFakeLog();
+  const logger = createLogger(log);
+
+  logger.error("Request failed:", new Error("GET HTTPS://API.TESLEMETRY.COM/sse/?cache=false&key=SECRET failed"));
+
+  assert.deepEqual(lines, ["[error] Request failed: GET HTTPS://API.TESLEMETRY.COM/sse/ failed"]);
+});
+
 test("auth_failure sets a persistent red status, surfaces node.error, and schedules a retry connect", () => {
   const { sse, connectCalls } = createFakeSse();
   const { node, statuses, errors } = createFakeNode();
