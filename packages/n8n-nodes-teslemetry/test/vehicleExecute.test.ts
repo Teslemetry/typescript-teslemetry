@@ -1,7 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TeslemetryVehicle } from "../src/nodes/TeslemetryVehicle.node.js";
-import { withMockedFetch, captureRequest, fakeExecuteContext } from "./testHelpers.js";
+import {
+  API_FAILURES,
+  assertApiFailure,
+  withMockedFetch,
+  captureRequest,
+  fakeExecuteContext,
+} from "./testHelpers.js";
 
 const VIN = "5YJSA1E14FF000000";
 
@@ -305,9 +311,122 @@ test("TeslemetryVehicle.execute returns an error item per failed item when Conti
   );
 
   assert.equal(result[0].length, 2);
-  assert.ok((result[0][0].json as { error?: string }).error);
+  assert.deepEqual(result[0][0].json, { error: "Teslemetry API request failed (HTTP 500)" });
   assert.deepEqual(result[0][1].json, { response: {} });
 });
+
+for (const failure of API_FAILURES) {
+  test(`TeslemetryVehicle.execute shows the api's text for ${failure.name}`, async () => {
+    const node = new TeslemetryVehicle();
+
+    await assert.rejects(
+      () =>
+        withMockedFetch(failure.response, () =>
+          node.execute.call(fakeExecuteContext([{ operation: "lockDoors", vin: VIN }])),
+        ),
+      (error) => assertApiFailure(error, failure, 0),
+    );
+
+    const result = await withMockedFetch(failure.response, () =>
+      node.execute.call(fakeExecuteContext([{ operation: "lockDoors", vin: VIN }], true)),
+    );
+    assert.deepEqual(result[0][0].json, { error: failure.message });
+  });
+}
+
+test("TeslemetryVehicle.execute says when the api could not be reached", async () => {
+  const node = new TeslemetryVehicle();
+  const context = fakeExecuteContext([{ operation: "lockDoors", vin: VIN }]);
+
+  await assert.rejects(
+    () =>
+      withMockedFetch(
+        () => {
+          throw new TypeError("fetch failed");
+        },
+        () => node.execute.call(context),
+      ),
+    (error: Error) => {
+      assert.equal(error.message, "Could not reach the Teslemetry API: fetch failed");
+      return true;
+    },
+  );
+});
+
+test("TeslemetryVehicle.execute names the item that failed", async () => {
+  const node = new TeslemetryVehicle();
+  const context = fakeExecuteContext([
+    { operation: "lockDoors", vin: VIN },
+    { operation: "unlockDoors", vin: VIN },
+  ]);
+
+  let call = 0;
+  await assert.rejects(
+    () =>
+      withMockedFetch(
+        () => {
+          call += 1;
+          return call === 1
+            ? new Response(JSON.stringify({ response: { result: true, reason: "" } }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              })
+            : API_FAILURES[1].response();
+        },
+        () => node.execute.call(context),
+      ),
+    (error) => assertApiFailure(error, API_FAILURES[1], 1),
+  );
+});
+
+function commandAnswer(response: Record<string, unknown>) {
+  return captureRequest({ response }).handler;
+}
+
+test("TeslemetryVehicle.execute fails a command the api answers with result: false", async () => {
+  const node = new TeslemetryVehicle();
+  const params = [{ operation: "lockDoors", vin: VIN }];
+
+  await assert.rejects(
+    () =>
+      withMockedFetch(commandAnswer({ result: false, reason: "could_not_wake_buses" }), () =>
+        node.execute.call(fakeExecuteContext(params)),
+      ),
+    (error: Error & { context?: { itemIndex?: number } }) => {
+      assert.equal(error.name, "NodeOperationError");
+      assert.equal(error.message, "Command failed: could_not_wake_buses");
+      assert.equal(error.context?.itemIndex, 0);
+      return true;
+    },
+  );
+
+  await assert.rejects(
+    () =>
+      withMockedFetch(commandAnswer({ result: false }), () => node.execute.call(fakeExecuteContext(params))),
+    (error: Error) => {
+      assert.equal(error.message, "Command failed with no reason given");
+      return true;
+    },
+  );
+
+  const result = await withMockedFetch(commandAnswer({ result: false, reason: "could_not_wake_buses" }), () =>
+    node.execute.call(fakeExecuteContext(params, true)),
+  );
+  assert.deepEqual(result[0][0].json, { error: "Command failed: could_not_wake_buses" });
+});
+
+for (const reason of ["already_set", "not_charging", "requested"]) {
+  test(`TeslemetryVehicle.execute treats result: false with reason "${reason}" as done`, async () => {
+    const node = new TeslemetryVehicle();
+    const context = fakeExecuteContext([{ operation: "stopCharging", vin: VIN }]);
+
+    const result = await withMockedFetch(commandAnswer({ result: false, reason }), () =>
+      node.execute.call(context),
+    );
+
+    assert.deepEqual(result[0][0].json, { response: { result: false, reason } });
+  });
+}
 
 test("TeslemetryVehicle.execute throws for an unknown operation", async () => {
   const node = new TeslemetryVehicle();

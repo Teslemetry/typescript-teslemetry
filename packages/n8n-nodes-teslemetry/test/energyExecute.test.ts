@@ -1,7 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TeslemetryEnergy } from "../src/nodes/TeslemetryEnergy.node.js";
-import { withMockedFetch, captureRequest, fakeExecuteContext } from "./testHelpers.js";
+import {
+  API_FAILURES,
+  assertApiFailure,
+  withMockedFetch,
+  captureRequest,
+  fakeExecuteContext,
+} from "./testHelpers.js";
 
 const SITE_ID = 123;
 
@@ -149,7 +155,7 @@ test("TeslemetryEnergy.execute returns an error item per failed item when Contin
   );
 
   assert.equal(result[0].length, 2);
-  assert.ok((result[0][0].json as { error?: string }).error);
+  assert.deepEqual(result[0][0].json, { error: "Teslemetry API request failed (HTTP 500)" });
   assert.deepEqual(result[0][1].json, { response: {} });
 });
 
@@ -159,3 +165,22 @@ test("TeslemetryEnergy.execute throws for an unknown operation", async () => {
 
   await assert.rejects(() => node.execute.call(context), /Unknown operation/);
 });
+
+for (const failure of API_FAILURES) {
+  test(`TeslemetryEnergy.execute shows the api's text for ${failure.name}`, async () => {
+    const node = new TeslemetryEnergy();
+
+    await assert.rejects(
+      () =>
+        withMockedFetch(failure.response, () =>
+          node.execute.call(fakeExecuteContext([{ operation: "getLiveStatus", siteId: SITE_ID }])),
+        ),
+      (error) => assertApiFailure(error, failure, 0),
+    );
+
+    const result = await withMockedFetch(failure.response, () =>
+      node.execute.call(fakeExecuteContext([{ operation: "getLiveStatus", siteId: SITE_ID }], true)),
+    );
+    assert.deepEqual(result[0][0].json, { error: failure.message });
+  });
+}
