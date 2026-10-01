@@ -1,5 +1,13 @@
 # @teslemetry/api
 
+## 0.12.1
+
+### Patch Changes
+
+- d2263b2: Reset the stream reconnect backoff as soon as any traffic (including a blank keep-alive) arrives on the SSE connection, so a single dropped socket after earlier failures no longer causes a long gap before reconnecting.
+- d321ce1: Fix the stream's `cache` option never reaching the server: the request was sent as `/sse/??cache=...`, so the server read the key as `?cache` and always replayed its last known state. The URL is now well-formed (`/sse/?cache=...`). The default is unchanged - a stream created without `cache` still sends `cache=true` and still gets the replay - but a caller that passes `cache: false` (or `cache: { cloud: false }`) now really gets no replay on connect. Also exports the `TeslemetryStreamOptions` type.
+- 19832b3: Fix the stream reconnect loop. A connection the server ends cleanly (as it does to every open stream on shutdown) is now treated as a disconnect: `disconnect` and `stream_error` are emitted and the reconnect waits for the backoff, instead of reconnecting in a tight loop with no events. `connect` is now emitted when the server's first chunk arrives rather than before the request is sent, so a rejected or hanging attempt no longer reports a connection. The reconnect backoff is capped at 60 seconds instead of 10 minutes.
+
 ## 0.12.0
 
 ### Minor Changes
