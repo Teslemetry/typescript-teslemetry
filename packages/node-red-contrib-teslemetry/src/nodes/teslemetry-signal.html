@@ -113,16 +113,29 @@
     </div>
     <div class="form-row">
         <label for="node-input-field"><i class="fa fa-tag"></i> Field</label>
-        <select id="node-input-field" style="width: 70%;">
-            <option value="">From msg.field</option>
-        </select>
+        <select id="node-input-field" style="width: 70%;"></select>
     </div>
 </script>
 
 <script type="text/html" data-help-name="teslemetry-signal">
     <p>Listens for a specific signal field from a vehicle.</p>
     <p>
-        Requires a VIN and a Field name. The field can be selected from the
-        dropdown or provided via <code>msg.field</code>.
+        Requires a VIN and a Field, both selected in the node - it has no
+        input, so neither can come from a message.
     </p>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">various</span></dt>
+        <dd>
+            The field's new value, as the vehicle reports it: no unit
+            conversion is applied (e.g. <code>VehicleSpeed</code> is in mph,
+            <code>Odometer</code> in miles), and it can be <code>null</code>
+            when the vehicle has no reading.
+        </dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd><code>signal</code></dd>
+        <dt>field <span class="property-type">string</span></dt>
+        <dd>The name of the field.</dd>
+    </dl>
 </script>

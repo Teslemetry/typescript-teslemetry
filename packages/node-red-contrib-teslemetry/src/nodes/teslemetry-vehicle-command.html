@@ -17,7 +17,7 @@
         outputs: 1,
         icon: "font-awesome/fa-car",
         label: function () {
-            return this.name || "Command: " + (this.command || "Data");
+            return this.name || "Command: " + (this.command || "msg.command");
         },
         oneditprepare: function () {
             const node = this;
@@ -91,13 +91,16 @@
             ><i class="fa fa-cogs"></i> Command</label
         >
         <select id="node-input-command">
+            <option value="">From msg.command</option>
             <option value="wakeUp">Wake Up</option>
             <option value="flashLights">Flash Lights</option>
             <option value="honkHorn">Honk Horn</option>
             <option value="lockDoors">Lock Doors</option>
             <option value="unlockDoors">Unlock Doors</option>
             <option value="remoteStart">Remote Start</option>
-            <option value="actuateTrunkRear">Open Rear Trunk</option>
+            <option value="actuateTrunkRear">
+                Open/Close Rear Trunk (toggle)
+            </option>
             <option value="actuateTrunkFront">Open Front Trunk</option>
             <option value="tonneauOpen">Open Tonneau (Cybertruck)</option>
             <option value="tonneauClose">Close Tonneau (Cybertruck)</option>
@@ -133,9 +136,11 @@
             <option value="setAutoSeatClimate">
                 Set Auto Seat Climate (msg.seat, msg.on)
             </option>
-            <option value="setTemps">Set Temps (msg.driver_temp)</option>
+            <option value="setTemps">
+                Set Temps (msg.driver_temp, msg.passenger_temp)
+            </option>
             <option value="setSeatHeater">
-                Set Seat Heater (msg.heater, msg.level)
+                Set Seat Heater (msg.seat, msg.level 0-3)
             </option>
             <option value="setSeatCooler">
                 Set Seat Cooler (msg.seat, msg.level 0-3)
@@ -274,13 +279,19 @@
         <dt class="optional">
             command <span class="property-type">string</span>
         </dt>
-        <dd>Command to execute (overrides config)</dd>
+        <dd>
+            Command to execute, e.g. <code>lockDoors</code>. Only used when
+            Command is set to <b>From msg.command</b>; a command selected in
+            the node takes precedence.
+        </dd>
         <dt class="optional">
-            payload <span class="property-type">object</span>
+            <i>arguments</i> <span class="property-type">various</span>
         </dt>
         <dd>
-            Arguments for commands (e.g. <code>{ "percent": 80 }</code> for Set
-            Charge Limit)
+            Command arguments are read from the top level of the message, not
+            from <code>msg.payload</code> - e.g. <code>msg.percent = 80</code>
+            for Set Charge Limit. Each entry in the Command list names the
+            properties it needs.
         </dd>
         <dt class="optional">
             time / departureTime / endOffPeakTime / startTime / endTime /

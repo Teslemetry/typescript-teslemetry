@@ -200,3 +200,20 @@ test("setTimeOfUseSettings rejects a tariff document missing required fields", a
   assert.match(errors[0], /code/);
   assert.match(errors[0], /daily_charges/);
 });
+
+test("msg.command is used when the node's Command is 'From msg.command' (empty)", async () => {
+  let stormMode: unknown;
+  const site = {
+    setStormMode: async (enabled: boolean) => {
+      stormMode = enabled;
+      return { response: {} };
+    },
+    getLiveStatus: async () => {
+      throw new Error("getLiveStatus must not run");
+    },
+  };
+
+  const errors = await runCommand(site, { command: "setStormModeOn" });
+  assert.deepEqual(errors, []);
+  assert.equal(stormMode, true);
+});

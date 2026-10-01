@@ -955,3 +955,53 @@ test("mediaPreviousTrack dispatches to the SDK with no arguments", async () => {
 
   assert.strictEqual(called, true);
 });
+
+test("msg.command is used when the node's Command is 'From msg.command' (empty)", async () => {
+  let locked = false;
+  const vehicle = {
+    lockDoors: async () => {
+      locked = true;
+      return { response: { result: true } };
+    },
+    vehicleData: async () => {
+      throw new Error("vehicleData must not run");
+    },
+  };
+
+  await runCommand(vehicle, { command: "lockDoors" });
+  assert.equal(locked, true);
+});
+
+test("a command selected in the node takes precedence over msg.command", async () => {
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+
+  const calls: string[] = [];
+  const vehicle = {
+    lockDoors: async () => {
+      calls.push("lockDoors");
+      return { response: {} };
+    },
+    vehicleData: async () => {
+      calls.push("vehicleData");
+      return { response: {} };
+    },
+  };
+
+  const configId = "cfg-precedence-test";
+  instances.set(configId, {
+    teslemetry: { api: { getVehicle: () => vehicle } } as any,
+    products: Promise.resolve({} as any),
+  });
+
+  const node = createFakeNode();
+  ctor.call(node, {
+    teslemetryConfig: configId,
+    vin: "TEST_VIN",
+    command: "vehicleData",
+  });
+
+  await node.handlers.input({ command: "lockDoors" } as Partial<Msg> as Msg, () => {}, () => {});
+  assert.deepEqual(calls, ["vehicleData"]);
+});
