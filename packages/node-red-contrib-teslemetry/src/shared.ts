@@ -15,35 +15,50 @@ export type Instance = {
 
 export const instances = new Map<string, Instance>();
 
-/**
- * Extract a useful error message from any error type.
- * Handles Error objects, hey-api response objects, and plain objects.
- */
-export function getErrorMessage(error: unknown): string {
-  if (!error) return "Unknown error";
+/** Request URLs carry the access token as `?token=`, so any URL in an error
+ *  text loses its whole query string before it can reach a status or a log. */
+function stripUrlQueries(text: string): string {
+  return text.replace(/(https?:\/\/[^\s?#"'<>]+)[?#][^\s"'<>]*/g, "$1");
+}
 
-  // Standard Error object
+function nonEmptyString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function describeError(error: unknown): string | undefined {
   if (error instanceof Error) {
-    return error.message;
+    // Node's fetch reports every network failure as "fetch failed" and keeps
+    // the reason (ECONNREFUSED, ENOTFOUND, a timeout) on `cause`.
+    const { cause } = error as {
+      cause?: { message?: unknown; code?: unknown };
+    };
+    const reason =
+      nonEmptyString(cause?.message) ?? nonEmptyString(cause?.code);
+    const message = nonEmptyString(error.message);
+    if (!reason || reason === message) return message;
+    return message ? `${message}: ${reason}` : reason;
   }
 
-  // hey-api throws response objects with this shape
-  if (typeof error === "object") {
+  // The generated client throws a non-JSON error body as the raw text
+  if (typeof error === "string") return nonEmptyString(error);
+
+  // ...and a JSON one as the parsed object. Tesla-shaped errors send an empty
+  // `error_description` with the reason in `error`, so skip empty strings.
+  if (error && typeof error === "object") {
     const obj = error as Record<string, unknown>;
+    const text =
+      nonEmptyString(obj.error_description) ??
+      nonEmptyString(obj.error) ??
+      nonEmptyString(obj.message);
+    if (text) return text;
 
-    if (typeof obj.error_description === "string") return obj.error_description;
-    if (typeof obj.error === "string") return obj.error;
-    if (typeof obj.message === "string") return obj.message;
-
-    // Check for response status
     if (obj.response && typeof obj.response === "object") {
       const resp = obj.response as Record<string, unknown>;
-      if (typeof obj.error_description === "string")
-        return obj.error_description;
-      if (typeof obj.error === "string") return obj.error;
       if (resp.status)
         return `HTTP ${resp.status}: ${resp.statusText || "Error"}`;
     }
+
+    if (Object.keys(obj).length === 0) return undefined;
 
     // Last resort: try to stringify
     try {
@@ -53,7 +68,41 @@ export function getErrorMessage(error: unknown): string {
     }
   }
 
-  return String(error);
+  return error ? String(error) : undefined;
+}
+
+/**
+ * Extract a useful error message from any error type.
+ * Handles Error objects, hey-api response objects, and plain objects.
+ */
+export function getErrorMessage(error: unknown): string {
+  return stripUrlQueries(describeError(error) ?? "Unknown error");
+}
+
+/** Longest error text shown under a node; the full text still reaches Catch nodes. */
+const MAX_STATUS_LENGTH = 100;
+
+/**
+ * Fail an input message: show the reason under the node and hand it to
+ * `done`, so Catch nodes fire with the message and Complete nodes do not.
+ */
+export function failInput(
+  node: Node,
+  done: (err?: Error) => void,
+  error: unknown,
+): void {
+  const text = getErrorMessage(error);
+  node.status({
+    fill: "red",
+    shape: "ring",
+    text:
+      text.length > MAX_STATUS_LENGTH
+        ? `${text.slice(0, MAX_STATUS_LENGTH - 1)}…`
+        : text,
+  });
+  // Passed as a string: Node-RED stringifies whatever it is given into the
+  // Catch message's `error.message`, which would prefix an Error with "Error: ".
+  done(text as unknown as Error);
 }
 
 /** How long to wait before retrying a stream that stopped after repeated
@@ -136,7 +185,7 @@ export function getInstance(configId: string, node: Node): Instance | null {
  */
 export function hasInstanceError(instance: Instance, node: Node): boolean {
   if (instance.error) {
-    node.status({ fill: "red", shape: "ring", text: "Error" });
+    node.status({ fill: "red", shape: "ring", text: instance.error });
     node.error(`Teslemetry error: ${instance.error}`);
     return true;
   }

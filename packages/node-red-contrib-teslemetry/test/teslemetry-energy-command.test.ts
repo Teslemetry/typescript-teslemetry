@@ -27,6 +27,13 @@ function createFakeNode(errors: string[] = []): FakeNode {
   };
 }
 
+/** Node-RED's `done(err)` raises `err` through `node.error(err, msg)`. */
+function failTo(node: FakeNode) {
+  return (err?: unknown) => {
+    if (err !== undefined) node.error(err as string);
+  };
+}
+
 function createFakeRED(): { RED: NodeAPI; registered: Record<string, Function> } {
   const registered: Record<string, Function> = {};
   const RED = {
@@ -61,8 +68,7 @@ async function runCommand(
   ctor.call(node, { teslemetryConfig: configId, siteId: "12345", command: "" });
 
   const send = () => {};
-  const done = () => {};
-  await node.handlers.input(msg as Msg, send, done);
+  await node.handlers.input(msg as Msg, send, failTo(node));
   return errors;
 }
 
@@ -84,7 +90,7 @@ const VALID_TARIFF = {
   },
 };
 
-test("a node constructed while the products fetch is failing processes messages once it recovers", async () => {
+test("a node constructed while the products fetch is failing still sends the message to the API", async () => {
   const { RED, registered } = createFakeRED();
   commandNodeModule(RED);
   const ctor = registered["teslemetry-energy-command"];
@@ -113,30 +119,20 @@ test("a node constructed while the products fetch is failing processes messages 
     command: "getLiveStatus",
   });
 
-  let sentWhileFailing = false;
+  // The failed account check must not swallow the command: the API gives
+  // its own answer.
+  let sent = false;
   await node.handlers.input(
     {} as Msg,
     () => {
-      sentWhileFailing = true;
+      sent = true;
     },
-    () => {},
+    failTo(node),
   );
-  assert.equal(sentWhileFailing, false);
-  assert.equal(called, false);
-  assert.ok(errors.some((e) => e.includes("invalid token")));
-
-  instance.error = undefined;
-
-  let sentAfterRecovery = false;
-  await node.handlers.input(
-    {} as Msg,
-    () => {
-      sentAfterRecovery = true;
-    },
-    () => {},
-  );
-  assert.equal(sentAfterRecovery, true);
   assert.equal(called, true);
+  assert.equal(sent, true);
+  // Only the construction-time report of the failed check, no input error.
+  assert.deepEqual(errors, ["Teslemetry error: invalid token"]);
 });
 
 test("setTimeOfUseSettings coerces a numeric-string version to a number before calling the SDK", async () => {

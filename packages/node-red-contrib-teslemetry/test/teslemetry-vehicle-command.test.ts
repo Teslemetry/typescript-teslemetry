@@ -10,7 +10,7 @@ interface FakeNode {
   handlers: Record<string, (...args: any[]) => any>;
   on(event: string, cb: (...args: any[]) => any): void;
   status(): void;
-  error(): void;
+  error(msg?: string): void;
   [key: string]: any;
 }
 
@@ -22,6 +22,13 @@ function createFakeNode(): FakeNode {
     },
     status() {},
     error() {},
+  };
+}
+
+/** Node-RED's `done(err)` raises `err` through `node.error(err, msg)`. */
+function failTo(node: FakeNode) {
+  return (err?: unknown) => {
+    if (err !== undefined) node.error(err as string);
   };
 }
 
@@ -56,8 +63,7 @@ async function runCommand(
   ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
 
   const send = () => {};
-  const done = () => {};
-  await node.handlers.input(msg as Msg, send, done);
+  await node.handlers.input(msg as Msg, send, failTo(node));
 }
 
 async function runCommandExpectError(
@@ -81,11 +87,11 @@ async function runCommandExpectError(
   };
   ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
 
-  await node.handlers.input(msg as Msg, () => {}, () => {});
+  await node.handlers.input(msg as Msg, () => {}, failTo(node));
   return errors;
 }
 
-test("a node constructed while the products fetch is failing processes messages once it recovers", async () => {
+test("a node constructed while the products fetch is failing still sends the message to the API", async () => {
   const { RED, registered } = createFakeRED();
   commandNodeModule(RED);
   const ctor = registered["teslemetry-vehicle-command"];
@@ -117,32 +123,20 @@ test("a node constructed while the products fetch is failing processes messages 
     command: "wakeUp",
   });
 
-  // Still failing: the message is rejected, not processed.
-  let sentWhileFailing = false;
+  // The failed account check must not swallow the command: the API gives
+  // its own answer.
+  let sent = false;
   await node.handlers.input(
     {} as Msg,
     () => {
-      sentWhileFailing = true;
+      sent = true;
     },
-    () => {},
+    failTo(node),
   );
-  assert.equal(sentWhileFailing, false);
-  assert.equal(receivedVin, undefined);
-  assert.ok(errors.some((e) => e.includes("invalid token")));
-
-  // The products fetch recovers in the background, without a redeploy.
-  instance.error = undefined;
-
-  let sentAfterRecovery = false;
-  await node.handlers.input(
-    {} as Msg,
-    () => {
-      sentAfterRecovery = true;
-    },
-    () => {},
-  );
-  assert.equal(sentAfterRecovery, true);
   assert.equal(receivedVin, "called");
+  assert.equal(sent, true);
+  // Only the construction-time report of the failed check, no input error.
+  assert.deepEqual(errors, ["Teslemetry error: invalid token"]);
 });
 
 test("setSeatCooler coerces a numeric-string msg.level to a number before calling the SDK", async () => {
@@ -393,7 +387,7 @@ test("setValetModeOn rejects a missing msg.password without echoing it, and neve
   ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
 
   const msg: Partial<Msg> = { command: "setValetModeOn" };
-  await node.handlers.input(msg as Msg, () => {}, () => {});
+  await node.handlers.input(msg as Msg, () => {}, failTo(node));
 
   assert.strictEqual(errors.length, 1);
   assert.doesNotMatch(errors[0], /hunter2/);
@@ -456,7 +450,7 @@ test("speedLimitActivate rejects a missing msg.pin without echoing it", async ()
   ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
 
   const msg: Partial<Msg> = { command: "speedLimitActivate" };
-  await node.handlers.input(msg as Msg, () => {}, () => {});
+  await node.handlers.input(msg as Msg, () => {}, failTo(node));
 
   assert.strictEqual(errors.length, 1);
   assert.match(errors[0], /pin/i);
@@ -487,7 +481,7 @@ test("speedLimitSetLimit rejects an out-of-range msg.limitMph", async () => {
   ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
 
   const msg: Partial<Msg> = { command: "speedLimitSetLimit", limitMph: 10 };
-  await node.handlers.input(msg as Msg, () => {}, () => {});
+  await node.handlers.input(msg as Msg, () => {}, failTo(node));
 
   assert.strictEqual(errors.length, 1);
   assert.match(errors[0], /limitMph/);
@@ -580,7 +574,7 @@ test("addChargeSchedule rejects a missing msg.lat", async () => {
       lon: -122.4194,
     } as any,
     () => {},
-    () => {},
+    failTo(node),
   );
 
   assert.strictEqual(errors.length, 1);
@@ -623,7 +617,7 @@ test("addChargeSchedule rejects an out-of-range msg.startTime", async () => {
       lon: -122.4194,
     } as any,
     () => {},
-    () => {},
+    failTo(node),
   );
 
   assert.strictEqual(errors.length, 1);
@@ -714,7 +708,7 @@ test("removeChargeSchedule rejects a missing msg.id", async () => {
   await node.handlers.input(
     { command: "removeChargeSchedule" } as any,
     () => {},
-    () => {},
+    failTo(node),
   );
 
   assert.strictEqual(errors.length, 1);
@@ -786,7 +780,7 @@ test("addPreconditionSchedule rejects a missing msg.preconditionTime", async () 
       lon: -122.4194,
     } as any,
     () => {},
-    () => {},
+    failTo(node),
   );
 
   assert.strictEqual(errors.length, 1);
@@ -878,7 +872,7 @@ test("removePreconditionSchedule rejects a non-integer msg.id", async () => {
   await node.handlers.input(
     { command: "removePreconditionSchedule", id: 2.5 } as any,
     () => {},
-    () => {},
+    failTo(node),
   );
 
   assert.strictEqual(errors.length, 1);
@@ -914,7 +908,7 @@ test("navigationGpsRequest rejects a missing msg.order", async () => {
     lat: 37.7749,
     lon: -122.4194,
   };
-  await node.handlers.input(msg as Msg, () => {}, () => {});
+  await node.handlers.input(msg as Msg, () => {}, failTo(node));
 
   assert.strictEqual(errors.length, 1);
   assert.match(errors[0], /order/i);
