@@ -113,10 +113,12 @@ teslemetry.sse.disconnect();
 
 ##### Stream errors and reconnecting
 
-The stream reconnects automatically with exponential backoff, re-resolving
-your access token callback on every attempt. Each failed attempt emits a
-`stream_error` event with the error, the HTTP status (when one was received),
-and the number of consecutive failures.
+The stream reconnects automatically with exponential backoff (2 seconds,
+doubling up to 60), re-resolving your access token callback on every attempt.
+`connect` is emitted once the server has started answering, not when the
+request is sent. Each failed attempt, and each connection the server ends,
+emits a `stream_error` event with the error, the HTTP status (when one was
+received), and the number of consecutive failures.
 
 Authentication failures are handled differently: after a `401`/`403` the
 stream reconnects once immediately (so a refreshed token can take over), and
