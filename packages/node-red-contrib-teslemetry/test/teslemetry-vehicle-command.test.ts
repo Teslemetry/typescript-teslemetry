@@ -1005,3 +1005,56 @@ test("a command selected in the node takes precedence over msg.command", async (
   await node.handlers.input({ command: "lockDoors" } as Partial<Msg> as Msg, () => {}, () => {});
   assert.deepEqual(calls, ["vehicleData"]);
 });
+
+async function runRefusal(response: unknown) {
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+  const configId = `cfg-refusal-${Math.random()}`;
+  instances.set(configId, {
+    teslemetry: { api: { getVehicle: () => ({ lockDoors: async () => ({ response }) }) } } as any,
+    products: Promise.resolve({} as any),
+  });
+  const node = createFakeNode();
+  const statuses: any[] = [];
+  node.status = (s?: unknown) => {
+    statuses.push(s);
+  };
+  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "lockDoors" });
+  const sent: Msg[] = [];
+  const doneArgs: unknown[] = [];
+  await node.handlers.input({} as Msg, (m: Msg) => sent.push(m), (err?: unknown) => doneArgs.push(err));
+  return { sent, doneArgs, status: statuses[statuses.length - 1] };
+}
+
+test("a refused command raises a catchable error naming the reason and sends nothing", async () => {
+  const { sent, doneArgs, status } = await runRefusal({ result: false, reason: "could_not_wake_buses" });
+  assert.equal(sent.length, 0);
+  assert.deepEqual(doneArgs, ["Command refused: could_not_wake_buses"]);
+  assert.equal(status.fill, "red");
+  assert.match(status.text, /could_not_wake_buses/);
+});
+
+test("a refusal without a reason raises an error", async () => {
+  const { sent, doneArgs } = await runRefusal({ result: false });
+  assert.equal(sent.length, 0);
+  assert.deepEqual(doneArgs, ["Command refused without a reason"]);
+});
+
+for (const reason of ["already_set", "not_charging", "requested"]) {
+  test(`a '${reason}' refusal passes through with a cleared status`, async () => {
+    const { sent, doneArgs, status } = await runRefusal({ result: false, reason });
+    assert.equal(sent.length, 1);
+    assert.deepEqual(sent[0].payload, { result: false, reason });
+    assert.deepEqual(doneArgs, [undefined]);
+    assert.deepEqual(status, {});
+  });
+}
+
+test("a successful command is sent on unchanged", async () => {
+  const { sent, doneArgs, status } = await runRefusal({ result: true, reason: "" });
+  assert.equal(sent.length, 1);
+  assert.deepEqual(sent[0].payload, { result: true, reason: "" });
+  assert.deepEqual(doneArgs, [undefined]);
+  assert.deepEqual(status, {});
+});

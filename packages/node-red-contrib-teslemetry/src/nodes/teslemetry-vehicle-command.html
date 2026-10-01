@@ -425,4 +425,13 @@
         <dt>payload <span class="property-type">object</span></dt>
         <dd>The response from the API.</dd>
     </dl>
+    <p>
+        When the vehicle refuses a command (<code>result: false</code>), the
+        node raises an error naming the reason (e.g.
+        <code>Command refused: could_not_wake_buses</code>) that a Catch node
+        receives with the original message, and sends nothing on its output.
+        The reasons <code>already_set</code>, <code>not_charging</code> and
+        <code>requested</code> mean the vehicle is already in the requested
+        state, so the message is sent on as normal.
+    </p>
 </script>

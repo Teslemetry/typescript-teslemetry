@@ -85,6 +85,11 @@ A VIN or command selected in the node always wins; `msg.vin` and `msg.command` a
 - `msg.lon` (number): Longitude for `triggerHomelink`.
 - `msg.value` (string): Address or text for `navigationRequest`.
 
+**Outputs:**
+- `msg.payload`: The response from the API, e.g. `{ "result": true, "reason": "" }`.
+
+When the vehicle refuses a command (`result: false`), the node raises an error naming the reason (e.g. `Command refused: could_not_wake_buses`) that a **catch** node receives with the original message, shows it in a red status, and sends nothing on its output. Refusals meaning the vehicle is already in the requested state - `already_set`, `not_charging` and `requested` - are not errors: the message is sent on as normal with `msg.payload.result` still `false`.
+
 ### teslemetry-energy-command
 Send commands to a Tesla Energy Site or retrieve site status.
 
