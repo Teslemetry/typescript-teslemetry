@@ -15,10 +15,12 @@ export type Instance = {
 
 export const instances = new Map<string, Instance>();
 
-/** Request URLs carry the access token as `?token=`, so any URL in an error
- *  text loses its whole query string before it can reach a status or a log. */
+/** Every Teslemetry request carries the access token as `?token=...`, so no
+ *  URL may reach a log with its query string intact. */
 function stripUrlQueries(text: string): string {
-  return text.replace(/(https?:\/\/[^\s?#"'<>]+)[?#][^\s"'<>]*/g, "$1");
+  return text
+    .replace(/(\bhttps?:\/\/[^\s?#"'<>]+)\?[^\s"'<>]*/g, "$1")
+    .replace(/\btoken=[^\s&"'<>]+/gi, "token=[redacted]");
 }
 
 function nonEmptyString(value: unknown): string | undefined {
@@ -106,14 +108,6 @@ export function failInput(
 }
 
 type RedLog = Record<"debug" | "info" | "warn" | "error", (msg: string) => void>;
-
-/** Every Teslemetry request carries the access token as `?token=...`, so no
- *  URL may reach a log with its query string intact. */
-function stripUrlQueries(text: string): string {
-  return text
-    .replace(/(\bhttps?:\/\/[^\s?#"'<>]+)\?[^\s"'<>]*/g, "$1")
-    .replace(/\btoken=[^\s&"'<>]+/gi, "token=[redacted]");
-}
 
 /**
  * Adapt `RED.log` to the SDK's logger. The SDK passes the reason as extra
