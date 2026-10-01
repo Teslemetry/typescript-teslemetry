@@ -105,6 +105,42 @@ export function failInput(
   done(text as unknown as Error);
 }
 
+type RedLog = Record<"debug" | "info" | "warn" | "error", (msg: string) => void>;
+
+/** Every Teslemetry request carries the access token as `?token=...`, so no
+ *  URL may reach a log with its query string intact. */
+function stripUrlQueries(text: string): string {
+  return text
+    .replace(/(\bhttps?:\/\/[^\s?#"'<>]+)\?[^\s"'<>]*/g, "$1")
+    .replace(/\btoken=[^\s&"'<>]+/gi, "token=[redacted]");
+}
+
+/**
+ * Adapt `RED.log` to the SDK's logger. The SDK passes the reason as extra
+ * arguments (`logger.error("SSE error:", error)`), which `RED.log` drops
+ * because its methods take a single message.
+ */
+export function createLogger(log: RedLog): Teslemetry["logger"] {
+  const at =
+    (level: keyof RedLog) =>
+    (...args: unknown[]) =>
+      log[level](
+        stripUrlQueries(
+          args
+            .map((arg) => (typeof arg === "string" ? arg : getErrorMessage(arg)))
+            .join(" "),
+        ),
+      );
+  return { debug: at("debug"), info: at("info"), warn: at("warn"), error: at("error") };
+}
+
+/** Connection refusals the user can act on, named in the status instead of a
+ *  bare retry count. */
+const STREAM_STATUS_REASONS: Record<number, string> = {
+  402: "subscription required",
+  429: "too many connections",
+};
+
 /** How long to wait before retrying a stream that stopped after repeated
  *  auth failures. The SDK gives up permanently on `auth_failure` (see
  *  TeslemetryStream), so a stalled token or a fixed credential needs
@@ -121,24 +157,33 @@ const AUTH_RETRY_DELAY_MS = 60_000;
  */
 export function attachStreamStatus(sse: TeslemetryStream, node: Node): () => void {
   let authRetryTimer: ReturnType<typeof setTimeout> | undefined;
+  // The SDK emits `disconnect` straight after `auth_failure` as it leaves its
+  // loop; that one must not replace the "auth failed" status.
+  let authFailed = false;
 
   const onConnect = () => {
+    authFailed = false;
     node.status({ fill: "green", shape: "dot", text: "connected" });
   };
   const onDisconnect = () => {
+    if (authFailed) return;
     node.status({ fill: "red", shape: "ring", text: "disconnected" });
   };
   const onStreamError = (event: TeslemetryStreamErrorEvent) => {
+    authFailed = false;
     const isAuth = event.error instanceof TeslemetryStreamAuthError;
-    node.status({
-      fill: "yellow",
-      shape: "ring",
-      text: isAuth
-        ? "auth error, retrying"
-        : `reconnecting (attempt ${event.retries})`,
-    });
+    const attempt = `(attempt ${event.retries})`;
+    let text = `reconnecting ${attempt}`;
+    if (isAuth) {
+      text = "auth error, retrying";
+    } else if (event.status !== undefined) {
+      const reason = STREAM_STATUS_REASONS[event.status] ?? `HTTP ${event.status}`;
+      text = `${reason}, retrying ${attempt}`;
+    }
+    node.status({ fill: "yellow", shape: "ring", text });
   };
   const onAuthFailure = (error: TeslemetryStreamAuthError) => {
+    authFailed = true;
     node.status({ fill: "red", shape: "dot", text: "auth failed - check token" });
     node.error(`Teslemetry stream authentication failed: ${error.message}`);
     authRetryTimer = setTimeout(() => {
@@ -146,6 +191,14 @@ export function attachStreamStatus(sse: TeslemetryStream, node: Node): () => voi
       sse.connect();
     }, AUTH_RETRY_DELAY_MS);
   };
+
+  // `connect()` returns early on a stream another node already started and
+  // announces nothing, so a node joining it takes its status from the stream.
+  if (sse.connected) {
+    onConnect();
+  } else if (sse.active) {
+    node.status({ fill: "yellow", shape: "ring", text: "connecting" });
+  }
 
   sse.on("connect", onConnect);
   sse.on("disconnect", onDisconnect);
