@@ -19,7 +19,7 @@ export const instances = new Map<string, Instance>();
  *  URL may reach a log with its query string intact. */
 function stripUrlQueries(text: string): string {
   return text
-    .replace(/(\bhttps?:\/\/[^\s?#"'<>]+)\?[^\s"'<>]*/g, "$1")
+    .replace(/(\bhttps?:\/\/[^\s?#"'<>]+)\?[^\s"'<>]*/gi, "$1")
     .replace(/\btoken=[^\s&"'<>]+/gi, "token=[redacted]");
 }
 
