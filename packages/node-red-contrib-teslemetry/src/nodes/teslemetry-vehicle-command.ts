@@ -51,6 +51,23 @@ function validateDaysOfWeek(daysOfWeek: string): void {
   }
 }
 
+/** Refusal reasons that mean the vehicle is already in the requested state
+ *  (the same list Home Assistant's Teslemetry integration accepts). */
+const BENIGN_REFUSAL_REASONS = new Set(["already_set", "not_charging", "requested"]);
+
+/** Throws when the API answered a command with `result: false` for a reason
+ *  other than a benign one, so the flow does not carry on as if it worked. */
+function checkCommandResult(response: unknown): void {
+  if (!response || typeof response !== "object") return;
+  const { result, reason } = response as { result?: unknown; reason?: unknown };
+  if (result !== false) return;
+  if (typeof reason === "string" && reason) {
+    if (BENIGN_REFUSAL_REASONS.has(reason)) return;
+    throw new Error(`Command refused: ${reason}`);
+  }
+  throw new Error("Command refused without a reason");
+}
+
 export default function (RED: NodeAPI) {
   function CommandNode(
     this: TeslemetryVehicleCommandNode,
@@ -591,6 +608,7 @@ export default function (RED: NodeAPI) {
             throw new Error(`Unknown command: ${command}`);
         }
 
+        checkCommandResult(result.response);
         msg.payload = result.response;
         node.status({});
         send(msg);
