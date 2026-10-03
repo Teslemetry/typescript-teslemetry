@@ -13,12 +13,22 @@ import { Logger, consoleLogger } from "./logger.js";
 import pkg from "../package.json" with { type: "json" };
 import type { Products } from "./const.js";
 import { Models } from "tesla-fleet-api/dist/types/vehicle.js";
+import { TeslemetryBusinessApi, isBusinessKey } from "./business.js";
+import {
+  BusinessRouteNotAllowedError,
+  parseRetryAfter,
+  toBusinessError,
+} from "./exceptions.js";
 
 interface TeslemetryOptions {
   region?: "na" | "eu";
   logger?: Logger;
   stream?: TeslemetryStreamOptions;
   throwOnError?: boolean;
+  /** Use Teslemetry for Business mode. Defaults to true when the access
+   *  token is a string shaped like a business key (`sk_...`); set it when
+   *  the token comes from a callback. */
+  business?: boolean;
 }
 
 export class Teslemetry {
@@ -30,6 +40,10 @@ export class Teslemetry {
   public logger: Logger;
   public user: TeslemetryUserApi;
   public charging: TeslemetryChargingApi;
+  /** True for a Teslemetry for Business API key. */
+  public isBusiness: boolean;
+  /** Teslemetry for Business calls; only a business key may use them. */
+  public business: TeslemetryBusinessApi;
 
   constructor(
     access_token: string | (() => Promise<string>),
@@ -37,6 +51,10 @@ export class Teslemetry {
   ) {
     this.logger = options?.logger || consoleLogger;
     if (options?.region) this.region = options.region;
+    this.isBusiness =
+      options?.business ??
+      (typeof access_token === "string" && isBusinessKey(access_token));
+    this.business = new TeslemetryBusinessApi(this);
 
     // Initialize client with base URL
     this.client = createClient({
@@ -53,7 +71,10 @@ export class Teslemetry {
       // Query params (e.g. ?token=...) may carry credentials - never log them.
       const path = response.url ? new URL(response.url).pathname : response.url;
       this.logger.debug(`Response from ${path}: ${response.status}`);
-      if (!this.region) {
+      // A business key serves customers in both regions, so one response's
+      // region must not pin the whole client: business.routeRequest picks
+      // the host per product instead.
+      if (!this.region && !this.isBusiness) {
         const userRegion = response.headers.get("x-region") as "na" | "eu";
         if (userRegion) {
           this.logger.debug(
@@ -67,6 +88,24 @@ export class Teslemetry {
       }
       return response;
     });
+
+    if (this.isBusiness) {
+      this.client.interceptors.request.use((request) =>
+        this.business.routeRequest(request),
+      );
+    }
+
+    // Business error codes come back as a typed error instead of the raw
+    // body. Consumer tokens never receive these codes, so nothing else
+    // changes.
+    this.client.interceptors.error.use(
+      (error, response) =>
+        toBusinessError(
+          error,
+          response?.status,
+          parseRetryAfter(response?.headers),
+        ) ?? error,
+    );
 
     this.sse = new TeslemetryStream(this, options?.stream);
     this.api = new TeslemetryApi(this);
@@ -113,6 +152,11 @@ export class Teslemetry {
    * @returns A promise that resolves to an object containing vehicle and energy site names, API, and SSE instances.
    */
   public async createProducts(): Promise<Products> {
+    if (this.isBusiness) {
+      throw new BusinessRouteNotAllowedError(
+        "Business API keys cannot read /api/metadata; use business.createProducts() instead",
+      );
+    }
     const { data } = await getApiMetadata({
       client: this.client,
       throwOnError: true,

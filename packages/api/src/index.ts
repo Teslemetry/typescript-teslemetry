@@ -10,6 +10,14 @@ export type {
 export { TeslemetryVehicleStream } from "./TeslemetryVehicleStream.js";
 export { TeslemetryEnergySiteStream } from "./TeslemetryEnergySiteStream.js";
 export { TeslemetryApi } from "./TeslemetryApi.js";
+export { TeslemetryBusinessApi, isBusinessKey } from "./business.js";
+export type {
+  BusinessProduct,
+  BusinessProductsResponse,
+  BusinessProducts,
+  BusinessVehicleDetails,
+  BusinessEnergyDetails,
+} from "./business.js";
 export { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
 export { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
 export * from "./const.js";

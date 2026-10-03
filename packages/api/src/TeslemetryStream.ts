@@ -21,7 +21,16 @@ import { expandSseTopics, SseTopic, SseTopicPreset } from "./sseTopics.js";
 import { Teslemetry } from "./Teslemetry.js";
 import { Logger } from "./logger.js";
 import { getSseById_ } from "./client/sdk.gen.js";
-import { TeslemetryStreamAuthError } from "./exceptions.js";
+import {
+  BusinessAuthUnavailableError,
+  BusinessProductNotConsentedError,
+  CustomerReconnectRequiredError,
+  CustomerScopeMissingError,
+  TeslemetryBusinessError,
+  TeslemetryStreamAuthError,
+  parseRetryAfter,
+  toBusinessError,
+} from "./exceptions.js";
 
 export interface TeslemetryStreamOptions {
   vin?: string;
@@ -42,6 +51,8 @@ export interface TeslemetryStreamErrorEvent {
   status?: number;
   /** Consecutive failed connection attempts since the last received event */
   retries: number;
+  /** Business keys only: the VIN or energy site id whose stream failed */
+  id?: string;
 }
 
 // Interface for event type safety
@@ -132,6 +143,22 @@ type EnergyCache = Record<string, EnergySiteCache>;
  *  trail the server coming back by more than a minute. */
 const MAX_BACKOFF_SECONDS = 60;
 
+/** The api ends every business-key stream after 5 minutes so the reconnect
+ *  goes through admission again (a revoked consent or key stops the stream).
+ *  A clean end after at least this long is that planned end, and reconnects
+ *  after the server's `retry: 1000` without a disconnect; a quicker clean end
+ *  is treated as a lost connection. */
+const BUSINESS_PLANNED_END_MIN_MS = 60_000;
+const BUSINESS_RECONNECT_MS = 1000;
+
+/** Business stream errors that concern one product, not the key: that
+ *  product's stream stops and the others keep running. */
+const PRODUCT_ERRORS = [
+  BusinessProductNotConsentedError,
+  CustomerReconnectRequiredError,
+  CustomerScopeMissingError,
+];
+
 export class TeslemetryStream extends EventEmitter {
   private root: Teslemetry;
   public active: boolean = false;
@@ -153,6 +180,11 @@ export class TeslemetryStream extends EventEmitter {
    *  can be reconnected without reusing an already-aborted controller. */
   private abortController: AbortController | undefined;
   private loopPromise: Promise<void> | undefined;
+  /** Business keys without a `vin` option: the running per-product
+   *  connection loops (a business key cannot open the account-wide stream),
+   *  and the ids among them currently receiving traffic. */
+  private productLoops: Map<string, Promise<void>> = new Map();
+  private liveProducts: Set<string> = new Set();
 
   // Constructor and basic setup
   constructor(root: Teslemetry, options?: TeslemetryStreamOptions) {
@@ -299,6 +331,7 @@ export class TeslemetryStream extends EventEmitter {
   public getVehicle(vin: string): TeslemetryVehicleStream {
     if (!this.vehicles.has(vin)) {
       new TeslemetryVehicleStream(this.root, vin);
+      if (this.perProduct && this.active) this._startProductLoop(vin);
     }
     return this.vehicles.get(vin)!;
   }
@@ -306,11 +339,36 @@ export class TeslemetryStream extends EventEmitter {
   public getEnergySite(id: string): TeslemetryEnergySiteStream {
     if (!this.energySites.has(id)) {
       new TeslemetryEnergySiteStream(this.root, id);
+      if (this.perProduct && this.active) this._startProductLoop(id);
     }
     return this.energySites.get(id)!;
   }
 
+  /** A business key with no `vin` option streams each product registered
+   *  through getVehicle()/getEnergySite() (or business.createProducts()) on
+   *  its own `/sse/{id}` connection. */
+  private get perProduct(): boolean {
+    return this.root.isBusiness && !this.vin;
+  }
+
   public async connect(): Promise<void> {
+    if (this.perProduct) {
+      if (!this.active) {
+        this.active = true;
+        this.abortController = new AbortController();
+      }
+      // Also restarts any product stream stopped by a product error.
+      for (const id of [...this.vehicles.keys(), ...this.energySites.keys()]) {
+        this._startProductLoop(id);
+      }
+      if (this.productLoops.size === 0) {
+        this.logger.warn(
+          "No products to stream: call business.createProducts() or getVehicle()/getEnergySite() first",
+        );
+      }
+      return;
+    }
+
     if (this.active) {
       return; // Already connected
     }
@@ -320,19 +378,62 @@ export class TeslemetryStream extends EventEmitter {
     this.loopPromise = this._connectLoop(this.abortController.signal);
   }
 
-  private async _connectLoop(signal: AbortSignal) {
+  private _startProductLoop(id: string) {
+    if (this.productLoops.has(id) || !this.abortController) return;
+    const loop = this._connectLoop(this.abortController.signal, id).finally(
+      () => this.productLoops.delete(id),
+    );
+    this.productLoops.set(id, loop);
+  }
+
+  private _markLive(id: string | undefined) {
+    if (id !== undefined) this.liveProducts.add(id);
+    if (this.connected || !this.active) return;
+    this.logger.info(`Connected to stream`);
+    this.connected = true;
+    this.emit("connect");
+  }
+
+  /** In per-product mode, "disconnect" means no product stream is live. */
+  private _markLost(id: string | undefined) {
+    if (id !== undefined) {
+      this.liveProducts.delete(id);
+      if (this.liveProducts.size > 0 || !this.connected) return;
+    }
+    this.connected = false;
+    this.emit("disconnect");
+  }
+
+  /** Stops every connection loop, as after repeated auth failures. */
+  private _stopAll() {
+    this.active = false;
+    this.abortController?.abort();
+  }
+
+  /**
+   * @param id Per-product mode only: the product this loop streams. Without
+   * it the loop streams `this.vin`, or the whole account.
+   */
+  private async _connectLoop(signal: AbortSignal, id?: string) {
     let retries = 0;
     let authFailures = 0;
+    const business = this.root.isBusiness;
     while (this.active) {
       // The generated SSE client retries internally and never rethrows, so
       // limit it to a single attempt and capture its failure: every retry
       // then flows through this loop, which re-resolves auth (a refreshed
       // token is picked up on reconnect) and applies the policy below.
       let streamError: unknown;
+      // Business keys: the failed response's body and Retry-After, read by
+      // the fetch wrapper below, since the SSE client throws only the status.
+      let errorBody: unknown;
+      let retryAfter: number | undefined;
+      let openedAt: number | undefined;
       try {
+        const baseFetch = this.root.client.getConfig().fetch ?? globalThis.fetch;
         const sse = await getSseById_({
           client: this.root.client,
-          path: { id: this.vin || "" },
+          path: { id: id ?? this.vin ?? "" },
           query: {
             cache: this.cloudCache,
             ...(this.topicsParam ? { topics: this.topicsParam } : {}),
@@ -345,6 +446,23 @@ export class TeslemetryStream extends EventEmitter {
           ...({ url: "/sse/{id}" } as object),
           sseMaxRetryAttempts: 1,
           signal,
+          ...(business
+            ? {
+                fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
+                  const response = await baseFetch(input, init);
+                  if (response.ok) {
+                    openedAt = Date.now();
+                  } else {
+                    retryAfter = parseRetryAfter(response.headers);
+                    errorBody = await response
+                      .clone()
+                      .json()
+                      .catch(() => undefined);
+                  }
+                  return response;
+                }) as typeof fetch,
+              }
+            : {}),
           // Fires for every SSE chunk, including blank keep-alives that
           // never reach the iterator below: any traffic proves the connection
           // is up, so a later drop restarts the backoff from scratch. It is
@@ -354,10 +472,7 @@ export class TeslemetryStream extends EventEmitter {
           // server opens every stream with a `retry:` chunk).
           onSseEvent: () => {
             retries = 0;
-            if (this.connected || !this.active) return;
-            this.logger.info(`Connected to stream`);
-            this.connected = true;
-            this.emit("connect");
+            this._markLive(id);
           },
           onSseError: (error) => {
             streamError = error;
@@ -373,6 +488,19 @@ export class TeslemetryStream extends EventEmitter {
           }
         }
 
+        if (
+          business &&
+          !streamError &&
+          openedAt !== undefined &&
+          Date.now() - openedAt >= BUSINESS_PLANNED_END_MIN_MS
+        ) {
+          // The api's planned end of a business stream: reconnect through
+          // admission again, still "connected" unless that attempt fails.
+          this.logger.debug("Business stream lifetime reached; reconnecting");
+          await sleep(BUSINESS_RECONNECT_MS, signal);
+          continue;
+        }
+
         // The server ending the response without an error (it does so for
         // every open stream when it shuts down for a deploy) is a lost
         // connection like any other: report it and back off before retrying
@@ -381,30 +509,53 @@ export class TeslemetryStream extends EventEmitter {
       } catch (error) {
         if (!this.active) break;
 
-        this.connected = false;
-        this.emit("disconnect");
+        this._markLost(id);
 
         retries++;
         const status = parseSseStatus(error);
-        const isAuthError = status === 401 || status === 403;
-        const finalError = isAuthError
+        const businessError = business
+          ? toBusinessError(errorBody, status, retryAfter)
+          : undefined;
+        const isProductError = PRODUCT_ERRORS.some(
+          (ErrorClass) => businessError instanceof ErrorClass,
+        );
+        const isAuthError =
+          !isProductError && (status === 401 || status === 403);
+        const authError = isAuthError
           ? new TeslemetryStreamAuthError(
               error instanceof Error ? error.message : String(error),
               status,
             )
-          : error;
+          : undefined;
+        if (authError && businessError) authError.cause = businessError;
+        const finalError = authError ?? businessError ?? error;
 
         this.logger.error("SSE error:", finalError);
-        this.emit("stream_error", { error: finalError, status, retries });
+        this.emit("stream_error", {
+          error: finalError,
+          status,
+          retries,
+          ...(id !== undefined ? { id } : {}),
+        });
 
-        if (isAuthError) {
+        if (isProductError) {
+          // Only this product is refused; its stream stops until connect()
+          // is called again, and the other products keep streaming.
+          this.logger.error(
+            `Stream for ${id ?? this.vin} refused: ${(businessError as TeslemetryBusinessError).code}; stopping it`,
+          );
+          if (id === undefined) this.active = false;
+          break;
+        }
+
+        if (authError) {
           authFailures++;
           if (authFailures >= 2) {
             this.logger.error(
               "Stream authentication failed twice in a row; stopping. Call connect() with valid credentials to resume.",
             );
-            this.active = false;
-            this.emit("auth_failure", finalError as TeslemetryStreamAuthError);
+            this._stopAll();
+            this.emit("auth_failure", authError);
             break;
           }
           // Reconnect immediately: the next attempt re-resolves the auth
@@ -413,14 +564,18 @@ export class TeslemetryStream extends EventEmitter {
           continue;
         }
 
-        const delay = Math.min(2 ** retries, MAX_BACKOFF_SECONDS) * 1000;
+        const delay = Math.max(
+          Math.min(2 ** retries, MAX_BACKOFF_SECONDS) * 1000,
+          businessError instanceof BusinessAuthUnavailableError
+            ? (businessError.retryAfter ?? 0) * 1000
+            : 0,
+        );
         this.logger.info(`Reconnecting in ${delay / 1000} seconds...`);
 
         await sleep(delay, signal);
       }
     }
-    this.connected = false;
-    this.emit("disconnect");
+    this._markLost(id);
   }
 
   public async disconnect(): Promise<void> {
@@ -434,7 +589,7 @@ export class TeslemetryStream extends EventEmitter {
     this.active = false;
     this.logger.info(`Disconnecting from stream`);
     this.abortController?.abort();
-    await this.loopPromise;
+    await Promise.all([this.loopPromise, ...this.productLoops.values()]);
   }
 
   public parseCreatedAt(event: SseEvent): Date {

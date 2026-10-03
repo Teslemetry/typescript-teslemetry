@@ -237,6 +237,30 @@ for (const siteId in products.energySites) {
 }
 ```
 
+### Teslemetry for Business
+
+A Teslemetry for Business API key (`sk_...`) works with the same client: it is detected by its prefix, sent only in the `Authorization` header, and limited to the vehicles and energy sites your customers have shared with your business. If the key comes from a callback, pass `{ business: true }`.
+
+```typescript
+const teslemetry = new Teslemetry("sk_...");
+
+// List consented products. This also learns each product's region, so later
+// requests and streams for it go straight to that region's host.
+const { vehicles, energySites } = await teslemetry.business.createProducts();
+for (const vin in vehicles) {
+  console.log(vin, vehicles[vin].product.customer.ref);
+}
+
+// One stream per product: a business key cannot open the account-wide stream.
+teslemetry.sse.on("stream_error", ({ id, error }) => console.error(id, error));
+await teslemetry.sse.connect();
+```
+
+- `teslemetry.createProducts()` and `api.getMetadata()` read `/api/metadata`, which a business key may not call; use `business.createProducts()` or `business.products()`.
+- The api ends every business stream after 5 minutes to re-check the key and consent. The SDK reconnects after 1 second without a `disconnect` event.
+- A stream refused for one product (`BusinessProductNotConsentedError`, `CustomerReconnectRequiredError`, `CustomerScopeMissingError`) stops only that product's stream, reported on `stream_error` with its `id`. Call `connect()` again to retry it. A rejected key stops every stream with one `auth_failure`.
+- Business error codes are thrown as typed errors, all subclasses of `TeslemetryBusinessError` with `code` and `status`: `BusinessNotActiveError`, `BusinessRouteNotAllowedError`, `BusinessPermissionMissingError`, `BusinessProductNotConsentedError`, `CustomerReconnectRequiredError`, `CustomerScopeMissingError`, and `BusinessAuthUnavailableError` (503, with `retryAfter` in seconds).
+
 ### Error Handling
 
 The SDK throws standard Javascript `Error` objects for configuration issues and specific errors for API failures. Streaming errors (like connection drops) are emitted via the stream error handler or specific exception classes.
