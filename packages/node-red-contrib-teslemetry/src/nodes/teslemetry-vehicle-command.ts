@@ -490,7 +490,9 @@ export default function (RED: NodeAPI) {
             result = await vehicle.navigationGpsRequest({
               lat: Number(msg.lat),
               lon: Number(msg.lon),
-              order: Number(msg.order),
+              // The regenerated spec narrows `order` to 0-3; the server still
+              // validates the value, so the node's own range check stays as is.
+              order: Number(msg.order) as 0 | 1 | 2 | 3,
             });
             break;
           case "navigationSuperchargerRequest":
