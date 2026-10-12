@@ -135,8 +135,8 @@ test("TeslemetryTrigger energy events filter by id (not site_id) for energy_tota
   const result = await withMockedFetch(
     () =>
       sseResponse([
-        { id: 999, totals: { generated: 1 } },
-        { id: 123, totals: { generated: 2 } },
+        { id: 999, totals: { total_home_usage: 1 } },
+        { id: 123, totals: { total_home_usage: 2 } },
       ]),
     () => node.trigger.call(context),
   );
