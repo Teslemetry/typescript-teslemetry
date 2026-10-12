@@ -116,6 +116,9 @@ export interface EnergySiteCache {
   wall_connector_totals?: {
     totals: SseWallConnectorTotals["totals"];
     date: SseWallConnectorTotals["date"];
+    /** The source event's `createdAt`, replayed as-is so consumers can reject
+     *  an older replay by comparing it with a live event. */
+    createdAt: SseWallConnectorTotals["createdAt"];
   };
 }
 
@@ -284,7 +287,7 @@ export class TeslemetryStream extends EventEmitter {
       siteCache.wall_connector_totals
     ) {
       listener({
-        createdAt: new Date().toISOString(),
+        createdAt: siteCache.wall_connector_totals.createdAt,
         id: siteId,
         date: siteCache.wall_connector_totals.date,
         totals: siteCache.wall_connector_totals.totals,
@@ -613,6 +616,7 @@ export class TeslemetryStream extends EventEmitter {
     this.energyCache[siteId].wall_connector_totals = {
       totals: event.totals,
       date: event.date,
+      createdAt: event.createdAt,
     };
   };
 

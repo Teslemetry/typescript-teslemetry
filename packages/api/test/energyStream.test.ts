@@ -508,7 +508,12 @@ test("startLocalCache replays a cached wall_connector_totals event to new listen
   teslemetry.sse.disconnect();
 
   const replayed: unknown[] = [];
-  siteStream.on("wall_connector_totals", (e) => replayed.push(e.totals));
+  const replayedCreatedAt: unknown[] = [];
+  siteStream.on("wall_connector_totals", (e) => {
+    replayed.push(e.totals);
+    replayedCreatedAt.push(e.createdAt);
+  });
   assert.deepEqual(replayed, [wallConnector]);
+  assert.deepEqual(replayedCreatedAt, ["2026-01-01T00:00:00.000Z"]);
   assert.equal(teslemetry.sse.energyCache[siteId]?.energy_totals, undefined);
 });
