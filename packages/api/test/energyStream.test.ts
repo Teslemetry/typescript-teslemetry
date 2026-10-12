@@ -459,3 +459,56 @@ test("siteInfoDocument omits tariff_content_v2 until a tariff event has been cac
 
   assert.deepEqual(siteStream.siteInfoDocument, { site_name: "Home" });
 });
+
+test("routes wall_connector_totals apart from energy_totals on the stream and the scoped energy site", async () => {
+  const siteId = "5150";
+  const energy = makeTotals({ total_home_usage: 12 });
+  const wallConnector = { "1529455-00-A--ABC123": 4200, "1529455-00-A--DEF456": 150 };
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      { createdAt: "2026-01-01T00:00:00.000Z", id: siteId, date: "2026-01-01", totals: energy },
+      { createdAt: "2026-01-01T00:00:01.000Z", id: siteId, date: "2026-01-01", totals: wallConnector },
+    ]),
+  );
+
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+
+  const streamEnergy: unknown[] = [];
+  const streamWc: unknown[] = [];
+  const siteEnergy: unknown[] = [];
+  const siteWc: unknown[] = [];
+  teslemetry.sse.on("energy_totals", (e) => streamEnergy.push(e.totals));
+  teslemetry.sse.on("wall_connector_totals", (e) => streamWc.push(e.totals));
+  siteStream.on("energy_totals", (e) => siteEnergy.push(e.totals));
+  siteStream.on("wall_connector_totals", (e) => siteWc.push(e.totals));
+
+  await teslemetry.sse.connect();
+  await waitFor(() => siteWc.length > 0 && siteEnergy.length > 0);
+  teslemetry.sse.disconnect();
+
+  assert.deepEqual(streamEnergy, [energy]);
+  assert.deepEqual(siteEnergy, [energy]);
+  assert.deepEqual(streamWc, [wallConnector]);
+  assert.deepEqual(siteWc, [wallConnector]);
+});
+
+test("startLocalCache replays a cached wall_connector_totals event to new listeners", async () => {
+  const siteId = "5150";
+  const wallConnector = { "1529455-00-A--ABC123": 4200 };
+  const teslemetry = makeTeslemetry(async () =>
+    sseResponse([
+      { createdAt: "2026-01-01T00:00:00.000Z", id: siteId, date: "2026-01-01", totals: wallConnector },
+    ]),
+  );
+  teslemetry.sse.startLocalCache();
+  const siteStream = teslemetry.sse.getEnergySite(siteId);
+
+  await teslemetry.sse.connect();
+  await waitFor(() => teslemetry.sse.energyCache[siteId]?.wall_connector_totals !== undefined);
+  teslemetry.sse.disconnect();
+
+  const replayed: unknown[] = [];
+  siteStream.on("wall_connector_totals", (e) => replayed.push(e.totals));
+  assert.deepEqual(replayed, [wallConnector]);
+  assert.equal(teslemetry.sse.energyCache[siteId]?.energy_totals, undefined);
+});

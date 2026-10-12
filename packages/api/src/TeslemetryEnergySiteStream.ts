@@ -5,6 +5,7 @@ import type {
   SseSiteInfo,
   SseTariffContentV2,
   SseEnergyTotals,
+  SseWallConnectorTotals,
 } from "./const.js";
 import { Logger } from "./logger.js";
 import { composeEnergySiteInfo, EnergySiteCache } from "./TeslemetryStream.js";
@@ -14,6 +15,7 @@ type TeslemetryEnergySiteStreamEventMap = {
   site_info: SseSiteInfo;
   tariff_content_v2: SseTariffContentV2;
   energy_totals: SseEnergyTotals;
+  wall_connector_totals: SseWallConnectorTotals;
 };
 
 export declare interface TeslemetryEnergySiteStream {

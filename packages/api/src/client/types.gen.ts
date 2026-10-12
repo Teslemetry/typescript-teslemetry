@@ -72,6 +72,10 @@ export type Def5 = {
    */
   generator_power?: number;
   /**
+   * Power delivered to grid services (e.g. a virtual power plant) in watts. Rare; only present when Tesla reports it.
+   */
+  grid_services_power?: number;
+  /**
    * Array of Tesla Wall Connectors at the energy site.
    */
   wall_connectors?: Array<{
@@ -468,6 +472,13 @@ export type Def8 = {
     minimum_delta?: number;
   };
   /**
+   * Accessory rail state. (Requires 2026.32)
+   */
+  AccRail?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+  };
+  /**
    * If the left front seat has auto seat climate enabled. (Requires 2024.26)
    */
   AutoSeatClimateLeft?: {
@@ -494,6 +505,14 @@ export type Def8 = {
   AutomaticEmergencyBrakingOff?: {
     interval_seconds: number;
     resend_interval_seconds?: number;
+  };
+  /**
+   * Automatic emergency braking state, as a raw integer. (Requires 2026.32)
+   */
+  AutomaticEmergencyBrakingState?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+    minimum_delta?: number;
   };
   /**
    * BMS operating state. (Requires 2024.26)
@@ -754,6 +773,13 @@ export type Def8 = {
     interval_seconds: number;
     resend_interval_seconds?: number;
     minimum_delta?: number;
+  };
+  /**
+   * Cruise state. (Requires 2026.32)
+   */
+  CruiseState?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
   };
   /**
    * The maximum speed the vehicle is allowed to travel, in miles per hour. (Requires 2024.26)
@@ -1280,7 +1306,7 @@ export type Def8 = {
     resend_interval_seconds?: number;
   };
   /**
-   * If AC is enabled. (Requires 2024.44.25)
+   * If climate is operating with A/C, otherwise its fans only. (Requires 2024.44.25)
    */
   HvacACEnabled?: {
     interval_seconds: number;
@@ -1318,7 +1344,7 @@ export type Def8 = {
     minimum_delta?: number;
   };
   /**
-   * The power state of the HVAC system. (Requires 2024.44.25)
+   * The state of the HVAC (Climate) system. (Requires 2024.44.25)
    */
   HvacPower?: {
     interval_seconds: number;
@@ -1389,6 +1415,14 @@ export type Def8 = {
    * The lateral acceleration of the vehicle measured in Gs. (Requires 2024.26)
    */
   LateralAcceleration?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+    minimum_delta?: number;
+  };
+  /**
+   * Lifetime DC charge energy in kWh. (Requires 2026.32)
+   */
+  LifetimeDcChargeEnergyKwh?: {
     interval_seconds: number;
     resend_interval_seconds?: number;
     minimum_delta?: number;
@@ -1735,6 +1769,13 @@ export type Def8 = {
     resend_interval_seconds?: number;
   };
   /**
+   * Power transfer status. (Requires 2026.32)
+   */
+  PowerTransferStatus?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+  };
+  /**
    * The number of hours remaining through Powershare. (Requires 2024.44.25)
    */
   PowershareHoursLeft?: {
@@ -1834,6 +1875,14 @@ export type Def8 = {
   RightHandDrive?: {
     interval_seconds: number;
     resend_interval_seconds?: number;
+  };
+  /**
+   * Rolling resistance coefficient. (Requires 2026.32)
+   */
+  RollingResistanceCoefficient?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+    minimum_delta?: number;
   };
   /**
    * The color of the roof. (Requires 2024.26)
@@ -2295,6 +2344,14 @@ export type Def8 = {
   ValetModeEnabled?: {
     interval_seconds: number;
     resend_interval_seconds?: number;
+  };
+  /**
+   * Learned vehicle mass in kg. Semi-truck only. (Requires 2026.32)
+   */
+  VehicleMassKg?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+    minimum_delta?: number;
   };
   /**
    * The nickname of the vehicle. (Requires 2024.26)
@@ -2357,6 +2414,13 @@ export type Def9 = {
     minimum_delta?: number;
   } | null;
   /**
+   * Accessory rail state. (Requires 2026.32)
+   */
+  AccRail?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+  } | null;
+  /**
    * If the left front seat has auto seat climate enabled. (Requires 2024.26)
    */
   AutoSeatClimateLeft?: {
@@ -2383,6 +2447,14 @@ export type Def9 = {
   AutomaticEmergencyBrakingOff?: {
     interval_seconds: number;
     resend_interval_seconds?: number;
+  } | null;
+  /**
+   * Automatic emergency braking state, as a raw integer. (Requires 2026.32)
+   */
+  AutomaticEmergencyBrakingState?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+    minimum_delta?: number;
   } | null;
   /**
    * BMS operating state. (Requires 2024.26)
@@ -2643,6 +2715,13 @@ export type Def9 = {
     interval_seconds: number;
     resend_interval_seconds?: number;
     minimum_delta?: number;
+  } | null;
+  /**
+   * Cruise state. (Requires 2026.32)
+   */
+  CruiseState?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
   } | null;
   /**
    * The maximum speed the vehicle is allowed to travel, in miles per hour. (Requires 2024.26)
@@ -3169,7 +3248,7 @@ export type Def9 = {
     resend_interval_seconds?: number;
   } | null;
   /**
-   * If AC is enabled. (Requires 2024.44.25)
+   * If climate is operating with A/C, otherwise its fans only. (Requires 2024.44.25)
    */
   HvacACEnabled?: {
     interval_seconds: number;
@@ -3207,7 +3286,7 @@ export type Def9 = {
     minimum_delta?: number;
   } | null;
   /**
-   * The power state of the HVAC system. (Requires 2024.44.25)
+   * The state of the HVAC (Climate) system. (Requires 2024.44.25)
    */
   HvacPower?: {
     interval_seconds: number;
@@ -3278,6 +3357,14 @@ export type Def9 = {
    * The lateral acceleration of the vehicle measured in Gs. (Requires 2024.26)
    */
   LateralAcceleration?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+    minimum_delta?: number;
+  } | null;
+  /**
+   * Lifetime DC charge energy in kWh. (Requires 2026.32)
+   */
+  LifetimeDcChargeEnergyKwh?: {
     interval_seconds: number;
     resend_interval_seconds?: number;
     minimum_delta?: number;
@@ -3624,6 +3711,13 @@ export type Def9 = {
     resend_interval_seconds?: number;
   } | null;
   /**
+   * Power transfer status. (Requires 2026.32)
+   */
+  PowerTransferStatus?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+  } | null;
+  /**
    * The number of hours remaining through Powershare. (Requires 2024.44.25)
    */
   PowershareHoursLeft?: {
@@ -3723,6 +3817,14 @@ export type Def9 = {
   RightHandDrive?: {
     interval_seconds: number;
     resend_interval_seconds?: number;
+  } | null;
+  /**
+   * Rolling resistance coefficient. (Requires 2026.32)
+   */
+  RollingResistanceCoefficient?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+    minimum_delta?: number;
   } | null;
   /**
    * The color of the roof. (Requires 2024.26)
@@ -4184,6 +4286,14 @@ export type Def9 = {
   ValetModeEnabled?: {
     interval_seconds: number;
     resend_interval_seconds?: number;
+  } | null;
+  /**
+   * Learned vehicle mass in kg. Semi-truck only. (Requires 2026.32)
+   */
+  VehicleMassKg?: {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+    minimum_delta?: number;
   } | null;
   /**
    * The nickname of the vehicle. (Requires 2024.26)
@@ -4251,6 +4361,13 @@ export type Def9 = {
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
+    minimum_delta?: number;
+  } | null | {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+  } | null | {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
@@ -4365,6 +4482,9 @@ export type Def9 = {
     interval_seconds: number;
     resend_interval_seconds?: number;
     minimum_delta?: number;
+  } | null | {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
@@ -4660,9 +4780,13 @@ export type Def9 = {
     interval_seconds: number;
     resend_interval_seconds?: number;
     minimum_delta?: number;
+  } | null | {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
+    minimum_delta?: number;
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
@@ -4825,6 +4949,9 @@ export type Def9 = {
     interval_seconds: number;
     resend_interval_seconds?: number;
     minimum_delta?: number;
+  } | null | {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
@@ -4852,6 +4979,9 @@ export type Def9 = {
     interval_seconds: number;
     resend_interval_seconds?: number;
     minimum_delta?: number;
+  } | null | {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
@@ -4873,6 +5003,7 @@ export type Def9 = {
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
+    minimum_delta?: number;
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
@@ -5086,6 +5217,10 @@ export type Def9 = {
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
+  } | null | {
+    interval_seconds: number;
+    resend_interval_seconds?: number;
+    minimum_delta?: number;
   } | null | {
     interval_seconds: number;
     resend_interval_seconds?: number;
@@ -5103,6 +5238,166 @@ export type Def9 = {
     interval_seconds: number;
     resend_interval_seconds?: number;
   } | null | undefined;
+};
+
+/**
+ * automationConditionLeaf
+ */
+export type Def10 = {
+  type: 'state';
+  state: 'online';
+  /**
+   * The vehicle the condition reads. It must be one of yours.
+   */
+  vin: string;
+} | {
+  type: 'value';
+  /**
+   * The vehicle the condition reads. It must be one of yours.
+   */
+  vin: string;
+  /**
+   * A telemetry field name, as in /api/1/vehicles/{vin}/telemetry. The vehicle's latest cached value is read; the vehicle is never woken.
+   */
+  field: 'ACChargingEnergyIn' | 'ACChargingPower' | 'AccRail' | 'AutoSeatClimateLeft' | 'AutoSeatClimateRight' | 'AutomaticBlindSpotCamera' | 'AutomaticEmergencyBrakingOff' | 'AutomaticEmergencyBrakingState' | 'BMSState' | 'BatteryHeaterOn' | 'BatteryLevel' | 'BlindSpotCollisionWarningChime' | 'BmsFullchargecomplete' | 'BrakePedal' | 'BrakePedalPos' | 'BrickSocMinPercent' | 'BrickVoltageMax' | 'BrickVoltageMin' | 'Cabin12vPortKeepOn' | 'Cabin48vPortKeepOn' | 'CabinOverheatProtectionMode' | 'CabinOverheatProtectionTemperatureLimit' | 'CarType' | 'CenterDisplay' | 'ChargeAmps' | 'ChargeCurrentRequest' | 'ChargeCurrentRequestMax' | 'ChargeEnableRequest' | 'ChargeLimitSoc' | 'ChargePort' | 'ChargePortColdWeatherMode' | 'ChargePortDoorOpen' | 'ChargePortLatch' | 'ChargeRateMilePerHour' | 'ChargeState' | 'ChargerPhases' | 'ChargerVoltage' | 'ChargingCableType' | 'ClimateKeeperMode' | 'ClimateSeatCoolingFrontLeft' | 'ClimateSeatCoolingFrontRight' | 'CruiseFollowDistance' | 'CruiseSetSpeed' | 'CruiseState' | 'CurrentLimitMph' | 'DCChargingEnergyIn' | 'DCChargingPower' | 'DCDCEnable' | 'DefrostForPreconditioning' | 'DefrostMode' | 'DestinationLocation' | 'DestinationName' | 'DetailedChargeState' | 'DiAxleSpeedF' | 'DiAxleSpeedR' | 'DiAxleSpeedREL' | 'DiAxleSpeedRER' | 'DiHeatsinkTF' | 'DiHeatsinkTR' | 'DiHeatsinkTREL' | 'DiHeatsinkTRER' | 'DiInverterTF' | 'DiInverterTR' | 'DiInverterTREL' | 'DiInverterTRER' | 'DiMotorCurrentF' | 'DiMotorCurrentR' | 'DiMotorCurrentREL' | 'DiMotorCurrentRER' | 'DiSlaveTorqueCmd' | 'DiStateF' | 'DiStateR' | 'DiStateREL' | 'DiStateRER' | 'DiStatorTempF' | 'DiStatorTempR' | 'DiStatorTempREL' | 'DiStatorTempRER' | 'DiTorqueActualF' | 'DiTorqueActualR' | 'DiTorqueActualREL' | 'DiTorqueActualRER' | 'DiTorquemotor' | 'DiVBatF' | 'DiVBatR' | 'DiVBatREL' | 'DiVBatRER' | 'DoorState' | 'DriveRail' | 'DriverSeatBelt' | 'DriverSeatOccupied' | 'EfficiencyPackage' | 'EmergencyLaneDepartureAvoidance' | 'EnergyRemaining' | 'EstBatteryRange' | 'EstimatedHoursToChargeTermination' | 'EuropeVehicle' | 'ExpectedEnergyPercentAtTripArrival' | 'ExteriorColor' | 'FastChargerPresent' | 'FastChargerType' | 'FdWindow' | 'ForwardCollisionWarning' | 'FpWindow' | 'Gear' | 'GpsAccuracyMeters' | 'GpsHeading' | 'GpsState' | 'GradeEstimatePercent' | 'GuestModeEnabled' | 'GuestModeMobileAccessState' | 'HomelinkDeviceCount' | 'HomelinkNearby' | 'HvacACEnabled' | 'HvacAutoMode' | 'HvacFanSpeed' | 'HvacFanStatus' | 'HvacLeftTemperatureRequest' | 'HvacPower' | 'HvacRightTemperatureRequest' | 'HvacSteeringWheelHeatAuto' | 'HvacSteeringWheelHeatLevel' | 'Hvil' | 'IdealBatteryRange' | 'InsideTemp' | 'IsolationResistance' | 'LaneDepartureAvoidance' | 'LateralAcceleration' | 'LifetimeDcChargeEnergyKwh' | 'LifetimeEnergyChargedKwh' | 'LifetimeEnergyGainedRegen' | 'LifetimeEnergyUsed' | 'LightsHazardsActive' | 'LightsHighBeams' | 'LightsTurnSignal' | 'LocatedAtFavorite' | 'LocatedAtHome' | 'LocatedAtWork' | 'Location' | 'Locked' | 'LongitudinalAcceleration' | 'MaxSpeedToReachDestinationMph' | 'MediaAudioVolume' | 'MediaAudioVolumeIncrement' | 'MediaAudioVolumeMax' | 'MediaNowPlayingAlbum' | 'MediaNowPlayingArtist' | 'MediaNowPlayingDuration' | 'MediaNowPlayingElapsed' | 'MediaNowPlayingStation' | 'MediaNowPlayingTitle' | 'MediaPlaybackSource' | 'MediaPlaybackStatus' | 'MilesSinceReset' | 'MilesToArrival' | 'MinutesToArrival' | 'ModuleTempMax' | 'ModuleTempMin' | 'NominalFullPackEnergyKwh' | 'NotEnoughPowerToHeat' | 'NumBrickVoltageMax' | 'NumBrickVoltageMin' | 'NumModuleTempMax' | 'NumModuleTempMin' | 'Odometer' | 'OffroadLightbarPresent' | 'OriginLocation' | 'OutsideTemp' | 'PackCurrent' | 'PackVoltage' | 'PairedPhoneKeyAndKeyFobQty' | 'PassengerSeatBelt' | 'PedalPosition' | 'PinToDriveEnabled' | 'PowerTransferStatus' | 'PowershareHoursLeft' | 'PowershareInstantaneousPowerKW' | 'PowershareStatus' | 'PowershareStopReason' | 'PowershareType' | 'PreconditioningEnabled' | 'RatedRange' | 'RdWindow' | 'RearDefrostEnabled' | 'RearDisplayHvacEnabled' | 'RearSeatHeaters' | 'RemoteStartActive' | 'RemoteStartEnabled' | 'RightHandDrive' | 'RollingResistanceCoefficient' | 'RoofColor' | 'RouteLine' | 'RouteTrafficMinutesDelay' | 'RpWindow' | 'ScheduledChargingMode' | 'ScheduledChargingPending' | 'ScheduledChargingStartTime' | 'ScheduledDepartureTime' | 'SeatHeaterLeft' | 'SeatHeaterRearCenter' | 'SeatHeaterRearLeft' | 'SeatHeaterRearRight' | 'SeatHeaterRight' | 'SeatVentEnabled' | 'SelfDrivingMilesSinceReset' | 'SemiCruiseSpeedLimitMph' | 'SemitruckPassengerSeatFoldPosition' | 'SemitruckTpmsPressureRe1L0' | 'SemitruckTpmsPressureRe1L1' | 'SemitruckTpmsPressureRe1R0' | 'SemitruckTpmsPressureRe1R1' | 'SemitruckTpmsPressureRe2L0' | 'SemitruckTpmsPressureRe2L1' | 'SemitruckTpmsPressureRe2R0' | 'SemitruckTpmsPressureRe2R1' | 'SemitruckTractorParkBrakeStatus' | 'SemitruckTrailerParkBrakeStatus' | 'SentryMode' | 'ServiceMode' | 'Setting24HourTime' | 'SettingChargeUnit' | 'SettingDistanceUnit' | 'SettingTemperatureUnit' | 'SettingTirePressureUnit' | 'Soc' | 'SoftwareUpdateAvailable' | 'SoftwareUpdateDownloadPercentComplete' | 'SoftwareUpdateExpectedDurationMinutes' | 'SoftwareUpdateInProgress' | 'SoftwareUpdateInstallationPercentComplete' | 'SoftwareUpdateScheduledStartTime' | 'SoftwareUpdateVersion' | 'SpeedLimitMode' | 'SpeedLimitWarning' | 'SunroofInstalled' | 'SuperchargerSessionTripPlanner' | 'TimeToFullCharge' | 'TonneauOpenPercent' | 'TonneauPosition' | 'TonneauTentMode' | 'TpmsHardWarnings' | 'TpmsLastSeenPressureTimeFl' | 'TpmsLastSeenPressureTimeFr' | 'TpmsLastSeenPressureTimeRl' | 'TpmsLastSeenPressureTimeRr' | 'TpmsPressureFl' | 'TpmsPressureFr' | 'TpmsPressureRl' | 'TpmsPressureRr' | 'TpmsSoftWarnings' | 'Trim' | 'ValetModeEnabled' | 'VehicleMassKg' | 'VehicleName' | 'VehicleSpeed' | 'Version' | 'WheelType' | 'WiperHeatEnabled';
+  /**
+   * equal and not_equal compare as text; above and below are strict number bounds.
+   */
+  operator: 'equal' | 'not_equal' | 'above' | 'below';
+  value: unknown;
+} | {
+  type: 'time';
+  /**
+   * Local HH:MM in the rule's time zone, inclusive
+   */
+  after?: string;
+  /**
+   * Local HH:MM in the rule's time zone, exclusive
+   */
+  before?: string;
+  days?: Array<'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'>;
+};
+
+/**
+ * automationCondition
+ */
+export type Def11 = unknown;
+
+/**
+ * automationCondition1
+ */
+export type Def12 = unknown;
+
+/**
+ * automationCondition2
+ */
+export type Def13 = unknown;
+
+/**
+ * automationConditionResult
+ */
+export type Def14 = {
+  type: 'state';
+  state: 'online';
+  /**
+   * The vehicle the condition reads. It must be one of yours.
+   */
+  vin: string;
+  /**
+   * Whether the condition passed
+   */
+  passed: boolean;
+  /**
+   * Why the condition could not be checked; such a run is failed
+   */
+  error?: string;
+  /**
+   * What the check read: the vehicle state, the field's cached value, or the local day and HH:MM
+   */
+  actual?: unknown;
+} | {
+  type: 'value';
+  /**
+   * The vehicle the condition reads. It must be one of yours.
+   */
+  vin: string;
+  /**
+   * A telemetry field name, as in /api/1/vehicles/{vin}/telemetry. The vehicle's latest cached value is read; the vehicle is never woken.
+   */
+  field: 'ACChargingEnergyIn' | 'ACChargingPower' | 'AccRail' | 'AutoSeatClimateLeft' | 'AutoSeatClimateRight' | 'AutomaticBlindSpotCamera' | 'AutomaticEmergencyBrakingOff' | 'AutomaticEmergencyBrakingState' | 'BMSState' | 'BatteryHeaterOn' | 'BatteryLevel' | 'BlindSpotCollisionWarningChime' | 'BmsFullchargecomplete' | 'BrakePedal' | 'BrakePedalPos' | 'BrickSocMinPercent' | 'BrickVoltageMax' | 'BrickVoltageMin' | 'Cabin12vPortKeepOn' | 'Cabin48vPortKeepOn' | 'CabinOverheatProtectionMode' | 'CabinOverheatProtectionTemperatureLimit' | 'CarType' | 'CenterDisplay' | 'ChargeAmps' | 'ChargeCurrentRequest' | 'ChargeCurrentRequestMax' | 'ChargeEnableRequest' | 'ChargeLimitSoc' | 'ChargePort' | 'ChargePortColdWeatherMode' | 'ChargePortDoorOpen' | 'ChargePortLatch' | 'ChargeRateMilePerHour' | 'ChargeState' | 'ChargerPhases' | 'ChargerVoltage' | 'ChargingCableType' | 'ClimateKeeperMode' | 'ClimateSeatCoolingFrontLeft' | 'ClimateSeatCoolingFrontRight' | 'CruiseFollowDistance' | 'CruiseSetSpeed' | 'CruiseState' | 'CurrentLimitMph' | 'DCChargingEnergyIn' | 'DCChargingPower' | 'DCDCEnable' | 'DefrostForPreconditioning' | 'DefrostMode' | 'DestinationLocation' | 'DestinationName' | 'DetailedChargeState' | 'DiAxleSpeedF' | 'DiAxleSpeedR' | 'DiAxleSpeedREL' | 'DiAxleSpeedRER' | 'DiHeatsinkTF' | 'DiHeatsinkTR' | 'DiHeatsinkTREL' | 'DiHeatsinkTRER' | 'DiInverterTF' | 'DiInverterTR' | 'DiInverterTREL' | 'DiInverterTRER' | 'DiMotorCurrentF' | 'DiMotorCurrentR' | 'DiMotorCurrentREL' | 'DiMotorCurrentRER' | 'DiSlaveTorqueCmd' | 'DiStateF' | 'DiStateR' | 'DiStateREL' | 'DiStateRER' | 'DiStatorTempF' | 'DiStatorTempR' | 'DiStatorTempREL' | 'DiStatorTempRER' | 'DiTorqueActualF' | 'DiTorqueActualR' | 'DiTorqueActualREL' | 'DiTorqueActualRER' | 'DiTorquemotor' | 'DiVBatF' | 'DiVBatR' | 'DiVBatREL' | 'DiVBatRER' | 'DoorState' | 'DriveRail' | 'DriverSeatBelt' | 'DriverSeatOccupied' | 'EfficiencyPackage' | 'EmergencyLaneDepartureAvoidance' | 'EnergyRemaining' | 'EstBatteryRange' | 'EstimatedHoursToChargeTermination' | 'EuropeVehicle' | 'ExpectedEnergyPercentAtTripArrival' | 'ExteriorColor' | 'FastChargerPresent' | 'FastChargerType' | 'FdWindow' | 'ForwardCollisionWarning' | 'FpWindow' | 'Gear' | 'GpsAccuracyMeters' | 'GpsHeading' | 'GpsState' | 'GradeEstimatePercent' | 'GuestModeEnabled' | 'GuestModeMobileAccessState' | 'HomelinkDeviceCount' | 'HomelinkNearby' | 'HvacACEnabled' | 'HvacAutoMode' | 'HvacFanSpeed' | 'HvacFanStatus' | 'HvacLeftTemperatureRequest' | 'HvacPower' | 'HvacRightTemperatureRequest' | 'HvacSteeringWheelHeatAuto' | 'HvacSteeringWheelHeatLevel' | 'Hvil' | 'IdealBatteryRange' | 'InsideTemp' | 'IsolationResistance' | 'LaneDepartureAvoidance' | 'LateralAcceleration' | 'LifetimeDcChargeEnergyKwh' | 'LifetimeEnergyChargedKwh' | 'LifetimeEnergyGainedRegen' | 'LifetimeEnergyUsed' | 'LightsHazardsActive' | 'LightsHighBeams' | 'LightsTurnSignal' | 'LocatedAtFavorite' | 'LocatedAtHome' | 'LocatedAtWork' | 'Location' | 'Locked' | 'LongitudinalAcceleration' | 'MaxSpeedToReachDestinationMph' | 'MediaAudioVolume' | 'MediaAudioVolumeIncrement' | 'MediaAudioVolumeMax' | 'MediaNowPlayingAlbum' | 'MediaNowPlayingArtist' | 'MediaNowPlayingDuration' | 'MediaNowPlayingElapsed' | 'MediaNowPlayingStation' | 'MediaNowPlayingTitle' | 'MediaPlaybackSource' | 'MediaPlaybackStatus' | 'MilesSinceReset' | 'MilesToArrival' | 'MinutesToArrival' | 'ModuleTempMax' | 'ModuleTempMin' | 'NominalFullPackEnergyKwh' | 'NotEnoughPowerToHeat' | 'NumBrickVoltageMax' | 'NumBrickVoltageMin' | 'NumModuleTempMax' | 'NumModuleTempMin' | 'Odometer' | 'OffroadLightbarPresent' | 'OriginLocation' | 'OutsideTemp' | 'PackCurrent' | 'PackVoltage' | 'PairedPhoneKeyAndKeyFobQty' | 'PassengerSeatBelt' | 'PedalPosition' | 'PinToDriveEnabled' | 'PowerTransferStatus' | 'PowershareHoursLeft' | 'PowershareInstantaneousPowerKW' | 'PowershareStatus' | 'PowershareStopReason' | 'PowershareType' | 'PreconditioningEnabled' | 'RatedRange' | 'RdWindow' | 'RearDefrostEnabled' | 'RearDisplayHvacEnabled' | 'RearSeatHeaters' | 'RemoteStartActive' | 'RemoteStartEnabled' | 'RightHandDrive' | 'RollingResistanceCoefficient' | 'RoofColor' | 'RouteLine' | 'RouteTrafficMinutesDelay' | 'RpWindow' | 'ScheduledChargingMode' | 'ScheduledChargingPending' | 'ScheduledChargingStartTime' | 'ScheduledDepartureTime' | 'SeatHeaterLeft' | 'SeatHeaterRearCenter' | 'SeatHeaterRearLeft' | 'SeatHeaterRearRight' | 'SeatHeaterRight' | 'SeatVentEnabled' | 'SelfDrivingMilesSinceReset' | 'SemiCruiseSpeedLimitMph' | 'SemitruckPassengerSeatFoldPosition' | 'SemitruckTpmsPressureRe1L0' | 'SemitruckTpmsPressureRe1L1' | 'SemitruckTpmsPressureRe1R0' | 'SemitruckTpmsPressureRe1R1' | 'SemitruckTpmsPressureRe2L0' | 'SemitruckTpmsPressureRe2L1' | 'SemitruckTpmsPressureRe2R0' | 'SemitruckTpmsPressureRe2R1' | 'SemitruckTractorParkBrakeStatus' | 'SemitruckTrailerParkBrakeStatus' | 'SentryMode' | 'ServiceMode' | 'Setting24HourTime' | 'SettingChargeUnit' | 'SettingDistanceUnit' | 'SettingTemperatureUnit' | 'SettingTirePressureUnit' | 'Soc' | 'SoftwareUpdateAvailable' | 'SoftwareUpdateDownloadPercentComplete' | 'SoftwareUpdateExpectedDurationMinutes' | 'SoftwareUpdateInProgress' | 'SoftwareUpdateInstallationPercentComplete' | 'SoftwareUpdateScheduledStartTime' | 'SoftwareUpdateVersion' | 'SpeedLimitMode' | 'SpeedLimitWarning' | 'SunroofInstalled' | 'SuperchargerSessionTripPlanner' | 'TimeToFullCharge' | 'TonneauOpenPercent' | 'TonneauPosition' | 'TonneauTentMode' | 'TpmsHardWarnings' | 'TpmsLastSeenPressureTimeFl' | 'TpmsLastSeenPressureTimeFr' | 'TpmsLastSeenPressureTimeRl' | 'TpmsLastSeenPressureTimeRr' | 'TpmsPressureFl' | 'TpmsPressureFr' | 'TpmsPressureRl' | 'TpmsPressureRr' | 'TpmsSoftWarnings' | 'Trim' | 'ValetModeEnabled' | 'VehicleMassKg' | 'VehicleName' | 'VehicleSpeed' | 'Version' | 'WheelType' | 'WiperHeatEnabled';
+  /**
+   * equal and not_equal compare as text; above and below are strict number bounds.
+   */
+  operator: 'equal' | 'not_equal' | 'above' | 'below';
+  value: unknown;
+  /**
+   * Whether the condition passed
+   */
+  passed: boolean;
+  /**
+   * Why the condition could not be checked; such a run is failed
+   */
+  error?: string;
+  /**
+   * What the check read: the vehicle state, the field's cached value, or the local day and HH:MM
+   */
+  actual?: unknown;
+} | {
+  type: 'time';
+  /**
+   * Local HH:MM in the rule's time zone, inclusive
+   */
+  after?: string;
+  /**
+   * Local HH:MM in the rule's time zone, exclusive
+   */
+  before?: string;
+  days?: Array<'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'>;
+  /**
+   * Whether the condition passed
+   */
+  passed: boolean;
+  /**
+   * Why the condition could not be checked; such a run is failed
+   */
+  error?: string;
+  /**
+   * What the check read: the vehicle state, the field's cached value, or the local day and HH:MM
+   */
+  actual?: unknown;
+} | {
+  type: 'and';
+  /**
+   * Whether the condition passed
+   */
+  passed: boolean;
+  /**
+   * Why the condition could not be checked; such a run is failed
+   */
+  error?: string;
+  conditions: Array<Def14>;
+} | {
+  type: 'or';
+  /**
+   * Whether the condition passed
+   */
+  passed: boolean;
+  /**
+   * Why the condition could not be checked; such a run is failed
+   */
+  error?: string;
+  conditions: Array<Def14>;
+} | {
+  type: 'not';
+  /**
+   * Whether the condition passed
+   */
+  passed: boolean;
+  /**
+   * Why the condition could not be checked; such a run is failed
+   */
+  error?: string;
+  conditions: Array<Def14>;
 };
 
 export type GetFieldsJsonData = {
@@ -5157,6 +5452,10 @@ export type GetFieldsJsonResponses = {
        * Whether this field can emit null when Tesla reports an invalid value for it; invalid values may otherwise be omitted when they carry no state change.
        */
       nullable?: boolean;
+      /**
+       * The vehicle_data key(s) carrying the equivalent signal, as dotted paths such as climate_state.is_climate_on, or null when there is none. Informational: semantics and units may differ from the streamed field.
+       */
+      vehicle_data_equivalent?: null | Array<string>;
     };
   };
 };
@@ -5174,7 +5473,7 @@ export type GetSseById_Data = {
   query?: {
     cache?: boolean;
     /**
-     * Comma-separated exact SSE wire event names to receive (state, data, alerts, errors, connectivity, vehicle_data, config, live_status, site_info, tariff_content_v2, energy_totals, credits). Omitted: legacy-all mode - every topic applicable to every accessible product, unchanged forever. Present: an exact allowlist, validated against the recognized topic set before the stream opens (duplicates are normalized; an unrecognized name or an empty value 400s).
+     * Comma-separated exact SSE wire event names to receive (state, data, alerts, errors, connectivity, vehicle_data, config, live_status, site_info, tariff_content_v2, energy_totals, wall_connector_totals, credits). Omitted: legacy-all mode - every topic applicable to every accessible product, unchanged forever. Present: an exact allowlist, validated against the recognized topic set before the stream opens (duplicates are normalized; an unrecognized name or an empty value 400s).
      */
     topics?: string;
   };
@@ -5218,10 +5517,12 @@ export type GetSseById_Responses = {
     data: {
       ACChargingEnergyIn?: number | null;
       ACChargingPower?: number | null;
+      AccRail?: boolean | null;
       AutoSeatClimateLeft?: boolean | null;
       AutoSeatClimateRight?: boolean | null;
       AutomaticBlindSpotCamera?: boolean | null;
       AutomaticEmergencyBrakingOff?: boolean | null;
+      AutomaticEmergencyBrakingState?: number | null;
       BMSState?: 'BMSStateUnknown' | 'BMSStateStandby' | 'BMSStateDrive' | 'BMSStateSupport' | 'BMSStateCharge' | 'BMSStateFEIM' | 'BMSStateClearFault' | 'BMSStateFault' | 'BMSStateWeld' | 'BMSStateTest' | 'BMSStateSNA' | null;
       BatteryHeaterOn?: boolean | null;
       BatteryLevel?: number | null;
@@ -5236,7 +5537,7 @@ export type GetSseById_Responses = {
       Cabin48vPortKeepOn?: 'CabinPortKeepOnStateUnknown' | 'CabinPortKeepOnStateOff' | 'CabinPortKeepOnStateOn' | null;
       CabinOverheatProtectionMode?: 'CabinOverheatProtectionModeStateUnknown' | 'CabinOverheatProtectionModeStateOff' | 'CabinOverheatProtectionModeStateOn' | 'CabinOverheatProtectionModeStateFanOnly' | null;
       CabinOverheatProtectionTemperatureLimit?: 'ClimateOverheatProtectionTempLimitUnknown' | 'ClimateOverheatProtectionTempLimitHigh' | 'ClimateOverheatProtectionTempLimitMedium' | 'ClimateOverheatProtectionTempLimitLow' | null;
-      CarType?: 'CarTypeUnknown' | 'CarTypeModelS' | 'CarTypeModelX' | 'CarTypeModel3' | 'CarTypeModelY' | 'CarTypeSemiTruck' | 'CarTypeCybertruck' | null;
+      CarType?: 'CarTypeUnknown' | 'CarTypeModelS' | 'CarTypeModelX' | 'CarTypeModel3' | 'CarTypeModelY' | 'CarTypeSemiTruck' | 'CarTypeCybertruck' | 'CarTypeSemiTruckV2' | 'CarTypeCybercab' | null;
       CenterDisplay?: 'DisplayStateUnknown' | 'DisplayStateOff' | 'DisplayStateDim' | 'DisplayStateAccessory' | 'DisplayStateOn' | 'DisplayStateDriving' | 'DisplayStateCharging' | 'DisplayStateLock' | 'DisplayStateSentry' | 'DisplayStateDog' | 'DisplayStateEntertainment' | null;
       ChargeAmps?: number | null;
       ChargeCurrentRequest?: number | null;
@@ -5257,6 +5558,7 @@ export type GetSseById_Responses = {
       ClimateSeatCoolingFrontRight?: number | null;
       CruiseFollowDistance?: 'FollowDistanceUnknown' | 'FollowDistance1' | 'FollowDistance2' | 'FollowDistance3' | 'FollowDistance4' | 'FollowDistance5' | 'FollowDistance6' | 'FollowDistance7' | null;
       CruiseSetSpeed?: number | null;
+      CruiseState?: 'CruiseStateUnknown' | 'CruiseStateOff' | 'CruiseStateStandby' | 'CruiseStateOn' | 'CruiseStateStandstill' | 'CruiseStateOverride' | 'CruiseStateFault' | 'CruiseStatePreFault' | 'CruiseStatePreCancel' | null;
       CurrentLimitMph?: number | null;
       DCChargingEnergyIn?: number | null;
       DCChargingPower?: number | null;
@@ -5268,7 +5570,7 @@ export type GetSseById_Responses = {
         longitude: number;
       } | null;
       DestinationName?: string | null;
-      DetailedChargeState?: 'DetailedChargeStateUnknown' | 'DetailedChargeStateDisconnected' | 'DetailedChargeStateNoPower' | 'DetailedChargeStateStarting' | 'DetailedChargeStateCharging' | 'DetailedChargeStateComplete' | 'DetailedChargeStateStopped' | null;
+      DetailedChargeState?: 'DetailedChargeStateUnknown' | 'DetailedChargeStateDisconnected' | 'DetailedChargeStateNoPower' | 'DetailedChargeStateStarting' | 'DetailedChargeStateCharging' | 'DetailedChargeStateComplete' | 'DetailedChargeStateStopped' | 'DetailedChargeStateCalibrating' | null;
       DiAxleSpeedF?: number | null;
       DiAxleSpeedR?: number | null;
       DiAxleSpeedREL?: number | null;
@@ -5351,6 +5653,7 @@ export type GetSseById_Responses = {
       IsolationResistance?: number | null;
       LaneDepartureAvoidance?: 'LaneAssistLevelUnknown' | 'LaneAssistLevelNone' | 'LaneAssistLevelWarning' | 'LaneAssistLevelAssist' | null;
       LateralAcceleration?: number | null;
+      LifetimeDcChargeEnergyKwh?: number | null;
       LifetimeEnergyChargedKwh?: number | null;
       LifetimeEnergyGainedRegen?: number | null;
       LifetimeEnergyUsed?: number | null;
@@ -5402,6 +5705,7 @@ export type GetSseById_Responses = {
       PassengerSeatBelt?: 'BuckleStatusUnknown' | 'BuckleStatusUnlatched' | 'BuckleStatusLatched' | 'BuckleStatusFaulted' | 'BuckleStatusSNA' | null;
       PedalPosition?: number | null;
       PinToDriveEnabled?: boolean | null;
+      PowerTransferStatus?: 'PowerTransferStatusUnknown' | 'PowerTransferStatusStandby' | 'PowerTransferStatusFaulted' | 'PowerTransferStatusEmergencyShutdown' | 'PowerTransferStatusExtEvseTestAllowed' | 'PowerTransferStatusExtPrechargeAllowed' | 'PowerTransferStatusChargeEnabling' | 'PowerTransferStatusChargeEnabled' | 'PowerTransferStatusGracefulShutdown' | 'PowerTransferStatusBlocked' | null;
       PowershareHoursLeft?: number | null;
       PowershareInstantaneousPowerKW?: number | null;
       PowershareStatus?: 'PowershareStateUnknown' | 'PowershareStateInactive' | 'PowershareStateHandshaking' | 'PowershareStateInit' | 'PowershareStateEnabled' | 'PowershareStateEnabledReconnectingSoon' | 'PowershareStateStopped' | null;
@@ -5416,6 +5720,7 @@ export type GetSseById_Responses = {
       RemoteStartActive?: boolean | null;
       RemoteStartEnabled?: boolean | null;
       RightHandDrive?: boolean | null;
+      RollingResistanceCoefficient?: number | null;
       RoofColor?: string | null;
       RouteLine?: string | null;
       RouteTrafficMinutesDelay?: number | null;
@@ -5500,6 +5805,7 @@ export type GetSseById_Responses = {
       } | null;
       Trim?: string | null;
       ValetModeEnabled?: boolean | null;
+      VehicleMassKg?: number | null;
       VehicleName?: string | null;
       VehicleSpeed?: number | null;
       Version?: string | null;
@@ -5579,10 +5885,12 @@ export type GetSseById_Responses = {
       fields: {
         ACChargingEnergyIn?: Def7;
         ACChargingPower?: Def7;
+        AccRail?: Def7;
         AutoSeatClimateLeft?: Def7;
         AutoSeatClimateRight?: Def7;
         AutomaticBlindSpotCamera?: Def7;
         AutomaticEmergencyBrakingOff?: Def7;
+        AutomaticEmergencyBrakingState?: Def7;
         BMSState?: Def7;
         BatteryHeaterOn?: Def7;
         BatteryLevel?: Def7;
@@ -5618,6 +5926,7 @@ export type GetSseById_Responses = {
         ClimateSeatCoolingFrontRight?: Def7;
         CruiseFollowDistance?: Def7;
         CruiseSetSpeed?: Def7;
+        CruiseState?: Def7;
         CurrentLimitMph?: Def7;
         DCChargingEnergyIn?: Def7;
         DCChargingPower?: Def7;
@@ -5702,6 +6011,7 @@ export type GetSseById_Responses = {
         IsolationResistance?: Def7;
         LaneDepartureAvoidance?: Def7;
         LateralAcceleration?: Def7;
+        LifetimeDcChargeEnergyKwh?: Def7;
         LifetimeEnergyChargedKwh?: Def7;
         LifetimeEnergyGainedRegen?: Def7;
         LifetimeEnergyUsed?: Def7;
@@ -5747,6 +6057,7 @@ export type GetSseById_Responses = {
         PassengerSeatBelt?: Def7;
         PedalPosition?: Def7;
         PinToDriveEnabled?: Def7;
+        PowerTransferStatus?: Def7;
         PowershareHoursLeft?: Def7;
         PowershareInstantaneousPowerKW?: Def7;
         PowershareStatus?: Def7;
@@ -5761,6 +6072,7 @@ export type GetSseById_Responses = {
         RemoteStartActive?: Def7;
         RemoteStartEnabled?: Def7;
         RightHandDrive?: Def7;
+        RollingResistanceCoefficient?: Def7;
         RoofColor?: Def7;
         RouteLine?: Def7;
         RouteTrafficMinutesDelay?: Def7;
@@ -5823,6 +6135,7 @@ export type GetSseById_Responses = {
         TpmsSoftWarnings?: Def7;
         Trim?: Def7;
         ValetModeEnabled?: Def7;
+        VehicleMassKg?: Def7;
         VehicleName?: Def7;
         VehicleSpeed?: Def7;
         Version?: Def7;
@@ -5872,6 +6185,20 @@ export type GetSseById_Responses = {
       total_grid_energy_exported: number | null;
     };
   } | {
+    id: Def4;
+    /**
+     * Installation-local calendar date (YYYY-MM-DD) these totals cover.
+     */
+    date: string;
+    createdAt: Def1;
+    isCache?: Def2;
+    /**
+     * Wh delivered on `date`, keyed by Wall Connector DIN. A Wall Connector with no session that day is absent.
+     */
+    totals: {
+      [key: string]: number;
+    };
+  } | {
     createdAt: Def1;
     site_id: Def4;
     isCache?: Def2;
@@ -5890,7 +6217,7 @@ export type GetSseByVinByFieldData = {
      * Vehicle Identification Number
      */
     vin: string;
-    field: 'ACChargingEnergyIn' | 'ACChargingPower' | 'AutoSeatClimateLeft' | 'AutoSeatClimateRight' | 'AutomaticBlindSpotCamera' | 'AutomaticEmergencyBrakingOff' | 'BMSState' | 'BatteryHeaterOn' | 'BatteryLevel' | 'BlindSpotCollisionWarningChime' | 'BmsFullchargecomplete' | 'BrakePedal' | 'BrakePedalPos' | 'BrickSocMinPercent' | 'BrickVoltageMax' | 'BrickVoltageMin' | 'Cabin12vPortKeepOn' | 'Cabin48vPortKeepOn' | 'CabinOverheatProtectionMode' | 'CabinOverheatProtectionTemperatureLimit' | 'CarType' | 'CenterDisplay' | 'ChargeAmps' | 'ChargeCurrentRequest' | 'ChargeCurrentRequestMax' | 'ChargeEnableRequest' | 'ChargeLimitSoc' | 'ChargePort' | 'ChargePortColdWeatherMode' | 'ChargePortDoorOpen' | 'ChargePortLatch' | 'ChargeRateMilePerHour' | 'ChargeState' | 'ChargerPhases' | 'ChargerVoltage' | 'ChargingCableType' | 'ClimateKeeperMode' | 'ClimateSeatCoolingFrontLeft' | 'ClimateSeatCoolingFrontRight' | 'CruiseFollowDistance' | 'CruiseSetSpeed' | 'CurrentLimitMph' | 'DCChargingEnergyIn' | 'DCChargingPower' | 'DCDCEnable' | 'DefrostForPreconditioning' | 'DefrostMode' | 'DestinationLocation' | 'DestinationName' | 'DetailedChargeState' | 'DiAxleSpeedF' | 'DiAxleSpeedR' | 'DiAxleSpeedREL' | 'DiAxleSpeedRER' | 'DiHeatsinkTF' | 'DiHeatsinkTR' | 'DiHeatsinkTREL' | 'DiHeatsinkTRER' | 'DiInverterTF' | 'DiInverterTR' | 'DiInverterTREL' | 'DiInverterTRER' | 'DiMotorCurrentF' | 'DiMotorCurrentR' | 'DiMotorCurrentREL' | 'DiMotorCurrentRER' | 'DiSlaveTorqueCmd' | 'DiStateF' | 'DiStateR' | 'DiStateREL' | 'DiStateRER' | 'DiStatorTempF' | 'DiStatorTempR' | 'DiStatorTempREL' | 'DiStatorTempRER' | 'DiTorqueActualF' | 'DiTorqueActualR' | 'DiTorqueActualREL' | 'DiTorqueActualRER' | 'DiTorquemotor' | 'DiVBatF' | 'DiVBatR' | 'DiVBatREL' | 'DiVBatRER' | 'DoorState' | 'DriveRail' | 'DriverSeatBelt' | 'DriverSeatOccupied' | 'EfficiencyPackage' | 'EmergencyLaneDepartureAvoidance' | 'EnergyRemaining' | 'EstBatteryRange' | 'EstimatedHoursToChargeTermination' | 'EuropeVehicle' | 'ExpectedEnergyPercentAtTripArrival' | 'ExteriorColor' | 'FastChargerPresent' | 'FastChargerType' | 'FdWindow' | 'ForwardCollisionWarning' | 'FpWindow' | 'Gear' | 'GpsAccuracyMeters' | 'GpsHeading' | 'GpsState' | 'GradeEstimatePercent' | 'GuestModeEnabled' | 'GuestModeMobileAccessState' | 'HomelinkDeviceCount' | 'HomelinkNearby' | 'HvacACEnabled' | 'HvacAutoMode' | 'HvacFanSpeed' | 'HvacFanStatus' | 'HvacLeftTemperatureRequest' | 'HvacPower' | 'HvacRightTemperatureRequest' | 'HvacSteeringWheelHeatAuto' | 'HvacSteeringWheelHeatLevel' | 'Hvil' | 'IdealBatteryRange' | 'InsideTemp' | 'IsolationResistance' | 'LaneDepartureAvoidance' | 'LateralAcceleration' | 'LifetimeEnergyChargedKwh' | 'LifetimeEnergyGainedRegen' | 'LifetimeEnergyUsed' | 'LightsHazardsActive' | 'LightsHighBeams' | 'LightsTurnSignal' | 'LocatedAtFavorite' | 'LocatedAtHome' | 'LocatedAtWork' | 'Location' | 'Locked' | 'LongitudinalAcceleration' | 'MaxSpeedToReachDestinationMph' | 'MediaAudioVolume' | 'MediaAudioVolumeIncrement' | 'MediaAudioVolumeMax' | 'MediaNowPlayingAlbum' | 'MediaNowPlayingArtist' | 'MediaNowPlayingDuration' | 'MediaNowPlayingElapsed' | 'MediaNowPlayingStation' | 'MediaNowPlayingTitle' | 'MediaPlaybackSource' | 'MediaPlaybackStatus' | 'MilesSinceReset' | 'MilesToArrival' | 'MinutesToArrival' | 'ModuleTempMax' | 'ModuleTempMin' | 'NominalFullPackEnergyKwh' | 'NotEnoughPowerToHeat' | 'NumBrickVoltageMax' | 'NumBrickVoltageMin' | 'NumModuleTempMax' | 'NumModuleTempMin' | 'Odometer' | 'OffroadLightbarPresent' | 'OriginLocation' | 'OutsideTemp' | 'PackCurrent' | 'PackVoltage' | 'PairedPhoneKeyAndKeyFobQty' | 'PassengerSeatBelt' | 'PedalPosition' | 'PinToDriveEnabled' | 'PowershareHoursLeft' | 'PowershareInstantaneousPowerKW' | 'PowershareStatus' | 'PowershareStopReason' | 'PowershareType' | 'PreconditioningEnabled' | 'RatedRange' | 'RdWindow' | 'RearDefrostEnabled' | 'RearDisplayHvacEnabled' | 'RearSeatHeaters' | 'RemoteStartActive' | 'RemoteStartEnabled' | 'RightHandDrive' | 'RoofColor' | 'RouteLine' | 'RouteTrafficMinutesDelay' | 'RpWindow' | 'ScheduledChargingMode' | 'ScheduledChargingPending' | 'ScheduledChargingStartTime' | 'ScheduledDepartureTime' | 'SeatHeaterLeft' | 'SeatHeaterRearCenter' | 'SeatHeaterRearLeft' | 'SeatHeaterRearRight' | 'SeatHeaterRight' | 'SeatVentEnabled' | 'SelfDrivingMilesSinceReset' | 'SemiCruiseSpeedLimitMph' | 'SemitruckPassengerSeatFoldPosition' | 'SemitruckTpmsPressureRe1L0' | 'SemitruckTpmsPressureRe1L1' | 'SemitruckTpmsPressureRe1R0' | 'SemitruckTpmsPressureRe1R1' | 'SemitruckTpmsPressureRe2L0' | 'SemitruckTpmsPressureRe2L1' | 'SemitruckTpmsPressureRe2R0' | 'SemitruckTpmsPressureRe2R1' | 'SemitruckTractorParkBrakeStatus' | 'SemitruckTrailerParkBrakeStatus' | 'SentryMode' | 'ServiceMode' | 'Setting24HourTime' | 'SettingChargeUnit' | 'SettingDistanceUnit' | 'SettingTemperatureUnit' | 'SettingTirePressureUnit' | 'Soc' | 'SoftwareUpdateAvailable' | 'SoftwareUpdateDownloadPercentComplete' | 'SoftwareUpdateExpectedDurationMinutes' | 'SoftwareUpdateInProgress' | 'SoftwareUpdateInstallationPercentComplete' | 'SoftwareUpdateScheduledStartTime' | 'SoftwareUpdateVersion' | 'SpeedLimitMode' | 'SpeedLimitWarning' | 'SunroofInstalled' | 'SuperchargerSessionTripPlanner' | 'TimeToFullCharge' | 'TonneauOpenPercent' | 'TonneauPosition' | 'TonneauTentMode' | 'TpmsHardWarnings' | 'TpmsLastSeenPressureTimeFl' | 'TpmsLastSeenPressureTimeFr' | 'TpmsLastSeenPressureTimeRl' | 'TpmsLastSeenPressureTimeRr' | 'TpmsPressureFl' | 'TpmsPressureFr' | 'TpmsPressureRl' | 'TpmsPressureRr' | 'TpmsSoftWarnings' | 'Trim' | 'ValetModeEnabled' | 'VehicleName' | 'VehicleSpeed' | 'Version' | 'WheelType' | 'WiperHeatEnabled';
+    field: 'ACChargingEnergyIn' | 'ACChargingPower' | 'AccRail' | 'AutoSeatClimateLeft' | 'AutoSeatClimateRight' | 'AutomaticBlindSpotCamera' | 'AutomaticEmergencyBrakingOff' | 'AutomaticEmergencyBrakingState' | 'BMSState' | 'BatteryHeaterOn' | 'BatteryLevel' | 'BlindSpotCollisionWarningChime' | 'BmsFullchargecomplete' | 'BrakePedal' | 'BrakePedalPos' | 'BrickSocMinPercent' | 'BrickVoltageMax' | 'BrickVoltageMin' | 'Cabin12vPortKeepOn' | 'Cabin48vPortKeepOn' | 'CabinOverheatProtectionMode' | 'CabinOverheatProtectionTemperatureLimit' | 'CarType' | 'CenterDisplay' | 'ChargeAmps' | 'ChargeCurrentRequest' | 'ChargeCurrentRequestMax' | 'ChargeEnableRequest' | 'ChargeLimitSoc' | 'ChargePort' | 'ChargePortColdWeatherMode' | 'ChargePortDoorOpen' | 'ChargePortLatch' | 'ChargeRateMilePerHour' | 'ChargeState' | 'ChargerPhases' | 'ChargerVoltage' | 'ChargingCableType' | 'ClimateKeeperMode' | 'ClimateSeatCoolingFrontLeft' | 'ClimateSeatCoolingFrontRight' | 'CruiseFollowDistance' | 'CruiseSetSpeed' | 'CruiseState' | 'CurrentLimitMph' | 'DCChargingEnergyIn' | 'DCChargingPower' | 'DCDCEnable' | 'DefrostForPreconditioning' | 'DefrostMode' | 'DestinationLocation' | 'DestinationName' | 'DetailedChargeState' | 'DiAxleSpeedF' | 'DiAxleSpeedR' | 'DiAxleSpeedREL' | 'DiAxleSpeedRER' | 'DiHeatsinkTF' | 'DiHeatsinkTR' | 'DiHeatsinkTREL' | 'DiHeatsinkTRER' | 'DiInverterTF' | 'DiInverterTR' | 'DiInverterTREL' | 'DiInverterTRER' | 'DiMotorCurrentF' | 'DiMotorCurrentR' | 'DiMotorCurrentREL' | 'DiMotorCurrentRER' | 'DiSlaveTorqueCmd' | 'DiStateF' | 'DiStateR' | 'DiStateREL' | 'DiStateRER' | 'DiStatorTempF' | 'DiStatorTempR' | 'DiStatorTempREL' | 'DiStatorTempRER' | 'DiTorqueActualF' | 'DiTorqueActualR' | 'DiTorqueActualREL' | 'DiTorqueActualRER' | 'DiTorquemotor' | 'DiVBatF' | 'DiVBatR' | 'DiVBatREL' | 'DiVBatRER' | 'DoorState' | 'DriveRail' | 'DriverSeatBelt' | 'DriverSeatOccupied' | 'EfficiencyPackage' | 'EmergencyLaneDepartureAvoidance' | 'EnergyRemaining' | 'EstBatteryRange' | 'EstimatedHoursToChargeTermination' | 'EuropeVehicle' | 'ExpectedEnergyPercentAtTripArrival' | 'ExteriorColor' | 'FastChargerPresent' | 'FastChargerType' | 'FdWindow' | 'ForwardCollisionWarning' | 'FpWindow' | 'Gear' | 'GpsAccuracyMeters' | 'GpsHeading' | 'GpsState' | 'GradeEstimatePercent' | 'GuestModeEnabled' | 'GuestModeMobileAccessState' | 'HomelinkDeviceCount' | 'HomelinkNearby' | 'HvacACEnabled' | 'HvacAutoMode' | 'HvacFanSpeed' | 'HvacFanStatus' | 'HvacLeftTemperatureRequest' | 'HvacPower' | 'HvacRightTemperatureRequest' | 'HvacSteeringWheelHeatAuto' | 'HvacSteeringWheelHeatLevel' | 'Hvil' | 'IdealBatteryRange' | 'InsideTemp' | 'IsolationResistance' | 'LaneDepartureAvoidance' | 'LateralAcceleration' | 'LifetimeDcChargeEnergyKwh' | 'LifetimeEnergyChargedKwh' | 'LifetimeEnergyGainedRegen' | 'LifetimeEnergyUsed' | 'LightsHazardsActive' | 'LightsHighBeams' | 'LightsTurnSignal' | 'LocatedAtFavorite' | 'LocatedAtHome' | 'LocatedAtWork' | 'Location' | 'Locked' | 'LongitudinalAcceleration' | 'MaxSpeedToReachDestinationMph' | 'MediaAudioVolume' | 'MediaAudioVolumeIncrement' | 'MediaAudioVolumeMax' | 'MediaNowPlayingAlbum' | 'MediaNowPlayingArtist' | 'MediaNowPlayingDuration' | 'MediaNowPlayingElapsed' | 'MediaNowPlayingStation' | 'MediaNowPlayingTitle' | 'MediaPlaybackSource' | 'MediaPlaybackStatus' | 'MilesSinceReset' | 'MilesToArrival' | 'MinutesToArrival' | 'ModuleTempMax' | 'ModuleTempMin' | 'NominalFullPackEnergyKwh' | 'NotEnoughPowerToHeat' | 'NumBrickVoltageMax' | 'NumBrickVoltageMin' | 'NumModuleTempMax' | 'NumModuleTempMin' | 'Odometer' | 'OffroadLightbarPresent' | 'OriginLocation' | 'OutsideTemp' | 'PackCurrent' | 'PackVoltage' | 'PairedPhoneKeyAndKeyFobQty' | 'PassengerSeatBelt' | 'PedalPosition' | 'PinToDriveEnabled' | 'PowerTransferStatus' | 'PowershareHoursLeft' | 'PowershareInstantaneousPowerKW' | 'PowershareStatus' | 'PowershareStopReason' | 'PowershareType' | 'PreconditioningEnabled' | 'RatedRange' | 'RdWindow' | 'RearDefrostEnabled' | 'RearDisplayHvacEnabled' | 'RearSeatHeaters' | 'RemoteStartActive' | 'RemoteStartEnabled' | 'RightHandDrive' | 'RollingResistanceCoefficient' | 'RoofColor' | 'RouteLine' | 'RouteTrafficMinutesDelay' | 'RpWindow' | 'ScheduledChargingMode' | 'ScheduledChargingPending' | 'ScheduledChargingStartTime' | 'ScheduledDepartureTime' | 'SeatHeaterLeft' | 'SeatHeaterRearCenter' | 'SeatHeaterRearLeft' | 'SeatHeaterRearRight' | 'SeatHeaterRight' | 'SeatVentEnabled' | 'SelfDrivingMilesSinceReset' | 'SemiCruiseSpeedLimitMph' | 'SemitruckPassengerSeatFoldPosition' | 'SemitruckTpmsPressureRe1L0' | 'SemitruckTpmsPressureRe1L1' | 'SemitruckTpmsPressureRe1R0' | 'SemitruckTpmsPressureRe1R1' | 'SemitruckTpmsPressureRe2L0' | 'SemitruckTpmsPressureRe2L1' | 'SemitruckTpmsPressureRe2R0' | 'SemitruckTpmsPressureRe2R1' | 'SemitruckTractorParkBrakeStatus' | 'SemitruckTrailerParkBrakeStatus' | 'SentryMode' | 'ServiceMode' | 'Setting24HourTime' | 'SettingChargeUnit' | 'SettingDistanceUnit' | 'SettingTemperatureUnit' | 'SettingTirePressureUnit' | 'Soc' | 'SoftwareUpdateAvailable' | 'SoftwareUpdateDownloadPercentComplete' | 'SoftwareUpdateExpectedDurationMinutes' | 'SoftwareUpdateInProgress' | 'SoftwareUpdateInstallationPercentComplete' | 'SoftwareUpdateScheduledStartTime' | 'SoftwareUpdateVersion' | 'SpeedLimitMode' | 'SpeedLimitWarning' | 'SunroofInstalled' | 'SuperchargerSessionTripPlanner' | 'TimeToFullCharge' | 'TonneauOpenPercent' | 'TonneauPosition' | 'TonneauTentMode' | 'TpmsHardWarnings' | 'TpmsLastSeenPressureTimeFl' | 'TpmsLastSeenPressureTimeFr' | 'TpmsLastSeenPressureTimeRl' | 'TpmsLastSeenPressureTimeRr' | 'TpmsPressureFl' | 'TpmsPressureFr' | 'TpmsPressureRl' | 'TpmsPressureRr' | 'TpmsSoftWarnings' | 'Trim' | 'ValetModeEnabled' | 'VehicleMassKg' | 'VehicleName' | 'VehicleSpeed' | 'Version' | 'WheelType' | 'WiperHeatEnabled';
   };
   query?: never;
   url: '/sse/{vin}/{field}';
@@ -5919,6 +6246,8 @@ export type GetApi1ProductsErrors = {
   default: {
     response: unknown;
     count?: number;
+    error?: string;
+    error_description?: string;
   };
 };
 
@@ -6161,9 +6490,9 @@ export type GetApiMetadataResponses = {
          */
         fleet_telemetry: null | string;
         /**
-         * Detected configuration issue preventing data access, or null if none. 'no_data': fleet status unavailable; 'streaming_toggle': the safety screen streaming toggle is disabled; 'key': the virtual key is not paired.
+         * Detected configuration issue preventing data access, or null if none. 'no_data': fleet status unavailable; 'streaming_toggle': the safety screen streaming toggle is disabled; 'key': the virtual key is not paired; 'scope': the Tesla authorization lacks the vehicle_device_data scope.
          */
-        issue: 'no_data' | 'streaming_toggle' | 'key' | null;
+        issue: 'no_data' | 'streaming_toggle' | 'key' | 'scope' | null;
         /**
          * Fleet status snapshot with Tesla-omitted fields normalized to null, or null if unavailable
          */
@@ -6217,6 +6546,10 @@ export type GetApiMetadataResponses = {
            * Whether dashcam clip save is supported
            */
           dashcam_clip_save_supported?: null | boolean;
+          /**
+           * Driver assistance hardware, e.g. 'TeslaAP3' (HW3) or 'TeslaAP4' (HW4)
+           */
+          driver_assist?: null | string;
           /**
            * Whether the vehicle has seat cooling
            */
@@ -6822,9 +7155,13 @@ export type GetApi1VehiclesByVinTelemetryData = {
      */
     fields?: string;
     /**
-     * Optional URL-encoded, semicolon-separated top-level topics to return: state, data, connectivity, alerts, errors, vehicle_data. Omit to return all topics. Ignored when `fields` is provided.
+     * Optional URL-encoded, semicolon-separated top-level topics to return, e.g. "data;alerts". Each must be one of state, data, connectivity, alerts, errors, vehicle_data. Omit to return all topics. Ignored when `fields` is provided.
      */
-    topics?: 'state' | 'data' | 'connectivity' | 'alerts' | 'errors' | 'vehicle_data';
+    topics?: string;
+    /**
+     * Optional cursor position to resume telemetry stream from.
+     */
+    cursor?: number;
   };
   url: '/api/1/vehicles/{vin}/telemetry';
 };
@@ -6843,6 +7180,10 @@ export type GetApi1VehiclesByVinTelemetryResponses = {
   200: {
     response?: {
       vin?: string;
+      /**
+       * The cursor value which can be used to get changes.
+       */
+      cursor?: number;
       /**
        * Latest cached vehicle state (online/asleep/offline) with createdAt, or null if uncached.
        */
@@ -6891,7 +7232,7 @@ export type GetApi1VehiclesByVinTelemetryWaitData = {
      */
     fields?: string;
     /**
-     * Optional URL-encoded, semicolon-separated top-level topics to watch: state, data, connectivity, alerts, errors. Omit (with no `fields`) to watch them all. Ignored when `fields` is given.
+     * Optional URL-encoded, semicolon-separated top-level topics to watch, e.g. "data;alerts". Each must be one of state, data, connectivity, alerts, errors. Omit (with no `fields`) to watch them all. Ignored when `fields` is given.
      */
     topics?: string;
     /**
@@ -7080,6 +7421,13 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
           minimum_delta?: number;
         };
         /**
+         * Accessory rail state. (Requires 2026.32)
+         */
+        AccRail?: {
+          interval_seconds: number;
+          resend_interval_seconds?: number;
+        };
+        /**
          * If the left front seat has auto seat climate enabled. (Requires 2024.26)
          */
         AutoSeatClimateLeft?: {
@@ -7106,6 +7454,14 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
         AutomaticEmergencyBrakingOff?: {
           interval_seconds: number;
           resend_interval_seconds?: number;
+        };
+        /**
+         * Automatic emergency braking state, as a raw integer. (Requires 2026.32)
+         */
+        AutomaticEmergencyBrakingState?: {
+          interval_seconds: number;
+          resend_interval_seconds?: number;
+          minimum_delta?: number;
         };
         /**
          * BMS operating state. (Requires 2024.26)
@@ -7366,6 +7722,13 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
           interval_seconds: number;
           resend_interval_seconds?: number;
           minimum_delta?: number;
+        };
+        /**
+         * Cruise state. (Requires 2026.32)
+         */
+        CruiseState?: {
+          interval_seconds: number;
+          resend_interval_seconds?: number;
         };
         /**
          * The maximum speed the vehicle is allowed to travel, in miles per hour. (Requires 2024.26)
@@ -7892,7 +8255,7 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
           resend_interval_seconds?: number;
         };
         /**
-         * If AC is enabled. (Requires 2024.44.25)
+         * If climate is operating with A/C, otherwise its fans only. (Requires 2024.44.25)
          */
         HvacACEnabled?: {
           interval_seconds: number;
@@ -7930,7 +8293,7 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
           minimum_delta?: number;
         };
         /**
-         * The power state of the HVAC system. (Requires 2024.44.25)
+         * The state of the HVAC (Climate) system. (Requires 2024.44.25)
          */
         HvacPower?: {
           interval_seconds: number;
@@ -8001,6 +8364,14 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
          * The lateral acceleration of the vehicle measured in Gs. (Requires 2024.26)
          */
         LateralAcceleration?: {
+          interval_seconds: number;
+          resend_interval_seconds?: number;
+          minimum_delta?: number;
+        };
+        /**
+         * Lifetime DC charge energy in kWh. (Requires 2026.32)
+         */
+        LifetimeDcChargeEnergyKwh?: {
           interval_seconds: number;
           resend_interval_seconds?: number;
           minimum_delta?: number;
@@ -8347,6 +8718,13 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
           resend_interval_seconds?: number;
         };
         /**
+         * Power transfer status. (Requires 2026.32)
+         */
+        PowerTransferStatus?: {
+          interval_seconds: number;
+          resend_interval_seconds?: number;
+        };
+        /**
          * The number of hours remaining through Powershare. (Requires 2024.44.25)
          */
         PowershareHoursLeft?: {
@@ -8446,6 +8824,14 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
         RightHandDrive?: {
           interval_seconds: number;
           resend_interval_seconds?: number;
+        };
+        /**
+         * Rolling resistance coefficient. (Requires 2026.32)
+         */
+        RollingResistanceCoefficient?: {
+          interval_seconds: number;
+          resend_interval_seconds?: number;
+          minimum_delta?: number;
         };
         /**
          * The color of the roof. (Requires 2024.26)
@@ -8907,6 +9293,14 @@ export type PostApi1VehiclesFleetTelemetryConfigData = {
         ValetModeEnabled?: {
           interval_seconds: number;
           resend_interval_seconds?: number;
+        };
+        /**
+         * Learned vehicle mass in kg. Semi-truck only. (Requires 2026.32)
+         */
+        VehicleMassKg?: {
+          interval_seconds: number;
+          resend_interval_seconds?: number;
+          minimum_delta?: number;
         };
         /**
          * The nickname of the vehicle. (Requires 2024.26)
@@ -11908,7 +12302,10 @@ export type PostApi1VehiclesByVinCommandNavigationGpsRequestData = {
   body: {
     lat: number;
     lon: number;
-    order: number;
+    /**
+     * Trip order, as RemoteNavTripOrder
+     */
+    order: 0 | 1 | 2 | 3;
   };
   path: {
     /**
@@ -12086,7 +12483,7 @@ export type PostApi1VehiclesByVinCommandNavigationScRequestData = {
      */
     id: number;
     /**
-     * Trip order, as NavigationSuperchargerRequest.RemoteNavTripOrder
+     * Trip order, as RemoteNavTripOrder
      */
     order: 0 | 1 | 2 | 3;
   };
@@ -12259,6 +12656,9 @@ export type PostApi1VehiclesByVinCommandNavigationWaypointsRequestResponse = Pos
 export type PostApi1VehiclesByVinCommandRemoteAutoSeatClimateRequestData = {
   body: {
     auto_climate_on: boolean;
+    /**
+     * Seat position, as AutoSeatClimateAction.AutoSeatPositionE
+     */
     auto_seat_position: 1 | 2;
   };
   path: {
@@ -12769,6 +13169,9 @@ export type PostApi1VehiclesByVinCommandRemoteStartDriveResponse = PostApi1Vehic
 
 export type PostApi1VehiclesByVinCommandRemoteSteeringWheelHeatLevelRequestData = {
   body: {
+    /**
+     * Steering wheel heat level
+     */
     level: 0 | 1 | 3;
   };
   path: {
@@ -13703,7 +14106,7 @@ export type PostApi1VehiclesByVinCommandSetChargingAmpsResponse = PostApi1Vehicl
 export type PostApi1VehiclesByVinCommandSetClimateKeeperModeData = {
   body: {
     /**
-     * 0=Off, 1=Keep Mode, 2=Dog Mode, 3=Camp Mode
+     * Climate keeper mode
      */
     climate_keeper_mode: 0 | 1 | 2 | 3;
   };
@@ -13791,7 +14194,7 @@ export type PostApi1VehiclesByVinCommandSetClimateKeeperModeResponse = PostApi1V
 export type PostApi1VehiclesByVinCommandSetCopTempData = {
   body: {
     /**
-     * 0=Low (90F/30C), 1=Medium (95F/35C), 2=High (100F/40C)
+     * Cabin Overheat Protection activation temperature
      */
     cop_temp: 0 | 1 | 2;
   };
@@ -21818,9 +22221,15 @@ export type PostApi1EnergySitesByIdCommandSetIslandModeResponse = PostApi1Energy
 
 export type PostApi1EnergySitesByIdCommandAddAuthorizedClientData = {
   body: {
-    key_type?: number;
+    /**
+     * Public key type, as AuthorizedKeyType.
+     */
+    key_type?: 1 | 2;
     public_key?: string;
-    authorized_client_type?: number;
+    /**
+     * Client type, as AuthorizedClientType.
+     */
+    authorized_client_type?: 1 | 2;
     description?: string;
   };
   path: {

@@ -214,6 +214,9 @@ export const getApiImageByVin = <ThrowOnError extends boolean = true>(options: O
 /**
  * Vehicle Data
  *
+ * > [!WARNING]
+ * > **Integrations should use [streaming](https://teslemetry.com/docs/getting-started/telemetry) instead.** Each vehicle_data refresh is billed in credits, while streaming delivers vehicle data in real time at no cost.
+ *
  * Returns the cached vehicle data for this vehicle. location_data will only be present if you have provided the location_data scope.
  */
 export const getApi1VehiclesByVinVehicleData = <ThrowOnError extends boolean = true>(options: Options<GetApi1VehiclesByVinVehicleDataData, ThrowOnError>): RequestResult<GetApi1VehiclesByVinVehicleDataResponses, GetApi1VehiclesByVinVehicleDataErrors, ThrowOnError> => (options.client ?? client).get<GetApi1VehiclesByVinVehicleDataResponses, GetApi1VehiclesByVinVehicleDataErrors, ThrowOnError>({
@@ -1351,7 +1354,7 @@ export const postApi1VehiclesByVinCommandSetChargingAmps = <ThrowOnError extends
 /**
  * Climate Keeper Mode
  *
- * Enables climate keeper mode. Accepted values are: 0,1,2,3. Mapping to respectively Off, Keep Mode, Dog Mode, Camp Mode.
+ * Sets climate keeper mode: Off, Keep Mode, Dog Mode, or Camp Mode.
  */
 export const postApi1VehiclesByVinCommandSetClimateKeeperMode = <ThrowOnError extends boolean = true>(options: Options<PostApi1VehiclesByVinCommandSetClimateKeeperModeData, ThrowOnError>): RequestResult<PostApi1VehiclesByVinCommandSetClimateKeeperModeResponses, PostApi1VehiclesByVinCommandSetClimateKeeperModeErrors, ThrowOnError> => (options.client ?? client).post<PostApi1VehiclesByVinCommandSetClimateKeeperModeResponses, PostApi1VehiclesByVinCommandSetClimateKeeperModeErrors, ThrowOnError>({
   security: [{ scheme: 'bearer', type: 'http' }, {
@@ -2725,7 +2728,7 @@ export const getApi1EnergySitesByIdCalendarHistory = <ThrowOnError extends boole
 /**
  * Charging History
  *
- * Returns the charging history of a wall connector.
+ * Returns the charging history of a wall connector. While a Wall Connector at the site is charging, Teslemetry polls the current installation-local day (start_date at local 00:00:00, end_date at local 23:59:59 or the next local midnight, time_zone set to the installation timezone) and once more when charging stops; a query for exactly that day is served from this cache while Teslemetry still sees the site idle or the cached copy is under 30 seconds old. Every other query is fetched live from Tesla. Per-Wall-Connector daily totals are also pushed as the wall_connector_totals SSE event.
  */
 export const getApi1EnergySitesByIdTelemetryHistory = <ThrowOnError extends boolean = true>(options: Options<GetApi1EnergySitesByIdTelemetryHistoryData, ThrowOnError>): RequestResult<GetApi1EnergySitesByIdTelemetryHistoryResponses, GetApi1EnergySitesByIdTelemetryHistoryErrors, ThrowOnError> => (options.client ?? client).get<GetApi1EnergySitesByIdTelemetryHistoryResponses, GetApi1EnergySitesByIdTelemetryHistoryErrors, ThrowOnError>({
   security: [{ scheme: 'bearer', type: 'http' }, {

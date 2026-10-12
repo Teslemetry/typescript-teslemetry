@@ -443,9 +443,9 @@ test("addAuthorizedClient posts the body to the site's add_authorized_client com
   });
 
   const body = {
-    key_type: 1,
+    key_type: 1 as const,
     public_key: "base64key",
-    authorized_client_type: 2,
+    authorized_client_type: 2 as const,
     description: "installer laptop",
   };
 

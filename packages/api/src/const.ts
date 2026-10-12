@@ -71,6 +71,38 @@ export type SseEnergyTotals = Omit<ExtractSse<{ totals: any }>, "totals"> & {
   totals: EnergyHistoryTotals;
 };
 
+/** Wh delivered on `date`, keyed by Wall Connector DIN. A Wall Connector with
+ *  no charge session that day is absent, not 0. */
+export type WallConnectorTotals = Record<string, number>;
+
+/** Per-Wall-Connector daily totals for one installation-local day (`date`,
+ *  YYYY-MM-DD), keyed by the energy site `id` (not `site_id`). Published while
+ *  any Wall Connector at the site is charging and once more after charging
+ *  stops; that closing total is sent while every Wall Connector is idle, so
+ *  keep it. Key updates by (`id`, DIN, `date`) and use `createdAt` to reject
+ *  an older replay. `isCache` is `true` only on a connect-time snapshot of
+ *  the last polled day, which may be an earlier date. Never carries the
+ *  session list: re-fetch it via the site's telemetry_history REST route.
+ *
+ *  The wire payload has the same shape as `energy_totals` apart from its
+ *  `totals` keys, so the two are told apart by `isWallConnectorTotals`. */
+export type SseWallConnectorTotals = Omit<
+  ExtractSse<{ totals: any }>,
+  "totals"
+> & {
+  totals: WallConnectorTotals;
+};
+
+/** `energy_totals` always carries every `ENERGY_HISTORY_TOTAL_FIELDS` key
+ *  (null when absent), and `total_home_usage` is one of them; a
+ *  `wall_connector_totals` payload is keyed only by Wall Connector DIN, so it
+ *  never has that key. */
+export function isWallConnectorTotals(
+  totals: EnergyHistoryTotals | WallConnectorTotals,
+): totals is WallConnectorTotals {
+  return !("total_home_usage" in totals);
+}
+
 export type FieldsResponse = GetApiConfigByVinResponses[200]["fields"];
 // The body of patch/post config is { fields: ... }
 export type FieldsRequest = NonNullable<

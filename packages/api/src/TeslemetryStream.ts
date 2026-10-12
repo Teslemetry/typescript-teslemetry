@@ -14,6 +14,8 @@ import {
   SseLiveStatus,
   SseSiteInfo,
   SseEnergyTotals,
+  SseWallConnectorTotals,
+  isWallConnectorTotals,
   SseTariffContentV2,
   Signals,
 } from "./const.js";
@@ -59,6 +61,7 @@ type TeslemetryStreamEventMap = {
   site_info: SseSiteInfo;
   tariff_content_v2: SseTariffContentV2;
   energy_totals: SseEnergyTotals;
+  wall_connector_totals: SseWallConnectorTotals;
   connect: void;
   disconnect: void;
   stream_error: TeslemetryStreamErrorEvent;
@@ -109,6 +112,10 @@ export interface EnergySiteCache {
   energy_totals?: {
     totals: SseEnergyTotals["totals"];
     date: SseEnergyTotals["date"];
+  };
+  wall_connector_totals?: {
+    totals: SseWallConnectorTotals["totals"];
+    date: SseWallConnectorTotals["date"];
   };
 }
 
@@ -272,6 +279,17 @@ export class TeslemetryStream extends EventEmitter {
         totals: siteCache.energy_totals.totals,
         isCache: true,
       } satisfies SseEnergyTotals);
+    } else if (
+      event === "wall_connector_totals" &&
+      siteCache.wall_connector_totals
+    ) {
+      listener({
+        createdAt: new Date().toISOString(),
+        id: siteId,
+        date: siteCache.wall_connector_totals.date,
+        totals: siteCache.wall_connector_totals.totals,
+        isCache: true,
+      } satisfies SseWallConnectorTotals);
     }
   }
 
@@ -467,7 +485,11 @@ export class TeslemetryStream extends EventEmitter {
     } else if ("tariff_content_v2" in event) {
       this.emit("tariff_content_v2", event);
     } else if ("totals" in event) {
-      this.emit("energy_totals", event as SseEnergyTotals);
+      if (isWallConnectorTotals(event.totals)) {
+        this.emit("wall_connector_totals", event as SseWallConnectorTotals);
+      } else {
+        this.emit("energy_totals", event as SseEnergyTotals);
+      }
     }
     this.emit("all", event);
 
@@ -488,7 +510,11 @@ export class TeslemetryStream extends EventEmitter {
     if ("totals" in event) {
       const site = this.energySites.get(String(event.id));
       if (site) {
-        site.emit("energy_totals", event as SseEnergyTotals);
+        if (isWallConnectorTotals(event.totals)) {
+          site.emit("wall_connector_totals", event as SseWallConnectorTotals);
+        } else {
+          site.emit("energy_totals", event as SseEnergyTotals);
+        }
       }
       return;
     }
@@ -581,6 +607,15 @@ export class TeslemetryStream extends EventEmitter {
     };
   };
 
+  private cacheWallConnectorTotals = (event: SseWallConnectorTotals): void => {
+    const siteId = String(event.id);
+    this.energyCache[siteId] ??= {};
+    this.energyCache[siteId].wall_connector_totals = {
+      totals: event.totals,
+      date: event.date,
+    };
+  };
+
   public startLocalCache(): void {
     this.localCache = true;
     this.on("state", this.cacheState);
@@ -592,6 +627,7 @@ export class TeslemetryStream extends EventEmitter {
     this.on("site_info", this.cacheSiteInfo);
     this.on("tariff_content_v2", this.cacheTariffContentV2);
     this.on("energy_totals", this.cacheEnergyTotals);
+    this.on("wall_connector_totals", this.cacheWallConnectorTotals);
     this.logger.info(`Started local cache`);
   }
 
@@ -606,6 +642,7 @@ export class TeslemetryStream extends EventEmitter {
     this.off("site_info", this.cacheSiteInfo);
     this.off("tariff_content_v2", this.cacheTariffContentV2);
     this.off("energy_totals", this.cacheEnergyTotals);
+    this.off("wall_connector_totals", this.cacheWallConnectorTotals);
     this.logger.info(`Stopped local cache`);
   }
 }
