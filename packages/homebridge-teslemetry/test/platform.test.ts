@@ -1,12 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
-import { Characteristic, Service } from "hap-nodejs";
+import { Accessory, Characteristic, HAPStatus, HapStatusError, Service, uuid } from "hap-nodejs";
 import type { PlatformAccessory } from "homebridge";
 import { TeslemetryPlatform } from "../src/platform.js";
 import { VehicleAccessory } from "../src/vehicle.js";
 import { createFakeAccessory } from "./fakePlatform.js";
 import { createFakeVehicle } from "./fakeVehicle.js";
+import { createFakeEnergySite } from "./fakeEnergySite.js";
 
 // discoverDevices() talks to the real Teslemetry SDK (network + SSE), so these
 // tests only cover the network-free constructor/lifecycle wiring; the SDK
@@ -16,7 +17,25 @@ import { createFakeVehicle } from "./fakeVehicle.js";
 function createFakeApi() {
 	const emitter = new EventEmitter();
 	return Object.assign(emitter, {
-		hap: { Service, Characteristic },
+		hap: {
+			Service,
+			Characteristic,
+			HapStatusError,
+			HAPStatus: { SERVICE_COMMUNICATION_FAILURE: HAPStatus.SERVICE_COMMUNICATION_FAILURE },
+			uuid,
+		},
+		registered: [] as PlatformAccessory[],
+		// hap-nodejs' Accessory asserts a non-empty name, as Homebridge's PlatformAccessory does.
+		platformAccessory: function (displayName: string, id: string) {
+			const accessory = new Accessory(displayName, id);
+			(accessory as unknown as { context: Record<string, unknown> }).context = {};
+			return accessory;
+		},
+		registerPlatformAccessories(_plugin: string, _platform: string, accessories: PlatformAccessory[]) {
+			this.registered.push(...accessories);
+		},
+		updatePlatformAccessories() {},
+		unregisterPlatformAccessories() {},
 	}) as unknown as import("homebridge").API;
 }
 
@@ -280,4 +299,196 @@ test("reconcileAccessories evicts a stale cached vehicle accessory and destroys 
 	// later SSE signal for it no longer updates its (now-unregistered) characteristic.
 	staleSse.emitSignal("BatteryLevel", 90);
 	assert.equal(staleBattery.getCharacteristic(Characteristic.BatteryLevel).value, 40);
+});
+
+type RegisterProducts = (products: unknown) => void;
+
+function createPlatform(config: Record<string, unknown> = {}) {
+	const { log, logs } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(
+		log,
+		{ platform: "Teslemetry", accessToken: "fake-token", ...config } as never,
+		api,
+	);
+	const registered = (api as unknown as { registered: PlatformAccessory[] }).registered;
+	return { platform, api, log, logs, registered };
+}
+
+/** A cached vehicle accessory as Homebridge restores it: services, no handlers. */
+function createCachedVehicleAccessory(vin: string) {
+	const accessory = new Accessory("Cached Vehicle", uuid.generate(vin));
+	(accessory as unknown as { context: Record<string, unknown> }).context = { vehicle: { vin } };
+	accessory.addService(new Service.LockMechanism("Lock"));
+	return accessory as unknown as PlatformAccessory;
+}
+
+async function hapSet(accessory: PlatformAccessory, value: unknown) {
+	const characteristic = accessory
+		.getService(Service.LockMechanism)!
+		.getCharacteristic(Characteristic.LockTargetState);
+	return characteristic.handleSetRequest(value as never);
+}
+
+async function hapGet(accessory: PlatformAccessory) {
+	const characteristic = accessory
+		.getService(Service.LockMechanism)!
+		.getCharacteristic(Characteristic.LockTargetState);
+	return characteristic.handleGetRequest();
+}
+
+test("a cached accessory fails writes before discovery and keeps its last value for reads", async () => {
+	const { platform } = createPlatform();
+	const accessory = createCachedVehicleAccessory("CACHED");
+	accessory.getService(Service.LockMechanism)!.updateCharacteristic(Characteristic.LockTargetState, 1);
+
+	platform.configureAccessory(accessory);
+
+	await assert.rejects(hapSet(accessory, 0), (status) =>
+		status === HAPStatus.SERVICE_COMMUNICATION_FAILURE,
+	);
+	assert.equal(await hapGet(accessory), 1);
+});
+
+test("fetchProductsWithRetry keeps retrying past five failures and marks cached accessories No Response after the grace period", async (t) => {
+	const { platform, logs } = createPlatform();
+	const accessory = createCachedVehicleAccessory("CACHED");
+	platform.configureAccessory(accessory);
+	(platform as unknown as { retryDelayMs: () => number }).retryDelayMs = () => 0;
+
+	let now = 0;
+	t.mock.method(Date, "now", () => now);
+	let calls = 0;
+	const fakeTeslemetry = {
+		createProducts: async () => {
+			calls++;
+			now += 60_000;
+			if (calls < 8) {
+				// The client throws the api's error body, not an Error.
+				throw { response: null, error: "subscription_required", error_description: "Subscription lapsed" };
+			}
+			return { vehicles: {}, energySites: {} };
+		},
+	};
+
+	let readDuringOutage: unknown;
+	const original = fakeTeslemetry.createProducts;
+	fakeTeslemetry.createProducts = async () => {
+		if (calls === 7) {
+			readDuringOutage = await hapGet(accessory).catch((status: unknown) => status);
+		}
+		return original();
+	};
+
+	await (platform as unknown as { fetchProductsWithRetry: FetchProductsWithRetry }).fetchProductsWithRetry(
+		fakeTeslemetry,
+		new AbortController().signal,
+	);
+
+	assert.equal(calls, 8);
+	assert.equal(readDuringOutage, HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+	assert.ok(logs.some((l) => l.level === "warn" && String(l.args[0]).includes("Subscription lapsed")));
+	assert.ok(!logs.some((l) => String(l.args[0]).includes("[object Object]")));
+	assert.equal(logs.filter((l) => l.level === "error" && String(l.args[0]).includes("No Response")).length, 1);
+	// Reachable again: reads return the last-known value until discovery builds the services.
+	assert.equal(await hapGet(accessory), 0);
+});
+
+test("one product that fails to set up does not keep the others out", () => {
+	const { platform, registered, logs } = createPlatform();
+	const broken = createFakeVehicle({ vin: "BROKEN", sse: undefined as never });
+	const good = createFakeVehicle({ vin: "GOOD", name: "Good Car" });
+	const { site } = createFakeEnergySite({ id: 1234567890, name: "Home" });
+
+	(platform as unknown as { registerProducts: RegisterProducts }).registerProducts({
+		vehicles: { BROKEN: broken.vehicle, GOOD: good.vehicle },
+		energySites: { "1234567890": site },
+	});
+
+	assert.deepEqual(registered.map((a) => a.displayName), ["Good Car", "Home"]);
+	assert.ok(logs.some((l) => l.level === "error" && String(l.args[0]).includes("BROKEN")));
+});
+
+test("a vehicle or site with an empty name gets a fallback name", () => {
+	const { platform, registered } = createPlatform();
+	const unnamed = createFakeVehicle({ vin: "5YJ3E1EA7KF000001", name: "" });
+	const { site } = createFakeEnergySite({ id: 1234567890, name: "" });
+
+	(platform as unknown as { registerProducts: RegisterProducts }).registerProducts({
+		vehicles: { "5YJ3E1EA7KF000001": unnamed.vehicle },
+		energySites: { "1234567890": site },
+	});
+
+	assert.deepEqual(registered.map((a) => a.displayName), ["Model 3", "Energy Site"]);
+});
+
+test("the legacy ignore_vin and ignore_site keys are still read", () => {
+	const { platform, registered, logs } = createPlatform({
+		ignore_vin: ["IGNORED"],
+		ignore_site: ["1234567890"],
+	});
+	const ignored = createFakeVehicle({ vin: "IGNORED", name: "Ignored Car" });
+	const kept = createFakeVehicle({ vin: "KEPT", name: "Kept Car" });
+	const { site } = createFakeEnergySite({ id: 1234567890, name: "Home" });
+
+	(platform as unknown as { registerProducts: RegisterProducts }).registerProducts({
+		vehicles: { IGNORED: ignored.vehicle, KEPT: kept.vehicle },
+		energySites: { "1234567890": site },
+	});
+
+	assert.deepEqual(registered.map((a) => a.displayName), ["Kept Car"]);
+	assert.ok(logs.some((l) => l.level === "warn" && String(l.args[0]).includes("ignoreVehicles")));
+});
+
+test("a vehicle that cannot stream logs one plain line; a cached one stays and answers No Response", async () => {
+	const { platform, registered, logs } = createPlatform();
+	const cachedAccessory = createCachedVehicleAccessory("NOSEAT");
+	platform.configureAccessory(cachedAccessory);
+	const noSeat = createFakeVehicle({
+		vin: "NOSEAT",
+		name: "No Seat",
+		metadata: { access: false, issue: null, config: {} } as never,
+	});
+	const noKey = createFakeVehicle({
+		vin: "NOKEY",
+		name: "No Key",
+		metadata: { access: true, polling: true, issue: "key", config: {} } as never,
+	});
+	const unknown = createFakeVehicle({
+		vin: "UNKNOWN",
+		name: "Unknown Flags",
+		metadata: { access: null, issue: "no_data", config: {} } as never,
+	});
+
+	(platform as unknown as { registerProducts: RegisterProducts }).registerProducts({
+		vehicles: { NOSEAT: noSeat.vehicle, NOKEY: noKey.vehicle, UNKNOWN: unknown.vehicle },
+		energySites: {},
+	});
+
+	assert.deepEqual(registered.map((a) => a.displayName), ["Unknown Flags"]);
+	const lines = logs.filter((l) => l.level === "warn" && String(l.args[0]).includes("cannot stream"));
+	assert.equal(lines.length, 2);
+	assert.ok(String(lines[0].args[0]).includes("not included in your Teslemetry subscription"));
+	assert.ok(String(lines[1].args[0]).includes("virtual key"));
+	// Kept, not evicted, and unreachable.
+	assert.ok((platform as unknown as { accessories: PlatformAccessory[] }).accessories.includes(cachedAccessory));
+	await assert.rejects(hapGet(cachedAccessory), (status) =>
+		status === HAPStatus.SERVICE_COMMUNICATION_FAILURE,
+	);
+});
+
+test("a cached accessory that discovery sets up gets live handlers in place of the hold", async () => {
+	const { platform } = createPlatform();
+	const { vehicle, calls } = createFakeVehicle({ vin: "LIVE", name: "Live Car" });
+	const accessory = createCachedVehicleAccessory("LIVE");
+	platform.configureAccessory(accessory);
+
+	(platform as unknown as { registerProducts: RegisterProducts }).registerProducts({
+		vehicles: { LIVE: vehicle },
+		energySites: {},
+	});
+
+	const lock = accessory.getService(Service.LockMechanism)!;
+	await lock.getCharacteristic(Characteristic.LockTargetState).handleSetRequest(1);
+	assert.deepEqual(calls.map((c) => c.method), ["lockDoors"]);
 });

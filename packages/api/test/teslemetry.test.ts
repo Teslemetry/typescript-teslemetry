@@ -43,3 +43,25 @@ test("useTeslaModel decodes the 4th VIN character to a model name", () => {
   assert.equal(useTeslaModel("7SAAGDEE1PF000000"), "Cybercab");
   assert.equal(useTeslaModel("0000000000000000"), "Unknown");
 });
+
+test("createProducts falls back when the api sends an empty product name", async (t) => {
+  // The api sends "" for a product without a name, not null.
+  t.mock.method(globalThis, "fetch", async () =>
+    Response.json({
+      vehicles: {
+        "5YJ3E1EA1KF000000": { name: "" },
+        "7SACGDEE1PF000000": { name: "Pearl" },
+      },
+      energy_sites: { "1234567890": { name: "" } },
+    }),
+  );
+  const teslemetry = new Teslemetry("fake-access-token", {
+    logger: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
+  });
+
+  const { vehicles, energySites } = await teslemetry.createProducts();
+
+  assert.equal(vehicles["5YJ3E1EA1KF000000"].name, "Model 3");
+  assert.equal(vehicles["7SACGDEE1PF000000"].name, "Pearl");
+  assert.equal(energySites["1234567890"].name, "Unnamed");
+});

@@ -15,10 +15,11 @@ import type {
   Service,
 } from "homebridge";
 
-import { Teslemetry, type Products, type VehicleDetails, type EnergyDetails } from "@teslemetry/api";
+import { Teslemetry, useTeslaModel, type Products, type VehicleDetails, type EnergyDetails } from "@teslemetry/api";
 import { PLATFORM_NAME, PLUGIN_NAME, type TeslemetryPlatformConfig } from "./settings.js";
 import { VehicleAccessory } from "./vehicle.js";
 import { EnergyAccessory } from "./energy.js";
+import { holdAccessory } from "./hold.js";
 
 /**
  * TeslemetryPlatform
@@ -51,6 +52,14 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
   private readonly vehicleAccessories: Map<string, VehicleAccessory> = new Map();
   private readonly energyAccessories: Map<number, EnergyAccessory> = new Map();
 
+  // Cached accessories with no live services yet, and the function that
+  // removes each one's hold (see holdAccessory()).
+  private readonly holds: Map<string, () => void> = new Map();
+  // UUIDs of cached accessories that stay unusable until Homebridge restarts.
+  private readonly unreachable: Set<string> = new Set();
+  // True once discovery has been failing for DISCOVERY_GRACE_MS.
+  private discoveryOverdue = false;
+
   // Aborts an in-progress createProducts() retry backoff on shutdown, so
   // Homebridge doesn't hang around waiting for a timer that no longer matters.
   private discoveryAbort?: AbortController;
@@ -69,6 +78,13 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     if (!this.config.accessToken) {
       this.log.error("Access token is required! Please configure your Teslemetry access token.");
       return;
+    }
+
+    if (this.config.ignore_vin || this.config.ignore_site) {
+      this.log.warn(
+        'The config keys "ignore_vin" and "ignore_site" are now "ignoreVehicles" and ' +
+          '"ignoreEnergySites". The old keys are still read.',
+      );
     }
 
     // When Homebridge finishes launching, initialize Teslemetry
@@ -91,81 +107,159 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
   configureAccessory(accessory: PlatformAccessory): void {
     this.log.info("Loading accessory from cache:", accessory.displayName);
     this.accessories.push(accessory);
+    // Until discovery builds its services, a write must fail rather than be
+    // stored and dropped.
+    this.hold(accessory);
   }
 
   /**
    * Discover and initialize Tesla vehicles and energy sites
    */
   private async discoverDevices(): Promise<void> {
+    // Initialize Teslemetry SDK
+    this.log.info("Connecting to Teslemetry...");
+    this.teslemetry = new Teslemetry(this.config.accessToken, {
+      logger: {
+        info: (message, ...args) => this.log.info(message, ...args),
+        error: (message, ...args) => this.log.error(message, ...args),
+        warn: (message, ...args) => this.log.warn(message, ...args),
+        debug: (message, ...args) => this.log.debug(message, ...args),
+      },
+      stream: {
+        cache: true, // Enable caching for immediate value access
+      },
+    });
+
+    // Get all products (vehicles and energy sites). This only gives up on shutdown.
+    this.log.info("Fetching Tesla products...");
+    this.discoveryAbort = new AbortController();
     try {
-      // Initialize Teslemetry SDK
-      this.log.info("Connecting to Teslemetry...");
-      this.teslemetry = new Teslemetry(this.config.accessToken, {
-        logger: {
-          info: (message, ...args) => this.log.info(message, ...args),
-          error: (message, ...args) => this.log.error(message, ...args),
-          warn: (message, ...args) => this.log.warn(message, ...args),
-          debug: (message, ...args) => this.log.debug(message, ...args),
-        },
-        stream: {
-          cache: true, // Enable caching for immediate value access
-        },
-      });
-
-      // Get all products (vehicles and energy sites)
-      this.log.info("Fetching Tesla products...");
-      this.discoveryAbort = new AbortController();
       this.products = await this.fetchProductsWithRetry(this.teslemetry, this.discoveryAbort.signal);
-
-      // Connect to streaming API
-      this.log.info("Connecting to streaming API...");
-      this.teslemetry.sse.connect();
-
-      // Set up streaming event handlers
-      this.setupStreamingHandlers();
-
-      // Discover vehicles
-      const vehicleVins = Object.keys(this.products.vehicles);
-      const energySiteIds = Object.keys(this.products.energySites);
-
-      this.log.info(
-        `Found ${vehicleVins.length} vehicle(s) and ${energySiteIds.length} energy site(s)`,
-      );
-
-      // Register vehicles
-      const keepUuids = new Set<string>();
-      for (const vin of vehicleVins) {
-        // Check if vehicle should be ignored
-        if (this.config.ignoreVehicles?.includes(vin)) {
-          this.log.info(`Ignoring vehicle ${vin} (configured in ignore list)`);
-          continue;
-        }
-
-        const vehicle = this.products.vehicles[vin];
-        keepUuids.add(this.registerVehicle(vehicle));
-      }
-
-      // Register energy sites
-      for (const siteIdStr of energySiteIds) {
-        const siteId = parseInt(siteIdStr, 10);
-
-        // Check if energy site should be ignored
-        if (this.config.ignoreEnergySites?.includes(siteId)) {
-          this.log.info(`Ignoring energy site ${siteId} (configured in ignore list)`);
-          continue;
-        }
-
-        const site = this.products.energySites[siteIdStr];
-        keepUuids.add(this.registerEnergySite(site));
-      }
-
-      // Anything cached from a previous run that wasn't just registered
-      // above is either gone from the account or newly ignored - evict it.
-      this.reconcileAccessories(keepUuids);
-    } catch (error) {
-      this.log.error("Failed to discover devices:", error);
-      this.log.error("Please check your access token and network connection.");
+    } catch {
+      return;
     }
+
+    // Connect to streaming API
+    this.log.info("Connecting to streaming API...");
+    this.teslemetry.sse.connect();
+
+    // Set up streaming event handlers
+    this.setupStreamingHandlers();
+
+    this.registerProducts(this.products);
+  }
+
+  /**
+   * Register every product that is not ignored, then evict cached
+   * accessories that are no longer returned. Each product is set up on its
+   * own, so one that fails does not keep the others out of HomeKit.
+   */
+  private registerProducts(products: Products): void {
+    const vehicleVins = Object.keys(products.vehicles);
+    const energySiteIds = Object.keys(products.energySites);
+
+    this.log.info(
+      `Found ${vehicleVins.length} vehicle(s) and ${energySiteIds.length} energy site(s)`,
+    );
+
+    const ignoredVehicles = new Set([
+      ...(this.config.ignoreVehicles ?? []),
+      ...(this.config.ignore_vin ?? []),
+    ]);
+    const ignoredSites = new Set(
+      [...(this.config.ignoreEnergySites ?? []), ...(this.config.ignore_site ?? [])].map(String),
+    );
+
+    // Register vehicles
+    const keepUuids = new Set<string>();
+    for (const vin of vehicleVins) {
+      // Check if vehicle should be ignored
+      if (ignoredVehicles.has(vin)) {
+        this.log.info(`Ignoring vehicle ${vin} (configured in ignore list)`);
+        continue;
+      }
+
+      const vehicle = withName(products.vehicles[vin], useTeslaModel(vin));
+      const uuid = this.api.hap.uuid.generate(vin);
+      const cached = this.accessories.some((acc) => acc.UUID === uuid);
+
+      const problem = unusableReason(vehicle);
+      if (problem) {
+        this.log.warn(
+          `Vehicle ${vehicle.name} (${vin}) cannot stream: ${problem}. ` +
+            (cached
+              ? "Its HomeKit tiles show No Response until this is fixed and Homebridge is restarted."
+              : "It is not added to HomeKit until this is fixed and Homebridge is restarted."),
+        );
+        if (cached) {
+          keepUuids.add(uuid);
+          this.unreachable.add(uuid);
+        }
+        continue;
+      }
+
+      keepUuids.add(uuid);
+      try {
+        this.registerVehicle(vehicle);
+      } catch (error) {
+        this.log.error(`Failed to set up vehicle ${vehicle.name} (${vin}):`, error);
+        this.holdUnreachable(uuid);
+      }
+    }
+
+    // Register energy sites
+    for (const siteIdStr of energySiteIds) {
+      const siteId = parseInt(siteIdStr, 10);
+
+      // Check if energy site should be ignored
+      if (ignoredSites.has(String(siteId))) {
+        this.log.info(`Ignoring energy site ${siteId} (configured in ignore list)`);
+        continue;
+      }
+
+      const site = withName(products.energySites[siteIdStr], "Energy Site");
+      const uuid = this.api.hap.uuid.generate(`energy-${site.id}`);
+      keepUuids.add(uuid);
+      try {
+        this.registerEnergySite(site);
+      } catch (error) {
+        this.log.error(`Failed to set up energy site ${site.name} (ID: ${site.id}):`, error);
+        this.holdUnreachable(uuid);
+      }
+    }
+
+    // Anything cached from a previous run that wasn't just registered
+    // above is either gone from the account or newly ignored - evict it.
+    this.reconcileAccessories(keepUuids);
+  }
+
+  /**
+   * Hold a cached accessory whose setup failed again, so it answers No
+   * Response instead of accepting writes with no service behind them.
+   */
+  private holdUnreachable(uuid: string): void {
+    this.unreachable.add(uuid);
+    const accessory = this.accessories.find((acc) => acc.UUID === uuid);
+    if (accessory && !this.holds.has(uuid)) {
+      this.hold(accessory);
+    }
+  }
+
+  private hold(accessory: PlatformAccessory): void {
+    this.holds.set(
+      accessory.UUID,
+      holdAccessory(
+        this.api,
+        accessory,
+        () => this.discoveryOverdue || this.unreachable.has(accessory.UUID),
+      ),
+    );
+  }
+
+  /** Remove the hold on a cached accessory before its live services are built. */
+  private release(uuid: string): void {
+    this.holds.get(uuid)?.();
+    this.holds.delete(uuid);
   }
 
   /**
@@ -254,6 +348,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
       };
 
       // Initialize VehicleAccessory with services
+      this.release(uuid);
       const vehicleAccessory = new VehicleAccessory(this, existingAccessory, vehicle);
       this.vehicleAccessories.set(vehicle.vin, vehicleAccessory);
 
@@ -307,6 +402,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
       };
 
       // Initialize EnergyAccessory with services
+      this.release(uuid);
       const energyAccessory = new EnergyAccessory(this, existingAccessory, site);
       this.energyAccessories.set(site.id, energyAccessory);
 
@@ -380,31 +476,92 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
   }
 
   /**
-   * Fetch products, retrying transient failures with capped exponential
-   * backoff so a momentary API/network blip doesn't require a Homebridge
-   * restart to recover from.
+   * Fetch products, retrying every failure with capped exponential backoff
+   * until it succeeds, so Homebridge starting before the network or the API
+   * is reachable recovers without a restart. Throws only once `signal` aborts.
    */
-  private async fetchProductsWithRetry(teslemetry: Teslemetry, signal: AbortSignal): Promise<Products> {
-    const maxAttempts = 5;
+  private async fetchProductsWithRetry(teslemetry: Pick<Teslemetry, "createProducts">, signal: AbortSignal): Promise<Products> {
+    const startedAt = Date.now();
     let attempt = 0;
     while (true) {
       try {
-        return await teslemetry.createProducts();
+        const products = await teslemetry.createProducts();
+        if (this.discoveryOverdue) {
+          this.log.info("Teslemetry is reachable again; setting up devices.");
+          this.discoveryOverdue = false;
+        }
+        return products;
       } catch (error) {
         attempt++;
-        if (attempt >= maxAttempts || signal.aborted) {
+        if (signal.aborted) {
           throw error;
         }
 
-        const delayMs = Math.min(2 ** attempt, 30) * 1000;
-        const message = error instanceof Error ? error.message : String(error);
+        const delayMs = this.retryDelayMs(attempt);
+        const message = describeError(error);
+        if (!this.discoveryOverdue && Date.now() - startedAt >= DISCOVERY_GRACE_MS) {
+          this.discoveryOverdue = true;
+          this.log.error(
+            `Fetching Tesla products has failed for ${DISCOVERY_GRACE_MS / 60_000} minutes: ${message}. ` +
+              "Cached accessories show No Response until it succeeds. " +
+              "Check your access token, your Teslemetry subscription and your network connection.",
+          );
+        }
         this.log.warn(
-          `Fetching Tesla products failed (attempt ${attempt}/${maxAttempts}): ${message}. Retrying in ${delayMs / 1000}s...`,
+          `Fetching Tesla products failed (attempt ${attempt}): ${message}. Retrying in ${delayMs / 1000}s...`,
         );
         await sleep(delayMs, signal);
       }
     }
   }
+
+  /** Wait before retry `attempt`: 2 s, doubling, at most 5 minutes. */
+  private retryDelayMs(attempt: number): number {
+    return Math.min(2 ** attempt, 300) * 1000;
+  }
+}
+
+/**
+ * How long discovery may fail before cached accessories answer No Response
+ * instead of their last-known values.
+ */
+const DISCOVERY_GRACE_MS = 5 * 60_000;
+
+/** A product the api sent with an empty name, renamed to `fallback`. */
+function withName<T extends { name: string }>(product: T, fallback: string): T {
+  return product.name ? product : { ...product, name: fallback };
+}
+
+/**
+ * Why a vehicle cannot stream, from the metadata flags the api sets, or
+ * undefined when nothing says it cannot. A null flag is unknown, not a problem.
+ */
+function unusableReason(vehicle: VehicleDetails): string | undefined {
+  const { access, issue } = vehicle.metadata ?? {};
+  if (access === false) return "it is not included in your Teslemetry subscription";
+  switch (issue) {
+    case "key":
+      return "the Teslemetry virtual key is not paired with it";
+    case "streaming_toggle":
+      return "data streaming is turned off on its safety screen";
+    case "scope":
+      return "your Tesla authorization lacks the vehicle_device_data scope";
+    default:
+      return undefined;
+  }
+}
+
+/** A readable reason from an Error or the api's `{ error, error_description }` body. */
+function describeError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object") {
+    const { error: code, error_description: description } = error as {
+      error?: unknown;
+      error_description?: unknown;
+    };
+    if (description || code) return String(description || code);
+  }
+  return String(error);
 }
 
 /** Resolves after `ms`, or immediately if `signal` aborts first - the abort
