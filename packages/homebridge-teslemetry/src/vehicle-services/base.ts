@@ -124,6 +124,13 @@ export abstract class BaseService {
   ): void {
     const target = this.service.getCharacteristic(characteristic);
     target.onSet(async (value) => {
+      // The tiles show "No Response" while the token or subscription is
+      // rejected; a write then must fail too rather than seem to succeed.
+      if (this.platform.unavailable) {
+        throw new this.platform.api.hap.HapStatusError(
+          this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE,
+        );
+      }
       try {
         await runSetHandler(target, value, handler, (error) => {
           this.platform.log.error(

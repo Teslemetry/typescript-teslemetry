@@ -105,13 +105,17 @@ test("configureAccessory caches the accessory and logs it", () => {
 function setupWithVehicle(platform: TeslemetryPlatform) {
 	const accessory = createFakeAccessory("Test Vehicle");
 	const { vehicle, sse: vehicleSse } = createFakeVehicle();
+	// Homebridge hands the cached accessory back first; registration then
+	// releases its hold before building the live services.
+	platform.configureAccessory(accessory);
+	(platform as unknown as { release: (uuid: string) => void }).release(accessory.UUID);
 	const vehicleAccessory = new VehicleAccessory(platform, accessory, vehicle);
 	(platform as unknown as { vehicleAccessories: Map<string, VehicleAccessory> }).vehicleAccessories.set(
 		vehicle.vin,
 		vehicleAccessory,
 	);
 
-	const sse = new EventEmitter();
+	const sse = Object.assign(new EventEmitter(), { connects: 0, connect() { sse.connects++; } });
 	(platform as unknown as { teslemetry: { sse: EventEmitter } }).teslemetry = { sse };
 	(platform as unknown as { setupStreamingHandlers: () => void }).setupStreamingHandlers();
 
@@ -134,7 +138,7 @@ test("two consecutive auth failures fault every registered accessory and log a t
 		Characteristic.StatusFault.GENERAL_FAULT,
 	);
 	assert.ok(
-		logs.some((l) => l.level === "error" && String(l.args[0]).includes("stopped permanently")),
+		logs.some((l) => l.level === "error" && String(l.args[0]).includes("access token was rejected")),
 	);
 });
 
@@ -181,7 +185,7 @@ test("a fault clears only once its own service receives a fresh reading after re
 	);
 });
 
-test("disconnect alone does not claim reconnection will happen, since it may be terminal", () => {
+test("disconnect logs at debug only, since stream_error already names the reason", () => {
 	const { log, logs } = createFakeLog();
 	const api = createFakeApi();
 	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
@@ -189,9 +193,114 @@ test("disconnect alone does not claim reconnection will happen, since it may be 
 
 	sse.emit("disconnect");
 
-	const disconnectLog = logs.find((l) => l.level === "warn" && String(l.args[0]).includes("disconnected"));
-	assert.ok(disconnectLog);
-	assert.ok(!String(disconnectLog.args[0]).includes("will attempt to reconnect"));
+	assert.ok(logs.some((l) => l.level === "debug" && String(l.args[0]).includes("disconnected")));
+	assert.ok(!logs.some((l) => l.level === "warn" || l.level === "error"));
+});
+
+/** Read a characteristic the way a HomeKit controller does. */
+async function read(characteristic: Characteristic): Promise<unknown> {
+	try {
+		return await characteristic.handleGetRequest();
+	} catch (status) {
+		return { status };
+	}
+}
+
+function emitAuthFailure(sse: EventEmitter) {
+	sse.emit("stream_error", { error: new Error("SSE failed: 401 Unauthorized"), status: 401, retries: 1 });
+	sse.emit("stream_error", { error: new Error("SSE failed: 401 Unauthorized"), status: 401, retries: 2 });
+	sse.emit("auth_failure", new Error("SSE failed: 401 Unauthorized"));
+}
+
+test("an auth failure shows No Response on every tile, and a connect restores the last-known values", async () => {
+	const { log } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+	const { accessory, sse, vehicleSse } = setupWithVehicle(platform);
+	vehicleSse.emitSignal("Locked", true);
+	const lock = accessory.getService(Service.LockMechanism)!.getCharacteristic(Characteristic.LockCurrentState);
+	const name = accessory.getService(Service.LockMechanism)!.getCharacteristic(Characteristic.Name);
+	const model = accessory.getService(Service.AccessoryInformation)!.getCharacteristic(Characteristic.Model);
+
+	emitAuthFailure(sse);
+
+	assert.deepEqual(await read(lock), { status: HAPStatus.SERVICE_COMMUNICATION_FAILURE });
+	assert.equal(typeof (await read(name)), "string");
+	assert.equal(typeof (await read(model)), "string");
+
+	sse.emit("connect");
+
+	assert.equal(await read(lock), Characteristic.LockCurrentState.SECURED);
+});
+
+test("a write fails while the tiles show No Response", async () => {
+	const { log } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+	const { accessory, sse } = setupWithVehicle(platform);
+	const target = accessory.getService(Service.LockMechanism)!.getCharacteristic(Characteristic.LockTargetState);
+
+	emitAuthFailure(sse);
+
+	await assert.rejects(
+		target.handleSetRequest(Characteristic.LockTargetState.SECURED),
+		(status: unknown) => status === HAPStatus.SERVICE_COMMUNICATION_FAILURE,
+	);
+});
+
+test("an auth failure connects again after five minutes", (t) => {
+	t.mock.timers.enable({ apis: ["setTimeout"] });
+	const { log } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+	const { sse } = setupWithVehicle(platform);
+
+	emitAuthFailure(sse);
+	t.mock.timers.tick(5 * 60_000 - 1);
+	assert.equal(sse.connects, 0);
+	t.mock.timers.tick(1);
+	assert.equal(sse.connects, 1);
+});
+
+test("shutdown cancels a pending auth retry", (t) => {
+	t.mock.timers.enable({ apis: ["setTimeout"] });
+	const { log } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+	const { sse } = setupWithVehicle(platform);
+	(sse as unknown as { close: () => void }).close = () => {};
+
+	emitAuthFailure(sse);
+	(api as unknown as EventEmitter).emit("shutdown");
+	t.mock.timers.tick(10 * 60_000);
+	assert.equal(sse.connects, 0);
+});
+
+test("402 shows No Response and is named in the log; an ordinary drop keeps the last-known values", async () => {
+	const { log, logs } = createFakeLog();
+	const api = createFakeApi();
+	const platform = new TeslemetryPlatform(log, { platform: "Teslemetry", accessToken: "fake-token" } as never, api);
+	const { accessory, sse, vehicleSse } = setupWithVehicle(platform);
+	vehicleSse.emitSignal("Locked", true);
+	const lock = accessory.getService(Service.LockMechanism)!.getCharacteristic(Characteristic.LockCurrentState);
+
+	sse.emit("stream_error", { error: new TypeError("terminated"), status: undefined, retries: 1 });
+	assert.equal(await read(lock), Characteristic.LockCurrentState.SECURED);
+	sse.emit("stream_error", { error: new Error("SSE failed: 429 Too Many Requests"), status: 429, retries: 2 });
+	assert.equal(await read(lock), Characteristic.LockCurrentState.SECURED);
+
+	sse.emit("stream_error", { error: new Error("SSE failed: 402 Payment Required"), status: 402, retries: 3 });
+	assert.deepEqual(await read(lock), { status: HAPStatus.SERVICE_COMMUNICATION_FAILURE });
+
+	const warnings = logs.filter((l) => l.level === "warn").map((l) => String(l.args[0]));
+	assert.deepEqual(warnings, [
+		"Streaming API error (connection lost, attempt 1): terminated",
+		"Streaming API error (too many connections, HTTP 429, attempt 2): SSE failed: 429 Too Many Requests",
+		"Streaming API error (subscription required, HTTP 402, attempt 3): SSE failed: 402 Payment Required",
+	]);
+
+	sse.emit("connect");
+	assert.equal(await read(lock), Characteristic.LockCurrentState.SECURED);
 });
 
 // fetchProductsWithRetry() and reconcileAccessories() are private, exercised

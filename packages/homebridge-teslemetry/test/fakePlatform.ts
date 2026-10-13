@@ -20,7 +20,7 @@ export function createFakeAccessory(displayName = "Test Vehicle"): PlatformAcces
 
 export function createFakePlatform(
 	config: Record<string, unknown> = {},
-	options: { streamFault?: boolean } = {},
+	options: { streamFault?: boolean; unavailable?: boolean } = {},
 ): {
 	platform: TeslemetryPlatform;
 	logs: LogEntry[];
@@ -35,6 +35,7 @@ export function createFakePlatform(
 		Characteristic,
 		config,
 		streamFault: options.streamFault ?? false,
+		unavailable: options.unavailable ?? false,
 		log: {
 			info: log("info"),
 			warn: log("warn"),
