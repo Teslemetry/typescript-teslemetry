@@ -22,8 +22,8 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 function setupVehicle() {
 	const { platform, logs } = createFakePlatform();
 	const accessory = createFakeAccessory("Test Vehicle");
-	const { vehicle } = createFakeVehicle();
-	return { platform, logs, accessory, vehicle, api: vehicle.api as any };
+	const { vehicle, sse } = createFakeVehicle();
+	return { platform, logs, accessory, vehicle, sse, api: vehicle.api as any };
 }
 
 function setupLock() {
@@ -165,6 +165,19 @@ test("a late failure leaves a newer successful write of the same value in place"
 	await target.handleSetRequest(LockTargetState.SECURED as never);
 
 	finish.reject(new Error("vehicle offline"));
+	await settle();
+
+	assert.equal(target.value, LockTargetState.SECURED);
+	assert.equal(hapService.getCharacteristic(LockCurrentState).value, LockCurrentState.SECURED);
+});
+
+test("a late failure leaves a telemetry reading of the same value in place", async (t) => {
+	const { hapService, target, sse, finish, answer } = await startSlowLock(t);
+	assert.equal(answer(), "success");
+
+	// The car locked although the api call then timed out.
+	sse.emitSignal("Locked", true);
+	finish.reject(new Error("408 Request Timeout"));
 	await settle();
 
 	assert.equal(target.value, LockTargetState.SECURED);

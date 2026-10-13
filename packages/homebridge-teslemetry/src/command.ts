@@ -47,7 +47,18 @@ export async function runSetHandler(
   const previous = characteristic.value;
   const write = (writeCounts.get(characteristic) ?? 0) + 1;
   writeCounts.set(characteristic, write);
+  // Any value set other than by a HomeKit write is a reading (telemetry or an
+  // optimistic state) that a late rollback must not overwrite.
+  let updated = false;
+  const onChange = (change: { reason: string }) => {
+    if (change.reason !== "write") updated = true;
+  };
+  characteristic.on("change", onChange);
   const running = handler(value);
+  running.then(
+    () => characteristic.off("change", onChange),
+    () => characteristic.off("change", onChange),
+  );
   let timer: ReturnType<typeof setTimeout> | undefined;
   const stillRunning = await Promise.race([
     running.then(() => false),
@@ -59,9 +70,9 @@ export async function runSetHandler(
 
   running.catch((error) => {
     onLateFailure(error);
-    // Leave a value that telemetry has since replaced, and one a newer write
+    // Leave a value that telemetry has since set, and one a newer write
     // owns: a repeat of the same value is otherwise indistinguishable.
-    if (writeCounts.get(characteristic) !== write) return;
+    if (updated || writeCounts.get(characteristic) !== write) return;
     if (characteristic.value === value) characteristic.updateValue(previous);
   });
 }
