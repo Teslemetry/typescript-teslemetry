@@ -1,7 +1,7 @@
 # n8n Teslemetry Integration
 
 [![npm version](https://img.shields.io/npm/v/@teslemetry/n8n-nodes-teslemetry.svg)](https://www.npmjs.com/package/@teslemetry/n8n-nodes-teslemetry)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 n8n community nodes for controlling Tesla vehicles and energy sites via the [Teslemetry](https://teslemetry.com) API.
 
@@ -134,7 +134,7 @@ Trigger workflows based on real-time vehicle events via Server-Sent Events (SSE)
 
 ## License
 
-Apache-2.0 License - see [LICENSE](LICENSE) file for details
+MIT License - see [LICENSE](LICENSE) file for details
 
 ## Contributing
 

@@ -30,7 +30,7 @@
     "email": "hello@teslemetry.com",
     "url": "https://teslemetry.com"
   },
-  "license": "Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Teslemetry/typescript-teslemetry"
