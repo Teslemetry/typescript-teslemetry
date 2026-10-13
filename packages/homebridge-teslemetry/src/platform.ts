@@ -20,6 +20,21 @@ import { PLATFORM_NAME, PLUGIN_NAME, type TeslemetryPlatformConfig } from "./set
 import { VehicleAccessory } from "./vehicle.js";
 import { EnergyAccessory } from "./energy.js";
 import { holdAccessory } from "./hold.js";
+import { createSdkLogger, describeError } from "./log.js";
+
+/** Stream refusals the user has to act on, named in the log. */
+const STREAM_STATUS_REASONS: Record<number, string> = {
+  401: "access token rejected",
+  402: "subscription required",
+  403: "access token rejected",
+  429: "too many connections",
+};
+
+/** How long to wait before connecting again after the SDK stopped the stream
+ *  on repeated auth failures. The SDK never resumes on its own, so a token that
+ *  was rejected for a moment, or a renewed subscription, needs this to recover
+ *  without a restart. */
+const AUTH_RETRY_DELAY_MS = 5 * 60_000;
 
 /**
  * TeslemetryPlatform
@@ -45,6 +60,17 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
    *  next markStreamFault() call that will never come until reconnect. */
   get streamFault(): boolean {
     return this.streamFaulted;
+  }
+
+  // Why every tile shows "No Response", or undefined while tiles show their
+  // last-known values. Set only for states the user has to fix (a rejected
+  // token, a lapsed subscription); an ordinary reconnect keeps the values.
+  private unavailableReason?: string;
+  private authRetryTimer?: ReturnType<typeof setTimeout>;
+
+  /** True while every tile shows "No Response"; writes must fail meanwhile. */
+  get unavailable(): boolean {
+    return this.unavailableReason !== undefined;
   }
 
   // Accessory management
@@ -97,6 +123,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     this.api.on("shutdown", () => {
       this.log.info("Homebridge is shutting down, closing Teslemetry connection...");
       this.discoveryAbort?.abort();
+      clearTimeout(this.authRetryTimer);
       this.teslemetry?.sse.close();
     });
   }
@@ -119,12 +146,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     // Initialize Teslemetry SDK
     this.log.info("Connecting to Teslemetry...");
     this.teslemetry = new Teslemetry(this.config.accessToken, {
-      logger: {
-        info: (message, ...args) => this.log.info(message, ...args),
-        error: (message, ...args) => this.log.error(message, ...args),
-        warn: (message, ...args) => this.log.warn(message, ...args),
-        debug: (message, ...args) => this.log.debug(message, ...args),
-      },
+      logger: createSdkLogger(this.log),
       stream: {
         cache: true, // Enable caching for immediate value access
       },
@@ -270,46 +292,108 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
       return;
     }
 
-    // "connect" fires as soon as the SSE handshake completes, before any
-    // event is consumed - clearing StatusFault here would show last-known
-    // (possibly stale/default) sensor state as healthy again with no proof
-    // fresh data has actually arrived. Each faulted service instead clears
-    // its own StatusFault the next time it receives a real payload (the
-    // same "unknown/faulted until a real reading lands" convention already
-    // used for TPMS/grid-outage/storm-watch at startup).
+    // "connect" fires on the stream's first chunk, so the server has
+    // accepted the token and the subscription: tiles that showed "No
+    // Response" get their last-known values back. Sensor StatusFault is not
+    // cleared here - each faulted service clears its own the next time it
+    // receives a real payload (the same "unknown/faulted until a real reading
+    // lands" convention already used for TPMS/grid-outage/storm-watch at
+    // startup), since a connect alone proves no fresh reading has arrived.
     this.teslemetry.sse.on("connect", () => {
-      if (this.streamFaulted) {
+      if (this.streamFaulted || this.unavailable) {
         this.log.info("✓ Streaming API reconnected");
         this.streamFaulted = false;
+        this.setUnavailable(undefined);
       } else {
         this.log.info("✓ Streaming API connected");
       }
     });
 
-    // A disconnect on its own doesn't say whether the SDK will retry or has
-    // stopped for good - that distinction only arrives via stream_error/
-    // auth_failure below, so this log makes no promise either way.
+    // Every failed attempt also emits "disconnect"; the stream_error line
+    // below already names the reason, so this one stays at debug.
     this.teslemetry.sse.on("disconnect", () => {
-      this.log.warn("✗ Streaming API disconnected");
+      this.log.debug("✗ Streaming API disconnected");
     });
 
     this.teslemetry.sse.on("stream_error", ({ error, status, retries }) => {
-      const message = error instanceof Error ? error.message : String(error);
+      const reason = status !== undefined ? STREAM_STATUS_REASONS[status] : undefined;
+      const statusText = status !== undefined ? `HTTP ${status}` : "connection lost";
       this.log.warn(
-        `Streaming API error (status ${status ?? "unknown"}, attempt ${retries}): ${message}`,
+        `Streaming API error (${reason ? `${reason}, ` : ""}${statusText}, attempt ${retries}): ${describeError(error)}`,
       );
+      // A lapsed subscription does not fix itself; the SDK keeps retrying
+      // with its backoff and the next connect restores the tiles.
+      if (status === 402) {
+        this.setUnavailable(STREAM_STATUS_REASONS[402]);
+      }
     });
 
     this.teslemetry.sse.on("auth_failure", (error) => {
+      const minutes = AUTH_RETRY_DELAY_MS / 60_000;
       this.log.error(
-        "Streaming API authentication failed twice in a row and has stopped permanently - " +
-          "characteristics will no longer update. Fix the access token in this plugin's " +
-          "config and restart Homebridge to resume streaming.",
-        error,
+        `Streaming API stopped: the access token was rejected twice in a row (${describeError(error)}). ` +
+          `Characteristics show No Response until it is accepted. Trying again in ${minutes} minutes; ` +
+          "if the token was revoked, update it in this plugin's config and restart Homebridge.",
       );
       this.streamFaulted = true;
       this.markStreamFault(true);
+      this.setUnavailable(STREAM_STATUS_REASONS[401]);
+      // The SDK has left its connect loop and never resumes on its own.
+      clearTimeout(this.authRetryTimer);
+      this.authRetryTimer = setTimeout(() => {
+        this.authRetryTimer = undefined;
+        this.teslemetry?.sse.connect();
+      }, AUTH_RETRY_DELAY_MS);
+      // Homebridge stays up on its own; the retry must not hold it open.
+      this.authRetryTimer.unref?.();
     });
+  }
+
+  /**
+   * Show "No Response" on every tile while the user has to act (`reason` set),
+   * or give the tiles their last-known values back (`reason` undefined).
+   */
+  private setUnavailable(reason: string | undefined): void {
+    if (reason === this.unavailableReason) return;
+    const wasUnavailable = this.unavailable;
+    this.unavailableReason = reason;
+    if (wasUnavailable === this.unavailable) return;
+    for (const accessory of this.accessories) {
+      this.applyAvailability(accessory);
+    }
+  }
+
+  /** A product registered while unavailable starts at "No Response" too. */
+  private applyAvailabilityTo(uuid: string): void {
+    const accessory = this.accessories.find(acc => acc.UUID === uuid);
+    if (accessory && this.unavailable) this.applyAvailability(accessory);
+  }
+
+  /**
+   * Fail every read of the accessory's characteristics with
+   * SERVICE_COMMUNICATION_FAILURE (HomeKit shows "No Response") while the
+   * platform is unavailable, or clear that failure and keep the stored value.
+   * The accessory's information and names stay readable.
+   */
+  private applyAvailability(accessory: PlatformAccessory): void {
+    const { Characteristic, Service, api } = this;
+    const failure = new api.hap.HapStatusError(api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    for (const service of accessory.services) {
+      if (service.UUID === Service.AccessoryInformation.UUID) continue;
+      for (const characteristic of service.characteristics) {
+        if (
+          characteristic.UUID === Characteristic.Name.UUID ||
+          characteristic.UUID === Characteristic.ConfiguredName.UUID
+        ) {
+          continue;
+        }
+        if (this.unavailable) {
+          characteristic.updateValue(failure);
+        } else if (characteristic.statusCode !== 0 && characteristic.value !== null) {
+          characteristic.updateValue(characteristic.value);
+        }
+      }
+    }
   }
 
   /**
@@ -374,6 +458,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
       this.accessories.push(accessory);
     }
 
+    this.applyAvailabilityTo(uuid);
     this.log.info(`✓ Vehicle registered: ${displayName} (${vehicle.vin})`);
     return uuid;
   }
@@ -428,6 +513,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
       this.accessories.push(accessory);
     }
 
+    this.applyAvailabilityTo(uuid);
     this.log.info(`✓ Energy site registered: ${displayName} (ID: ${site.id})`);
     return uuid;
   }
@@ -549,19 +635,6 @@ function unusableReason(vehicle: VehicleDetails): string | undefined {
     default:
       return undefined;
   }
-}
-
-/** A readable reason from an Error or the api's `{ error, error_description }` body. */
-function describeError(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (error && typeof error === "object") {
-    const { error: code, error_description: description } = error as {
-      error?: unknown;
-      error_description?: unknown;
-    };
-    if (description || code) return String(description || code);
-  }
-  return String(error);
 }
 
 /** Resolves after `ms`, or immediately if `signal` aborts first - the abort

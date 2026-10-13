@@ -145,10 +145,14 @@ Each energy site appears as its own set of accessories:
 3. Restart Homebridge
 4. Check firewall settings (SSE requires persistent connections)
 
-If the log shows streaming authentication failed twice in a row, the stream has stopped
-permanently (contact sensors and occupancy sensors that support a fault state, e.g. doors,
-TPMS, wall connectors, and presence, will show faulted). Fix the access token in your config
-and restart Homebridge - the plugin does not retry a dead token on its own.
+While the stream only reconnects (a dropped connection, `too many connections`), the
+accessories keep their last-known values. If Teslemetry rejects the access token twice in a
+row (`access token rejected`) or reports `subscription required`, every accessory shows
+**No Response** and commands fail until the stream is accepted again. Sensors that support a
+fault state (doors, TPMS, wall connectors, presence) also show faulted until their next
+reading. After a rejected token the plugin tries again every 5 minutes, so a renewed
+subscription or a briefly rejected token recovers on its own; if you replaced the token,
+update it in your config and restart Homebridge.
 
 ### Accessories Not Responding
 
