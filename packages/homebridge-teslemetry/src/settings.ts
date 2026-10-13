@@ -33,6 +33,16 @@ export interface TeslemetryPlatformConfig {
   ignoreEnergySites?: number[];
 
   /**
+   * Legacy (0.4.x) name of ignoreVehicles, still read
+   */
+  ignore_vin?: string[];
+
+  /**
+   * Legacy (0.4.x) name of ignoreEnergySites, still read
+   */
+  ignore_site?: Array<number | string>;
+
+  /**
    * Prefix accessory names with vehicle/site name
    * @default true
    */

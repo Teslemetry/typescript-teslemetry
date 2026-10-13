@@ -122,7 +122,7 @@ export class Teslemetry {
       Object.entries(data.vehicles).map(([vin, metadata]) => [
         vin,
         {
-          name: metadata.name ?? useTeslaModel(vin),
+          name: metadata.name || useTeslaModel(vin),
           vin,
           api: this.api.getVehicle(vin),
           sse: this.sse.getVehicle(vin),
@@ -137,7 +137,7 @@ export class Teslemetry {
         return [
           id,
           {
-            name: metadata.name ?? "Unnamed",
+            name: metadata.name || "Unnamed",
             id: siteId,
             api: this.api.getEnergySite(siteId),
             sse: this.sse.getEnergySite(id),
