@@ -129,7 +129,7 @@ Trigger workflows based on real-time vehicle events via Server-Sent Events (SSE)
 ## Resources
 
 - **Teslemetry Documentation**: https://teslemetry.com/docs
-- **API Reference**: https://developer.teslemetry.com
+- **API Reference**: https://teslemetry.com/docs
 - **Support**: https://github.com/Teslemetry/typescript-teslemetry/issues
 
 ## License

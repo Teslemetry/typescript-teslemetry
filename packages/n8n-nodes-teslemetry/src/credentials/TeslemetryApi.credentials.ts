@@ -1,4 +1,6 @@
 import {
+	IAuthenticateGeneric,
+	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -6,7 +8,7 @@ import {
 export class TeslemetryApi implements ICredentialType {
 	name = 'teslemetryApi';
 	displayName = 'Teslemetry API';
-	documentationUrl = 'https://docs.teslemetry.com';
+	documentationUrl = 'https://teslemetry.com/docs';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Access Token',
@@ -18,4 +20,20 @@ export class TeslemetryApi implements ICredentialType {
 			description: 'Your Teslemetry Access Token',
 		},
 	];
+
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic',
+		properties: {
+			headers: {
+				Authorization: '=Bearer {{$credentials.accessToken}}',
+			},
+		},
+	};
+
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: 'https://api.teslemetry.com',
+			url: '/api/test',
+		},
+	};
 }
