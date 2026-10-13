@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.13.1
+
+### Patch Changes
+
+- e119ea2: `createProducts()` now falls back to the model name (vehicles) or "Unnamed" (energy sites) when the api sends an empty product name, not only when the name is missing.
+
 ## 0.13.0
 
 ### Minor Changes
