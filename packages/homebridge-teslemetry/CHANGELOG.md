@@ -1,5 +1,15 @@
 # @teslemetry/homebridge-teslemetry
 
+## 1.2.5
+
+### Patch Changes
+
+- e119ea2: Discovery no longer gives up when Teslemetry cannot be reached at start: it retries until it succeeds, waiting at most 5 minutes between tries. Until a cached accessory is set up, HomeKit writes to it fail instead of reporting success and sending nothing; after 5 minutes of failed discovery its tiles show No Response. A product that fails to set up no longer keeps the others out of HomeKit, and an empty vehicle or site name falls back to a default. A vehicle outside the subscription or unable to stream (unpaired virtual key, streaming toggle off, missing `vehicle_device_data` scope) gets one plain log line; if it was already in HomeKit its tiles show No Response, otherwise it is not added. The legacy 0.4.x config keys `ignore_vin` and `ignore_site` are read again.
+- 260411e: A command that fails after HomeKit was answered no longer puts back a value that telemetry has since reported. A lock command that timed out after the car locked left the Home app showing "Unlocking" on a locked car.
+- fbdd832: Recover and report stream trouble. After the access token is rejected twice, the stream now tries again every 5 minutes instead of stopping until a restart. While the token is rejected or the subscription has lapsed (HTTP 402), every accessory shows No Response and commands fail; a plain reconnect keeps the last-known values. Stream errors are logged as one line that names the cause (`access token rejected`, `subscription required`, `too many connections`), without a stack trace.
+- Updated dependencies [e119ea2]
+  - @teslemetry/api@0.13.1
+
 ## 1.2.4
 
 ### Patch Changes

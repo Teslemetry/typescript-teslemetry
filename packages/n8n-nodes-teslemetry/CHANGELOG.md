@@ -1,5 +1,12 @@
 # @teslemetry/n8n-nodes-teslemetry
 
+## 0.5.1
+
+### Patch Changes
+
+- 8495acb: The Teslemetry API credential now tests the access token against `/api/test` when saved, so a mistyped token is reported straight away. The credential's documentation link and the README's API reference link now point to `https://teslemetry.com/docs`; the old hosts did not resolve.
+- 66d3f69: Relicense the package from Apache-2.0 to MIT, which n8n requires for community node verification. Ships a `LICENSE` file with the MIT text.
+
 ## 0.5.0
 
 ### Minor Changes
