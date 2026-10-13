@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.13.0
+
+### Minor Changes
+
+- 0ada305: Add the `wall_connector_totals` stream event: per-Wall-Connector daily Wh totals keyed by DIN (`totals`), with the installation-local `date`, on both `TeslemetryStream` and `TeslemetryEnergySiteStream`. It is now a valid `topics` name, and `startLocalCache()` replays the last value to new listeners. The generated client was regenerated from the live spec.
+
 ## 0.12.1
 
 ### Patch Changes
