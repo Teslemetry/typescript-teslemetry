@@ -18,9 +18,11 @@ Only **commands** (writes) need this. A new telemetry field needs no code: the N
    - Add a case to `test/teslemetry-vehicle-command.test.ts` (or `teslemetry-energy-command.test.ts`).
 
 3. **n8n** (`packages/n8n-nodes-teslemetry`):
-   - In `src/nodes/TeslemetryVehicle.node.ts` (energy: `TeslemetryEnergy.node.ts`), add an `options` entry (`name`, `value`, `action`) to the operation list.
+   - The package does not use `@teslemetry/api` (n8n's verification forbids it); it calls the endpoint itself through `teslemetryRequest()` in `nodes/shared.ts`. Copy the path and body from the SDK method.
+   - In `nodes/TeslemetryVehicle/TeslemetryVehicle.node.ts` (energy: `nodes/TeslemetryEnergy/TeslemetryEnergy.node.ts`), add an `options` entry (`name`, `value`, `action`) to the operation list of the matching resource, keeping it alphabetical.
    - Add one property per argument, shown only for that operation with `displayOptions: { show: { operation: ['<method>'] } }`.
-   - Add a `case '<method>':` to the `execute` switch. Read arguments with `this.getNodeParameter('<name>', itemIndex)`.
+   - Add an `OPERATIONS` entry that builds the request (`command('<endpoint>', (param) => ({ ... }))` for `command/<endpoint>`). Read arguments with `param('<name>')`.
+   - Run `pnpm --filter @teslemetry/n8n-nodes-teslemetry validate` (n8n's lint).
    - Add the operation to `README.md`.
    - Add a row (operation, params, expected path and body) to the table in `test/vehicleExecute.test.ts` (or `energyExecute.test.ts`).
 

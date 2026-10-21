@@ -9,8 +9,7 @@ n8n community nodes for controlling Tesla vehicles and energy sites via the [Tes
 
 - 🚗 **Vehicle Control**: Lock/unlock, climate, charging, navigation, and more
 - ⚡ **Energy Management**: Monitor and control Powerwall and Solar systems
-- 📡 **Real-Time Events**: Trigger workflows based on vehicle state changes
-- 🔄 **Full API Coverage**: Access all Teslemetry API features
+- 📡 **Change Events**: Trigger workflows when vehicle telemetry or energy site status changes
 
 ## Installation
 
@@ -51,7 +50,7 @@ Then restart your n8n instance.
 ## Nodes
 
 ### Teslemetry Vehicle
-Perform operations on your Tesla vehicles.
+Perform operations on your Tesla vehicles. Operations are grouped by resource: **Vehicle**, **Doors and Closure**, **Climate** and **Charging**.
 
 **Operations:**
 - **Get Vehicle Data**: Retrieves comprehensive data.
@@ -68,7 +67,7 @@ Perform operations on your Tesla vehicles.
 - **Navigation Request**: Send a destination to the vehicle navigation.
 
 ### Teslemetry Energy
-Interact with Tesla Energy sites (Solar/Powerwall).
+Interact with Tesla Energy sites (Solar/Powerwall). Operations are grouped by resource: **Status** and **Setting**.
 
 **Operations:**
 - **Get Live Status**: Live power usage details.
@@ -81,19 +80,22 @@ Interact with Tesla Energy sites (Solar/Powerwall).
 - **Off-Grid Reserve**: Set vehicle charging reserve for off-grid operation.
 
 ### Teslemetry Trigger
-Trigger workflows based on real-time vehicle events via Server-Sent Events (SSE).
+A polling trigger: it checks Teslemetry on the node's **Poll Times** schedule (every minute by default) and starts the workflow once for each value that changed since the previous check. The first check after you activate the workflow only records the current values. A manual test run returns the current values.
 
-**Event Types:**
-- **All Events**: Stream all events
-- **Data**: Real-time telemetry data updates
-- **State**: State changes (online/asleep/charging)
-- **Vehicle Data**: Full vehicle data snapshots
-- **Errors**: Vehicle error events
-- **Alerts**: Vehicle alerts and notifications
-- **Connectivity**: Connection status changes
-- **Credits**: API credit usage updates
-- **Config**: Configuration changes
-- **Signal**: Monitor specific fields (e.g., `speed`, `odometer`, `battery_level`)
+**Vehicle events** read the vehicle's cached telemetry (`GET /api/1/vehicles/{vin}/telemetry`). This read never wakes the vehicle, never calls Tesla, and costs no credits, so a short poll interval is free. The vehicle must stream the fields you watch (add them in the Teslemetry console).
+- **Any Change**: Any change to the topics below
+- **Data**: Any telemetry field changed (the item lists only the changed fields)
+- **Signal**: One telemetry field changed (choose the field)
+- **State**: The vehicle went online, asleep or offline
+- **Connectivity**: A network interface connected or disconnected
+- **Alerts**, **Errors**, **Vehicle Data**: The topic's cached value changed
+
+**Energy site events** read the site's `live_status` or `site_info`. Teslemetry serves both from its own cache, which it refreshes about every 30 seconds (live status) and every 5 minutes (site info), so polling faster than that returns the same values. Credits are charged only when Teslemetry fetches fresh data from Tesla, not for cache reads.
+- **Live Status**: Power flows, battery level and grid status
+- **Site Info**: Settings such as backup reserve and operation mode
+- **Tariff Content**: The site tariff changed, or was removed (`tariff_content_v2: null`)
+
+Earlier versions streamed events over Server-Sent Events (SSE). n8n Cloud does not allow the long-lived reconnecting connection a stream needs, so the trigger now polls. The stream-only events **Credits**, **Config** and **Energy Totals**, and the "all vehicles"/"all sites" choice, are no longer available.
 
 ## Usage Examples
 
@@ -114,16 +116,16 @@ Trigger workflows based on real-time vehicle events via Server-Sent Events (SSE)
 ### Example 3: Monitor Charging Status
 
 1. Add a **Teslemetry Trigger** node
-2. Set event type to **Data**
-3. Filter for charging-related updates
-4. Send notifications when charging completes
+2. Set event type to **Signal** and the field to `DetailedChargeState`
+3. Add an **IF** node that checks `{{ $json.value }}` is `DetailedChargeStateComplete`
+4. Send a notification when charging completes
 
 ### Example 4: Alert on Low Battery
 
 1. Add a **Teslemetry Trigger** node
 2. Set event type to **Signal**
-3. Select signal: `battery_level`
-4. Add an **IF** node to check if battery < 20%
+3. Select the field `BatteryLevel`
+4. Add an **IF** node to check if `{{ $json.value }}` < 20
 5. Send notification via email/SMS
 
 ## Resources
