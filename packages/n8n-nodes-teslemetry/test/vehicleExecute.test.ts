@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TeslemetryVehicle } from "../src/nodes/TeslemetryVehicle.node.js";
+import { TeslemetryVehicle } from "../nodes/TeslemetryVehicle/TeslemetryVehicle.node.js";
 import {
   API_FAILURES,
   assertApiFailure,

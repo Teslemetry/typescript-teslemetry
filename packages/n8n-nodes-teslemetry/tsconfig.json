@@ -1,11 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
-    "paths": {
-      "@teslemetry/api": ["../api/dist"]
-    }
+    "noEmit": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["nodes/**/*.ts", "credentials/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,28 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TeslemetryVehicle } from "../src/nodes/TeslemetryVehicle.node.js";
-import { TeslemetryEnergy } from "../src/nodes/TeslemetryEnergy.node.js";
-import { TeslemetryTrigger } from "../src/nodes/TeslemetryTrigger.node.js";
-import { API_FAILURES, assertApiFailure, fakeLogger, fakeNode } from "./testHelpers.js";
+import { TeslemetryVehicle } from "../nodes/TeslemetryVehicle/TeslemetryVehicle.node.js";
+import { TeslemetryEnergy } from "../nodes/TeslemetryEnergy/TeslemetryEnergy.node.js";
+import { TeslemetryTrigger } from "../nodes/TeslemetryTrigger/TeslemetryTrigger.node.js";
+import { API_FAILURES, assertApiFailure, fakeHelpers, fakeLogger, fakeNode, withMockedFetch } from "./testHelpers.js";
 
 // Minimal ILoadOptionsFunctions stand-in for the loadOptions methods.
 const fakeLoadOptionsContext = {
-  getCredentials: async () => ({ accessToken: "token" }),
   getNode: () => fakeNode,
   logger: fakeLogger().logger,
+  helpers: fakeHelpers,
 } as never;
-
-function withMockedFetch<T>(
-  handler: (request: Request) => Promise<Response> | Response,
-  run: () => Promise<T>,
-): Promise<T> {
-  const original = globalThis.fetch;
-  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) =>
-    handler(new Request(input, init))) as typeof fetch;
-  return run().finally(() => {
-    globalThis.fetch = original;
-  });
-}
 
 test("TeslemetryVehicle.getVins calls a real TeslemetryApi method (regression: api.vehicles() is not a function)", async () => {
   const node = new TeslemetryVehicle();
@@ -73,10 +61,7 @@ test("TeslemetryTrigger.getVins calls a real TeslemetryApi method (regression: a
     () => node.methods.loadOptions.getVins.call(fakeLoadOptionsContext),
   );
 
-  assert.deepEqual(options, [
-    { name: "All Vehicles", value: "" },
-    { name: "My Tesla (5YJSA1E14FF000000)", value: "5YJSA1E14FF000000" },
-  ]);
+  assert.deepEqual(options, [{ name: "My Tesla (5YJSA1E14FF000000)", value: "5YJSA1E14FF000000" }]);
 });
 
 test("TeslemetryTrigger.getSites calls a real TeslemetryApi method (regression: api.products() is not a function)", async () => {
@@ -94,10 +79,7 @@ test("TeslemetryTrigger.getSites calls a real TeslemetryApi method (regression: 
     () => node.methods.loadOptions.getSites.call(fakeLoadOptionsContext),
   );
 
-  assert.deepEqual(options, [
-    { name: "All Sites", value: "" },
-    { name: "Home (123)", value: 123 },
-  ]);
+  assert.deepEqual(options, [{ name: "Home (123)", value: 123 }]);
 });
 
 test("TeslemetryTrigger.getFields calls a real TeslemetryApi method (regression: api.fields() is not a function)", async () => {

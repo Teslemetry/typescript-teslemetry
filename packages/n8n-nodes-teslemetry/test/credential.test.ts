@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { TeslemetryApi } from "../src/credentials/TeslemetryApi.credentials";
+import { TeslemetryApi } from "../credentials/TeslemetryApi.credentials";
 
 test("credential tests the token against /api/test with a bearer header", () => {
   const credential = new TeslemetryApi();

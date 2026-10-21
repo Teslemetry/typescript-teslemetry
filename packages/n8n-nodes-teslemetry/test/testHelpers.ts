@@ -1,21 +1,51 @@
 import assert from "node:assert/strict";
+import type { IHttpRequestOptions } from "n8n-workflow";
 
-export function withMockedFetch<T>(
-  handler: (request: Request) => Promise<Response> | Response,
-  run: () => Promise<T>,
-): Promise<T> {
-  const original = globalThis.fetch;
-  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-    const request = new Request(input, init);
-    const response = await handler(request);
-    // A real response carries its request URL, access token included.
-    Object.defineProperty(response, "url", { value: request.url });
-    return response;
-  }) as typeof fetch;
+type Handler = (request: Request) => Promise<Response> | Response;
+
+let currentHandler: Handler | undefined;
+
+/** Answers every request the fake contexts' n8n HTTP helper sends with `handler` while `run` runs. */
+export function withMockedFetch<T>(handler: Handler, run: () => Promise<T>): Promise<T> {
+  currentHandler = handler;
   return run().finally(() => {
-    globalThis.fetch = original;
+    currentHandler = undefined;
   });
 }
+
+/**
+ * Stand-in for n8n's `httpRequestWithAuthentication`: applies the credential's
+ * bearer header, sends the request to the current handler as a fetch Request,
+ * and answers the way n8n's axios-based helper does - a JSON body parsed, any
+ * other body as text, and with `ignoreHttpStatusErrors` no throw on a failure status.
+ */
+export async function fakeHttpRequestWithAuthentication(credentialType: string, options: IHttpRequestOptions) {
+  assert.equal(credentialType, "teslemetryApi");
+  if (!currentHandler) throw new Error("no request handler is mocked");
+  const url = new URL(options.url, options.baseURL);
+  for (const [key, value] of Object.entries(options.qs ?? {})) url.searchParams.set(key, String(value));
+  const request = new Request(url, {
+    method: options.method ?? "GET",
+    headers: { ...(options.headers as Record<string, string>), Authorization: "Bearer token" },
+    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+  });
+  const response = await currentHandler(request);
+  const text = await response.text();
+  let body: unknown = text;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    // Not JSON: n8n hands over the text.
+  }
+  if (!options.ignoreHttpStatusErrors && !response.ok) throw new Error(`HTTP ${response.status}`);
+  return options.returnFullResponse ? { body, headers: {}, statusCode: response.status, statusMessage: response.statusText } : body;
+}
+
+/** The `helpers` a fake context carries. */
+export const fakeHelpers = {
+  httpRequestWithAuthentication: fakeHttpRequestWithAuthentication,
+  returnJsonArray: (data: unknown) => (Array.isArray(data) ? data : [data]).map((json) => ({ json })),
+};
 
 /** Captures the last request seen by withMockedFetch and always answers with `body`. */
 export function captureRequest(body: unknown = { response: {} }) {
@@ -102,7 +132,7 @@ export function assertApiFailure(error: unknown, expected: { message: string; ht
   assert.equal(nodeError.message, expected.message);
   assert.equal(nodeError.httpCode, expected.httpCode);
   assert.equal(nodeError.context?.itemIndex, itemIndex);
-  assert.ok(!JSON.stringify(nodeError).includes("token="), "the error must not carry the request URL");
+  assert.ok(!JSON.stringify(nodeError).includes("Bearer"), "the error must not carry the credential");
   return true;
 }
 
@@ -114,9 +144,8 @@ export function fakeExecuteContext(itemsParams: Array<Record<string, unknown>>, 
     getInputData: () => itemsParams.map(() => ({ json: {} })),
     getNodeParameter: (name: string, itemIndex: number, fallback?: unknown) =>
       name in itemsParams[itemIndex] ? itemsParams[itemIndex][name] : fallback,
-    getCredentials: async () => ({ accessToken: "token" }),
     continueOnFail: () => continueOnFail,
-    prepareOutputData: (data: unknown) => [data],
+    helpers: fakeHelpers,
   };
   return context as never;
 }
