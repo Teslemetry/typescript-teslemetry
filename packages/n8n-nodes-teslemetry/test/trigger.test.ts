@@ -1,268 +1,163 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TeslemetryTrigger } from "../src/nodes/TeslemetryTrigger.node.js";
-import { apiError, fakeLogger, fakeNode, withMockedFetch } from "./testHelpers.js";
+import { TeslemetryTrigger } from "../nodes/TeslemetryTrigger/TeslemetryTrigger.node.js";
+import { apiError, fakeHelpers, fakeNode, withMockedFetch } from "./testHelpers.js";
 
-const TOKEN = "secret-access-token";
+const VIN = "5YJSA1E14FF000000";
+const SITE_ID = 123;
 
-async function waitFor(condition: () => boolean, timeoutMs = 2000): Promise<void> {
-  const start = Date.now();
-  while (!condition()) {
-    if (Date.now() - start > timeoutMs) {
-      throw new Error("Timed out waiting for condition");
-    }
-    await new Promise((resolve) => setTimeout(resolve, 10));
-  }
-}
-
-function fakeTriggerContext(params: Record<string, unknown>, mode = "trigger") {
-  const emitted: unknown[] = [];
-  const emittedErrors: Error[] = [];
-  const { lines, logger } = fakeLogger();
+/** Minimal IPollFunctions stand-in; `staticData` persists across polls like n8n's node static data. */
+function fakePollContext(params: Record<string, unknown>, mode = "trigger", staticData: Record<string, unknown> = {}) {
   const context = {
-    getCredentials: async () => ({ accessToken: TOKEN }),
-    getNodeParameter: (name: string, fallback?: unknown) =>
-      name in params ? params[name] : fallback,
+    getNodeParameter: (name: string, fallback?: unknown) => (name in params ? params[name] : fallback),
     getNode: () => fakeNode,
     getMode: () => mode,
-    emit: (data: unknown) => emitted.push(data),
-    emitError: (error: Error) => emittedErrors.push(error),
-    logger,
-    helpers: {
-      returnJsonArray: (data: unknown) => data,
-    },
+    getWorkflowStaticData: () => staticData,
+    helpers: fakeHelpers,
   };
-  return { context: context as never, emitted, emittedErrors, lines };
+  return { context: context as never, staticData };
 }
 
-const ALL_VEHICLE_EVENTS = { resource: "vehicle", event: "all", vin: "" };
+function json(body: unknown) {
+  return new Response(JSON.stringify(body), { status: 200, headers: { "Content-Type": "application/json" } });
+}
 
-/** Answers trigger()'s token check and the stream separately, counting stream attempts. */
-function teslemetryServer(answers: { test?: () => Response; stream: () => Response }) {
-  const seen = { test: 0, stream: 0 };
+/** Answers each request with the next body and records the requests. */
+function server(...bodies: unknown[]) {
+  const requests: URL[] = [];
   const handler = (request: Request) => {
-    if (new URL(request.url).pathname === "/api/test") {
-      seen.test += 1;
-      return (
-        answers.test?.() ??
-        new Response(JSON.stringify({ response: true }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        })
-      );
-    }
-    seen.stream += 1;
-    return answers.stream();
+    requests.push(new URL(request.url));
+    return json(bodies[Math.min(requests.length, bodies.length) - 1]);
   };
-  return { handler, seen };
+  return { handler, requests };
 }
 
-const streamStatus = (status: number, statusText: string) => () => new Response(null, { status, statusText });
+const leaf = (value: unknown, createdAt = "2026-10-22T00:00:00Z") => ({ value, createdAt });
 
-for (const c of [
-  {
-    name: "a rejected token (401)",
-    response: () => apiError(401, "invalid_token", "Invalid authentication token"),
-    message: "Teslemetry rejected the access token: Invalid authentication token",
-    httpCode: "401",
-  },
-  {
-    name: "a lapsed subscription (402)",
-    response: () => apiError(402, "subscription_required", "Active subscription required"),
-    message: "Teslemetry requires an active subscription: Active subscription required",
-    httpCode: "402",
-  },
-  {
-    name: "the api's repeated-failure block (429)",
-    response: () => apiError(429, "rate_limited", "Rate limit exceeded, retry after 5 seconds"),
-    message:
-      "Teslemetry is limiting requests or stream connections for this account: Rate limit exceeded, retry after 5 seconds",
-    httpCode: "429",
-  },
-]) {
-  test(`TeslemetryTrigger fails activation on ${c.name} without opening the stream`, async () => {
-    const { context, emittedErrors } = fakeTriggerContext(ALL_VEHICLE_EVENTS);
-    const { handler, seen } = teslemetryServer({ test: c.response, stream: streamStatus(200, "OK") });
-    const node = new TeslemetryTrigger();
-
-    await assert.rejects(
-      () => withMockedFetch(handler, () => node.trigger.call(context)),
-      (error: Error & { httpCode?: string }) => {
-        assert.equal(error.message, c.message);
-        assert.equal(error.httpCode, c.httpCode);
-        assert.ok(!JSON.stringify(error).includes(TOKEN), "the error must not carry the token");
-        return true;
-      },
-    );
-    assert.equal(seen.stream, 0);
-    assert.equal(emittedErrors.length, 0);
-  });
+/** Polls once per body against one persisted static data, returning each poll's items. */
+async function pollEach(params: Record<string, unknown>, ...bodies: unknown[]) {
+  const { handler, requests } = server(...bodies);
+  const { context } = fakePollContext(params);
+  const node = new TeslemetryTrigger();
+  const results = [];
+  for (let i = 0; i < bodies.length; i++) {
+    const result = await withMockedFetch(handler, () => node.poll.call(context));
+    results.push(result ? result[0].map((item: { json: unknown }) => item.json) : null);
+  }
+  return { results, requests };
 }
 
-test("TeslemetryTrigger still connects when the token check fails for a reason that may clear", async () => {
-  const { context, lines } = fakeTriggerContext(ALL_VEHICLE_EVENTS);
-  const { handler, seen } = teslemetryServer({
-    test: () => new Response("Service Unavailable", { status: 503 }),
-    stream: streamStatus(500, "Server Error"),
+test("TeslemetryTrigger records a baseline on the first poll and then emits only changed fields", async () => {
+  const snapshot = (soc: number) => ({
+    response: { vin: VIN, state: leaf("online"), data: { BatteryLevel: leaf(soc), Locked: leaf(true) } },
   });
-  const node = new TeslemetryTrigger();
+  const { results, requests } = await pollEach({ resource: "vehicle", vin: VIN, event: "data" }, snapshot(80), snapshot(80), snapshot(81));
 
-  const result = await withMockedFetch(handler, async () => {
-    const response = await node.trigger.call(context);
-    await waitFor(() => seen.stream > 0);
-    return response;
-  });
-
-  assert.ok(lines.includes("warn: Teslemetry check before connecting failed: Service Unavailable"), lines.join("\n"));
-  await result.closeFunction!();
+  assert.equal(requests[0].pathname, `/api/1/vehicles/${VIN}/telemetry`);
+  assert.equal(requests[0].searchParams.get("topics"), "data");
+  assert.deepEqual(results, [null, null, [{ vin: VIN, topic: "data", data: { BatteryLevel: leaf(81) } }]]);
 });
 
-test("TeslemetryTrigger surfaces a terminal auth failure via emitError", async () => {
-  const { context, emittedErrors } = fakeTriggerContext(ALL_VEHICLE_EVENTS);
-  const { handler } = teslemetryServer({ stream: streamStatus(401, "Unauthorized") });
-  const node = new TeslemetryTrigger();
-
-  const result = await withMockedFetch(handler, async () => {
-    const response = await node.trigger.call(context);
-    await waitFor(() => emittedErrors.length > 0);
-    return response;
-  });
-
-  assert.equal(emittedErrors.length, 1);
-  assert.equal(emittedErrors[0].message, "Teslemetry rejected the access token (HTTP 401)");
-
-  // Idempotent cleanup: calling closeFunction twice must not throw.
-  await result.closeFunction!();
-  await result.closeFunction!();
-});
-
-test("TeslemetryTrigger reports a subscription that lapses on the stream once, not per retry", async () => {
-  const { context, emittedErrors } = fakeTriggerContext(ALL_VEHICLE_EVENTS);
-  const { handler, seen } = teslemetryServer({ stream: streamStatus(402, "Payment Required") });
-  const node = new TeslemetryTrigger();
-
-  const result = await withMockedFetch(handler, async () => {
-    const response = await node.trigger.call(context);
-    // The SDK retries after 2 s; wait for that second refusal.
-    await waitFor(() => seen.stream >= 2, 5000);
-    return response;
-  });
-
-  assert.equal(emittedErrors.length, 1);
-  assert.equal(emittedErrors[0].message, "Teslemetry requires an active subscription (HTTP 402)");
-  await result.closeFunction!();
-});
-
-test("TeslemetryTrigger logs the stream's connection cap (429) once and keeps an active workflow retrying", async () => {
-  const { context, emittedErrors, lines } = fakeTriggerContext(ALL_VEHICLE_EVENTS);
-  const { handler, seen } = teslemetryServer({ stream: streamStatus(429, "Too Many Requests") });
-  const node = new TeslemetryTrigger();
-
-  const result = await withMockedFetch(handler, async () => {
-    const response = await node.trigger.call(context);
-    await waitFor(() => seen.stream >= 2, 5000);
-    return response;
-  });
-
-  // emitError would make n8n reactivate the trigger straight back into the same 429.
-  assert.equal(emittedErrors.length, 0);
-  assert.deepEqual(
-    lines.filter((line) => line.includes("limiting")),
-    ["error: Teslemetry is limiting requests or stream connections for this account (HTTP 429). The stream keeps retrying."],
+test("TeslemetryTrigger Any Change reads the full snapshot and emits one item per changed topic", async () => {
+  const { results, requests } = await pollEach(
+    { resource: "vehicle", vin: VIN, event: "all" },
+    { response: { state: leaf("asleep"), data: { Locked: leaf(true) }, alerts: null } },
+    { response: { state: leaf("online"), data: { Locked: leaf(false) }, alerts: null } },
   );
-  await result.closeFunction!();
+
+  assert.equal(requests[0].search, "");
+  assert.deepEqual(results[1], [
+    { vin: VIN, topic: "data", data: { Locked: leaf(false) } },
+    { vin: VIN, topic: "state", state: leaf("online") },
+  ]);
 });
 
-test("TeslemetryTrigger fails a manual test run on the stream's connection cap (429) instead of waiting", async () => {
-  const { context, emittedErrors } = fakeTriggerContext(ALL_VEHICLE_EVENTS, "manual");
-  const { handler } = teslemetryServer({ stream: streamStatus(429, "Too Many Requests") });
-  const node = new TeslemetryTrigger();
-
-  const result = await withMockedFetch(handler, async () => {
-    const response = await node.trigger.call(context);
-    await waitFor(() => emittedErrors.length > 0);
-    return response;
-  });
-
-  assert.equal(
-    emittedErrors[0].message,
-    "Teslemetry is limiting requests or stream connections for this account (HTTP 429)",
+test("TeslemetryTrigger Signal reads one field and emits its value", async () => {
+  const { results, requests } = await pollEach(
+    { resource: "vehicle", vin: VIN, event: "signal", field: "BatteryLevel" },
+    { response: { data: { BatteryLevel: leaf(50, "t1") } } },
+    { response: { data: { BatteryLevel: leaf(51, "t2") } } },
   );
-  await result.closeFunction!();
+
+  assert.equal(requests[0].searchParams.get("fields"), "BatteryLevel");
+  assert.deepEqual(results[1], [{ vin: VIN, topic: "signal", field: "BatteryLevel", value: 51, createdAt: "t2" }]);
 });
 
-test("TeslemetryTrigger logs stream disconnects without surfacing them as trigger errors", async () => {
-  const { context, emittedErrors, lines } = fakeTriggerContext(ALL_VEHICLE_EVENTS);
-  const { handler } = teslemetryServer({ stream: streamStatus(500, "Server Error") });
+test("TeslemetryTrigger Signal requires a VIN and a field", async () => {
+  const node = new TeslemetryTrigger();
+  await assert.rejects(
+    () => node.poll.call(fakePollContext({ resource: "vehicle", vin: "", event: "signal", field: "Soc" }).context),
+    /Choose the vehicle to watch/,
+  );
+  await assert.rejects(
+    () => node.poll.call(fakePollContext({ resource: "vehicle", vin: VIN, event: "signal" }).context),
+    /Choose the field to watch/,
+  );
+});
+
+test("TeslemetryTrigger starts a new baseline when the watched vehicle changes", async () => {
+  const { handler } = server({ response: { data: { Locked: leaf(true) } } }, { response: { data: { Locked: leaf(false) } } });
+  const staticData = {};
   const node = new TeslemetryTrigger();
 
-  const result = await withMockedFetch(handler, async () => {
-    const response = await node.trigger.call(context);
-    await waitFor(() => lines.some((line) => line.includes("disconnected")));
-    return response;
-  });
+  await withMockedFetch(handler, () =>
+    node.poll.call(fakePollContext({ resource: "vehicle", vin: VIN, event: "data" }, "trigger", staticData).context),
+  );
+  const result = await withMockedFetch(handler, () =>
+    node.poll.call(fakePollContext({ resource: "vehicle", vin: "OTHERVIN", event: "data" }, "trigger", staticData).context),
+  );
 
-  assert.equal(emittedErrors.length, 0);
-  await result.closeFunction!();
+  assert.equal(result, null);
 });
 
-test("TeslemetryTrigger sends the SDK's log lines to n8n's logger, never the console, and never with the token", async () => {
-  const { context, lines } = fakeTriggerContext(ALL_VEHICLE_EVENTS);
-  const { handler } = teslemetryServer({ stream: streamStatus(500, "Server Error") });
-  const node = new TeslemetryTrigger();
+test("TeslemetryTrigger shows the current values on a manual run without moving the baseline", async () => {
+  const { handler } = server({ response: { state: leaf("online") } });
+  const { context, staticData } = fakePollContext({ resource: "vehicle", vin: VIN, event: "state" }, "manual");
 
-  const consoleCalls: unknown[][] = [];
-  const original = { debug: console.debug, info: console.info, warn: console.warn, error: console.error };
-  for (const level of ["debug", "info", "warn", "error"] as const) {
-    console[level] = (...args: unknown[]) => void consoleCalls.push(args);
-  }
-  try {
-    const result = await withMockedFetch(handler, async () => {
-      const response = await node.trigger.call(context);
-      await waitFor(() => lines.some((line) => line.includes("SSE error")));
-      return response;
-    });
-    await result.closeFunction!();
-  } finally {
-    Object.assign(console, original);
-  }
+  const result = await withMockedFetch(handler, () => new TeslemetryTrigger().poll.call(context));
 
-  assert.deepEqual(consoleCalls, []);
-  assert.ok(lines.includes("debug: Response from /api/test: 200"), lines.join("\n"));
-  // A rejected attempt never announces a connection: the SDK logs it only on
-  // the stream's first chunk.
-  assert.ok(!lines.includes("debug: Connected to stream"), lines.join("\n"));
-  assert.ok(lines.includes("error: SSE error: Error: SSE failed: 500 Server Error"), lines.join("\n"));
-  assert.ok(!lines.some((line) => line.includes(TOKEN) || line.includes("token=")), lines.join("\n"));
+  assert.deepEqual(result?.[0].map((item: { json: unknown }) => item.json), [{ vin: VIN, topic: "state", state: leaf("online") }]);
+  assert.deepEqual(staticData, {});
 });
 
-test("TeslemetryTrigger.closeFunction tears down listeners and stops the stream", async () => {
-  const { context, emitted } = fakeTriggerContext(ALL_VEHICLE_EVENTS);
-  // One event, then the stream stays open as the real one does.
-  const { handler } = teslemetryServer({
-    stream: () =>
-      new Response(
-        new ReadableStream({
-          start(controller) {
-            const event = { vin: "5YJSA1E14FF000000", state: "online" };
-            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`));
-          },
-        }),
-        { status: 200, headers: { "Content-Type": "text/event-stream" } },
+test("TeslemetryTrigger energy Live Status emits the site's status when it changes", async () => {
+  const { results, requests } = await pollEach(
+    { resource: "energySite", siteId: SITE_ID, event: "live_status" },
+    { response: { solar_power: 100, timestamp: "t1" } },
+    { response: { solar_power: 200, timestamp: "t2" } },
+  );
+
+  assert.equal(requests[0].pathname, `/api/1/energy_sites/${SITE_ID}/live_status`);
+  assert.deepEqual(results[1], [{ site_id: SITE_ID, solar_power: 200, timestamp: "t2" }]);
+});
+
+test("TeslemetryTrigger energy Tariff Content reports a removed tariff (null) as a change", async () => {
+  const { results, requests } = await pollEach(
+    { resource: "energySite", siteId: SITE_ID, event: "tariff_content_v2" },
+    { response: { tariff_content_v2: { name: "TOU" } } },
+    { response: { tariff_content_v2: null } },
+    { response: {} },
+  );
+
+  assert.equal(requests[0].pathname, `/api/1/energy_sites/${SITE_ID}/site_info`);
+  assert.deepEqual(results.slice(1), [[{ site_id: SITE_ID, tariff_content_v2: null }], null]);
+});
+
+test("TeslemetryTrigger fails the poll with the api's text and no credential", async () => {
+  const { context } = fakePollContext({ resource: "vehicle", vin: VIN, event: "all" });
+
+  await assert.rejects(
+    () =>
+      withMockedFetch(
+        () => apiError(402, "subscription_required", "Active subscription required"),
+        () => new TeslemetryTrigger().poll.call(context),
       ),
-  });
-  const node = new TeslemetryTrigger();
-
-  const result = await withMockedFetch(handler, async () => {
-    const response = await node.trigger.call(context);
-    await waitFor(() => emitted.length > 0);
-    return response;
-  });
-
-  await result.closeFunction!();
-  const countAfterClose = emitted.length;
-
-  // A second close is a no-op, not a re-teardown attempt.
-  await result.closeFunction!();
-  assert.equal(emitted.length, countAfterClose);
+    (error: Error & { httpCode?: string }) => {
+      assert.equal(error.name, "NodeApiError");
+      assert.equal(error.message, "Active subscription required");
+      assert.equal(error.httpCode, "402");
+      assert.ok(!JSON.stringify(error).includes("Bearer"));
+      return true;
+    },
+  );
 });
