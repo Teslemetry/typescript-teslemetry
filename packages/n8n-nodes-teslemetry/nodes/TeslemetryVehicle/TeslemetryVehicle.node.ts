@@ -786,11 +786,12 @@ export class TeslemetryVehicle implements INodeType {
 				},
 			},
 			{
-				displayName: 'Charging Time (HH:Mm)',
+				displayName: 'Charging Time',
 				name: 'schedule_time',
 				type: 'string',
 				default: '00:00',
-				description: 'Time of day charging should start, in the vehicle\'s local time',
+				placeholder: 'HH:mm',
+				description: 'Time of day charging should start (24-hour HH:mm), in the vehicle\'s local time',
 				displayOptions: {
 					show: {
 						operation: ['setScheduledCharging'],
