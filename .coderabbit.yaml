@@ -3,3 +3,5 @@ reviews:
   high_level_summary: false
   auto_review:
     enabled: true
+    ignore_title_keywords:
+      - "chore: version packages"
