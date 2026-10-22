@@ -71,9 +71,6 @@ importers:
       '@n8n/node-cli':
         specifier: ^0.51.5
         version: 0.51.5(43e2d15aac755b04e49b4abf94855da0)
-      '@teslemetry/api':
-        specifier: workspace:*
-        version: link:../api
       eslint:
         specifier: 9.29.0
         version: 9.29.0(jiti@2.6.1)

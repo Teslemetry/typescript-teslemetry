@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TeslemetryEnergy } from "../src/nodes/TeslemetryEnergy.node.js";
+import { TeslemetryEnergy } from "../nodes/TeslemetryEnergy/TeslemetryEnergy.node.js";
 import {
   API_FAILURES,
   assertApiFailure,

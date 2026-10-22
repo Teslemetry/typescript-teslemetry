@@ -7,7 +7,7 @@
   },
   "scripts": {
     "test": "tsx --test test/*.test.ts",
-    "build": "tsdown && cp src/nodes/*.svg dist/nodes/",
+    "build": "tsdown && for dir in nodes/*/ credentials/; do cp \"$dir\"*.svg \"dist/$dir\"; done",
     "verify:package": "tsx scripts/verify-package.ts",
     "dev2": "pnpm build && mkdir -p .n8n-home/nodes && ln -sf $(pwd) .n8n-home/nodes/teslemetry && N8N_LOG_OUTPUT=console N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true N8N_USER_FOLDER=$(pwd)/.n8n-home ./node_modules/.bin/n8n start",
     "tsc": "tsc",
@@ -50,9 +50,9 @@
       "dist/credentials/TeslemetryApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/TeslemetryVehicle.node.js",
-      "dist/nodes/TeslemetryEnergy.node.js",
-      "dist/nodes/TeslemetryTrigger.node.js"
+      "dist/nodes/TeslemetryVehicle/TeslemetryVehicle.node.js",
+      "dist/nodes/TeslemetryEnergy/TeslemetryEnergy.node.js",
+      "dist/nodes/TeslemetryTrigger/TeslemetryTrigger.node.js"
     ]
   },
   "peerDependencies": {
@@ -60,7 +60,6 @@
   },
   "devDependencies": {
     "@n8n/node-cli": "^0.51.5",
-    "@teslemetry/api": "workspace:*",
     "eslint": "9.29.0",
     "n8n": "^1.122.5",
     "n8n-workflow": "^1.119.1",

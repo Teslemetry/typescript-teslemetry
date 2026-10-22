@@ -39,7 +39,7 @@ jobs:
         run: pnpm test
 
       - name: Verify the n8n package loads from its packed tarball
-        # The tests import the node classes from src/. n8n instead reads only
+        # The tests import the node classes from nodes/. n8n instead reads only
         # the files the manifest lists and takes each class name from its file
         # name, so this packs the tarball and loads it with n8n's own
         # PackageDirectoryLoader, failing unless 3 nodes and 1 credential load.

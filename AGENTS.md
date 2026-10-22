@@ -1,6 +1,6 @@
 # Teslemetry TypeScript Monorepo
 
-pnpm workspaces + changesets. `packages/api` is the `@teslemetry/api` SDK; the other packages depend on it via `workspace:*`. The ioBroker adapter lives in its own repo, [Teslemetry/ioBroker.teslemetry](https://github.com/Teslemetry/ioBroker.teslemetry).
+pnpm workspaces + changesets. `packages/api` is the `@teslemetry/api` SDK; the other packages except `n8n-nodes-teslemetry` depend on it via `workspace:*`. The ioBroker adapter lives in its own repo, [Teslemetry/ioBroker.teslemetry](https://github.com/Teslemetry/ioBroker.teslemetry).
 
 ## Development
 
