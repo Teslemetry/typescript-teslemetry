@@ -1,0 +1,59 @@
+{
+  "name": "@teslemetry/pro",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API client for Teslemetry for Business (teslemetry.pro)",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "api": "pnpm build && node examples/api.ts",
+    "sse": "pnpm build && node examples/sse.ts",
+    "client": "openapi-ts --file openapi-ts.config.ts",
+    "verify:client": "tsx scripts/verify-public-client.ts",
+    "build": "tsdown --format cjs,esm",
+    "test": "tsx --test test/*.test.ts",
+    "tsc": "tsc --noEmit",
+    "release": "pnpm version patch"
+  },
+  "keywords": [
+    "tesla",
+    "teslemetry"
+  ],
+  "type": "module",
+  "author": {
+    "name": "Teslemetry",
+    "email": "hello@teslemetry.com",
+    "url": "https://teslemetry.com"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Teslemetry/typescript-teslemetry"
+  },
+  "bugs": "https://github.com/Teslemetry/typescript-teslemetry/issues/new?template=api_bug.yml",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.0.0-next-20260728215008",
+    "dotenv": "^17.2.3",
+    "tesla-fleet-api": "^0.3.0",
+    "tsdown": "^0.22.4",
+    "tsx": "^4.20.6"
+  }
+}

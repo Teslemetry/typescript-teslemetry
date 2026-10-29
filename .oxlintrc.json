@@ -8,10 +8,10 @@
   "env": {
     "builtin": true
   },
-  "ignorePatterns": ["packages/api/src/client/**"],
+  "ignorePatterns": ["packages/api/src/client/**", "packages/pro/src/client/**"],
   "overrides": [
     {
-      "files": ["packages/api/src/**/*.ts"],
+      "files": ["packages/api/src/**/*.ts", "packages/pro/src/**/*.ts"],
       "rules": {
         "typescript/no-unsafe-declaration-merging": "off"
       }

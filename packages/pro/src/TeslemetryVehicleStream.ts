@@ -1,0 +1,278 @@
+import { EventEmitter } from "events";
+import { Teslemetry } from "./Teslemetry.js";
+import {
+  getApiConfigByVin,
+  patchApiConfigByVin,
+  postApiConfigByVin,
+} from "./client/index.js";
+import type {
+  FieldsRequest,
+  FieldsResponse,
+  SseConfig,
+  SseData,
+  SseState,
+  SseErrors,
+  SseAlerts,
+  SseConnectivity,
+  SseVehicleData,
+  Signals,
+} from "./const.js";
+import { Logger } from "./logger.js";
+import { VehicleCache } from "./TeslemetryStream.js";
+
+/** Simple deferred promise pattern */
+class Deferred<T> {
+  public promise: Promise<T>;
+  public resolve!: (value: T) => void;
+  public reject!: (error: Error) => void;
+
+  constructor() {
+    this.promise = new Promise<T>((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+  }
+}
+
+type TeslemetryStreamEventMap = {
+  state: SseState;
+  data: SseData;
+  errors: SseErrors;
+  alerts: SseAlerts;
+  connectivity: SseConnectivity;
+  vehicle_data: SseVehicleData;
+  config: SseConfig;
+};
+
+// Base event emitter types
+export declare interface TeslemetryVehicleStream {
+  on<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this;
+
+  once<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this;
+
+  off<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this;
+
+  emit<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    data: TeslemetryStreamEventMap[K],
+  ): boolean;
+}
+
+// Data signal event emmiter types
+export declare interface TeslemetryVehicleStreamData extends EventEmitter {
+  on<T extends Signals>(
+    event: T,
+    listener: (event: Exclude<SseData["data"][T], undefined>) => void,
+  ): this;
+  once<T extends Signals>(
+    event: T,
+    listener: (event: Exclude<SseData["data"][T], undefined>) => void,
+  ): this;
+  off<T extends Signals>(
+    event: T,
+    listener: (event: Exclude<SseData["data"][T], undefined>) => void,
+  ): this;
+  emit<T extends Signals>(
+    event: T,
+    data: Exclude<SseData["data"][T], undefined>,
+  ): boolean;
+}
+
+export class TeslemetryVehicleStream extends EventEmitter {
+  private root: Teslemetry;
+  public vin: string;
+  public fields: FieldsRequest = {}; // Allow updates from both requests, and responses
+  private _fieldUpdateBatch: {
+    fields: FieldsRequest;
+    deferred: Deferred<boolean>;
+    timeout: NodeJS.Timeout;
+  } | null = null;
+  public logger: Logger;
+  public data: TeslemetryVehicleStreamData;
+
+  constructor(root: Teslemetry, vin: string) {
+    if (root.sse.vehicles.has(vin)) {
+      throw new Error("Vehicle already exists");
+    }
+    super();
+    this.root = root;
+    this.vin = vin;
+    this.logger = root.sse.logger;
+    this.data = new EventEmitter();
+
+    root.sse.vehicles.set(vin, this);
+
+    // Keep field config up to date
+    this.on("config", (event) => {
+      this.fields = event.config.fields;
+    });
+  }
+
+  get cache(): VehicleCache {
+    return this.root.sse.cache[this.vin] ?? {};
+  }
+
+  public on<K extends keyof TeslemetryStreamEventMap>(
+    event: K,
+    listener: (data: TeslemetryStreamEventMap[K]) => void,
+  ): this {
+    // Register before replaying: see the matching comment in
+    // TeslemetryStream.on() - once() wraps the listener in a self-removing
+    // shim that must already be registered for its self-removal to work,
+    // or it becomes a permanently inert leftover listener.
+    super.on(event, listener);
+    this.root.sse.sendVehicleCache(this.vin, event, listener);
+    return this;
+  }
+
+  /** Get the current configuration for the vehicle */
+  public async getConfig(): Promise<void> {
+    const { data, response } = await getApiConfigByVin({
+      path: { vin: this.vin },
+    });
+
+    if (response.status === 200 && data) {
+      this.fields = (data.fields as FieldsResponse) || {};
+    } else if (response.status === 404) {
+      this.logger.warn(`Config for VIN ${this.vin} not found (404).`);
+      return;
+    } else {
+      throw new Error(`Failed to get config: ${response.statusText}`);
+    }
+  }
+
+  /** Safely add field configuration to the vehicle
+   * Returns a promise that resolves when the debounced update completes.
+   * Multiple calls within the debounce window share the same promise.
+   */
+  public updateFields(fields: FieldsRequest): Promise<boolean> {
+    if (!this._fieldUpdateBatch) {
+      this._fieldUpdateBatch = {
+        fields: {},
+        deferred: new Deferred<boolean>(),
+        timeout: null!,
+      };
+    }
+
+    this._fieldUpdateBatch.fields = {
+      ...this._fieldUpdateBatch.fields,
+      ...fields,
+    };
+
+    clearTimeout(this._fieldUpdateBatch.timeout);
+    this._fieldUpdateBatch.timeout = setTimeout(
+      () => this._flushFieldUpdate(),
+      1000,
+    );
+
+    return this._fieldUpdateBatch.deferred.promise;
+  }
+
+  /** Flush pending field updates to the API */
+  private async _flushFieldUpdate(): Promise<void> {
+    const batch = this._fieldUpdateBatch!;
+    this._fieldUpdateBatch = null;
+
+    try {
+      const data = await this.patchConfig(batch.fields);
+      if (data?.updated_vehicles === undefined) {
+        throw new Error(`Error updating streaming config for ${this.vin}`);
+      }
+      this.fields = { ...this.fields, ...batch.fields };
+      if (data.updated_vehicles === 0) {
+        this.logger.debug(`No update required for ${this.vin}`);
+        batch.deferred.resolve(false);
+      } else {
+        this.logger.info(
+          `Updated ${Object.keys(batch.fields).length} streaming fields for ${this.vin}`,
+        );
+        batch.deferred.resolve(true);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to update streaming config for ${this.vin}:`,
+        error,
+      );
+      batch.deferred.reject(error as Error);
+    }
+  }
+
+  /** Modify the field configuration of the vehicle */
+  public async patchConfig(fields: FieldsRequest) {
+    const { data } = await patchApiConfigByVin({
+      client: this.root.client,
+      path: { vin: this.vin },
+      body: { fields },
+    });
+    return data;
+  }
+
+  /** Replace the field configuration of the vehicle */
+  public async postConfig(fields: FieldsRequest): Promise<any> {
+    const { data } = await postApiConfigByVin({
+      client: this.root.client,
+      path: { vin: this.vin },
+      body: { fields },
+    });
+    return data;
+  }
+
+  /**
+   * Add a field to the vehicles streaming configuration
+   * @param field Vehicle Signal
+   * @param interval
+   * @returns Promise that resolves to whether the field configuration changed
+   */
+  public addField(field: Signals, interval?: number): Promise<boolean> {
+    if (
+      this.fields &&
+      this.fields[field] &&
+      (interval === undefined ||
+        this.fields[field]!.interval_seconds === interval)
+    ) {
+      this.logger.debug(
+        `Streaming field ${field} already enabled @ ${this.fields[field]?.interval_seconds || "default"}s`,
+      );
+      return Promise.resolve(false);
+    }
+
+    const value =
+      interval !== undefined ? { interval_seconds: interval } : null;
+    return this.updateFields({ [field]: value } as FieldsRequest);
+  }
+
+  /**
+   * Helper to enable and listen for specific field signals
+   * @param field Vehicle field to listen for
+   * @param callback Callback function to handle signals
+   * @returns Off function to stop the listener
+   */
+  public onSignal<T extends Signals>(
+    field: T,
+    callback: (value: Exclude<SseData["data"][T], undefined>) => void,
+  ): () => void {
+    this.addField(field).catch(() => {
+      this.logger.error(`Failed to add field ${field}`);
+    });
+    const data = this.root.sse.cache?.[this.vin]?.data?.[field];
+    if (data !== undefined) {
+      callback(data as Exclude<SseData["data"][T], undefined>);
+    }
+    this.data.on(field, callback);
+    return () => this.data.off(field, callback);
+  }
+
+  public stop(): void {
+    this.removeAllListeners();
+    this.data.removeAllListeners();
+  }
+}
