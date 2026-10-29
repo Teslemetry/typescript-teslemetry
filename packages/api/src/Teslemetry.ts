@@ -160,7 +160,7 @@ export class Teslemetry {
    * @returns TeslemetryVehicleApi instance
    */
   public vehicle(vin: string): TeslemetryVehicleApi {
-    return new TeslemetryVehicleApi(this, vin);
+    return this.api.getVehicle(vin);
   }
 
   /**
@@ -169,7 +169,7 @@ export class Teslemetry {
    * @returns TeslemetryEnergyApi instance
    */
   public energySite(siteId: number): TeslemetryEnergyApi {
-    return new TeslemetryEnergyApi(this, siteId);
+    return this.api.getEnergySite(siteId);
   }
 }
 

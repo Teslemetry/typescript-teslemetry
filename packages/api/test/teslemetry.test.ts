@@ -120,3 +120,25 @@ test("getConfig uses the root client and logs a 404 instead of throwing", async 
   assert.deepEqual(requested, ["https://eu.teslemetry.com"]);
   assert.deepEqual(warnings, ["Config for VIN 5YJ3E1EA1KF000000 not found (404)."]);
 });
+
+test("vehicle() and energySite() return the already registered instance", () => {
+  const teslemetry = new Teslemetry("fake-access-token");
+  const registeredVehicle = teslemetry.getVehicle("5YJ3E1EA1KF000000").api;
+  const registeredSite = teslemetry.getEnergySite(12345).api;
+
+  assert.equal(teslemetry.vehicle("5YJ3E1EA1KF000000"), registeredVehicle);
+  assert.equal(teslemetry.energySite(12345), registeredSite);
+  // Repeated calls must not throw "already exists" either.
+  assert.equal(teslemetry.vehicle("5YJ3E1EA1KF000000"), registeredVehicle);
+  assert.equal(teslemetry.energySite(12345), registeredSite);
+});
+
+test("vehicle() and energySite() create the product when it is not registered yet", () => {
+  const teslemetry = new Teslemetry("fake-access-token");
+
+  assert.equal(
+    teslemetry.vehicle("5YJ3E1EA1KF000001"),
+    teslemetry.getVehicle("5YJ3E1EA1KF000001").api,
+  );
+  assert.equal(teslemetry.energySite(678), teslemetry.getEnergySite(678).api);
+});

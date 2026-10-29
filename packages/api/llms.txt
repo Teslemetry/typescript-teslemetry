@@ -27,9 +27,9 @@ Handles REST API calls for a specific vehicle.
   - `state()`: Get vehicle state.
   - `vehicleData()`: Get comprehensive vehicle data.
   - `flashLights()`, `honkHorn()`: Basic commands.
-  - `doorLock()`, `doorUnlock()`: Security commands.
-  - `autoConditioningStart()`, `autoConditioningStop()`: Climate control.
-  - `chargeStart()`, `chargeStop()`: Charging control.
+  - `lockDoors()`, `unlockDoors()`: Security commands.
+  - `startAutoConditioning()`, `stopAutoConditioning()`: Climate control.
+  - `startCharging()`, `stopCharging()`: Charging control.
 
 ### `TeslemetryStream` & `TeslemetryVehicleStream`
 Handles Server-Sent Events (SSE) for real-time data.
@@ -37,7 +37,7 @@ Handles Server-Sent Events (SSE) for real-time data.
 - **Key Methods:**
   - `connect()`: Start the SSE connection.
   - `disconnect()`: Close the connection.
-  - `onSignal(signalName: string, callback)`: Subscribe to specific vehicle signals (e.g., "Speed", "PackCurrent").
+  - `onSignal(signalName: string, callback)`: Subscribe to specific vehicle signals (e.g., "VehicleSpeed", "PackCurrent").
   - `on("connect", callback)` / `on("disconnect", callback)`: Monitor connection state.
 
 ## Code Examples
@@ -49,9 +49,9 @@ import { Teslemetry } from "@teslemetry/api";
 const api = new Teslemetry(process.env.TOKEN);
 const vehicle = api.getVehicle("VIN123");
 
-// Get state
-const state = await vehicle.api.state();
-if (state.charge_state.charging_state === "Charging") {
+// Get full vehicle data (state() has no charge_state)
+const data = await vehicle.api.vehicleData();
+if (data.response.charge_state.charging_state === "Charging") {
   console.log("Vehicle is charging");
 }
 ```
@@ -62,7 +62,7 @@ const api = new Teslemetry(process.env.TOKEN);
 const vehicle = api.getVehicle("VIN123");
 
 // Listen for speed updates
-vehicle.sse.onSignal("Speed", (speed) => {
+vehicle.sse.onSignal("VehicleSpeed", (speed) => {
   console.log(`Speed: ${speed}`);
 });
 
