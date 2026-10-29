@@ -180,9 +180,6 @@ export class TeslemetryStream extends EventEmitter {
     if (options?.topics?.length) {
       this.topicsParam = expandSseTopics(options.topics).join(",");
     }
-    if (this.vin) {
-      this.getVehicle(this.vin);
-    }
     if (this.localCache) {
       this.startLocalCache();
     }

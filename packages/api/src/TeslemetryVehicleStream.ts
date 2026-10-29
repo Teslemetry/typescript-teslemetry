@@ -136,17 +136,20 @@ export class TeslemetryVehicleStream extends EventEmitter {
 
   /** Get the current configuration for the vehicle */
   public async getConfig(): Promise<void> {
+    // throwOnError: false, so a 404 reaches the branch below instead of throwing.
     const { data, response } = await getApiConfigByVin({
+      client: this.root.client,
       path: { vin: this.vin },
+      throwOnError: false,
     });
 
-    if (response.status === 200 && data) {
+    if (response?.status === 200 && data) {
       this.fields = (data.fields as FieldsResponse) || {};
-    } else if (response.status === 404) {
+    } else if (response?.status === 404) {
       this.logger.warn(`Config for VIN ${this.vin} not found (404).`);
       return;
     } else {
-      throw new Error(`Failed to get config: ${response.statusText}`);
+      throw new Error(`Failed to get config: ${response?.statusText}`);
     }
   }
 

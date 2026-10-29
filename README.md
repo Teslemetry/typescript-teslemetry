@@ -8,6 +8,10 @@ This repository contains the official TypeScript/JavaScript tools and libraries 
 
 The core TypeScript/JavaScript client library for the Teslemetry API. Provides full control over vehicles, energy sites, and real-time streaming (SSE).
 
+### [@teslemetry/pro](./packages/pro/README.md)
+
+The same client for the Teslemetry for Business API (`api.teslemetry.pro`), generated from its own OpenAPI schema. Not published to npm yet.
+
 ## Coming Soon
 
 - **Node-RED Integration**: Custom nodes for Node-RED flows (Work in Progress).
