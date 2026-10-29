@@ -39,7 +39,7 @@ console.log("Vehicle State:", state);
 await vehicle.api.flashLights();
 
 // 3. Stream Real-time Data
-vehicle.sse.onSignal("Speed", (speed) => {
+vehicle.sse.onSignal("VehicleSpeed", (speed) => {
   console.log(`Current Speed: ${speed} mph`);
 });
 
@@ -79,11 +79,11 @@ const vehicle = teslemetry.getVehicle("VIN...");
 const data = await vehicle.api.vehicleData();
 
 // Climate Control
-await vehicle.api.autoConditioningStart();
+await vehicle.api.startAutoConditioning();
 await vehicle.api.setTemps(20, 20); // Driver, Passenger (Celsius)
 
 // Charging
-await vehicle.api.chargeStart();
+await vehicle.api.startCharging();
 await vehicle.api.setChargeLimit(80);
 
 // Locking
@@ -148,7 +148,7 @@ need - either exact wire topic names or the bundled presets from
 before the connection opens:
 
 ```typescript
-const teslemetry = new Teslemetry(getToken, {
+const teslemetry = new Teslemetry(process.env.TOKEN, {
   stream: { topics: ["energyLive", "credits"] },
 });
 ```
@@ -233,7 +233,7 @@ for (const vin in products.vehicles) {
 // Access discovered energy sites
 for (const siteId in products.energySites) {
   const site = products.energySites[siteId];
-  console.log(`Found Site: ${site.name} (${site.site})`);
+  console.log(`Found Site: ${site.name} (${site.id})`);
 }
 ```
 

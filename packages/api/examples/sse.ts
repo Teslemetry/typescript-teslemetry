@@ -1,4 +1,4 @@
-// examples/simple.ts
+// examples/sse.ts
 
 import { config } from "dotenv";
 import { Teslemetry } from "@teslemetry/api"; // Adjust path if needed
