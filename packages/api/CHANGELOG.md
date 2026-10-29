@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.13.3
+
+### Patch Changes
+
+- e5f82a7: Fix `Teslemetry.vehicle(vin)` and `Teslemetry.energySite(id)` throwing "already exists" when the product was already registered, and correct method names, signal names and examples in the README, `llms.txt` and example headers.
+
 ## 0.13.2
 
 ### Patch Changes
