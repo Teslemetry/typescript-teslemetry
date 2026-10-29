@@ -11,12 +11,12 @@ This file provides context for Large Language Models (LLMs) to understand and ge
 
 ### `Teslemetry`
 The main entry point.
-- **Constructor:** `new Teslemetry(accessToken: string, region?: "na" | "eu")`
+- **Constructor:** `new Teslemetry(accessToken: string | (() => Promise<string>), options?: { region?: "na" | "eu"; logger?: Logger; stream?: TeslemetryStreamOptions; throwOnError?: boolean })`
 - **Methods:**
   - `getVehicle(vin: string)`: Returns `{ api: TeslemetryVehicleApi, sse: TeslemetryVehicleStream }`.
   - `vehicle(vin: string)`: Returns `TeslemetryVehicleApi`.
   - `energySite(siteId: number)`: Returns `TeslemetryEnergyApi`.
-  - `getRegion()`: Promis to resolve "na" or "eu".
+  - `getRegion()`: Promise that resolves to "na", "eu", or `null` when the server sends no recognized region.
 
 ### `TeslemetryVehicleApi`
 Handles REST API calls for a specific vehicle.

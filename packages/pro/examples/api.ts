@@ -9,7 +9,7 @@ const { TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN } = config().parsed as Record<
   string
 >;
 
-console.log({ TESLEMETRY_ACCESS_TOKEN, TESLEMETRY_VIN });
+console.log({ TESLEMETRY_VIN });
 
 async function main() {
   const teslemetry = new Teslemetry(TESLEMETRY_ACCESS_TOKEN, {

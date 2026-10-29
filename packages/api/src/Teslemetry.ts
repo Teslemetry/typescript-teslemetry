@@ -54,7 +54,7 @@ export class Teslemetry {
       const path = response.url ? new URL(response.url).pathname : response.url;
       this.logger.debug(`Response from ${path}: ${response.status}`);
       if (!this.region) {
-        const userRegion = response.headers.get("x-region") as "na" | "eu";
+        const userRegion = parseRegion(response.headers.get("x-region"));
         if (userRegion) {
           this.logger.debug(
             `Changing region from ${this.region || "null"} to ${userRegion}`,
@@ -69,6 +69,9 @@ export class Teslemetry {
     });
 
     this.sse = new TeslemetryStream(this, options?.stream);
+    // TeslemetryVehicleStream reads root.sse, so the vin's stream can only be
+    // created once this.sse is assigned.
+    if (options?.stream?.vin) this.sse.getVehicle(options.stream.vin);
     this.api = new TeslemetryApi(this);
     this.user = new TeslemetryUserApi(this);
     this.charging = new TeslemetryChargingApi(this);
@@ -100,12 +103,13 @@ export class Teslemetry {
 
   /**
    * Ensure the users region has been set
-   * @returns Promise that resolves to the region ("na" or "eu")
+   * @returns Promise that resolves to the region ("na" or "eu"), or `null`
+   * when the server sends no recognized `x-region` header
    */
-  public async getRegion(): Promise<"na" | "eu"> {
+  public async getRegion(): Promise<"na" | "eu" | null> {
     if (this.region) return this.region;
     const { response } = await getApiTest({ client: this.client });
-    return response.headers.get("x-region") as "na" | "eu";
+    return parseRegion(response?.headers.get("x-region"));
   }
 
   /**
@@ -168,5 +172,8 @@ export class Teslemetry {
     return new TeslemetryEnergyApi(this, siteId);
   }
 }
+
+const parseRegion = (value: string | null | undefined): "na" | "eu" | null =>
+  value === "na" || value === "eu" ? value : null;
 
 export const useTeslaModel = (vin: string) => Models[vin[3]] ?? "Unknown";

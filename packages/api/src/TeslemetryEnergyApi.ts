@@ -618,44 +618,44 @@ export class TeslemetryEnergyApi extends EventEmitter {
       switch (endpoint) {
         case "siteInfo": {
           const intervalHandle = setInterval(() => {
-            this.getSiteInfo().catch(this.root.logger.warn);
+            this.getSiteInfo().catch((error) => this.root.logger.warn(error));
           }, this.refreshDelay);
           this.refreshIntervals[endpoint] = () => clearInterval(intervalHandle);
-          this.getSiteInfo().catch(this.root.logger.warn);
+          this.getSiteInfo().catch((error) => this.root.logger.warn(error));
           break;
         }
         case "liveStatus": {
           const intervalHandle = setInterval(() => {
-            this.getLiveStatus().catch(this.root.logger.warn);
+            this.getLiveStatus().catch((error) => this.root.logger.warn(error));
           }, this.refreshDelay);
           this.refreshIntervals[endpoint] = () => clearInterval(intervalHandle);
-          this.getLiveStatus().catch(this.root.logger.warn);
+          this.getLiveStatus().catch((error) => this.root.logger.warn(error));
           break;
         }
         case "backupHistory":
           // Schedule 30 seconds after each 5-minute mark aligned to clock time
           this.refreshIntervals[endpoint] = scheduler(
-            () => this.refreshBackupHistory().catch(this.root.logger.warn),
+            () => this.refreshBackupHistory().catch((error) => this.root.logger.warn(error)),
             300_000,
             20_000 + Math.round(10_000 * Math.random()),
           );
-          this.refreshBackupHistory().catch(this.root.logger.warn);
+          this.refreshBackupHistory().catch((error) => this.root.logger.warn(error));
           break;
         case "energyHistory":
           // Schedule 30 seconds after each 5-minute mark aligned to clock time
           this.refreshIntervals[endpoint] = scheduler(
-            () => this.refreshEnergyHistory().catch(this.root.logger.warn),
+            () => this.refreshEnergyHistory().catch((error) => this.root.logger.warn(error)),
             300_000,
             20_000 + Math.round(10_000 * Math.random()),
           );
-          this.refreshEnergyHistory().catch(this.root.logger.warn);
+          this.refreshEnergyHistory().catch((error) => this.root.logger.warn(error));
           break;
         case "chargeHistory": {
           const intervalHandle = setInterval(() => {
-            this.refreshChargeHistory().catch(this.root.logger.warn);
+            this.refreshChargeHistory().catch((error) => this.root.logger.warn(error));
           }, this.refreshDelay);
           this.refreshIntervals[endpoint] = () => clearInterval(intervalHandle);
-          this.refreshChargeHistory().catch(this.root.logger.warn);
+          this.refreshChargeHistory().catch((error) => this.root.logger.warn(error));
           break;
         }
         default:

@@ -11,12 +11,14 @@ This library provides a strictly typed, easy-to-use wrapper for interacting with
 
 ## Installation
 
+`@teslemetry/pro` is not published to npm yet. Until it is, build it from this monorepo and link it:
+
 ```bash
-npm install @teslemetry/pro
-# or
-pnpm add @teslemetry/pro
-# or
-yarn add @teslemetry/pro
+pnpm install
+pnpm --filter @teslemetry/pro build
+cd packages/pro && pnpm link --global
+# then, in your project:
+pnpm link --global @teslemetry/pro
 ```
 
 ## Quick Start
