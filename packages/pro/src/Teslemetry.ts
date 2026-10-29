@@ -39,7 +39,7 @@ export class Teslemetry {
       auth: access_token,
       baseUrl: `https://${this.region || "api"}.teslemetry.pro`,
       headers: {
-        "X-Library": `typescript teslemetry ${pkg.version}`,
+        "X-Library": `typescript teslemetry-pro ${pkg.version}`,
       },
       throwOnError: options?.throwOnError ?? true,
     });
@@ -159,7 +159,7 @@ export class Teslemetry {
    * @returns TeslemetryVehicleApi instance
    */
   public vehicle(vin: string): TeslemetryVehicleApi {
-    return new TeslemetryVehicleApi(this, vin);
+    return this.api.getVehicle(vin);
   }
 
   /**
@@ -168,7 +168,7 @@ export class Teslemetry {
    * @returns TeslemetryEnergyApi instance
    */
   public energySite(siteId: number): TeslemetryEnergyApi {
-    return new TeslemetryEnergyApi(this, siteId);
+    return this.api.getEnergySite(siteId);
   }
 }
 
