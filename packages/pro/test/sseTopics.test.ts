@@ -94,3 +94,7 @@ test("a preset selection sends its expanded exact wire names as the topics query
     [...SSE_TOPIC_PRESETS.energyFullState].sort(),
   );
 });
+
+test("the products preset expands to the product topic", () => {
+  assert.deepEqual(expandSseTopics(["products"]), ["product"]);
+});

@@ -1,4 +1,4 @@
-// examples/simple.ts
+// examples/api.ts
 
 import { config } from "dotenv";
 import { Teslemetry } from "@teslemetry/pro"; // Adjust path if needed
@@ -24,7 +24,8 @@ async function main() {
   const sonic = teslemetry.getVehicle(TESLEMETRY_VIN);
   const state = await sonic.api.state();
   console.log(state);
-  await sonic.api.flashLights();
+  // Commands act on a real car, so this example only reads. Run commands
+  // such as flashLights() against a vehicle you own or have permission to command.
 
   // Listen for battery level updates
   const removeDataListener = sonic.sse.onSignal("ChargerVoltage", (x) => {

@@ -39,6 +39,7 @@ export const SSE_TOPIC_PRESETS = {
   energyLive: ["live_status"],
   energyFullState: ["live_status", "site_info"],
   account: ["credits"],
+  products: ["product"],
 } as const satisfies Record<string, readonly SseTopic[]>;
 
 export type SseTopicPreset = keyof typeof SSE_TOPIC_PRESETS;

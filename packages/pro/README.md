@@ -11,14 +11,8 @@ This library provides a strictly typed, easy-to-use wrapper for interacting with
 
 ## Installation
 
-`@teslemetry/pro` is not published to npm yet. Until it is, build it from this monorepo and link it:
-
 ```bash
-pnpm install
-pnpm --filter @teslemetry/pro build
-cd packages/pro && pnpm link --global
-# then, in your project:
-pnpm link --global @teslemetry/pro
+npm install @teslemetry/pro
 ```
 
 ## Quick Start
@@ -27,7 +21,7 @@ pnpm link --global @teslemetry/pro
 import { Teslemetry } from "@teslemetry/pro";
 
 // Initialize with your access token
-const teslemetry = new Teslemetry(process.env.TESLEMETRY_ACCESS_TOKEN);
+const teslemetry = new Teslemetry(process.env.TESLEMETRY_ACCESS_TOKEN!);
 
 // Get a specific vehicle
 const vin = "5YJ...";
@@ -41,7 +35,7 @@ console.log("Vehicle State:", state);
 await vehicle.api.flashLights();
 
 // 3. Stream Real-time Data
-vehicle.sse.onSignal("Speed", (speed) => {
+vehicle.sse.onSignal("VehicleSpeed", (speed) => {
   console.log(`Current Speed: ${speed} mph`);
 });
 
@@ -81,11 +75,11 @@ const vehicle = teslemetry.getVehicle("VIN...");
 const data = await vehicle.api.vehicleData();
 
 // Climate Control
-await vehicle.api.autoConditioningStart();
+await vehicle.api.startAutoConditioning();
 await vehicle.api.setTemps(20, 20); // Driver, Passenger (Celsius)
 
 // Charging
-await vehicle.api.chargeStart();
+await vehicle.api.startCharging();
 await vehicle.api.setChargeLimit(80);
 
 // Locking
@@ -146,10 +140,13 @@ By default the stream sends every event applicable to every product you can
 access (legacy-all mode). Pass `stream.topics` to receive only the events you
 need - either exact wire topic names or the bundled presets from
 `SSE_TOPIC_PRESETS` (`vehicleFull`, `vehicleCore`, `energyLive`,
-`energyFullState`, `account`), which are expanded client-side to exact names
+`energyFullState`, `account`, `products`), which are expanded client-side to exact names
 before the connection opens:
 
 ```typescript
+// getToken is any () => Promise<string> that returns a current access token
+const getToken = async () => process.env.TESLEMETRY_ACCESS_TOKEN!;
+
 const teslemetry = new Teslemetry(getToken, {
   stream: { topics: ["energyLive", "credits"] },
 });
@@ -228,16 +225,41 @@ for (const vin in products.vehicles) {
   const vehicle = products.vehicles[vin];
   console.log(`Found ${vehicle.name} (${vehicle.vin})`);
   
-  // Use the API immediately
-  await vehicle.api.honkHorn();
+  // Use the API immediately (a read, not a command)
+  await vehicle.api.state();
 }
 
 // Access discovered energy sites
 for (const siteId in products.energySites) {
   const site = products.energySites[siteId];
-  console.log(`Found Site: ${site.name} (${site.site})`);
+  console.log(`Found Site: ${site.name} (${site.id})`);
 }
 ```
+
+#### Filtering products
+
+`getProducts()` returns one page of consented products. Pass `type` (`"vehicle"` or `"energy"`), `ref` (only the customer with that reference), `since` (only consents granted at or after that time), and `limit`/`cursor` for pagination:
+
+```typescript
+const page = await teslemetry.api.getProducts({ type: "vehicle", limit: 50 });
+console.log(page.count, page.response, page.next_cursor);
+```
+
+#### Product events
+
+The stream emits a `product` event each time a vehicle or energy site joins or leaves your business (`event` is `product.joined` or `product.left`, with `type`, `vin` or `energy_site_id`, `customer`, `cause` on `product.left`, and `timestamp`). Select it with the `products` preset or the exact `product` topic:
+
+```typescript
+teslemetry.sse.on("product", (event) => {
+  console.log(event.event, event.vin ?? event.energy_site_id);
+});
+```
+
+The business webhook receives the same event as `product.joined`/`product.left`.
+
+### Business configuration and webhook
+
+The generated client contains business-only functions for `/api/business/config/default*` (`getApiBusinessConfigDefault`, `postApiBusinessConfigDefault`, `putApiBusinessConfigDefault`, `patchApiBusinessConfigDefault`, `deleteApiBusinessConfigDefault`, `getApiBusinessConfigDefaultStatus`: the default telemetry configuration applied to shared vehicles) and `/api/business/webhook` (`getApiBusinessWebhook`, `putApiBusinessWebhook`, `patchApiBusinessWebhook`, `deleteApiBusinessWebhook`: the webhook that receives telemetry from every vehicle shared with your business). `@teslemetry/pro` does not export these functions yet; call the endpoints with `teslemetry.client` or any HTTP client, as described in the [API reference](https://api.teslemetry.pro/docs).
 
 ### Error Handling
 

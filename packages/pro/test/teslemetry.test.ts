@@ -160,3 +160,31 @@ test("getConfig uses the root client and logs a 404 instead of throwing", async 
   assert.deepEqual(requested, ["https://eu.teslemetry.pro"]);
   assert.deepEqual(warnings, ["Config for VIN 5YJ3E1EA1KF000000 not found (404)."]);
 });
+
+test("vehicle() and energySite() reuse an instance registered earlier", () => {
+  const teslemetry = new Teslemetry("fake-access-token");
+  const vin = "5YJ3E1EA1KF000000";
+
+  const registered = teslemetry.api.getVehicle(vin);
+  assert.equal(teslemetry.vehicle(vin), registered);
+  assert.equal(teslemetry.vehicle(vin), teslemetry.getVehicle(vin).api);
+
+  const site = teslemetry.api.getEnergySite(12345);
+  assert.equal(teslemetry.energySite(12345), site);
+});
+
+test("X-Library identifies @teslemetry/pro", async () => {
+  const teslemetry = new Teslemetry("fake-access-token", { region: "na" });
+  let sent: string | null = null;
+  teslemetry.client.setConfig({
+    fetch: (async (request: Request) => {
+      sent = request.headers.get("X-Library");
+      return new Response(JSON.stringify({ response: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as unknown as typeof fetch,
+  });
+  await teslemetry.api.getProducts();
+  assert.match(sent ?? "", /^typescript teslemetry-pro \d/);
+});
