@@ -461,6 +461,51 @@ export class TeslemetryStream extends EventEmitter {
     return new Date(date.getTime() + parseInt((ns || "000").substring(0, 3)));
   }
 
+  /**
+   * Inject vehicle signals from another source (e.g. a local BLE reader) as
+   * if they had arrived over the stream. Builds the wire event
+   * `{ ...metadata, vin, data, createdAt }` and dispatches it exactly like a
+   * native event, so `data`/`all` listeners and `onSignal()` callbacks fire.
+   * No connection is needed, and there is no dedupe or ranking against
+   * native events.
+   *
+   * Cache rule: the event updates the local cache exactly as a native `data`
+   * event does (merged per signal, last write wins) whenever the local cache
+   * is running, and is skipped by it otherwise.
+   *
+   * Values must use the stream's wire shapes, e.g. `Gear` is
+   * `"ShiftStateP" | "ShiftStateR" | "ShiftStateN" | "ShiftStateD" | ...`,
+   * not a bare `"P"`.
+   *
+   * @param data Signal values keyed by signal name.
+   * @param vin Target vehicle; defaults to the stream's `vin` option.
+   * @param metadata Extra top-level fields merged into the event; cannot
+   *   override `vin`, `data` or `createdAt`.
+   * @param createdAt Event time; defaults to now.
+   */
+  public ingest(
+    data: SseData["data"],
+    vin?: string,
+    metadata?: Record<string, unknown>,
+    createdAt?: string | Date,
+  ): SseData {
+    const target = vin ?? this.vin;
+    if (!target) {
+      throw new Error("ingest() requires a vin when the stream has none");
+    }
+    const event = {
+      ...metadata,
+      vin: target,
+      data,
+      createdAt:
+        createdAt instanceof Date
+          ? createdAt.toISOString()
+          : (createdAt ?? new Date().toISOString()),
+    } as SseData;
+    this._dispatch(event);
+    return event;
+  }
+
   private _dispatch(event: SseEvent) {
     if ("state" in event) {
       this.emit("state", event);

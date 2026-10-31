@@ -38,6 +38,7 @@ Handles Server-Sent Events (SSE) for real-time data.
   - `connect()`: Start the SSE connection.
   - `disconnect()`: Close the connection.
   - `onSignal(signalName: string, callback)`: Subscribe to specific vehicle signals (e.g., "VehicleSpeed", "PackCurrent").
+  - `ingest(data, vin?, metadata?, createdAt?)` (vehicle stream: `ingest(data, metadata?, createdAt?)`): Dispatch externally read signals (e.g. BLE) as a native `data` event; no connection needed, updates the local cache. Use wire shapes (`Gear: "ShiftStateD"`).
   - `on("connect", callback)` / `on("disconnect", callback)`: Monitor connection state.
 
 ## Code Examples
