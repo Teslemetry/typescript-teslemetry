@@ -274,6 +274,18 @@ export class TeslemetryVehicleStream extends EventEmitter {
     return () => this.data.off(field, callback);
   }
 
+  /**
+   * Inject signals for this vehicle as if they had arrived over the stream.
+   * See `TeslemetryStream.ingest()` for the event shape and cache rule.
+   */
+  public ingest(
+    data: SseData["data"],
+    metadata?: Record<string, unknown>,
+    createdAt?: string | Date,
+  ): SseData {
+    return this.root.sse.ingest(data, this.vin, metadata, createdAt);
+  }
+
   public stop(): void {
     this.removeAllListeners();
     this.data.removeAllListeners();

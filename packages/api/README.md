@@ -156,6 +156,25 @@ const teslemetry = new Teslemetry(process.env.TOKEN, {
 Omitting `topics` entirely preserves legacy-all behavior forever - it is
 never reinterpreted as a narrower default.
 
+##### Ingesting signals from another source
+
+`ingest()` dispatches signals you read elsewhere (for example over BLE) as if
+they arrived on the stream: `data`/`all` listeners and `onSignal()` callbacks
+fire as they do for a native event. It needs no connection and does no dedupe
+or ranking against native events. When the local cache is running, an ingested
+event updates it the same way a native `data` event does. When the cache is
+off, the cache is left alone.
+
+```typescript
+vehicle.sse.ingest({ Gear: "ShiftStateD" }, { source: "ble" });
+// or, on the shared stream:
+teslemetry.sse.ingest({ VehicleSpeed: 12 }, vin, { source: "ble" }, new Date());
+```
+
+Values must use the stream's wire shapes. For example, `Gear` is
+`"ShiftStateP" | "ShiftStateR" | "ShiftStateN" | "ShiftStateD" | ...`, so add
+the `ShiftState` prefix to a bare `"D"`.
+
 ##### Energy tariffs and the composed site-info view
 
 `site_info` events no longer carry `tariff_content`/`tariff_content_v2` -
