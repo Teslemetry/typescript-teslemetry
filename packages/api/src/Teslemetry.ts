@@ -12,7 +12,7 @@ import { getApiMetadata, getApiTest } from "./client/index.js";
 import { Logger, consoleLogger } from "./logger.js";
 import pkg from "../package.json" with { type: "json" };
 import type { Products } from "./const.js";
-import { Models } from "tesla-fleet-api/dist/types/vehicle.js";
+import { Models } from "tesla-fleet-api/const";
 
 interface TeslemetryOptions {
   region?: "na" | "eu";
