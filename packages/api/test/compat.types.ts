@@ -37,6 +37,9 @@ class FakePrimary {
   trigger_homelink(_token?: string | null, _lat?: number, _lon?: number): Promise<CommandResponse> {
     throw new Error("type check only");
   }
+  navigation_request(_value: string, _type?: string, _locale?: string, _timestamp_ms?: number): Promise<CommandResponse> {
+    throw new Error("type check only");
+  }
   primary_only(): Promise<string> {
     throw new Error("type check only");
   }
@@ -50,6 +53,7 @@ export async function routedCalls(router: RouterOf<readonly [FakePrimary, Vehicl
   await router.wake_up({ wait: true, timeoutMs: 1000 });
   await router.set_pin_to_drive(true, 1234);
   await router.trigger_homelink("token", 1, 2);
+  await router.navigation_request("Home", "share_ext_content_raw", "en-US", 1234);
   await router.primary_only();
   // A method on compat alone is routed, and keeps the SDK's reply type.
   const reply: { response?: unknown } = await router.vehicle();

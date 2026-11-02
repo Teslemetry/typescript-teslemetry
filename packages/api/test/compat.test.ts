@@ -48,7 +48,7 @@ const METHOD_MAP: [string, string, ...unknown[]][] = [
   ["speedLimitClearPin", "speed_limit_clear_pin", "1234"],
   ["speedLimitClearPinAdmin", "speed_limit_clear_pin_admin"],
   ["speedLimitSetLimit", "speed_limit_set_limit", 60],
-  ["navigationRequest", "navigation_request", "Home", "en-US"],
+  ["navigationRequest", "navigation_request", "Home"],
   ["navigationGpsRequest", "navigation_gps_request", 1, 2],
   ["navigationWaypointsRequest", "navigation_waypoints_request", "a,b"],
   ["upcomingCalendarEntries", "upcoming_calendar_entries", "{}"],
@@ -273,14 +273,25 @@ test("set_scheduled_departure takes positional arguments and sends the same defa
   });
 });
 
-test("navigation_request sends the documented string value, with type and timestamp", async () => {
+test("navigation_request takes Python's (value, type, locale, timestamp_ms) order and sends the documented string value", async () => {
   const { teslemetry, sent } = makeTeslemetry();
-  await compatFor(teslemetry).navigation_request("1 Main St", "en-US");
-  const body = sent.at(-1)?.body as Record<string, unknown>;
-  assert.equal(body.value, "1 Main St");
-  assert.equal(body.locale, "en-US");
+  const compat = compatFor(teslemetry);
+  await compat.navigation_request("1 Main St", "share_ext_content_raw", "en-AU", 1234);
+  assert.deepEqual(sent.at(-1)?.body, {
+    value: "1 Main St",
+    type: "share_ext_content_raw",
+    locale: "en-AU",
+    timestamp_ms: 1234,
+  });
+});
+
+test("navigation_request defaults type and timestamp, and sends no locale it was not given", async () => {
+  const { teslemetry, sent } = makeTeslemetry();
+  await compatFor(teslemetry).navigation_request("1 Main St");
+  const body = sent.at(-1)!.body as Record<string, unknown>;
   assert.equal(body.type, "share_ext_content_raw");
   assert.equal(typeof body.timestamp_ms, "number");
+  assert.equal("locale" in body, false);
 });
 
 test("trigger_homelink takes Python's (token, lat, lon) order and sends lat and lon to their own keys", async () => {

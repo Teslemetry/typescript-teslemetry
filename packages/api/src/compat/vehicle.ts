@@ -545,9 +545,14 @@ export class VehicleCompat {
 
   // Navigation
 
-  /** `value` is sent as the plain string the public API spec documents, not `tesla-fleet-api`'s `android.intent.extra.TEXT` object. */
-  async navigation_request(value: string, locale?: string, type: string = "share_ext_content_raw") {
-    return this.api.navigationRequest({ value, locale, type, timestamp_ms: Date.now() });
+  /** `value` is sent as the plain string the public API spec documents, not `tesla-fleet-api`'s `android.intent.extra.TEXT` object. The arguments take Python's order. */
+  async navigation_request(value: string, type?: string | null, locale?: string | null, timestamp_ms?: number | null) {
+    return this.api.navigationRequest({
+      value,
+      type: type ?? "share_ext_content_raw",
+      locale: locale ?? undefined,
+      timestamp_ms: timestamp_ms || Date.now(),
+    });
   }
 
   async navigation_gps_request(lat: number, lon: number, order?: number) {
