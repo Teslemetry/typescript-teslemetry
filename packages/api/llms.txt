@@ -44,6 +44,7 @@ Handles Server-Sent Events (SSE) for real-time data.
 ### `@teslemetry/api/compat`
 Adapters that give the API classes `tesla-fleet-api`'s method names and arguments, for use as a `tesla-fleet-api` router backend.
 - `new VehicleCompat(api: TeslemetryVehicleApi)`: e.g. `door_lock()`, `remote_seat_heater_request(seat, level)`. Replies keep `{ response }`.
+- `new EnergySiteCompat(api: TeslemetryEnergyApi)`: e.g. `backup(percent)`, `grid_import_export(disallow?, rule?)`, which sends only the settings given. Note the order: `disallow` first, unlike `gridImportExport(rule, disallow)`.
 - Rejections stay the SDK's values; objects gain non-enumerable `status` and `failover_safe`.
 
 ## Code Examples

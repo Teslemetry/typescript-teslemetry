@@ -22,6 +22,7 @@ export function makeTeslemetry(reply: (request: Request) => Response | Promise<R
   teslemetry.client.setConfig({
     fetch: (async (request: Request) => {
       const url = new URL(request.url);
+      url.searchParams.delete("token");
       const text = await request.clone().text();
       sent.push({
         method: request.method,

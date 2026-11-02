@@ -264,11 +264,14 @@ the cloud backend of its routers. It imports nothing from `tesla-fleet-api`, so
 it loads no protobuf, and the match is structural.
 
 ```typescript
-import { VehicleCompat } from "@teslemetry/api/compat";
-import { VehicleRouter } from "tesla-fleet-api/router";
+import { EnergySiteCompat, VehicleCompat } from "@teslemetry/api/compat";
+import { EnergySiteRouter, VehicleRouter } from "tesla-fleet-api/router";
 
 const router = new VehicleRouter([bluetoothVehicle, new VehicleCompat(vehicle.api)]);
 await router.door_lock();
+
+const site = new EnergySiteRouter([localPowerwall, new EnergySiteCompat(energySite.api)]);
+await site.grid_import_export(false);
 ```
 
 A method the API has no wrapper for stays absent, and the router skips that

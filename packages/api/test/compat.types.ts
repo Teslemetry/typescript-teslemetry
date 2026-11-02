@@ -3,7 +3,7 @@
 //
 // `@teslemetry/api` must not depend on the router, so `Routed` here is a copy of
 // the mapped type in tesla-fleet-api's `src/router/base.ts`.
-import { VehicleCompat } from "../src/compat/index.js";
+import { EnergySiteCompat, VehicleCompat } from "../src/compat/index.js";
 
 type MethodKeys<B> = { [K in keyof B]-?: B[K] extends (...args: never[]) => unknown ? K : never }[keyof B];
 type AllMethodKeys<B> = B extends unknown ? MethodKeys<B> : never;
@@ -59,4 +59,36 @@ export async function routedCalls(router: RouterOf<readonly [FakePrimary, Vehicl
   await router.lockDoors();
   // @ts-expect-error `api` is an attribute, not a routed method.
   await router.api();
+}
+
+/** The shapes of a local Powerwall primary. `live_status` is on both; `local_config` is local only. */
+class FakeLocalSite {
+  readonly energy_site_id = 1;
+
+  live_status(): Promise<{ response: { percentage_charged: number } }> {
+    throw new Error("type check only");
+  }
+  grid_import_export(_disallow?: boolean | null, _rule?: string | null): Promise<Record<string, unknown>> {
+    throw new Error("type check only");
+  }
+  set_island_mode(_mode: number, _force?: boolean | null): Promise<Record<string, unknown>> {
+    throw new Error("type check only");
+  }
+  local_config(): Promise<{ response: object }> {
+    throw new Error("type check only");
+  }
+}
+
+export async function routedEnergyCalls(router: RouterOf<readonly [FakeLocalSite, EnergySiteCompat]>): Promise<void> {
+  await router.live_status();
+  await router.grid_import_export(false);
+  await router.grid_import_export(null, "pv_only");
+  await router.set_island_mode(1, true);
+  await router.local_config();
+  await router.site_info();
+
+  // @ts-expect-error The library order: `disallow` comes first.
+  await router.grid_import_export("pv_only", true);
+  // @ts-expect-error SDK camelCase names are not routed.
+  await router.setBackupReserve(20);
 }
