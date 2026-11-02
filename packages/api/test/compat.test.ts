@@ -292,6 +292,46 @@ test("trigger_homelink takes Python's (token, lat, lon) order and sends lat and 
   assert.deepEqual(sent.at(-1)?.body, { lat: 3.5, lon: 4.5 });
 });
 
+test("trigger_homelink sends a location only when both lat and lon are given, and 0 counts as given", async () => {
+  const { teslemetry, sent } = makeTeslemetry();
+  const compat = compatFor(teslemetry);
+  await compat.trigger_homelink(undefined, 1.5);
+  assert.deepEqual(sent.at(-1)?.body, {});
+  await compat.trigger_homelink(undefined, undefined, 2.5);
+  assert.deepEqual(sent.at(-1)?.body, {});
+  await compat.trigger_homelink();
+  assert.deepEqual(sent.at(-1)?.body, {});
+  await compat.trigger_homelink(null, 0, 0);
+  assert.deepEqual(sent.at(-1)?.body, { lat: 0, lon: 0 });
+});
+
+test("window_control leaves out a location it was not given", async () => {
+  const { teslemetry, sent } = makeTeslemetry();
+  await compatFor(teslemetry).window_control("vent");
+  assert.deepEqual(sent.at(-1)?.body, { command: "vent" });
+});
+
+test("set_valet_mode leaves out a password it was not given", async () => {
+  const { teslemetry, sent } = makeTeslemetry();
+  await compatFor(teslemetry).set_valet_mode(false);
+  assert.deepEqual(sent.at(-1)?.body, { on: false });
+});
+
+test("schedules send a name when given", async () => {
+  const { teslemetry, sent } = makeTeslemetry();
+  const compat = compatFor(teslemetry);
+  await compat.add_charge_schedule("All", true, 1, 2, 60, undefined, undefined, undefined, "Home");
+  assert.equal((sent.at(-1)!.body as { name?: string }).name, "Home");
+  await compat.add_precondition_schedule("All", true, 1, 2, 60, undefined, undefined, "Work");
+  assert.equal((sent.at(-1)!.body as { name?: string }).name, "Work");
+});
+
+test("start_light_show defaults to the first show", async () => {
+  const { teslemetry, sent } = makeTeslemetry();
+  await compatFor(teslemetry).start_light_show();
+  assert.deepEqual(sent.at(-1)?.body, { show_index: 0 });
+});
+
 test("numeric PINs are sent as strings", async () => {
   const { teslemetry, sent } = makeTeslemetry();
   const compat = compatFor(teslemetry);

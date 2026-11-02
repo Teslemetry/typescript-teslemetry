@@ -94,10 +94,10 @@ function frontSeat(seat: FrontSeat | number): (typeof FRONT_SEAT_NAMES)[1 | 2] {
  * A rejection is the value the SDK rejects, with hidden `status` and
  * `failover_safe` added when it is an object.
  *
- * These `tesla-fleet-api` arguments have no SDK equivalent: `trigger_homelink`'s
- * `token` is accepted and ignored, to keep its position, and
+ * These `tesla-fleet-api` arguments have no SDK equivalent, so they are accepted
+ * to keep signatures matching, and ignored: `trigger_homelink`'s `token`,
  * `clear_pin_to_drive_admin`'s `pin`, `nearby_charging_sites`' filters and
- * `release_notes`' `staged` and `language` are not accepted.
+ * `release_notes`' `staged` and `language`.
  */
 export class VehicleCompat {
   readonly api: Api;
@@ -142,7 +142,7 @@ export class VehicleCompat {
     return this.api.getMobileEnabled();
   }
 
-  async nearby_charging_sites() {
+  async nearby_charging_sites(_count?: number, _radius?: number, _detail?: boolean) {
     return this.api.getNearbyChargingSites();
   }
 
@@ -150,7 +150,7 @@ export class VehicleCompat {
     return this.api.getRecentAlerts();
   }
 
-  async release_notes() {
+  async release_notes(_staged?: boolean, _language?: string) {
     return this.api.getReleaseNotes();
   }
 
@@ -211,8 +211,8 @@ export class VehicleCompat {
     return this.api.actuateTrunk(which_trunk);
   }
 
-  async window_control(command: "vent" | "close", lat: number, lon: number) {
-    return this.api.windowControl(command, lat, lon);
+  async window_control(command: "vent" | "close", lat?: number, lon?: number) {
+    return this.api.windowControl(command, lat as number, lon as number);
   }
 
   async sun_roof_control(state: "stop" | "close" | "vent") {
@@ -235,9 +235,10 @@ export class VehicleCompat {
     return this.api.remoteStart();
   }
 
-  /** Python's argument order. The SDK sends no `token`, so it is ignored. */
+  /** Python's argument order. The SDK sends no `token`, so it is ignored. A location is sent only when both coordinates are given. */
   async trigger_homelink(_token?: string | null, lat?: number, lon?: number) {
-    return this.api.triggerHomelink(lat as number, lon as number);
+    const located = lat != null && lon != null;
+    return this.api.triggerHomelink((located ? lat : undefined) as number, (located ? lon : undefined) as number);
   }
 
   async set_vehicle_name(vehicle_name: string) {
@@ -420,6 +421,7 @@ export class VehicleCompat {
     end_time?: number,
     one_time?: boolean,
     id?: number,
+    name?: string,
   ) {
     if (start_time == null && end_time == null) {
       throw new Error("Either start_time or end_time or both must be provided");
@@ -435,6 +437,7 @@ export class VehicleCompat {
       end_time,
       id,
       one_time,
+      name,
     });
   }
 
@@ -450,6 +453,7 @@ export class VehicleCompat {
     precondition_time: number,
     id?: number,
     one_time?: boolean,
+    name?: string,
   ) {
     return this.api.addPreconditionSchedule({
       days_of_week: days_of_week as string,
@@ -459,6 +463,7 @@ export class VehicleCompat {
       precondition_time,
       id,
       one_time,
+      name,
     });
   }
 
@@ -476,8 +481,8 @@ export class VehicleCompat {
     return this.api.setGuestMode(enable);
   }
 
-  async set_valet_mode(on: boolean, password: string | number) {
-    return this.api.setValetMode(on, String(password));
+  async set_valet_mode(on: boolean, password?: string | number) {
+    return this.api.setValetMode(on, (password == null ? undefined : String(password)) as string);
   }
 
   async reset_valet_pin() {
@@ -496,7 +501,7 @@ export class VehicleCompat {
     return this.api.clearPinToDrive(pin);
   }
 
-  async clear_pin_to_drive_admin() {
+  async clear_pin_to_drive_admin(_pin?: string | number) {
     return this.api.clearPinToDriveAdmin();
   }
 
@@ -589,7 +594,7 @@ export class VehicleCompat {
     return this.api.playVideo(url);
   }
 
-  async start_light_show(show_index: number, start_time?: number, volume?: number, dance_moves?: boolean) {
+  async start_light_show(show_index: number = 0, start_time?: number, volume?: number, dance_moves?: boolean) {
     return this.api.startLightShow(show_index, start_time, volume, dance_moves);
   }
 
