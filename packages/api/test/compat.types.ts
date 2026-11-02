@@ -34,6 +34,9 @@ class FakePrimary {
   set_pin_to_drive(_on: boolean, _password: string | number): Promise<CommandResponse> {
     throw new Error("type check only");
   }
+  trigger_homelink(_token?: string | null, _lat?: number, _lon?: number): Promise<CommandResponse> {
+    throw new Error("type check only");
+  }
   primary_only(): Promise<string> {
     throw new Error("type check only");
   }
@@ -46,6 +49,7 @@ export async function routedCalls(router: RouterOf<readonly [FakePrimary, Vehicl
   await router.remote_seat_cooler_request(1, 3);
   await router.wake_up({ wait: true, timeoutMs: 1000 });
   await router.set_pin_to_drive(true, 1234);
+  await router.trigger_homelink("token", 1, 2);
   await router.primary_only();
   // A method on compat alone is routed, and keeps the SDK's reply type.
   const reply: { response?: unknown } = await router.vehicle();
@@ -55,6 +59,8 @@ export async function routedCalls(router: RouterOf<readonly [FakePrimary, Vehicl
   await router.door_lokc();
   // @ts-expect-error A seat name fails when it is not a name on both backends.
   await router.remote_seat_heater_request("front_left", 2);
+  // @ts-expect-error The old (lat, lon) order no longer fits.
+  await router.trigger_homelink(1, 2);
   // @ts-expect-error SDK camelCase names are not routed.
   await router.lockDoors();
   // @ts-expect-error `api` is an attribute, not a routed method.

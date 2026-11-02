@@ -35,7 +35,7 @@ const METHOD_MAP: [string, string, ...unknown[]][] = [
   ["setPinToDrive", "set_pin_to_drive", true, "1234"],
   ["clearPinToDriveAdmin", "clear_pin_to_drive_admin"],
   ["setVehicleName", "set_vehicle_name", "Car"],
-  ["triggerHomelink", "trigger_homelink", 1, 2],
+  ["triggerHomelink", "trigger_homelink", "token", 1, 2],
   ["sunRoofControl", "sun_roof_control", "vent"],
   ["setClimateKeeperMode", "set_climate_keeper_mode", 1],
   ["setPreconditioningMax", "set_preconditioning_max", true, false],
@@ -281,6 +281,15 @@ test("navigation_request sends the documented string value, with type and timest
   assert.equal(body.locale, "en-US");
   assert.equal(body.type, "share_ext_content_raw");
   assert.equal(typeof body.timestamp_ms, "number");
+});
+
+test("trigger_homelink takes Python's (token, lat, lon) order and sends lat and lon to their own keys", async () => {
+  const { teslemetry, sent } = makeTeslemetry();
+  const compat = compatFor(teslemetry);
+  await compat.trigger_homelink("homelink-token", 1.5, 2.5);
+  assert.deepEqual(sent.at(-1)?.body, { lat: 1.5, lon: 2.5 });
+  await compat.trigger_homelink(undefined, 3.5, 4.5);
+  assert.deepEqual(sent.at(-1)?.body, { lat: 3.5, lon: 4.5 });
 });
 
 test("numeric PINs are sent as strings", async () => {

@@ -94,9 +94,10 @@ function frontSeat(seat: FrontSeat | number): (typeof FRONT_SEAT_NAMES)[1 | 2] {
  * A rejection is the value the SDK rejects, with hidden `status` and
  * `failover_safe` added when it is an object.
  *
- * These `tesla-fleet-api` arguments have no SDK equivalent and are not accepted:
- * `trigger_homelink`'s `token`, `clear_pin_to_drive_admin`'s `pin`,
- * `nearby_charging_sites`' filters and `release_notes`' `staged` and `language`.
+ * These `tesla-fleet-api` arguments have no SDK equivalent: `trigger_homelink`'s
+ * `token` is accepted and ignored, to keep its position, and
+ * `clear_pin_to_drive_admin`'s `pin`, `nearby_charging_sites`' filters and
+ * `release_notes`' `staged` and `language` are not accepted.
  */
 export class VehicleCompat {
   readonly api: Api;
@@ -234,8 +235,9 @@ export class VehicleCompat {
     return this.api.remoteStart();
   }
 
-  async trigger_homelink(lat: number, lon: number) {
-    return this.api.triggerHomelink(lat, lon);
+  /** Python's argument order. The SDK sends no `token`, so it is ignored. */
+  async trigger_homelink(_token?: string | null, lat?: number, lon?: number) {
+    return this.api.triggerHomelink(lat as number, lon as number);
   }
 
   async set_vehicle_name(vehicle_name: string) {
