@@ -1,5 +1,11 @@
 # @teslemetry/pro
 
+## 0.1.1
+
+### Patch Changes
+
+- e72e709: Build against `tesla-fleet-api` 0.4, importing its `tariff`, `const` and `types` subpaths instead of the removed `dist/...` deep imports. The bundled output is unchanged in behaviour and still has no runtime `tesla-fleet-api` dependency.
+
 ## 0.1.0
 
 ### Minor Changes
