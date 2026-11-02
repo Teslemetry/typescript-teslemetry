@@ -13,6 +13,14 @@
       },
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
+    },
+    "./compat": {
+      "types": {
+        "import": "./dist/compat.d.mts",
+        "require": "./dist/compat.d.cts"
+      },
+      "import": "./dist/compat.mjs",
+      "require": "./dist/compat.cjs"
     }
   },
   "files": [

@@ -28,6 +28,7 @@ To make a change: branch, edit, `pnpm build`, `pnpm changeset`, commit (includin
 - `@hey-api/openapi-ts` is pinned to a `0.0.0-next-*` build because stable releases crash on `typescript@7.x`. Move to stable once `typescript` leaves a stable tag's dependency tree.
 - **Credential leak**: the access token travels as `?token=...`, so `request.url`/`response.url` carry the credential. Any logging, error-reporting or telemetry code must strip the whole query string before it reaches a consumer-wired `logger`.
 - `tesla-fleet-api` is a devDependency on purpose: tsdown bundles devDependencies, so it is inlined with no runtime dependency. Deep-import its leaf modules (`dist/tariff.js`, `dist/types/*.js`), never the package root, and check those leaves before hand-maintaining a constant. Any new bundled devDependency needs a `deps.onlyBundle` entry in `tsdown.config.ts`.
+- `src/compat/` (`@teslemetry/api/compat`) has no runtime import outside itself and never imports `tesla-fleet-api`, so it stays free of protobuf. Its error interceptor must keep the rejection the same value and add only hidden `status`/`failover_safe`: Homey rethrows any `Error` before its `invalid_token` refresh. The client turns a falsy rejection into `{}` after interceptors run, so an empty-body rejection is the one case the interceptor returns a new object.
 
 **Streaming rules**:
 - Energy SSE events do not agree on the site identifier (`site_id` vs `id`). Check the backend schema for a new event's field; do not assume `site_id`.
