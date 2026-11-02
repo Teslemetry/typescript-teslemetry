@@ -130,3 +130,31 @@ test("ingest defaults to the stream's vin option and throws without one", () => 
   const unscoped = makeTeslemetry().teslemetry;
   assert.throws(() => unscoped.sse.ingest({ Soc: 1 }), /requires a vin/);
 });
+
+test("metadata cannot change an ingested event's type or route", () => {
+  for (const key of ["state", "site_id", "totals"]) {
+    const { teslemetry } = makeTeslemetry();
+    const vehicle = teslemetry.sse.getVehicle(vin);
+
+    const rootData: SseData[] = [];
+    const rootState: unknown[] = [];
+    const vehicleData: SseData[] = [];
+    const vehicleState: unknown[] = [];
+    const gears: unknown[] = [];
+    teslemetry.sse.on("data", (event) => rootData.push(event));
+    teslemetry.sse.on("state", (event) => rootState.push(event));
+    vehicle.on("data", (event) => vehicleData.push(event));
+    vehicle.on("state", (event) => vehicleState.push(event));
+    vehicle.onSignal("Gear", (value) => gears.push(value));
+
+    const event = vehicle.ingest({ Gear: "ShiftStateD" }, { [key]: "online", source: "ble" });
+
+    assert.equal(rootData.length, 1, key);
+    assert.equal(vehicleData.length, 1, key);
+    assert.deepEqual(rootState, [], key);
+    assert.deepEqual(vehicleState, [], key);
+    assert.deepEqual(gears, ["ShiftStateD"], key);
+    assert.equal(key in event, false, key);
+    assert.equal((event as SseData & { source?: string }).source, "ble", key);
+  }
+});

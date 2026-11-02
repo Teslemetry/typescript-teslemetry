@@ -142,6 +142,9 @@ type EnergyCache = Record<string, EnergySiteCache>;
  *  trail the server coming back by more than a minute. */
 const MAX_BACKOFF_SECONDS = 60;
 
+/** Top-level keys `_dispatch` checks ahead of `data` or `vin`: on an ingested event they would misroute it. */
+const DISPATCH_KEYS = new Set(["state", "site_id", "totals"]);
+
 export class TeslemetryStream extends EventEmitter {
   private root: Teslemetry;
   public active: boolean = false;
@@ -480,7 +483,8 @@ export class TeslemetryStream extends EventEmitter {
    * @param data Signal values keyed by signal name.
    * @param vin Target vehicle; defaults to the stream's `vin` option.
    * @param metadata Extra top-level fields merged into the event; cannot
-   *   override `vin`, `data` or `createdAt`.
+   *   override `vin`, `data` or `createdAt`. `state`, `site_id` and `totals` are
+   *   dropped, because `_dispatch` would take them for another event type.
    * @param createdAt Event time; defaults to now.
    */
   public ingest(
@@ -494,7 +498,9 @@ export class TeslemetryStream extends EventEmitter {
       throw new Error("ingest() requires a vin when the stream has none");
     }
     const event = {
-      ...metadata,
+      ...Object.fromEntries(
+        Object.entries(metadata ?? {}).filter(([key]) => !DISPATCH_KEYS.has(key)),
+      ),
       vin: target,
       data,
       createdAt:
