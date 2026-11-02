@@ -256,6 +256,31 @@ for (const siteId in products.energySites) {
 }
 ```
 
+### Using `@teslemetry/api` as a `tesla-fleet-api` router backend
+
+`@teslemetry/api/compat` adapts the vehicle and energy-site APIs to the method
+names, arguments and `{ response }` replies of `tesla-fleet-api`, so they can be
+the cloud backend of its routers. It imports nothing from `tesla-fleet-api`, so
+it loads no protobuf, and the match is structural.
+
+```typescript
+import { VehicleCompat } from "@teslemetry/api/compat";
+import { VehicleRouter } from "tesla-fleet-api/router";
+
+const router = new VehicleRouter([bluetoothVehicle, new VehicleCompat(vehicle.api)]);
+await router.door_lock();
+```
+
+A method the API has no wrapper for stays absent, and the router skips that
+backend for it.
+
+Creating a compat object adds one error interceptor to the client. Rejections
+stay the values the SDK always rejects with (a parsed body, a string for a
+non-JSON page, or `{}`), so existing error handling sees no change. Object and
+`Error` rejections gain non-enumerable `status` and `failover_safe` properties,
+which the router reads. `failover_safe` is `true` for network errors and HTTP
+401, 402, 403, 408, 429, 500, 502, 503 and 504.
+
 ### Error Handling
 
 The SDK throws standard Javascript `Error` objects for configuration issues and specific errors for API failures. Streaming errors (like connection drops) are emitted via the stream error handler or specific exception classes.

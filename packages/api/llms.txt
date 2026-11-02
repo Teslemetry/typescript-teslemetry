@@ -41,6 +41,11 @@ Handles Server-Sent Events (SSE) for real-time data.
   - `ingest(data, vin?, metadata?, createdAt?)` (vehicle stream: `ingest(data, metadata?, createdAt?)`): Dispatch externally read signals (e.g. BLE) as a native `data` event; no connection needed, updates the local cache. Use wire shapes (`Gear: "ShiftStateD"`).
   - `on("connect", callback)` / `on("disconnect", callback)`: Monitor connection state.
 
+### `@teslemetry/api/compat`
+Adapters that give the API classes `tesla-fleet-api`'s method names and arguments, for use as a `tesla-fleet-api` router backend.
+- `new VehicleCompat(api: TeslemetryVehicleApi)`: e.g. `door_lock()`, `remote_seat_heater_request(seat, level)`. Replies keep `{ response }`.
+- Rejections stay the SDK's values; objects gain non-enumerable `status` and `failover_safe`.
+
 ## Code Examples
 
 ### Basic Setup & Vehicle State
