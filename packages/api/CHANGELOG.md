@@ -1,5 +1,16 @@
 # @teslemetry/api
 
+## 0.14.0
+
+### Minor Changes
+
+- 89cbe8f: Add `TeslemetryStream.ingest(data, vin?, metadata?, createdAt?)` and `TeslemetryVehicleStream.ingest(data, metadata?, createdAt?)` to dispatch externally sourced signals (e.g. BLE) as native `data` events, without a connection.
+
+### Patch Changes
+
+- e72e709: Build against `tesla-fleet-api` 0.4, importing its `tariff`, `const` and `types` subpaths instead of the removed `dist/...` deep imports. The bundled output is unchanged in behaviour and still has no runtime `tesla-fleet-api` dependency.
+- 09aebd2: `ingest()` now drops `state`, `site_id` and `totals` from `metadata`, which previously sent the event down the wrong path, so `data` listeners and `onSignal()` callbacks missed it.
+
 ## 0.13.3
 
 ### Patch Changes
