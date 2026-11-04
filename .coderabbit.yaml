@@ -1,4 +1,5 @@
-# CodeRabbit is opt-in per repository (org default: off). This repo opts in.
+# CodeRabbit is enabled org-wide by the central config. This file overrides it and inherits the rest.
+inheritance: true
 reviews:
   high_level_summary: false
   auto_review:
