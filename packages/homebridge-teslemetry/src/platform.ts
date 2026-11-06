@@ -18,6 +18,7 @@ import type {
 import { Teslemetry, useTeslaModel, type Products, type VehicleDetails, type EnergyDetails } from "@teslemetry/api";
 import { PLATFORM_NAME, PLUGIN_NAME, type TeslemetryPlatformConfig } from "./settings.js";
 import { VehicleAccessory } from "./vehicle.js";
+import pkg from "../package.json" with { type: "json" };
 import { EnergyAccessory } from "./energy.js";
 import { holdAccessory } from "./hold.js";
 import { createSdkLogger, describeError } from "./log.js";
@@ -147,6 +148,7 @@ export class TeslemetryPlatform implements DynamicPlatformPlugin {
     this.log.info("Connecting to Teslemetry...");
     this.teslemetry = new Teslemetry(this.config.accessToken, {
       logger: createSdkLogger(this.log),
+      client: `${pkg.name}/${pkg.version}`,
       stream: {
         cache: true, // Enable caching for immediate value access
       },

@@ -9,9 +9,12 @@ import {
 	NodeApiError,
 	NodeOperationError,
 } from 'n8n-workflow';
+import pkg from '../package.json';
 
 export const CREDENTIAL_TYPE = 'teslemetryApi';
 export const BASE_URL = 'https://api.teslemetry.com';
+/** Sent as `X-Client` so the API can tell which integration made a request. */
+export const CLIENT = `${pkg.name}/${pkg.version}`;
 
 type TeslemetryContext = IExecuteFunctions | ILoadOptionsFunctions | IPollFunctions;
 
@@ -61,7 +64,7 @@ export async function teslemetryRequest<T = IDataObject>(
 		method,
 		baseURL: BASE_URL,
 		url: path,
-		headers: { 'X-Library': 'n8n-nodes-teslemetry' },
+		headers: { 'X-Library': 'n8n-nodes-teslemetry', 'X-Client': CLIENT },
 		json: true,
 		returnFullResponse: true,
 		ignoreHttpStatusErrors: true,

@@ -6,6 +6,8 @@ import {
   streamOptions,
   testCredentials,
 } from "../src/nodes/teslemetry-config.js";
+import registerConfigNode from "../src/nodes/teslemetry-config.js";
+import pkg from "../package.json" with { type: "json" };
 import type { Instance } from "../src/shared.js";
 import type { Products, Teslemetry } from "@teslemetry/api";
 
@@ -164,4 +166,23 @@ test("replay is off unless the config node explicitly ticks it", () => {
   assert.deepEqual(streamOptions({ replay: true }), {
     cache: { cloud: true, local: false },
   });
+});
+
+test("the credentials check identifies the integration in the X-Client header", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () => Response.json({}));
+  const posts = new Map<string, Function>();
+  const log = { debug() {}, info() {}, warn() {}, error() {} };
+  registerConfigNode({
+    nodes: { registerType() {} },
+    httpAdmin: { get() {}, post: (path: string, fn: Function) => posts.set(path, fn) },
+    log,
+  } as any);
+
+  await posts.get("/teslemetry/test-credentials")!(
+    { body: { token: "fake-token" } },
+    { json() {}, status: () => ({ json() {} }) },
+  );
+
+  const request = fetchMock.mock.calls[0].arguments[0] as Request;
+  assert.equal(request.headers.get("X-Client"), `${pkg.name}/${pkg.version}`);
 });

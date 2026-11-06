@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { TeslemetryVehicle } from "../nodes/TeslemetryVehicle/TeslemetryVehicle.node.js";
+import pkg from "../package.json";
 import {
   API_FAILURES,
   assertApiFailure,
@@ -433,4 +434,14 @@ test("TeslemetryVehicle.execute throws for an unknown operation", async () => {
   const context = fakeExecuteContext([{ operation: "notARealOperation", vin: VIN }]);
 
   await assert.rejects(() => node.execute.call(context), /Unknown operation/);
+});
+
+test("requests identify the integration in the X-Client header", async () => {
+  const { handler, getRequest } = captureRequest();
+  const node = new TeslemetryVehicle();
+  const context = fakeExecuteContext([{ operation: "vehicleData", vin: VIN }]);
+
+  await withMockedFetch(handler, () => node.execute.call(context));
+
+  assert.equal(getRequest()!.headers.get("X-Client"), `${pkg.name}/${pkg.version}`);
 });

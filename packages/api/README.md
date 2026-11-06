@@ -63,6 +63,14 @@ const teslemetry = new Teslemetry("YOUR_ACCESS_TOKEN");
 const teslemetryEu = new Teslemetry("YOUR_ACCESS_TOKEN", { region: "eu" });
 ```
 
+If you are building an app or integration, pass `client` to identify it. It is sent as the `X-Client` header on every request.
+
+```typescript
+const teslemetry = new Teslemetry("YOUR_ACCESS_TOKEN", {
+  client: "my-app/1.2.3",
+});
+```
+
 ### Vehicle API
 
 Use `getVehicle(vin)` to interact with a vehicle. This returns an object containing two specialized handlers:

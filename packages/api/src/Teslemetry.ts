@@ -19,6 +19,9 @@ interface TeslemetryOptions {
   logger?: Logger;
   stream?: TeslemetryStreamOptions;
   throwOnError?: boolean;
+  /** Identifies the app using the SDK, such as "my-app/1.2.3". Sent as the
+   *  `X-Client` header on every request. */
+  client?: string;
 }
 
 export class Teslemetry {
@@ -44,6 +47,7 @@ export class Teslemetry {
       baseUrl: `https://${this.region || "api"}.teslemetry.com`,
       headers: {
         "X-Library": `typescript teslemetry ${pkg.version}`,
+        ...(options?.client && { "X-Client": options.client }),
       },
       throwOnError: options?.throwOnError ?? true,
     });
