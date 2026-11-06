@@ -142,3 +142,27 @@ test("vehicle() and energySite() create the product when it is not registered ye
   );
   assert.equal(teslemetry.energySite(678), teslemetry.getEnergySite(678).api);
 });
+
+test("the client option is sent as the X-Client header", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () => Response.json({}));
+  const teslemetry = new Teslemetry("fake-access-token", {
+    logger: quietLogger,
+    client: "my-app/1.2.3",
+  });
+
+  await teslemetry.getRegion();
+
+  const request = fetchMock.mock.calls[0].arguments[0] as Request;
+  assert.equal(request.headers.get("X-Client"), "my-app/1.2.3");
+  assert.match(request.headers.get("X-Library") ?? "", /^typescript teslemetry /);
+});
+
+test("no X-Client header is sent without the client option", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () => Response.json({}));
+  const teslemetry = new Teslemetry("fake-access-token", { logger: quietLogger });
+
+  await teslemetry.getRegion();
+
+  const request = fetchMock.mock.calls[0].arguments[0] as Request;
+  assert.equal(request.headers.has("X-Client"), false);
+});

@@ -1,6 +1,9 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { Teslemetry, TeslemetryStreamOptions } from "@teslemetry/api";
 import { createLogger, instances, getErrorMessage, Instance } from "../shared";
+import pkg from "../../package.json" with { type: "json" };
+
+const CLIENT = `${pkg.name}/${pkg.version}`;
 
 export interface TeslemetryConfigNodeDef extends NodeDef {
   token: string;
@@ -118,6 +121,7 @@ export default function (RED: NodeAPI) {
     if (this.credentials && this.credentials.token) {
       const teslemetry = new Teslemetry(this.credentials.token, {
         logger: createLogger(RED.log),
+        client: CLIENT,
         stream: streamOptions(config),
       });
 
@@ -212,7 +216,10 @@ export default function (RED: NodeAPI) {
         return;
       }
 
-      const teslemetry = new Teslemetry(token, { logger: createLogger(RED.log) });
+      const teslemetry = new Teslemetry(token, {
+        logger: createLogger(RED.log),
+        client: CLIENT,
+      });
       res.json(await testCredentials(teslemetry));
     },
   );
