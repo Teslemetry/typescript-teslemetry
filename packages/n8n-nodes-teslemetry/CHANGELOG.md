@@ -1,5 +1,11 @@
 # @teslemetry/n8n-nodes-teslemetry
 
+## 0.6.1
+
+### Patch Changes
+
+- 3d79f6a: Send an `X-Client` header with the package name and version on every Teslemetry API request.
+
 ## 0.6.0
 
 ### Minor Changes

@@ -1,5 +1,13 @@
 # @teslemetry/homebridge-teslemetry
 
+## 1.2.9
+
+### Patch Changes
+
+- 3d79f6a: Send an `X-Client` header with the package name and version on every Teslemetry API request.
+- Updated dependencies [3d79f6a]
+  - @teslemetry/api@0.15.0
+
 ## 1.2.8
 
 ### Patch Changes
