@@ -1,5 +1,11 @@
 # @teslemetry/api
 
+## 0.15.0
+
+### Minor Changes
+
+- 3d79f6a: Add a `client` option to the `Teslemetry` constructor. Set it to your app's name and version, such as `"my-app/1.2.3"`, and the SDK sends it as an `X-Client` header on every request. `X-Library` is unchanged.
+
 ## 0.14.0
 
 ### Minor Changes

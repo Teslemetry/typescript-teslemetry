@@ -1,5 +1,11 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.8.1
+
+### Patch Changes
+
+- 3d79f6a: Send an `X-Client` header with the package name and version on every Teslemetry API request.
+
 ## 0.8.0
 
 ### Minor Changes
