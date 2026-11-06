@@ -66,7 +66,7 @@ To make a change: branch, edit, `pnpm build`, `pnpm changeset`, commit (includin
 
 - `.github/workflows/reusable-ci.yml` is the one place for CI checks; `ci.yml` and `publish.yml`'s `validate` job both call it.
 - The `main` ruleset requires the two "Build, Lint & Typecheck" checks and CodeRabbit on PRs, but admins bypass it, so `publish.yml`'s `release` job must keep `needs: validate` in the same run. Do not inline CI steps into `publish.yml` or drop that gate.
-- The "chore: version packages" PR gets no CI run on its own, because pushes made with `GITHUB_TOKEN` start no workflows. Push an empty commit to `changeset-release/main` to start CI. A later merge to `main` rebuilds that branch and drops the commit, so confirm the checks ran on the current head.
+- `publish.yml` writes the "chore: version packages" PR with the release GitHub App token (`RELEASE_APP_ID`/`RELEASE_APP_PRIVATE_KEY`), because pushes made with `GITHUB_TOKEN` start no workflows and the PR would get no CI.
 - A package name's first release needs an npm org owner to register npm trusted publishing for that name (or publish the first version by hand); otherwise `changeset publish` fails for it.
 - `pnpm/action-setup` stays `@v4` with no `version:`, so it reads `packageManager`. A drifted pin makes `changeset publish` fall back to `npm publish` and fail with `EUNKNOWNCONFIG`.
 - On an `EBADENGINE` publish failure, compare `npm view npm@latest engines` with the workflow's `node-version` first.

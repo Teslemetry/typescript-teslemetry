@@ -22,8 +22,21 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
+      # Pushes and PRs made with GITHUB_TOKEN start no workflows, so the
+      # version PR is written with the app token to get CI.
+      - name: Mint Release App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
       - name: Checkout Repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -53,7 +66,7 @@ jobs:
           commit: "chore: version packages"
           title: "chore: version packages"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_CONFIG_PROVENANCE: true
 
       - name: Check for specific package releases
