@@ -36,7 +36,9 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
-          token: ${{ steps.app-token.outputs.token }}
+          # changesets/action writes its own .netrc from GITHUB_TOKEN; a persisted
+          # checkout credential would override it.
+          persist-credentials: false
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
