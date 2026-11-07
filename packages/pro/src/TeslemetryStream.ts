@@ -343,6 +343,10 @@ export class TeslemetryStream extends EventEmitter {
   private async _connectLoop(signal: AbortSignal) {
     let retries = 0;
     let authFailures = 0;
+    // The last `cursor` received, sent on each reconnect so the server's
+    // snapshot resumes after it. Scoped to this loop: a fresh connect() gets
+    // a full snapshot, and the vin and topics never change within one.
+    let cursor: number | undefined;
     while (this.active) {
       // The generated SSE client retries internally and never rethrows, so
       // limit it to a single attempt and capture its failure: every retry
@@ -356,6 +360,7 @@ export class TeslemetryStream extends EventEmitter {
           query: {
             cache: this.cloudCache,
             ...(this.topicsParam ? { topics: this.topicsParam } : {}),
+            ...(cursor !== undefined ? { cursor } : {}),
           },
           // The public spec publishes this route as the literal path
           // `/sse/{id}?`, so the generated `url` ends in a `?` and the query
@@ -389,6 +394,10 @@ export class TeslemetryStream extends EventEmitter {
             if (!this.active) break;
             retries = 0;
             authFailures = 0;
+            // Omitted on some events: keep the last value received.
+            if ("cursor" in event && typeof event.cursor === "number") {
+              cursor = event.cursor;
+            }
             this._dispatch(event);
           }
         }

@@ -506,3 +506,82 @@ test("cache.cloud alone decides the cache query, and a vin goes in the path", as
   assert.equal(url.searchParams.get("cache"), "false");
   assert.equal(url.searchParams.get("topics"), "state");
 });
+
+/** Runs `body` with every backoff wait (>= 1s) elapsing at once. */
+async function withInstantBackoff(body: () => Promise<void>): Promise<void> {
+  const realSetTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = ((fn: () => void, ms?: number) =>
+    realSetTimeout(fn, ms !== undefined && ms >= 1000 ? 0 : ms)) as typeof setTimeout;
+  try {
+    await body();
+  } finally {
+    globalThis.setTimeout = realSetTimeout;
+  }
+}
+
+const VIN = "TESTVIN0000000000";
+const createdAt = "2026-01-01T00:00:00.000Z";
+
+test("a reconnect sends the last cursor received, and the first connect none", async () => {
+  const urls: URL[] = [];
+  const teslemetry = makeTeslemetry(async (request) => {
+    urls.push(new URL(request.url));
+    if (urls.length === 1) {
+      // Ends cleanly, so the loop reconnects; the last event omits its cursor
+      return sseResponse([
+        { createdAt, vin: VIN, data: { BatteryLevel: 80 }, cursor: 4 },
+        { createdAt, vin: VIN, alerts: [], cursor: 7 },
+        { createdAt, vin: VIN, state: "online" },
+      ]);
+    }
+    return openSseResponse({ createdAt, vin: VIN, state: "online" });
+  });
+
+  await withInstantBackoff(async () => {
+    await teslemetry.sse.connect();
+    await waitFor(() => urls.length >= 2);
+    await teslemetry.sse.close();
+  });
+
+  assert.equal(urls[0].searchParams.has("cursor"), false);
+  assert.equal(urls[1].searchParams.get("cursor"), "7");
+});
+
+test("a reconnect sends no cursor when none was received", async () => {
+  const urls: URL[] = [];
+  const teslemetry = makeTeslemetry(async (request) => {
+    urls.push(new URL(request.url));
+    if (urls.length === 1) {
+      return sseResponse([{ createdAt, vin: VIN, state: "online" }]);
+    }
+    return openSseResponse({ createdAt, vin: VIN, state: "online" });
+  });
+
+  await withInstantBackoff(async () => {
+    await teslemetry.sse.connect();
+    await waitFor(() => urls.length >= 2);
+    await teslemetry.sse.close();
+  });
+
+  assert.equal(urls[1].searchParams.has("cursor"), false);
+});
+
+test("connect() after close() sends no cursor", async () => {
+  const urls: URL[] = [];
+  const teslemetry = makeTeslemetry(async (request) => {
+    urls.push(new URL(request.url));
+    return openSseResponse({ createdAt, vin: VIN, state: "online", cursor: 3 });
+  });
+
+  const states: string[] = [];
+  teslemetry.sse.on("state", (event) => states.push(event.state));
+
+  await teslemetry.sse.connect();
+  await waitFor(() => states.length >= 1);
+  await teslemetry.sse.close();
+  await teslemetry.sse.connect();
+  await waitFor(() => urls.length >= 2);
+  await teslemetry.sse.close();
+
+  assert.equal(urls[1].searchParams.has("cursor"), false);
+});

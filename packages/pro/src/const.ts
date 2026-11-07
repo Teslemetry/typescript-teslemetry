@@ -14,10 +14,13 @@ type ExtractSse<T> = Extract<GetSseById_Response, T>;
 
 export type SseEvent = GetSseById_Response;
 export type SseState = ExtractSse<{ state: any }>;
-export type SseData = ExtractSse<{ data: any }>;
-export type SseErrors = ExtractSse<{ errors: any }>;
-export type SseAlerts = ExtractSse<{ alerts: any }>;
-export type SseConnectivity = ExtractSse<{ networkInterface: any }>;
+/** The stream cache position of a vehicle event. It never goes backwards and
+ *  may be omitted, in which case the last value received still applies. */
+type SseCursor = { cursor?: number };
+export type SseData = ExtractSse<{ data: any }> & SseCursor;
+export type SseErrors = ExtractSse<{ errors: any }> & SseCursor;
+export type SseAlerts = ExtractSse<{ alerts: any }> & SseCursor;
+export type SseConnectivity = ExtractSse<{ networkInterface: any }> & SseCursor;
 export type SseCredits = ExtractSse<{ credits: any }>;
 export type SseVehicleData = ExtractSse<{ vehicle_data: any }>;
 export type SseConfig = ExtractSse<{ config: any }>;
