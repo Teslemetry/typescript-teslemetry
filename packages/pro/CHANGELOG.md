@@ -1,5 +1,11 @@
 # @teslemetry/pro
 
+## 0.1.2
+
+### Patch Changes
+
+- bb43c77: The stream now resumes from the last `cursor` received when it reconnects, so the server's snapshot starts after it instead of resending everything. Vehicle `data`, `alerts`, `errors` and `connectivity` event types carry the optional `cursor`.
+
 ## 0.1.1
 
 ### Patch Changes
