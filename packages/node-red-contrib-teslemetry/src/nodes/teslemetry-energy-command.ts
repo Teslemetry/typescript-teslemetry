@@ -5,6 +5,7 @@ import { catalogBody, CommandArg, resolveArgs, sendCatalogCommand } from "../cat
 import { validateParameters, ValidationRules } from "../validation";
 import { Msg } from "../types";
 import type { SiteCommands } from "../localPowerwall";
+import { localCommand } from "../localCommands";
 import type { TeslemetryLocalPowerwallNode } from "./teslemetry-local-powerwall";
 
 /**
@@ -289,9 +290,7 @@ export default function (RED: NodeAPI) {
               spec,
               await resolveArgs(RED, node, msg, node.command ? node.args : undefined),
             );
-            const toLocal = local
-              ? (await import("../localPowerwall")).localCommand(spec.name, body)
-              : undefined;
+            const toLocal = local ? localCommand(spec.name, body) : undefined;
             if (spec.paired) {
               const { energySites } = await instance.products;
               cloudCanRun = energySites[siteId]?.metadata.paired === true;
