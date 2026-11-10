@@ -174,7 +174,11 @@ test("the credentials check identifies the integration in the X-Client header", 
   const log = { debug() {}, info() {}, warn() {}, error() {} };
   registerConfigNode({
     nodes: { registerType() {} },
-    httpAdmin: { get() {}, post: (path: string, fn: Function) => posts.set(path, fn) },
+    auth: { needsPermission: () => () => {} },
+    httpAdmin: {
+      get() {},
+      post: (path: string, ...handlers: Function[]) => posts.set(path, handlers[handlers.length - 1]),
+    },
     log,
   } as any);
 
@@ -185,4 +189,28 @@ test("the credentials check identifies the integration in the X-Client header", 
 
   const request = fetchMock.mock.calls[0].arguments[0] as Request;
   assert.equal(request.headers.get("X-Client"), `${pkg.name}/${pkg.version}`);
+});
+
+test("every admin route requires a Node-RED editor permission", () => {
+  const routes = new Map<string, Function[]>();
+  const record = (method: string) => (path: string, ...handlers: Function[]) =>
+    routes.set(`${method} ${path}`, handlers);
+  registerConfigNode({
+    nodes: { registerType() {} },
+    auth: {
+      needsPermission: (permission: string) => Object.assign(() => {}, { permission }),
+    },
+    httpAdmin: { get: record("GET"), post: record("POST") },
+    log: { debug() {}, info() {}, warn() {}, error() {} },
+  } as any);
+
+  const permissions = Object.fromEntries(
+    [...routes].map(([route, handlers]) => [route, (handlers[0] as any).permission]),
+  );
+  assert.deepEqual(permissions, {
+    "GET /teslemetry/vehicles": "teslemetry-config.read",
+    "GET /teslemetry/energy_sites": "teslemetry-config.read",
+    "POST /teslemetry/test-credentials": "teslemetry-config.write",
+    "GET /teslemetry/fields": "teslemetry-config.read",
+  });
 });
