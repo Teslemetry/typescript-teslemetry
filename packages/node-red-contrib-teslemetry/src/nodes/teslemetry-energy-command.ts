@@ -76,7 +76,6 @@ export default function (RED: NodeAPI) {
     const instance = getInstance(config.teslemetryConfig, node);
     if (!instance) return;
 
-    const products = instance.products;
     node.teslemetry = instance.teslemetry;
     node.siteId = config.siteId;
     node.command = config.command;
@@ -96,7 +95,8 @@ export default function (RED: NodeAPI) {
         }
 
         if (PAIRED_COMMANDS.has(command)) {
-          const { energySites } = await products;
+          // Read at message time: a products retry replaces the promise.
+          const { energySites } = await instance.products;
           if (energySites[siteId]?.metadata.paired !== true) {
             throw new Error(NOT_PAIRED_MESSAGE);
           }

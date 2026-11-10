@@ -293,3 +293,42 @@ for (const command of ["dispatchBatteryPower", "resumeBatteryOperation"]) {
     });
   }
 }
+
+test("the paired check reads the products fetched after the node was created", async () => {
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-energy-command"];
+
+  let called = false;
+  const site = {
+    resumeBatteryOperation: async () => {
+      called = true;
+      return { response: {} };
+    },
+  };
+
+  const configId = `cfg-retry-test-${nextConfigId++}`;
+  const instance: Instance = {
+    teslemetry: { api: { getEnergySite: () => site } } as any,
+    products: Promise.resolve({ vehicles: {}, energySites: {} }),
+    error: "fetch failed",
+  };
+  instances.set(configId, instance);
+
+  const node = createFakeNode();
+  ctor.call(node, { teslemetryConfig: configId, siteId: "12345", command: "" });
+
+  // A later retry of the products fetch succeeds.
+  instance.products = Promise.resolve({
+    vehicles: {},
+    energySites: { "12345": { metadata: { paired: true } } },
+  } as any);
+  instance.error = undefined;
+
+  await node.handlers.input(
+    { command: "resumeBatteryOperation" } as unknown as Msg,
+    () => {},
+    failTo(node),
+  );
+  assert.equal(called, true);
+});
