@@ -238,4 +238,9 @@ test("the commands list leaves out commands for another vehicle model", () => {
   assert.ok(!list("5YJYGDEE0LF000000").includes("set_outlets"));
   assert.ok(list("7G2CEHED0RA000000").includes("set_outlets"));
   assert.ok(list().includes("set_outlets"));
+
+  let energy: { name: string }[] = [];
+  gets.get("/teslemetry/commands")!({ query: { product: "energy" } }, { json: (b: any) => (energy = b) });
+  assert.ok(energy.some((spec) => spec.name === "dispatch_battery_power"));
+  assert.ok(!energy.some((spec) => spec.name === "set_charge_limit"));
 });

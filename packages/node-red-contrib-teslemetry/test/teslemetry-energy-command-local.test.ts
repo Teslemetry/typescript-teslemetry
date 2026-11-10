@@ -49,7 +49,16 @@ async function runCommand(
   );
   const configId = `cfg-local-command-${nextConfigId++}`;
   instances.set(configId, {
-    teslemetry: { api: { getEnergySite: () => cloud } } as any,
+    teslemetry: {
+      api: { getEnergySite: () => cloud },
+      // Catalog commands go through the SDK's HTTP client.
+      client: {
+        request: async (options: { url: string; path: unknown; body?: unknown }) => {
+          cloudCalls.push([options.url, options.path, options.body]);
+          return { data: { response: { via: "cloud" } } };
+        },
+      },
+    } as any,
     products: Promise.resolve({
       vehicles: {},
       energySites: { "12345": { metadata: { paired: options.paired ?? true } } },
@@ -307,4 +316,59 @@ test("a gateway paired for another site is not sent this site's commands", async
   assert.deepEqual(run.cloudCalls, [["setBackupReserve", 40]]);
   assert.equal(gateway.logins.length, 0);
   assert.deepEqual(run.status, {});
+});
+
+const BACKUP = "/api/1/energy_sites/{id}/backup";
+
+test("a catalog command with a local form goes to a healthy gateway and not to the cloud", async () => {
+  const gateway = await startGateway();
+
+  const run = await runCommand(
+    { command: "backup", payload: { backup_reserve_percent: 40 } },
+    { host: gateway.host },
+  );
+
+  assert.deepEqual(run.errors, []);
+  assert.deepEqual(run.cloudCalls, []);
+  assert.equal(run.status.text, "local");
+});
+
+test("a catalog command goes to the cloud when the gateway does not answer", async () => {
+  const run = await runCommand(
+    { command: "backup", payload: { backup_reserve_percent: "40" } },
+    { host: DEAD_HOST },
+  );
+
+  assert.deepEqual(run.errors, []);
+  assert.deepEqual(run.cloudCalls, [[BACKUP, { id: 12345 }, { backup_reserve_percent: 40 }]]);
+  assert.equal(run.status.text, "cloud");
+});
+
+test("a paired catalog command is never sent to the cloud for a site that is not paired", async () => {
+  const viaGateway = await runCommand(
+    { command: "dispatch_battery_power", payload: { power_watts: 1000, duration_seconds: 60 } },
+    { host: DEAD_HOST, paired: false },
+  );
+  const noGateway = await runCommand(
+    { command: "dispatch_battery_power", payload: { power_watts: 1000, duration_seconds: 60 } },
+    { paired: false },
+  );
+
+  assert.equal(viaGateway.errors.length, 1);
+  assert.deepEqual(viaGateway.cloudCalls, []);
+  assert.match(noGateway.errors[0], /not paired/);
+  assert.deepEqual(noGateway.cloudCalls, []);
+});
+
+test("a catalog command the gateway does not take skips it", async () => {
+  const gateway = await startGateway();
+
+  const run = await runCommand(
+    { command: "storm_mode", payload: { enabled: true } },
+    { host: gateway.host },
+  );
+
+  assert.deepEqual(run.cloudCalls, [["/api/1/energy_sites/{id}/storm_mode", { id: 12345 }, { enabled: true }]]);
+  assert.equal(gateway.logins.length, 0);
+  assert.equal(run.status.text, "cloud");
 });

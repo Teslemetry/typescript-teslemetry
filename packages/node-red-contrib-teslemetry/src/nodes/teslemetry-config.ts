@@ -2,6 +2,7 @@ import { Node, NodeAPI, NodeDef } from "node-red";
 import {
   Teslemetry,
   TeslemetryStreamOptions,
+  ENERGY_COMMANDS,
   useTeslaModel,
   VEHICLE_COMMANDS,
 } from "@teslemetry/api";
@@ -214,7 +215,12 @@ export default function (RED: NodeAPI) {
   });
 
   // The vehicle model comes from the VIN, so a VIN filters the list without a request.
+  // Energy commands are filtered in the editor, which knows the node's Local gateway.
   RED.httpAdmin.get("/teslemetry/commands", canRead, (req: any, res: any) => {
+    if (req.query.product === "energy") {
+      res.json(Object.values(ENERGY_COMMANDS));
+      return;
+    }
     const vin = typeof req.query.vin === "string" ? req.query.vin : "";
     const model = vin ? useTeslaModel(vin) : undefined;
     res.json(
