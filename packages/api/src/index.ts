@@ -14,6 +14,8 @@ export { TeslemetryVehicleApi } from "./TeslemetryVehicleApi.js";
 export { TeslemetryEnergyApi } from "./TeslemetryEnergyApi.js";
 export * from "./const.js";
 export * from "./sseTopics.js";
+export { VEHICLE_COMMANDS, ENERGY_COMMANDS } from "./commands.js";
+export type { CommandField, CommandSpec } from "./commands.js";
 export * from "./exceptions.js";
 export type { EnergyDetails, VehicleDetails, Products } from "./const.js";
 export { getTariffPeriods } from "./tariff.js";

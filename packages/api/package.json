@@ -21,7 +21,7 @@
   "scripts": {
     "api": "pnpm build && node examples/api.ts",
     "sse": "pnpm build && node examples/sse.ts",
-    "client": "openapi-ts --file openapi-ts.config.ts",
+    "client": "openapi-ts --file openapi-ts.config.ts && tsx scripts/generate-command-catalog.ts",
     "verify:client": "tsx scripts/verify-public-client.ts",
     "build": "tsdown --format cjs,esm",
     "test": "tsx --test test/*.test.ts",
