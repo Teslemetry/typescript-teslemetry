@@ -64,7 +64,7 @@ Configuration node to store your Teslemetry Access Token.
 - **Replay last known values on connect**: Off by default, so nodes stay silent until a value next changes. When ticked, Teslemetry sends its last known state each time the stream connects or reconnects. Replayed events carry `isCache: true` in the payload of the event nodes; a Signal node outputs only the value, so a replayed value there has no marker.
 
 ### teslemetry-local-powerwall
-Configuration node that connects Node-RED to a Powerwall gateway on your local network. Node-RED must be on the same network as the gateway.
+Configuration node that connects Node-RED to a Powerwall gateway on your local network. Node-RED must be on the same network as the gateway. Pick it in the **Local gateway** field of an Energy Command node to send commands to the Powerwall without the internet.
 
 **Configuration:**
 - **Config**: Select your Teslemetry Config node
@@ -109,6 +109,7 @@ Send commands to a Tesla Energy Site or retrieve site status.
 
 **Configuration:**
 - **Site ID**: Select a site or leave empty to use `msg.siteId`.
+- **Local gateway**: Optional. A Teslemetry Local Powerwall config node. Backup reserve, operation mode, grid export, dispatch and resume then go to the gateway over your local network first, and through the cloud only if the gateway does not answer. The node status shows `local` or `cloud`.
 - **Command**: Select a command, or choose **From msg.command** to take it from each message.
 
 A site or command selected in the node always wins; `msg.siteId` and `msg.command` are only read when the matching dropdown is set to its **From msg…** option. Command arguments are read from the top level of the message, not from `msg.payload`.

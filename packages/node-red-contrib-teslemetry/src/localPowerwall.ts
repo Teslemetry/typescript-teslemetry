@@ -13,11 +13,13 @@ import {
 import {
   PowerwallAuthenticationError,
   PowerwallClient,
+  PowerwallEnergySite,
   PowerwallError,
   PowerwallKeyRejectedError,
   parse_authorized_clients,
   verify_local_gateway,
 } from "tesla-fleet-api/powerwall";
+import { EnergySiteRouter, is_failover_safe } from "tesla-fleet-api/router";
 
 export type CloudSite = ReturnType<Teslemetry["api"]["getEnergySite"]>;
 
@@ -149,4 +151,71 @@ function createClient({ host, password, privateKey }: GatewayCredentials) {
       format: "pem",
     }) as string,
   });
+}
+
+/** The commands a gateway takes locally, under the names both backends share. */
+export interface SiteCommands {
+  backup(percent: number): Promise<{ response?: unknown }>;
+  operation(
+    mode: "self_consumption" | "backup" | "autonomous",
+  ): Promise<{ response?: unknown }>;
+  grid_import_export(
+    disallowGridCharging: boolean | null,
+    exportRule: "battery_ok" | "pv_only" | "never",
+  ): Promise<{ response?: unknown }>;
+  dispatch_battery_power(
+    powerWatts: number,
+    durationSeconds: number,
+  ): Promise<{ response?: unknown }>;
+  resume_battery_operation(): Promise<{ response?: unknown }>;
+}
+
+export type LocalSite = PowerwallEnergySite;
+
+/** A gateway connection that lives as long as its config node. */
+export function createLocalSite(credentials: GatewayCredentials): LocalSite {
+  return new PowerwallEnergySite(createClient(credentials));
+}
+
+export interface Sent {
+  result: { response?: unknown };
+  path: "local" | "cloud";
+  /** Why the gateway gave no answer, when the cloud ran the command instead. */
+  failover?: string;
+}
+
+/**
+ * Send a command to the gateway, and to the cloud only when the gateway gave
+ * no answer. A gateway that answers and refuses is final: the cloud reaches
+ * the same gateway.
+ * @param cloud The fallback, or null when the cloud cannot run this command
+ */
+export async function sendLocalFirst<M extends keyof SiteCommands>(
+  local: LocalSite,
+  cloud: SiteCommands | null,
+  method: M,
+  args: Parameters<SiteCommands[M]>,
+): Promise<Sent> {
+  const call = (backend: object) =>
+    (backend as Record<string, (...a: unknown[]) => Promise<any>>)[method](
+      ...args,
+    );
+  if (!cloud) return { result: await call(local), path: "local" };
+
+  let path: Sent["path"] = "local";
+  let failover: string | undefined;
+  const router = new EnergySiteRouter([local, cloud], {
+    on_result: (error, backend) => {
+      if (error === null) {
+        path = backend === local ? "local" : "cloud";
+        return true;
+      }
+      const safe = is_failover_safe(error);
+      if (safe && backend === local) {
+        failover = error instanceof Error ? error.message : String(error);
+      }
+      return safe;
+    },
+  });
+  return { result: await call(router), path, failover };
 }

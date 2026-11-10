@@ -1,6 +1,6 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { getErrorMessage, instances } from "../shared";
-import type { GatewayCredentials } from "../localPowerwall";
+import type { GatewayCredentials, LocalSite } from "../localPowerwall";
 
 export interface TeslemetryLocalPowerwallNodeDef extends NodeDef {
   teslemetryConfig: string;
@@ -10,6 +10,9 @@ export interface TeslemetryLocalPowerwallNodeDef extends NodeDef {
 
 export interface TeslemetryLocalPowerwallNode extends Node {
   credentials: { password: string; privateKey: string };
+  siteId: string;
+  /** The gateway connection, opened on first use. Undefined until the node is fully set up. */
+  local?: () => Promise<LocalSite>;
 }
 
 /** What the editor holds in a password field whose saved value it was never sent. */
@@ -24,6 +27,19 @@ export default function (RED: NodeAPI) {
     config: TeslemetryLocalPowerwallNodeDef,
   ) {
     RED.nodes.createNode(this, config);
+    this.siteId = config.siteId;
+    const { password, privateKey } = this.credentials ?? {};
+    if (!config.host || !password || !privateKey) return;
+
+    let site: Promise<LocalSite> | undefined;
+    this.local = () =>
+      (site ??= import("../localPowerwall").then((local) =>
+        local.createLocalSite({ host: config.host, password, privateKey }),
+      ));
+    this.on("close", (done: () => void) => {
+      site?.then((local) => local.powerwall.close()).catch(() => {});
+      done();
+    });
   }
   // Both are password-type credentials: Node-RED stores them outside the
   // flow, leaves them out of exports and never sends them back to the editor.
