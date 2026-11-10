@@ -10,6 +10,7 @@ const fakeLoadOptionsContext = {
   getNode: () => fakeNode,
   logger: fakeLogger().logger,
   helpers: fakeHelpers,
+  getCurrentNodeParameter: () => undefined,
 } as never;
 
 test("TeslemetryVehicle.getVins calls a real TeslemetryApi method (regression: api.vehicles() is not a function)", async () => {
@@ -46,6 +47,33 @@ test("TeslemetryEnergy.getSites calls a real TeslemetryApi method (regression: a
   );
 
   assert.deepEqual(options, [{ name: "Home (123)", value: 123 }]);
+});
+
+test("TeslemetryEnergy.getSites lists only sites with Teslemetry's key verified on the gateway for battery dispatch", async () => {
+  const node = new TeslemetryEnergy();
+  for (const operation of ["dispatchBatteryPower", "resumeBatteryOperation"]) {
+    const context = { ...(fakeLoadOptionsContext as object), getCurrentNodeParameter: () => operation } as never;
+    const options = await withMockedFetch(
+      (request) =>
+        new Response(
+          JSON.stringify(
+            new URL(request.url).pathname === "/api/metadata"
+              ? { energy_sites: { "1": { paired: true }, "2": { paired: false }, "3": { paired: null } } }
+              : {
+                  response: [1, 2, 3, 4].map((id) => ({
+                    energy_site_id: id,
+                    site_name: `Site ${id}`,
+                    resource_type: "battery",
+                  })),
+                },
+          ),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      () => node.methods.loadOptions.getSites.call(context),
+    );
+
+    assert.deepEqual(options, [{ name: "Site 1 (1)", value: 1 }], operation);
+  }
 });
 
 test("TeslemetryTrigger.getVins calls a real TeslemetryApi method (regression: api.vehicles() is not a function)", async () => {

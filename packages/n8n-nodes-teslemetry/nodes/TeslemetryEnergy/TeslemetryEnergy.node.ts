@@ -12,6 +12,11 @@ import {
 } from 'n8n-workflow';
 import { errorText, loadOptions, siteOptions, teslemetryRequest, toNodeError } from '../shared';
 
+type Metadata = { energy_sites?: Record<string, { paired?: boolean | null }> };
+
+// Signed gateway commands: Teslemetry's key must be verified on the gateway.
+const DISPATCH_OPERATIONS = ['dispatchBatteryPower', 'resumeBatteryOperation'];
+
 type SiteInfo = { response?: { tariff_id?: unknown; tariff_content?: unknown; tariff_content_v2?: unknown } };
 
 // Each operation's request, relative to /api/1/energy_sites/{id}/.
@@ -81,6 +86,7 @@ export class TeslemetryEnergy implements INodeType {
 				type: 'options',
 				typeOptions: {
 					loadOptionsMethod: 'getSites',
+					loadOptionsDependsOn: ['operation'],
 				},
 				default: '',
 				required: true,
@@ -145,12 +151,13 @@ export class TeslemetryEnergy implements INodeType {
 						name: 'Dispatch Battery Power',
 						value: 'dispatchBatteryPower',
 						action: 'Dispatch battery power',
+						description: "Lists only sites with Teslemetry's key verified on the gateway",
 					},
 					{
 						name: 'Resume Battery Operation',
 						value: 'resumeBatteryOperation',
 						action: 'Resume normal battery operation',
-						description: 'End a battery power dispatch early',
+						description: "End a battery power dispatch early. Lists only sites with Teslemetry's key verified on the gateway.",
 					},
 					{
 						name: 'Set Backup Reserve',
@@ -292,7 +299,12 @@ export class TeslemetryEnergy implements INodeType {
 	methods = {
 		loadOptions: {
 			async getSites(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				return loadOptions(this, () => siteOptions(this));
+				return loadOptions(this, async () => {
+					const sites = await siteOptions(this);
+					if (!DISPATCH_OPERATIONS.includes(this.getCurrentNodeParameter('operation') as string)) return sites;
+					const { energy_sites } = await teslemetryRequest<Metadata>(this, 'GET', '/api/metadata');
+					return sites.filter((site) => energy_sites?.[String(site.value)]?.paired === true);
+				});
 			},
 		},
 	};
