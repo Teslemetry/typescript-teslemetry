@@ -33,7 +33,7 @@ let nextConfigId = 0;
 /** Run one command on a node whose Local gateway is `host`, for site 12345. */
 async function runCommand(
   msg: Partial<Msg>,
-  options: { host?: string; paired?: boolean; gatewaySiteId?: string },
+  options: { host?: string; paired?: boolean; gatewaySiteId?: string; route?: string },
 ) {
   const cloudCalls: unknown[][] = [];
   const cloud = new Proxy(
@@ -115,6 +115,7 @@ async function runCommand(
     siteId: "12345",
     command: "",
     localGateway: options.host ? "gateway-1" : undefined,
+    route: options.route,
   });
   await node.handlers.input(
     msg as Msg,
@@ -385,4 +386,71 @@ test("a catalog command the gateway does not take skips it", async () => {
   assert.deepEqual(run.cloudCalls, [["/api/1/energy_sites/{id}/storm_mode", { id: 12345 }, { enabled: true }]]);
   assert.equal(gateway.logins.length, 0);
   assert.equal(run.status.text, "cloud");
+});
+
+test("Local only never reaches the cloud, even when the gateway does not answer", async () => {
+  const legacy = await runCommand(
+    { command: "setBackupReserve", percentage: 40 },
+    { host: DEAD_HOST, route: "local" },
+  );
+  const catalog = await runCommand(
+    { command: "backup", payload: { backup_reserve_percent: 40 } },
+    { host: DEAD_HOST, route: "local" },
+  );
+
+  assert.equal(legacy.errors.length, 1);
+  assert.equal(catalog.errors.length, 1);
+  assert.deepEqual([...legacy.cloudCalls, ...catalog.cloudCalls], []);
+});
+
+test("Local only refuses a command the gateway does not take", async () => {
+  const gateway = await startGateway();
+
+  const legacy = await runCommand({ command: "setStormModeOn" }, { host: gateway.host, route: "local" });
+  const catalog = await runCommand(
+    { command: "storm_mode", payload: { enabled: true } },
+    { host: gateway.host, route: "local" },
+  );
+
+  assert.match(legacy.errors[0], /does not take this command/);
+  assert.match(catalog.errors[0], /does not take this command/);
+  assert.deepEqual([...legacy.cloudCalls, ...catalog.cloudCalls], []);
+});
+
+test("Local only without a gateway for the site fails", async () => {
+  const run = await runCommand({ command: "setBackupReserve", percentage: 40 }, { route: "local" });
+
+  assert.match(run.errors[0], /no Local gateway/);
+  assert.deepEqual(run.cloudCalls, []);
+});
+
+test("Local only sends a command with a local form to the gateway", async () => {
+  const gateway = await startGateway();
+
+  const run = await runCommand(
+    { command: "backup", payload: { backup_reserve_percent: 40 } },
+    { host: gateway.host, route: "local", paired: false },
+  );
+
+  assert.deepEqual(run.errors, []);
+  assert.deepEqual(run.cloudCalls, []);
+  assert.equal(run.status.text, "local");
+});
+
+test("Cloud only skips a healthy gateway and still needs the site paired", async () => {
+  const gateway = await startGateway();
+
+  const backup = await runCommand(
+    { command: "setBackupReserve", percentage: 40 },
+    { host: gateway.host, route: "cloud" },
+  );
+  const dispatch = await runCommand(
+    { command: "dispatch_battery_power", payload: { power_watts: 1000, duration_seconds: 60 } },
+    { host: gateway.host, route: "cloud", paired: false },
+  );
+
+  assert.deepEqual(backup.cloudCalls, [["setBackupReserve", 40]]);
+  assert.equal(gateway.logins.length, 0);
+  assert.match(dispatch.errors[0], /not paired/);
+  assert.deepEqual(dispatch.cloudCalls, []);
 });

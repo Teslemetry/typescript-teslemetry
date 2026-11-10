@@ -60,6 +60,18 @@ const PAIRED_COMMANDS = new Set([
   "reconnectGrid",
 ]);
 
+export type Route = "auto" | "local" | "cloud";
+
+export const NO_GATEWAY_MESSAGE =
+  "Route is Local only, but this node has no Local gateway for this energy site";
+export const NO_LOCAL_FORM_MESSAGE =
+  "Route is Local only, and the gateway does not take this command";
+
+/** Stands in for the cloud on a Local only node, so a command with no local form fails instead of reaching the cloud. */
+const NO_CLOUD = new Proxy({} as CloudSite, {
+  get: () => () => Promise.reject(new Error(NO_LOCAL_FORM_MESSAGE)),
+});
+
 export const NOT_PAIRED_MESSAGE =
   "This energy site is not paired: set a Local gateway for it on this node, or verify Teslemetry's key on the gateway from the Teslemetry console";
 
@@ -86,6 +98,8 @@ export interface TeslemetryEnergyCommandNodeDef extends NodeDef {
   command: string;
   /** A Teslemetry Local Powerwall config node. Absent on nodes saved before the field existed. */
   localGateway?: string;
+  /** Absent on nodes saved before the field existed, which behave as "auto". */
+  route?: Route;
   args?: Record<string, CommandArg>;
 }
 
@@ -122,7 +136,9 @@ export default function (RED: NodeAPI) {
     node.on("input", async function (msg: Msg, send, done) {
       const siteId: string = node.siteId || (msg.siteId as string) || "";
       const command: string = node.command || (msg.command as string) || "";
-      const site = node.teslemetry!.api.getEnergySite(Number(siteId));
+      const route: Route = config.route || "auto";
+      const site =
+        route === "local" ? NO_CLOUD : node.teslemetry!.api.getEnergySite(Number(siteId));
 
       try {
         if (!siteId) {
@@ -134,12 +150,15 @@ export default function (RED: NodeAPI) {
 
         // A gateway only takes commands for its own site.
         const local =
-          gateway?.siteId === String(siteId) ? gateway.local : undefined;
-        let cloudCanRun = true;
+          route !== "cloud" && gateway?.siteId === String(siteId)
+            ? gateway.local
+            : undefined;
+        if (route === "local" && !local) throw new Error(NO_GATEWAY_MESSAGE);
+        let cloudCanRun = route !== "local";
         if (PAIRED_COMMANDS.has(command)) {
           // Read at message time: a products retry replaces the promise.
           const { energySites } = await instance.products;
-          cloudCanRun = energySites[siteId]?.metadata.paired === true;
+          cloudCanRun &&= energySites[siteId]?.metadata.paired === true;
           if (!cloudCanRun && !local) {
             throw new Error(NOT_PAIRED_MESSAGE);
           }
@@ -291,9 +310,10 @@ export default function (RED: NodeAPI) {
               await resolveArgs(RED, node, msg, node.command ? node.args : undefined),
             );
             const toLocal = local ? localCommand(spec.name, body) : undefined;
+            if (route === "local" && !toLocal) throw new Error(NO_LOCAL_FORM_MESSAGE);
             if (spec.paired) {
               const { energySites } = await instance.products;
-              cloudCanRun = energySites[siteId]?.metadata.paired === true;
+              cloudCanRun &&= energySites[siteId]?.metadata.paired === true;
               if (!cloudCanRun && !toLocal) throw new Error(NOT_PAIRED_MESSAGE);
             }
             const sendCloud = () =>

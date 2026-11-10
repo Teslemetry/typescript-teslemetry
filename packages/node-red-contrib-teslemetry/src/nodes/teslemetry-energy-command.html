@@ -20,6 +20,7 @@
                 type: "teslemetry-local-powerwall",
                 required: false,
             },
+            route: { value: "auto" },
             command: { value: "live_status" },
             args: { value: {} },
         },
@@ -27,7 +28,13 @@
         outputs: 1,
         icon: "font-awesome/fa-bolt",
         label: function () {
-            return this.name || "Energy: " + (this.command || "msg.command");
+            const route = { local: " (local only)", cloud: " (cloud only)" };
+            return (
+                this.name ||
+                "Energy: " +
+                    (this.command || "msg.command") +
+                    (route[this.route] || "")
+            );
         },
         oneditprepare: function () {
             const node = this;
@@ -37,6 +44,7 @@
             let catalog = {};
 
             const gatewayInput = $("#node-input-localGateway");
+            const routeSelect = $("#node-input-route");
 
             // Commands that need `paired` need a key the gateway trusts:
             // Teslemetry's (the site is paired), or Node-RED's own through a
@@ -44,20 +52,27 @@
             // gateway takes. They are greyed out otherwise. With "From msg.siteId" the site is unknown here; the
             // node refuses at runtime instead. The selected option is never
             // disabled: jQuery's val() returns null for a disabled one,
-            // which would clear the saved command on Done.
+            // which would clear the saved command on Done. Local only greys
+            // out every command the gateway does not take.
             function updateCommands() {
+                const route = routeSelect.val();
+                $("#node-input-row-localGateway").toggle(route !== "cloud");
                 const siteId = siteSelect.val();
                 const gateway = RED.nodes.node(gatewayInput.val());
-                const local = !!gateway && gateway.siteId === siteId;
+                const local =
+                    route !== "cloud" && !!gateway && gateway.siteId === siteId;
                 const unpaired = !!siteId && paired[siteId] !== true;
                 $("#node-input-command option").each(function () {
                     const spec = catalog[this.value];
                     // The earlier paired-only names all have a local form.
                     const legacy = $(this).hasClass("teslemetry-paired-only");
+                    const takesLocal = legacy || (spec && spec.local);
                     const needsKey = legacy || (spec && spec.paired);
-                    const viaGateway = local && (legacy || (spec && spec.local));
-                    this.disabled =
-                        unpaired && needsKey && !viaGateway && !this.selected;
+                    const blocked =
+                        route === "local"
+                            ? this.value !== "" && !takesLocal
+                            : unpaired && needsKey && !(local && takesLocal);
+                    this.disabled = blocked && !this.selected;
                 });
             }
 
@@ -112,6 +127,7 @@
             });
             siteSelect.change(updateCommands);
             gatewayInput.change(updateCommands);
+            routeSelect.change(updateCommands);
 
             if (configInput.val()) {
                 updateSites();
@@ -144,6 +160,16 @@
         </select>
     </div>
     <div class="form-row">
+        <label for="node-input-route">
+            <i class="fa fa-random"></i> Route
+        </label>
+        <select id="node-input-route" style="width: 70%;">
+            <option value="auto">Automatic (local gateway first, then cloud)</option>
+            <option value="local">Local only (never the cloud)</option>
+            <option value="cloud">Cloud only (never the local network)</option>
+        </select>
+    </div>
+    <div class="form-row" id="node-input-row-localGateway">
         <label for="node-input-localGateway">
             <i class="fa fa-server"></i> Local gateway
         </label>
@@ -207,6 +233,14 @@
 <script type="text/html" data-help-name="teslemetry-energy-command">
     <p>Interacts with an Energy Site via Teslemetry API.</p>
     <p>Requires a valid Teslemetry configuration and a Site ID.</p>
+
+    <h3>Route</h3>
+    <p>
+        <b>Automatic</b> sends to the Local gateway first and to the cloud only
+        when the gateway gives no answer. <b>Local only</b> never uses the
+        cloud and fails when the gateway does not answer or does not take the
+        command. <b>Cloud only</b> never uses the local network.
+    </p>
 
     <h3>Inputs</h3>
     <dl class="message-properties">
