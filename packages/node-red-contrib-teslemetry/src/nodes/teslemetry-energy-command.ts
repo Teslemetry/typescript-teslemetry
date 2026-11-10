@@ -3,6 +3,8 @@ import { Teslemetry } from "@teslemetry/api";
 import { failInput, getInstance } from "../shared";
 import { validateParameters, ValidationRules } from "../validation";
 import { Msg } from "../types";
+import type { SiteCommands } from "../localPowerwall";
+import type { TeslemetryLocalPowerwallNode } from "./teslemetry-local-powerwall";
 
 /**
  * Required top-level shape of `tesla-fleet-api`'s `TariffContentV2` type
@@ -46,17 +48,35 @@ function normalizeTariffContentV2(tariff: Record<string, any>) {
   return normalized;
 }
 
-/** Dispatch and resume are signed with Teslemetry's key, so the api refuses them
- *  until that key is verified on the gateway (metadata `paired`). */
+/** Dispatch and resume must be signed. The cloud signs them with Teslemetry's
+ *  key, so it refuses them until that key is verified on the gateway (metadata
+ *  `paired`); a local gateway signs them with Node-RED's own key. */
 const PAIRED_COMMANDS = new Set(["dispatchBatteryPower", "resumeBatteryOperation"]);
 
 export const NOT_PAIRED_MESSAGE =
-  "This energy site is not paired with Teslemetry: verify Teslemetry's key on the gateway from the Teslemetry console";
+  "This energy site is not paired: set a Local gateway for it on this node, or verify Teslemetry's key on the gateway from the Teslemetry console";
+
+type CloudSite = ReturnType<Teslemetry["api"]["getEnergySite"]>;
+
+/** The cloud's form of the commands a local gateway also takes. */
+function cloudCommands(site: CloudSite): SiteCommands {
+  return {
+    backup: (percent) => site.setBackupReserve(percent),
+    operation: (mode) => site.setOperationMode(mode),
+    grid_import_export: (disallowGridCharging, exportRule) =>
+      site.gridImportExport(exportRule, disallowGridCharging ?? undefined),
+    dispatch_battery_power: (powerWatts, durationSeconds) =>
+      site.dispatchBatteryPower(powerWatts, durationSeconds),
+    resume_battery_operation: () => site.resumeBatteryOperation(),
+  };
+}
 
 export interface TeslemetryEnergyCommandNodeDef extends NodeDef {
   teslemetryConfig: string;
   siteId: string;
   command: string;
+  /** A Teslemetry Local Powerwall config node. Absent on nodes saved before the field existed. */
+  localGateway?: string;
 }
 
 export interface TeslemetryEnergyCommandNode extends Node {
@@ -81,6 +101,12 @@ export default function (RED: NodeAPI) {
     node.command = config.command;
     node.status({});
 
+    const gateway = config.localGateway
+      ? (RED.nodes.getNode(config.localGateway) as
+          | TeslemetryLocalPowerwallNode
+          | undefined)
+      : undefined;
+
     node.on("input", async function (msg: Msg, send, done) {
       const siteId: string = node.siteId || (msg.siteId as string) || "";
       const command: string = node.command || (msg.command as string) || "";
@@ -94,15 +120,46 @@ export default function (RED: NodeAPI) {
           throw new Error("No Energy Command provided");
         }
 
+        // A gateway only takes commands for its own site.
+        const local =
+          gateway?.siteId === String(siteId) ? gateway.local : undefined;
+        let cloudCanRun = true;
         if (PAIRED_COMMANDS.has(command)) {
           // Read at message time: a products retry replaces the promise.
           const { energySites } = await instance.products;
-          if (energySites[siteId]?.metadata.paired !== true) {
+          cloudCanRun = energySites[siteId]?.metadata.paired === true;
+          if (!cloudCanRun && !local) {
             throw new Error(NOT_PAIRED_MESSAGE);
           }
         }
 
         node.status({ fill: "blue", shape: "dot", text: "running command" });
+
+        const cloud = cloudCommands(site);
+        let path: "local" | "cloud" = "cloud";
+        /** Local first when this node has a gateway for the site, else the cloud. */
+        const run = async <M extends keyof SiteCommands>(
+          method: M,
+          ...args: Parameters<SiteCommands[M]>
+        ): Promise<{ response?: any }> => {
+          if (!local) {
+            return (cloud[method] as (...a: unknown[]) => Promise<any>)(...args);
+          }
+          const { sendLocalFirst } = await import("../localPowerwall");
+          const sent = await sendLocalFirst(
+            await local(),
+            cloudCanRun ? cloud : null,
+            method,
+            args,
+          );
+          path = sent.path;
+          if (sent.failover) {
+            node.warn(
+              `The local gateway did not answer (${sent.failover}); the command was sent through the cloud`,
+            );
+          }
+          return sent.result;
+        };
 
         let result: { response?: any };
 
@@ -125,16 +182,16 @@ export default function (RED: NodeAPI) {
                 max: 100,
               },
             });
-            result = await site.setBackupReserve(msg.percentage);
+            result = await run("backup", msg.percentage);
             break;
           case "setOperationModeSelfConsumption":
-            result = await site.setOperationMode("self_consumption");
+            result = await run("operation", "self_consumption");
             break;
           case "setOperationModeBackup":
-            result = await site.setOperationMode("backup");
+            result = await run("operation", "backup");
             break;
           case "setOperationModeAutonomous":
-            result = await site.setOperationMode("autonomous");
+            result = await run("operation", "autonomous");
             break;
           case "setStormModeOn":
             result = await site.setStormMode(true);
@@ -143,13 +200,13 @@ export default function (RED: NodeAPI) {
             result = await site.setStormMode(false);
             break;
           case "gridExportEverything":
-            result = await site.gridImportExport("battery_ok");
+            result = await run("grid_import_export", null, "battery_ok");
             break;
           case "gridExportSolar":
-            result = await site.gridImportExport("pv_only");
+            result = await run("grid_import_export", null, "pv_only");
             break;
           case "gridExportNothing":
-            result = await site.gridImportExport("never");
+            result = await run("grid_import_export", null, "never");
             break;
           case "setOffGridVehicleChargingReserve":
             validateParameters(msg, {
@@ -186,20 +243,22 @@ export default function (RED: NodeAPI) {
                 max: 86400,
               },
             });
-            result = await site.dispatchBatteryPower(
+            result = await run(
+              "dispatch_battery_power",
               Number(msg.powerWatts),
               Number(msg.durationSeconds),
             );
             break;
           case "resumeBatteryOperation":
-            result = await site.resumeBatteryOperation();
+            result = await run("resume_battery_operation");
             break;
           default:
             throw new Error(`Unknown command: ${command}`);
         }
 
         msg.payload = result.response;
-        node.status({});
+        // With a gateway on this node, say which path ran the command.
+        node.status(local ? { fill: "green", shape: "dot", text: path } : {});
         send(msg);
         done();
       } catch (err: unknown) {

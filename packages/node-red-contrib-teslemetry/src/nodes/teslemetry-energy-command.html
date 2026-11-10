@@ -11,6 +11,11 @@
                 required: true,
             },
             siteId: { value: "" },
+            localGateway: {
+                value: "",
+                type: "teslemetry-local-powerwall",
+                required: false,
+            },
             command: { value: "getLiveStatus" },
         },
         inputs: 1,
@@ -28,15 +33,21 @@
             );
             const paired = {};
 
-            // Dispatch and resume need Teslemetry's key verified on the
-            // gateway, so they are greyed out for a site that is not paired.
-            // With "From msg.siteId" the site is unknown here; the node
-            // refuses an unpaired site at runtime instead. The selected option
-            // is never disabled: jQuery's val() returns null for a disabled
-            // one, which would clear the saved command on Done.
+            const gatewayInput = $("#node-input-localGateway");
+
+            // Dispatch and resume need a key the gateway trusts: Node-RED's
+            // own through a local gateway for the site, or Teslemetry's
+            // (the site is paired). They are greyed out for a site with
+            // neither. With "From msg.siteId" the site is unknown here; the
+            // node refuses at runtime instead. The selected option is never
+            // disabled: jQuery's val() returns null for a disabled one,
+            // which would clear the saved command on Done.
             function updateCommands() {
                 const siteId = siteSelect.val();
-                const unpaired = !!siteId && paired[siteId] !== true;
+                const gateway = RED.nodes.node(gatewayInput.val());
+                const local = !!gateway && gateway.siteId === siteId;
+                const unpaired =
+                    !!siteId && paired[siteId] !== true && !local;
                 pairedOnly.each(function () {
                     this.disabled = unpaired && !this.selected;
                 });
@@ -84,6 +95,7 @@
                 updateSites();
             });
             siteSelect.change(updateCommands);
+            gatewayInput.change(updateCommands);
 
             if (configInput.val()) {
                 updateSites();
@@ -110,6 +122,12 @@
         <select id="node-input-siteId" style="width: 70%;">
             <option value="">From msg.siteId</option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-localGateway">
+            <i class="fa fa-server"></i> Local gateway
+        </label>
+        <input type="text" id="node-input-localGateway" />
     </div>
     <div class="form-row">
         <label for="node-input-command">
@@ -142,7 +160,7 @@
                 <option value="gridExportSolar">Export Solar</option>
                 <option value="gridExportNothing">Export Nothing</option>
             </optgroup>
-            <optgroup label="Battery Dispatch (paired sites only)">
+            <optgroup label="Battery Dispatch (local gateway or paired site)">
                 <option
                     class="teslemetry-paired-only"
                     value="dispatchBatteryPower"
@@ -224,13 +242,36 @@
         </dd>
     </dl>
 
+    <h3>Local gateway</h3>
+    <p>
+        Optional. Pick a <b>Teslemetry Local Powerwall</b> config node to send
+        commands to the Powerwall gateway over your local network. The
+        messages in and out stay the same. These commands go to the gateway
+        first: backup reserve, the three operation modes, the three grid
+        export rules, dispatch and resume. If the gateway does not answer,
+        the command is sent through the Teslemetry cloud instead and the
+        node logs a warning. If the gateway answers and refuses, the node
+        reports that error and does not try the cloud. A command that went
+        to the cloud after the gateway timed out may have run twice.
+    </p>
+    <p>
+        Every other command goes through the cloud as before. The gateway is
+        only used for its own energy site. With a local gateway set, the
+        status under the node shows <code>local</code> or <code>cloud</code>
+        for the path the last command took.
+    </p>
+
     <h3>Battery dispatch</h3>
     <p>
-        Dispatch and resume are sent through the Teslemetry cloud, so the
-        site must be paired: Teslemetry's key verified on the gateway from the
-        Teslemetry console. The two commands are greyed out for a site that
-        is not paired, and the node refuses them at runtime with an error for
-        a site that is not paired.
+        Dispatch and resume must be signed with a key the gateway trusts.
+        With a local gateway they are signed with Node-RED's own key and
+        work without the internet. Without one they go through the
+        Teslemetry cloud, which needs the site paired: Teslemetry's key
+        verified on the gateway from the Teslemetry console. The two
+        commands are greyed out for a site that has neither, and the node
+        refuses them at runtime with an error. For a site that is not
+        paired, dispatch and resume are never sent to the cloud, so they
+        fail if the local gateway does not answer.
     </p>
 
     <h3>Outputs</h3>
