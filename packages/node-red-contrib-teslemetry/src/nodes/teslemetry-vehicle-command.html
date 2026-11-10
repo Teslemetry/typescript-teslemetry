@@ -1,17 +1,8 @@
+<script
+    type="text/javascript"
+    src="resources/@teslemetry/node-red-contrib-teslemetry/command-editor.js"
+></script>
 <script type="text/javascript">
-(function () {
-    function readArgs() {
-        const args = {};
-        $("#node-input-args-container input.teslemetry-arg").each(function () {
-            const input = $(this);
-            args[input.data("field")] = {
-                type: input.typedInput("type"),
-                value: input.typedInput("value"),
-            };
-        });
-        return args;
-    }
-
     RED.nodes.registerType("teslemetry-vehicle-command", {
         category: "Teslemetry Vehicle",
         paletteLabel: "Command",
@@ -37,129 +28,8 @@
             const node = this;
             const vinSelect = $("#node-input-vin");
             const configInput = $("#node-input-teslemetryConfig");
-            const commandSelect = $("#node-input-command");
-            const badge = $("#node-input-command-badge");
-            const argsContainer = $("#node-input-args-container");
-            let catalog = {};
-            // Field settings survive switching to another command and back.
-            const args = { [node.command]: node.args || {} };
-
-            // Earlier names stay listed only when this node is saved with one.
-            $("#node-input-command-earlier option")
-                .filter(function () {
-                    return this.value !== node.command;
-                })
-                .remove();
-            if (!$("#node-input-command-earlier option").length) {
-                $("#node-input-command-earlier").remove();
-            }
-
-            function hint(field) {
-                const parts = [];
-                if (field.required) parts.push("required");
-                if (field.min !== undefined || field.max !== undefined) {
-                    parts.push(
-                        (field.min ?? "") + " to " + (field.max ?? ""),
-                    );
-                }
-                if (field.default !== undefined) {
-                    parts.push("default " + JSON.stringify(field.default));
-                }
-                return parts.join(", ");
-            }
-
-            function fieldTypes(field) {
-                const context = ["msg", "flow", "global", "env", "jsonata"];
-                if (field.enum) {
-                    return [
-                        {
-                            value: "enum",
-                            label: "value",
-                            options: field.enum,
-                        },
-                    ].concat(context);
-                }
-                if (field.type === "number") return ["num"].concat(context);
-                if (field.type === "boolean") return ["bool"].concat(context);
-                if (field.type === "string") return ["str"].concat(context);
-                return ["json"].concat(context);
-            }
-
-            function showFields() {
-                const shown = argsContainer.data("command");
-                if (shown) args[shown] = readArgs();
-                const command = commandSelect.val();
-                const spec = catalog[command];
-                argsContainer.empty().removeData("command");
-                badge.text(spec && spec.badge ? spec.badge : "");
-                if (!spec) return;
-                argsContainer.data("command", command);
-                const saved = args[command] || {};
-                spec.fields.forEach(function (field) {
-                    const row = $('<div class="form-row"></div>');
-                    $("<label></label>")
-                        .text(field.name)
-                        .attr("title", field.name + (field.description ? ": " + field.description : ""))
-                        .css({ overflow: "hidden", "text-overflow": "ellipsis", "white-space": "nowrap" })
-                        .appendTo(row);
-                    const input = $(
-                        '<input type="text" class="teslemetry-arg" style="width: 70%;">',
-                    )
-                        .data("field", field.name)
-                        .appendTo(row);
-                    input.typedInput({ types: fieldTypes(field) });
-                    const value = saved[field.name] || {
-                        type: "msg",
-                        value: "payload." + field.name,
-                    };
-                    input.typedInput("type", value.type);
-                    input.typedInput("value", value.value);
-                    const text = hint(field);
-                    if (text) {
-                        $('<div style="margin: 2px 0 0 105px; font-size: 0.85em; opacity: 0.7;"></div>')
-                            .text(text)
-                            .appendTo(row);
-                    }
-                    row.appendTo(argsContainer);
-                });
-            }
-
-            function updateCommands(vin) {
-                $.getJSON("teslemetry/commands", { vin: vin })
-                    .done(function (data) {
-                        const current = commandSelect.val() || node.command;
-                        catalog = {};
-                        commandSelect.find("optgroup.teslemetry-catalog").remove();
-                        const groups = {};
-                        data.forEach(function (spec) {
-                            catalog[spec.name] = spec;
-                            if (!groups[spec.group]) {
-                                groups[spec.group] = $(
-                                    '<optgroup class="teslemetry-catalog"></optgroup>',
-                                ).attr("label", spec.group);
-                            }
-                            $("<option></option>")
-                                .val(spec.name)
-                                .text(spec.label)
-                                .attr("title", spec.name)
-                                .appendTo(groups[spec.group]);
-                        });
-                        Object.values(groups).forEach(function (group) {
-                            commandSelect.append(group);
-                        });
-                        // A saved command another model lacks stays selectable.
-                        if (current && !commandSelect.find("option").filter(function () {
-                            return this.value === current;
-                        }).length) {
-                            $("<option></option>").val(current).text(current).appendTo(commandSelect);
-                        }
-                        commandSelect.val(current);
-                        showFields();
-                    })
-                    .fail(function (jqxhr, textStatus, error) {
-                        console.error("Failed to fetch commands", error);
-                    });
-            }
+            // The model comes from the VIN, so the list is filtered for it.
+            const loadCommands = TeslemetryCommandEditor.setup(node);
 
             function updateVins() {
                 const configId = configInput.val();
@@ -198,26 +68,19 @@
                 updateVins();
             });
             vinSelect.change(function () {
-                updateCommands(vinSelect.val());
+                loadCommands({ vin: vinSelect.val() });
             });
-            commandSelect.change(showFields);
 
             // Initial load if config is already selected
             if (configInput.val()) {
                 updateVins();
             }
-            updateCommands(node.vin);
+            loadCommands({ vin: node.vin });
         },
         oneditsave: function () {
-            // Fields are only rewritten when they were shown for the saved
-            // command, so a failed catalog load keeps the stored ones.
-            const container = $("#node-input-args-container");
-            if (container.data("command") === $("#node-input-command").val()) {
-                this.args = readArgs();
-            }
+            TeslemetryCommandEditor.save(this);
         },
     });
-})();
 </script>
 
 <script type="text/html" data-template-name="teslemetry-vehicle-command">
@@ -418,7 +281,7 @@
             </option>
             </optgroup>
         </select>
-        <div id="node-input-command-badge" style="margin: 2px 0 0 105px; font-size: 0.85em; opacity: 0.7;"></div>
+        <div id="node-input-command-badge"></div>
     </div>
     <div id="node-input-args-container"></div>
 </script>

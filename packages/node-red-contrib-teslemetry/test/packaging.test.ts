@@ -39,3 +39,19 @@ test("the build output requires only Node built-ins and its own files", () => {
   }
   assert.deepEqual([...external], []);
 });
+
+// Node-RED serves a package's `resources/` folder to the editor; a script an
+// editor file loads from there must exist and be published.
+test("every editor resource a node loads ships in the package", () => {
+  const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
+  const prefix = `resources/${pkg.name}/`;
+  for (const file of Object.values(nodes)) {
+    const html = readFileSync(resolve(root, file.replace(/\.js$/, ".html")), "utf8");
+    for (const [, src] of html.matchAll(/src="([^"]+)"/g)) {
+      assert.ok(src.startsWith(prefix), `${src} is not a resource of this package`);
+      const resource = `resources/${src.slice(prefix.length)}`;
+      assert.ok(existsSync(resolve(root, resource)), `${resource} does not exist`);
+      assert.ok(pkg.files.includes("resources"), "resources/ is not published");
+    }
+  }
+});

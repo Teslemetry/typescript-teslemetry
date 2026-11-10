@@ -41,7 +41,8 @@
   },
   "bugs": "https://github.com/Teslemetry/typescript-teslemetry/issues/new?template=node_red_bug.yml",
   "files": [
-    "dist"
+    "dist",
+    "resources"
   ],
   "node-red": {
     "version": ">=3.0.0",
