@@ -45,6 +45,12 @@ const OPERATIONS: Record<
 		path: 'off_grid_vehicle_charging_reserve',
 		body: { off_grid_vehicle_charging_reserve_percent: param('off_grid_vehicle_charging_reserve_percent') },
 	}),
+	dispatchBatteryPower: (param) => ({
+		method: 'POST',
+		path: 'command/dispatch_battery_power',
+		body: { power_watts: param('power_watts'), duration_seconds: param('duration_seconds') },
+	}),
+	resumeBatteryOperation: () => ({ method: 'POST', path: 'command/resume_battery_operation' }),
 };
 
 export class TeslemetryEnergy implements INodeType {
@@ -86,7 +92,11 @@ export class TeslemetryEnergy implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
-					{ name: 'Setting', value: 'settings', description: 'Backup reserve, operation mode, storm mode and grid rules' },
+					{
+						name: 'Setting',
+						value: 'settings',
+						description: 'Backup reserve, operation mode, storm mode, grid rules and battery dispatch',
+					},
 					{ name: 'Status', value: 'status', description: 'Live status, site information and tariff' },
 				],
 				default: 'status',
@@ -131,6 +141,17 @@ export class TeslemetryEnergy implements INodeType {
 					},
 				},
 				options: [
+					{
+						name: 'Dispatch Battery Power',
+						value: 'dispatchBatteryPower',
+						action: 'Dispatch battery power',
+					},
+					{
+						name: 'Resume Battery Operation',
+						value: 'resumeBatteryOperation',
+						action: 'Resume normal battery operation',
+						description: 'End a battery power dispatch early',
+					},
 					{
 						name: 'Set Backup Reserve',
 						value: 'setBackupReserve',
@@ -223,6 +244,33 @@ export class TeslemetryEnergy implements INodeType {
 				displayOptions: {
 					show: {
 						operation: ['gridImportExport'],
+					},
+				},
+			},
+			{
+				displayName: 'Power (W)',
+				name: 'power_watts',
+				type: 'number',
+				default: 0,
+				typeOptions: { maxValue: 100000, minValue: -100000 },
+				description:
+					'Battery power in watts: positive discharges the battery, negative charges it. Starting a new dispatch replaces the previous one.',
+				displayOptions: {
+					show: {
+						operation: ['dispatchBatteryPower'],
+					},
+				},
+			},
+			{
+				displayName: 'Duration (Seconds)',
+				name: 'duration_seconds',
+				type: 'number',
+				default: 3600,
+				typeOptions: { maxValue: 86400, minValue: 1, numberPrecision: 0 },
+				description: 'How long to dispatch for. When it ends, the battery returns to normal operation by itself.',
+				displayOptions: {
+					show: {
+						operation: ['dispatchBatteryPower'],
 					},
 				},
 			},
