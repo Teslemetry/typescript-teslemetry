@@ -6,6 +6,11 @@ import { instances } from "../src/shared.js";
 import type { Instance } from "../src/shared.js";
 import type { Msg } from "../src/types.js";
 import { Teslemetry } from "@teslemetry/api";
+import { createRequire } from "node:module";
+
+// Node-RED's own property evaluator, reached through the node-red package.
+const nodeRedRequire = createRequire(createRequire(import.meta.url).resolve("node-red/package.json"));
+const { util: nodeRedUtil } = nodeRedRequire("@node-red/util");
 
 interface FakeNode {
   handlers: Record<string, (...args: any[]) => any>;
@@ -1060,8 +1065,13 @@ test("a successful command is sent on unchanged", async () => {
   assert.deepEqual(status, {});
 });
 
-async function runCatalogCommand(command: string, payload: unknown) {
+async function runCatalogCommand(
+  command: string,
+  payload: unknown,
+  nodeConfig: Record<string, unknown> = {},
+) {
   const { RED, registered } = createFakeRED();
+  (RED as any).util = nodeRedUtil;
   commandNodeModule(RED);
   const ctor = registered["teslemetry-vehicle-command"];
 
@@ -1092,7 +1102,7 @@ async function runCatalogCommand(command: string, payload: unknown) {
   node.error = (msg?: string) => {
     errors.push(msg || "");
   };
-  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
+  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "", ...nodeConfig });
   const sent: Msg[] = [];
   await node.handlers.input({ command, payload } as Partial<Msg> as Msg, (m: Msg) => sent.push(m), failTo(node));
   return { requests, errors, sent };
@@ -1149,4 +1159,31 @@ test("a catalog command coerces a numeric PIN to the string the API expects", as
   const { requests, errors } = await runCatalogCommand("speed_limit_deactivate", { pin: 1234 });
   assert.deepEqual(errors, []);
   assert.deepEqual(requests[0].body, { pin: "1234" });
+});
+
+test("a field set in the node wins over msg.payload and an empty field is left to msg.payload", async () => {
+  const { requests, errors } = await runCatalogCommand(
+    "",
+    { enabled: false, lowerChargeLimit: 30, upperChargeLimit: 70, limit: 85 },
+    {
+      command: "charge_on_solar",
+      args: {
+        enabled: { type: "bool", value: "true" },
+        lowerChargeLimit: { type: "num", value: "" },
+        upperChargeLimit: { type: "msg", value: "payload.limit" },
+      },
+    },
+  );
+  assert.deepEqual(errors, []);
+  assert.deepEqual(requests[0].body, { enabled: true, lowerChargeLimit: 30, upperChargeLimit: 85 });
+});
+
+test("the node's fields are ignored when the command comes from msg.command", async () => {
+  const { requests, errors } = await runCatalogCommand(
+    "set_charge_limit",
+    { percent: 60 },
+    { args: { percent: { type: "num", value: "90" } } },
+  );
+  assert.deepEqual(errors, []);
+  assert.deepEqual(requests[0].body, { percent: 60 });
 });

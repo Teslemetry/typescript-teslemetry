@@ -210,7 +210,32 @@ test("every admin route requires a Node-RED editor permission", () => {
   assert.deepEqual(permissions, {
     "GET /teslemetry/vehicles": "teslemetry-config.read",
     "GET /teslemetry/energy_sites": "teslemetry-config.read",
+    "GET /teslemetry/commands": "teslemetry-config.read",
     "POST /teslemetry/test-credentials": "teslemetry-config.write",
     "GET /teslemetry/fields": "teslemetry-config.read",
   });
+});
+
+test("the commands list leaves out commands for another vehicle model", () => {
+  const gets = new Map<string, Function>();
+  registerConfigNode({
+    nodes: { registerType() {} },
+    auth: { needsPermission: () => () => {} },
+    httpAdmin: {
+      get: (path: string, ...handlers: Function[]) => gets.set(path, handlers[handlers.length - 1]),
+      post() {},
+    },
+    log: { debug() {}, info() {}, warn() {}, error() {} },
+  } as any);
+  const list = (vin?: string) => {
+    let body: { name: string }[] = [];
+    gets.get("/teslemetry/commands")!({ query: { vin } }, { json: (b: any) => (body = b) });
+    return body.map((spec) => spec.name);
+  };
+
+  // The fourth VIN character is the model: Y for Model Y, C for Cybertruck.
+  assert.ok(list("5YJYGDEE0LF000000").includes("set_charge_limit"));
+  assert.ok(!list("5YJYGDEE0LF000000").includes("set_outlets"));
+  assert.ok(list("7G2CEHED0RA000000").includes("set_outlets"));
+  assert.ok(list().includes("set_outlets"));
 });
