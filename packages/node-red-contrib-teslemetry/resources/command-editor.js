@@ -49,6 +49,7 @@
         const badge = $("#node-input-command-badge").css(TIP_STYLE);
         const container = $("#node-input-args-container");
         let catalog = {};
+        let loaded = false;
         // Field settings survive switching to another command and back.
         const args = { [node.command]: node.args || {} };
 
@@ -95,7 +96,10 @@
         function load(query) {
             $.getJSON("teslemetry/commands", query)
                 .done(function (data) {
-                    const current = commandSelect.val() || node.command;
+                    // The first load restores the saved command, which has no
+                    // option yet; later loads keep the choice, including "".
+                    const current = loaded ? commandSelect.val() : node.command;
+                    loaded = true;
                     catalog = {};
                     commandSelect.find("optgroup.teslemetry-catalog").remove();
                     const groups = {};
