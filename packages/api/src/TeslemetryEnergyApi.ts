@@ -29,6 +29,8 @@ import {
   postApi1EnergySitesByIdCommandCancelBackupEvent,
   postApi1EnergySitesByIdCommandSetLocalSiteConfig,
   postApi1EnergySitesByIdCommandSetIslandMode,
+  postApi1EnergySitesByIdCommandDispatchBatteryPower,
+  postApi1EnergySitesByIdCommandResumeBatteryOperation,
   postApi1EnergySitesByIdCommandAddAuthorizedClient,
   postApi1EnergySitesByIdCommandRemoveAuthorizedClient,
   GetApi1EnergySitesByIdSiteInfoResponse,
@@ -548,6 +550,38 @@ export class TeslemetryEnergyApi extends EventEmitter {
       path: { id: this.siteId },
       client: this.root.client,
     });
+    return data;
+  }
+
+  /**
+   * Dispatch the Powerwall battery at a fixed power for a set time, after which it returns to normal operation by itself. A new dispatch replaces the previous one.
+   * @param power_watts Battery power in watts, -100000 to 100000; positive discharges and negative charges
+   * @param duration_seconds How long to hold the power, 1 to 86400 seconds
+   * @return Promise to an object with response containing the dispatch's request ID
+   */
+  public async dispatchBatteryPower(
+    power_watts: number,
+    duration_seconds: number,
+  ) {
+    const { data } = await postApi1EnergySitesByIdCommandDispatchBatteryPower({
+      body: { power_watts, duration_seconds },
+      path: { id: this.siteId },
+      client: this.root.client,
+    });
+    return data;
+  }
+
+  /**
+   * End a battery power dispatch early and return the Powerwall to normal operation.
+   * @return Promise to an object with response containing the resume's request ID
+   */
+  public async resumeBatteryOperation() {
+    const { data } = await postApi1EnergySitesByIdCommandResumeBatteryOperation(
+      {
+        path: { id: this.siteId },
+        client: this.root.client,
+      },
+    );
     return data;
   }
 
