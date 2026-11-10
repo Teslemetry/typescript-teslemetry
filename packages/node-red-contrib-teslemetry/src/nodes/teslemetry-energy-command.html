@@ -1,3 +1,7 @@
+<script
+    type="text/javascript"
+    src="resources/@teslemetry/node-red-contrib-teslemetry/command-editor.js"
+></script>
 <script type="text/javascript">
     RED.nodes.registerType("teslemetry-energy-command", {
         category: "Teslemetry Energy",
@@ -16,7 +20,8 @@
                 type: "teslemetry-local-powerwall",
                 required: false,
             },
-            command: { value: "getLiveStatus" },
+            command: { value: "live_status" },
+            args: { value: {} },
         },
         inputs: 1,
         outputs: 1,
@@ -28,17 +33,15 @@
             const node = this;
             const siteSelect = $("#node-input-siteId");
             const configInput = $("#node-input-teslemetryConfig");
-            const pairedOnly = $(
-                "#node-input-command option.teslemetry-paired-only",
-            );
             const paired = {};
+            let catalog = {};
 
             const gatewayInput = $("#node-input-localGateway");
 
-            // Dispatch, resume, off-grid and reconnect need a key the gateway trusts: Node-RED's
-            // own through a local gateway for the site, or Teslemetry's
-            // (the site is paired). They are greyed out for a site with
-            // neither. With "From msg.siteId" the site is unknown here; the
+            // Commands that need `paired` need a key the gateway trusts:
+            // Teslemetry's (the site is paired), or Node-RED's own through a
+            // local gateway for the site, which only covers the commands the
+            // gateway takes. They are greyed out otherwise. With "From msg.siteId" the site is unknown here; the
             // node refuses at runtime instead. The selected option is never
             // disabled: jQuery's val() returns null for a disabled one,
             // which would clear the saved command on Done.
@@ -46,12 +49,25 @@
                 const siteId = siteSelect.val();
                 const gateway = RED.nodes.node(gatewayInput.val());
                 const local = !!gateway && gateway.siteId === siteId;
-                const unpaired =
-                    !!siteId && paired[siteId] !== true && !local;
-                pairedOnly.each(function () {
-                    this.disabled = unpaired && !this.selected;
+                const unpaired = !!siteId && paired[siteId] !== true;
+                $("#node-input-command option").each(function () {
+                    const spec = catalog[this.value];
+                    // The earlier paired-only names all have a local form.
+                    const legacy = $(this).hasClass("teslemetry-paired-only");
+                    const needsKey = legacy || (spec && spec.paired);
+                    const viaGateway = local && (legacy || (spec && spec.local));
+                    this.disabled =
+                        unpaired && needsKey && !viaGateway && !this.selected;
                 });
             }
+
+            const loadCommands = TeslemetryCommandEditor.setup(
+                node,
+                function (loaded) {
+                    catalog = loaded;
+                    updateCommands();
+                },
+            );
 
             function updateSites() {
                 const configId = configInput.val();
@@ -100,6 +116,10 @@
             if (configInput.val()) {
                 updateSites();
             }
+            loadCommands({ product: "energy" });
+        },
+        oneditsave: function () {
+            TeslemetryCommandEditor.save(this);
         },
     });
 </script>
@@ -135,9 +155,10 @@
         </label>
         <select id="node-input-command">
             <option value="">From msg.command</option>
+            <option value="getTariff">Get Tariff (TOU rates)</option>
+            <optgroup id="node-input-command-earlier" label="Earlier names (still supported)">
             <option value="getLiveStatus">Get Live Status</option>
             <option value="getSiteInfo">Get Site Info</option>
-            <option value="getTariff">Get Tariff (TOU rates)</option>
             <option value="setOperationModeSelfConsumption">
                 Mode: Self Consumption
             </option>
@@ -155,35 +176,32 @@
                 Set Time-of-Use Tariff (msg.tariffContentV2) - REPLACES
                 entire schedule
             </option>
-            <optgroup label="Grid Control">
-                <option value="gridExportEverything">Export Everything</option>
-                <option value="gridExportSolar">Export Solar</option>
-                <option value="gridExportNothing">Export Nothing</option>
-            </optgroup>
-            <optgroup label="Battery Dispatch (local gateway or paired site)">
-                <option
-                    class="teslemetry-paired-only"
-                    value="dispatchBatteryPower"
-                >
-                    Dispatch Battery Power (msg.powerWatts, msg.durationSeconds)
-                </option>
-                <option
-                    class="teslemetry-paired-only"
-                    value="resumeBatteryOperation"
-                >
-                    Resume Battery Operation
-                </option>
-            </optgroup>
-            <optgroup label="Grid Connection (local gateway or paired site)">
-                <option class="teslemetry-paired-only" value="goOffGrid">
-                    Go Off-Grid (runs the home from the battery)
-                </option>
-                <option class="teslemetry-paired-only" value="reconnectGrid">
-                    Reconnect to Grid
-                </option>
+            <option value="gridExportEverything">Export Everything</option>
+            <option value="gridExportSolar">Export Solar</option>
+            <option value="gridExportNothing">Export Nothing</option>
+            <option
+                class="teslemetry-paired-only"
+                value="dispatchBatteryPower"
+            >
+                Dispatch Battery Power (msg.powerWatts, msg.durationSeconds)
+            </option>
+            <option
+                class="teslemetry-paired-only"
+                value="resumeBatteryOperation"
+            >
+                Resume Battery Operation
+            </option>
+            <option class="teslemetry-paired-only" value="goOffGrid">
+                Go Off-Grid (runs the home from the battery)
+            </option>
+            <option class="teslemetry-paired-only" value="reconnectGrid">
+                Reconnect to Grid
+            </option>
             </optgroup>
         </select>
+        <div id="node-input-command-badge"></div>
     </div>
+    <div id="node-input-args-container"></div>
 </script>
 
 <script type="text/html" data-help-name="teslemetry-energy-command">
@@ -202,7 +220,17 @@
         <dd>
             Command to execute, e.g. <code>setStormModeOn</code>. Only used
             when Command is set to <b>From msg.command</b>; a command selected
-            in the node takes precedence.
+            in the node takes precedence. Also takes any Teslemetry API energy
+            site command by its route name, e.g. <code>backup</code> or
+            <code>storm_mode</code>.
+        </dd>
+        <dt class="optional">
+            payload <span class="property-type">object</span>
+        </dt>
+        <dd>
+            Arguments for an API route name command, using the API's field
+            names, e.g. <code>{ "backup_reserve_percent": 40 }</code> for
+            <code>backup</code>.
         </dd>
         <dt class="optional">
             percentage / percent <span class="property-type">number</span>

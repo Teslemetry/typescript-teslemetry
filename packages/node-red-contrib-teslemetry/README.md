@@ -113,9 +113,12 @@ Send commands to a Tesla Energy Site or retrieve site status.
 **Configuration:**
 - **Site ID**: Select a site or leave empty to use `msg.siteId`.
 - **Local gateway**: Optional. A Teslemetry Local Powerwall config node. Backup reserve, operation mode, grid export, dispatch, resume, go off-grid and reconnect to grid then go to the gateway over your local network first, and through the cloud only if the gateway does not answer. The node status shows `local` or `cloud`.
-- **Command**: Select a command, or choose **From msg.command** to take it from each message.
+- **Command**: Select a command, or choose **From msg.command** to take it from each message. The list holds every energy site command in the Teslemetry API, grouped as the API groups them. Commands that need a key the gateway trusts (dispatch, backup events, island mode, gateway config and diagnostics) are greyed out for a site that is not paired with Teslemetry, except dispatch, resume and island mode when this node has a Local gateway for the site, which signs those itself. A node saved with an earlier command name keeps it, under **Earlier names (still supported)**.
+- **Fields**: Each argument of the selected command, as a fixed value or read from `msg`, `flow`, `global`, an environment variable or JSONata. By default each reads `msg.payload.<field>`.
 
-A site or command selected in the node always wins; `msg.siteId` and `msg.command` are only read when the matching dropdown is set to its **From msg…** option. Command arguments are read from the top level of the message, not from `msg.payload`.
+A site or command selected in the node always wins; `msg.siteId` and `msg.command` are only read when the matching dropdown is set to its **From msg…** option. Earlier command names (`setBackupReserve`, ...) read their arguments from the top level of the message, not from `msg.payload`.
+
+`msg.command` also takes any energy site command from the [Teslemetry API](https://teslemetry.com/docs) by its route name, such as `backup`, `storm_mode` or `schedule_backup_event`. These read their arguments from `msg.payload` using the API's field names (a field set in the node wins over `msg.payload`), for example `msg.payload = { "backup_reserve_percent": 40 }`. With a Local gateway, `backup`, `operation`, `grid_import_export`, `dispatch_battery_power`, `resume_battery_operation` and `set_island_mode` go to the gateway first, as the earlier names do.
 
 **Inputs:**
 - `msg.siteId` (number): Energy Site ID (when Site ID is **From msg.siteId**).

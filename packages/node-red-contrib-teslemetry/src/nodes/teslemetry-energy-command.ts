@@ -1,9 +1,11 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
-import { Teslemetry } from "@teslemetry/api";
+import { ENERGY_COMMANDS, Teslemetry } from "@teslemetry/api";
 import { failInput, getInstance } from "../shared";
+import { catalogBody, CommandArg, resolveArgs, sendCatalogCommand } from "../catalog";
 import { validateParameters, ValidationRules } from "../validation";
 import { Msg } from "../types";
 import type { SiteCommands } from "../localPowerwall";
+import { localCommand } from "../localCommands";
 import type { TeslemetryLocalPowerwallNode } from "./teslemetry-local-powerwall";
 
 /**
@@ -84,12 +86,14 @@ export interface TeslemetryEnergyCommandNodeDef extends NodeDef {
   command: string;
   /** A Teslemetry Local Powerwall config node. Absent on nodes saved before the field existed. */
   localGateway?: string;
+  args?: Record<string, CommandArg>;
 }
 
 export interface TeslemetryEnergyCommandNode extends Node {
   teslemetry?: Teslemetry;
   siteId: string;
   command: string;
+  args?: Record<string, CommandArg>;
 }
 
 export default function (RED: NodeAPI) {
@@ -106,6 +110,7 @@ export default function (RED: NodeAPI) {
     node.teslemetry = instance.teslemetry;
     node.siteId = config.siteId;
     node.command = config.command;
+    node.args = config.args;
     node.status({});
 
     const gateway = config.localGateway
@@ -144,20 +149,19 @@ export default function (RED: NodeAPI) {
 
         const cloud = cloudCommands(site);
         let path: "local" | "cloud" = "cloud";
-        /** Local first when this node has a gateway for the site, else the cloud. */
-        const run = async <M extends keyof SiteCommands>(
-          method: M,
-          ...args: Parameters<SiteCommands[M]>
+        /** Through the gateway, and through `fallback` only when the gateway gives no answer. */
+        const sendLocal = async (
+          gateway: NonNullable<typeof local>,
+          method: keyof SiteCommands,
+          args: unknown[],
+          fallback: SiteCommands | null,
         ): Promise<{ response?: any }> => {
-          if (!local) {
-            return (cloud[method] as (...a: unknown[]) => Promise<any>)(...args);
-          }
           const { sendLocalFirst } = await import("../localPowerwall");
           const sent = await sendLocalFirst(
-            await local(),
-            cloudCanRun ? cloud : null,
+            await gateway(),
+            fallback,
             method,
-            args,
+            args as Parameters<SiteCommands[typeof method]>,
           );
           path = sent.path;
           if (sent.failover) {
@@ -166,6 +170,16 @@ export default function (RED: NodeAPI) {
             );
           }
           return sent.result;
+        };
+        /** Local first when this node has a gateway for the site, else the cloud. */
+        const run = async <M extends keyof SiteCommands>(
+          method: M,
+          ...args: Parameters<SiteCommands[M]>
+        ): Promise<{ response?: any }> => {
+          if (!local) {
+            return (cloud[method] as (...a: unknown[]) => Promise<any>)(...args);
+          }
+          return sendLocal(local, method, args, cloudCanRun ? cloud : null);
         };
 
         let result: { response?: any };
@@ -266,8 +280,34 @@ export default function (RED: NodeAPI) {
           case "reconnectGrid":
             result = await run("set_island_mode", 1, null);
             break;
-          default:
-            throw new Error(`Unknown command: ${command}`);
+          default: {
+            // Catalog commands take their arguments from msg.payload and the node's fields.
+            const spec = Object.prototype.hasOwnProperty.call(ENERGY_COMMANDS, command)
+              ? ENERGY_COMMANDS[command]
+              : undefined;
+            if (!spec) throw new Error(`Unknown command: ${command}`);
+            const body = catalogBody(
+              spec,
+              await resolveArgs(RED, node, msg, node.command ? node.args : undefined),
+            );
+            const toLocal = local ? localCommand(spec.name, body) : undefined;
+            if (spec.paired) {
+              const { energySites } = await instance.products;
+              cloudCanRun = energySites[siteId]?.metadata.paired === true;
+              if (!cloudCanRun && !toLocal) throw new Error(NOT_PAIRED_MESSAGE);
+            }
+            const sendCloud = () =>
+              sendCatalogCommand(node.teslemetry!, spec, { id: Number(siteId) }, body);
+            result = toLocal
+              ? await sendLocal(
+                  local!,
+                  toLocal.method,
+                  toLocal.args,
+                  // The router calls the fallback by the gateway's method name.
+                  cloudCanRun ? ({ [toLocal.method]: sendCloud } as unknown as SiteCommands) : null,
+                )
+              : await sendCloud();
+          }
         }
 
         msg.payload = result.response;
