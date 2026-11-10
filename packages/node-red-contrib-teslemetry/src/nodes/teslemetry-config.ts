@@ -1,5 +1,10 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
-import { Teslemetry, TeslemetryStreamOptions } from "@teslemetry/api";
+import {
+  Teslemetry,
+  TeslemetryStreamOptions,
+  useTeslaModel,
+  VEHICLE_COMMANDS,
+} from "@teslemetry/api";
 import { createLogger, instances, getErrorMessage, Instance } from "../shared";
 import pkg from "../../package.json" with { type: "json" };
 
@@ -206,6 +211,17 @@ export default function (RED: NodeAPI) {
       RED.log.error(`Failed to fetch energy sites: ${getErrorMessage(error)}`);
       res.status(500).send("Failed to fetch energy sites");
     }
+  });
+
+  // The vehicle model comes from the VIN, so a VIN filters the list without a request.
+  RED.httpAdmin.get("/teslemetry/commands", canRead, (req: any, res: any) => {
+    const vin = typeof req.query.vin === "string" ? req.query.vin : "";
+    const model = vin ? useTeslaModel(vin) : undefined;
+    res.json(
+      Object.values(VEHICLE_COMMANDS).filter(
+        (spec) => !model || !spec.models || spec.models.includes(model),
+      ),
+    );
   });
 
   RED.httpAdmin.post(

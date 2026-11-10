@@ -82,11 +82,12 @@ Send commands to a specific vehicle or retrieve vehicle data.
 
 **Configuration:**
 - **VIN**: Select a vehicle or leave empty to use `msg.vin`.
-- **Command**: Select a command, or choose **From msg.command** to take it from each message.
+- **Command**: Select a command, or choose **From msg.command** to take it from each message. The list holds every vehicle command in the Teslemetry API, grouped as the API groups them, with its credit cost. Commands only some models take, such as Cybertruck outlets, are listed only for that model. A node saved with an earlier command name keeps it, under **Earlier names (still supported)**.
+- **Fields**: Each argument of the selected command, as a fixed value or read from `msg`, `flow`, `global`, an environment variable or JSONata. By default each reads `msg.payload.<field>`. Allowed values are a dropdown, and the field shows its range and whether it is required.
 
 A VIN or command selected in the node always wins; `msg.vin` and `msg.command` are only read when the matching dropdown is set to its **From msg…** option. Command arguments are read from the top level of the message (`msg.percent`, not `msg.payload.percent`).
 
-`msg.command` also takes any vehicle command from the [Teslemetry API](https://teslemetry.com/docs) by its route name, such as `set_charge_limit`, `closure` or `charge_on_solar`. These read their arguments from `msg.payload` using the API's field names, for example `msg.payload = { "percent": 80 }`, and check them against the API's ranges and allowed values before sending. A command that reads state, such as `managed_charging_sites`, takes no arguments, and `get_charge_on_solar` reads what `charge_on_solar` sets.
+`msg.command` also takes any vehicle command from the [Teslemetry API](https://teslemetry.com/docs) by its route name, such as `set_charge_limit`, `closure` or `charge_on_solar`. These read their arguments from `msg.payload` using the API's field names (a field set in the node wins over `msg.payload`), for example `msg.payload = { "percent": 80 }`, and check them against the API's ranges and allowed values before sending. A command that reads state, such as `managed_charging_sites`, takes no arguments, and `get_charge_on_solar` reads what `charge_on_solar` sets.
 
 **Inputs:**
 - `msg.vin` (string): VIN of the vehicle (when VIN is **From msg.vin**).

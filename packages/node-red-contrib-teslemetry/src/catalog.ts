@@ -1,4 +1,6 @@
 import type { CommandSpec, Teslemetry } from "@teslemetry/api";
+import type { Node, NodeAPI } from "node-red";
+import type { Msg } from "./types";
 import { validateParameters, ValidationRules } from "./validation";
 
 /** Validates `args` against a catalog command's fields and returns the request body:
@@ -51,4 +53,32 @@ export async function sendCatalogCommand(
     }),
   });
   return data;
+}
+
+/** A command field set in the editor: a typedInput type and value. */
+export interface CommandArg {
+  type: string;
+  value: string;
+}
+
+/** The command's arguments: `msg.payload`, overlaid with each field set in the node. */
+export async function resolveArgs(
+  RED: NodeAPI,
+  node: Node,
+  msg: Msg,
+  args: Record<string, CommandArg> | undefined,
+): Promise<Record<string, unknown>> {
+  const payload = msg.payload;
+  const out: Record<string, unknown> =
+    payload && typeof payload === "object" && !Array.isArray(payload) ? { ...payload } : {};
+  for (const [name, { type, value }] of Object.entries(args ?? {})) {
+    if (value === "") continue;
+    const resolved = await new Promise<unknown>((resolve, reject) =>
+      RED.util.evaluateNodeProperty(value, type, node, msg, (err, result) =>
+        err ? reject(err) : resolve(result),
+      ),
+    );
+    if (resolved !== undefined) out[name] = resolved;
+  }
+  return out;
 }

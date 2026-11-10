@@ -2,19 +2,21 @@ import { Node, NodeAPI, NodeDef } from "node-red";
 import { failInput, getInstance } from "../shared";
 import { validateParameters, ValidationRules } from "../validation";
 import { Teslemetry, VEHICLE_COMMANDS } from "@teslemetry/api";
-import { sendCatalogCommand } from "../catalog";
+import { CommandArg, resolveArgs, sendCatalogCommand } from "../catalog";
 import { Msg } from "../types";
 
 export interface TeslemetryVehicleCommandNodeDef extends NodeDef {
   teslemetryConfig: string;
   vin: string;
   command: string;
+  args?: Record<string, CommandArg>;
 }
 
 export interface TeslemetryVehicleCommandNode extends Node {
   teslemetry?: Teslemetry;
   vin: string;
   command: string;
+  args?: Record<string, CommandArg>;
 }
 
 const TIME_OF_DAY_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -83,6 +85,7 @@ export default function (RED: NodeAPI) {
     node.teslemetry = instance.teslemetry;
     node.vin = config.vin;
     node.command = config.command;
+    node.args = config.args;
     node.status({});
 
     node.on("input", async function (msg: Msg, send, done) {
@@ -608,17 +611,18 @@ export default function (RED: NodeAPI) {
             result = await vehicle.mediaPreviousTrack();
             break;
           default: {
-            // Catalog commands take their arguments from msg.payload.
+            // Catalog commands take their arguments from msg.payload and the node's fields.
             const spec = Object.prototype.hasOwnProperty.call(VEHICLE_COMMANDS, command)
               ? VEHICLE_COMMANDS[command]
               : undefined;
             if (!spec) throw new Error(`Unknown command: ${command}`);
-            result = await sendCatalogCommand(
-              node.teslemetry!,
-              spec,
-              { vin },
-              msg.payload,
+            const args = await resolveArgs(
+              RED,
+              node,
+              msg,
+              node.command ? node.args : undefined,
             );
+            result = await sendCatalogCommand(node.teslemetry!, spec, { vin }, args);
           }
         }
 

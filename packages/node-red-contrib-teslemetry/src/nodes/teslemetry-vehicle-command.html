@@ -1,3 +1,7 @@
+<script
+    type="text/javascript"
+    src="resources/@teslemetry/node-red-contrib-teslemetry/command-editor.js"
+></script>
 <script type="text/javascript">
     RED.nodes.registerType("teslemetry-vehicle-command", {
         category: "Teslemetry Vehicle",
@@ -12,6 +16,7 @@
             },
             vin: { value: "" },
             command: { value: "vehicleData" },
+            args: { value: {} },
         },
         inputs: 1,
         outputs: 1,
@@ -23,6 +28,8 @@
             const node = this;
             const vinSelect = $("#node-input-vin");
             const configInput = $("#node-input-teslemetryConfig");
+            // The model comes from the VIN, so the list is filtered for it.
+            const loadCommands = TeslemetryCommandEditor.setup(node);
 
             function updateVins() {
                 const configId = configInput.val();
@@ -60,11 +67,18 @@
             configInput.change(function () {
                 updateVins();
             });
+            vinSelect.change(function () {
+                loadCommands({ vin: vinSelect.val() });
+            });
 
             // Initial load if config is already selected
             if (configInput.val()) {
                 updateVins();
             }
+            loadCommands({ vin: node.vin });
+        },
+        oneditsave: function () {
+            TeslemetryCommandEditor.save(this);
         },
     });
 </script>
@@ -92,7 +106,9 @@
         >
         <select id="node-input-command">
             <option value="">From msg.command</option>
+            <option value="vehicleData">Get Vehicle Data</option>
             <option value="wakeUp">Wake Up</option>
+            <optgroup id="node-input-command-earlier" label="Earlier names (still supported)">
             <option value="flashLights">Flash Lights</option>
             <option value="honkHorn">Honk Horn</option>
             <option value="lockDoors">Lock Doors</option>
@@ -263,9 +279,11 @@
             <option value="speedLimitSetLimit">
                 Set Speed Limit (msg.limitMph, 50-90)
             </option>
-            <option value="vehicleData">Get Vehicle Data</option>
+            </optgroup>
         </select>
+        <div id="node-input-command-badge"></div>
     </div>
+    <div id="node-input-args-container"></div>
 </script>
 
 <script type="text/html" data-help-name="teslemetry-vehicle-command">
