@@ -426,6 +426,63 @@ test("setIslandMode posts the mode/force body to the site's set_island_mode comm
   assert.deepEqual(result, { response: { request_id: "req-4" } });
 });
 
+test("dispatchBatteryPower posts the power_watts/duration_seconds body to the site's dispatch_battery_power command endpoint", async () => {
+  const siteId = 12345;
+  let receivedUrl: string | undefined;
+  let receivedMethod: string | undefined;
+  let receivedBody: unknown;
+
+  const teslemetry = makeTeslemetry(async (request) => {
+    receivedUrl = request.url;
+    receivedMethod = request.method;
+    receivedBody = JSON.parse(await request.text());
+    return new Response(
+      JSON.stringify({ response: { request_id: "req-dispatch" } }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+
+  const result = await teslemetry
+    .energySite(siteId)
+    .dispatchBatteryPower(-5000, 900);
+
+  assert.equal(receivedMethod, "POST");
+  assert.match(
+    receivedUrl ?? "",
+    new RegExp(
+      `/api/1/energy_sites/${siteId}/command/dispatch_battery_power(?:[?].*)?$`,
+    ),
+  );
+  assert.deepEqual(receivedBody, { power_watts: -5000, duration_seconds: 900 });
+  assert.deepEqual(result, { response: { request_id: "req-dispatch" } });
+});
+
+test("resumeBatteryOperation posts to the site's resume_battery_operation command endpoint", async () => {
+  const siteId = 12345;
+  let receivedUrl: string | undefined;
+  let receivedMethod: string | undefined;
+
+  const teslemetry = makeTeslemetry(async (request) => {
+    receivedUrl = request.url;
+    receivedMethod = request.method;
+    return new Response(
+      JSON.stringify({ response: { request_id: "req-resume" } }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+  });
+
+  const result = await teslemetry.energySite(siteId).resumeBatteryOperation();
+
+  assert.equal(receivedMethod, "POST");
+  assert.match(
+    receivedUrl ?? "",
+    new RegExp(
+      `/api/1/energy_sites/${siteId}/command/resume_battery_operation(?:[?].*)?$`,
+    ),
+  );
+  assert.deepEqual(result, { response: { request_id: "req-resume" } });
+});
+
 test("addAuthorizedClient posts the body to the site's add_authorized_client command endpoint", async () => {
   const siteId = 12345;
   let receivedUrl: string | undefined;

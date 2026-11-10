@@ -361,7 +361,7 @@ export class TeslemetryStream extends EventEmitter {
           query: {
             cache: this.cloudCache,
             ...(this.topicsParam ? { topics: this.topicsParam } : {}),
-            ...(cursor !== undefined ? { cursor } : {}),
+            ...(cursor !== undefined ? { cursor: String(cursor) } : {}),
           },
           // The public spec publishes this route as the literal path
           // `/sse/{id}?`, so the generated `url` ends in a `?` and the query
