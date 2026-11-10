@@ -168,6 +168,11 @@ export interface SiteCommands {
     durationSeconds: number,
   ): Promise<{ response?: unknown }>;
   resume_battery_operation(): Promise<{ response?: unknown }>;
+  /** @param mode 6 goes off-grid and 1 reconnects to the grid */
+  set_island_mode(
+    mode: 1 | 6,
+    force: boolean | null,
+  ): Promise<{ response?: unknown }>;
 }
 
 export type LocalSite = PowerwallEnergySite;

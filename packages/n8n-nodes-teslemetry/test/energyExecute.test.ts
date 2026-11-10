@@ -73,6 +73,20 @@ const CASES: Case[] = [
     body: { power_watts: -5000, duration_seconds: 900 },
   },
   { operation: "resumeBatteryOperation", path: "command/resume_battery_operation", method: "POST", body: null },
+  {
+    operation: "setIslandMode",
+    params: { island_mode: 6 },
+    path: "command/set_island_mode",
+    method: "POST",
+    body: { mode: 6, force: true },
+  },
+  {
+    operation: "setIslandMode",
+    params: { island_mode: 1 },
+    path: "command/set_island_mode",
+    method: "POST",
+    body: { mode: 1 },
+  },
 ];
 
 for (const c of CASES) {
