@@ -1,5 +1,12 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.10.0
+
+### Minor Changes
+
+- 5961208: The Energy Command node has a new optional "Local gateway" field. Pick a Teslemetry Local Powerwall config node and backup reserve, operation mode, grid export, battery dispatch and resume go to the Powerwall gateway over your local network first, so they work without the internet. If the gateway does not answer, the command goes through the Teslemetry cloud instead; if the gateway answers and refuses, the node reports that error. The status under the node shows `local` or `cloud` for the path the command took. With a local gateway, dispatch and resume are signed with Node-RED's own key, so they also work for a site that is not paired with Teslemetry. Flows without a local gateway are unchanged.
+- 30691de: New "Teslemetry Local Powerwall" config node, which connects Node-RED to a Powerwall gateway on your local network. Pick the energy site and press Pair: Node-RED creates its own key and registers it with the Powerwall, and you approve it once by flicking the On/Off switch on your primary Powerwall off and back on. Then enter the gateway's Wi-Fi password and press Verify. The gateway's address is filled in for you. The key and password are stored as Node-RED credentials, so they are never part of an exported flow, and "Remove key" takes the key off the gateway again.
+
 ## 0.9.1
 
 ### Patch Changes
