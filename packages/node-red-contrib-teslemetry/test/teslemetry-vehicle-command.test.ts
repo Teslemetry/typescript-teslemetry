@@ -5,6 +5,7 @@ import commandNodeModule from "../src/nodes/teslemetry-vehicle-command.js";
 import { instances } from "../src/shared.js";
 import type { Instance } from "../src/shared.js";
 import type { Msg } from "../src/types.js";
+import { Teslemetry } from "@teslemetry/api";
 
 interface FakeNode {
   handlers: Record<string, (...args: any[]) => any>;
@@ -1057,4 +1058,95 @@ test("a successful command is sent on unchanged", async () => {
   assert.deepEqual(sent[0].payload, { result: true, reason: "" });
   assert.deepEqual(doneArgs, [undefined]);
   assert.deepEqual(status, {});
+});
+
+async function runCatalogCommand(command: string, payload: unknown) {
+  const { RED, registered } = createFakeRED();
+  commandNodeModule(RED);
+  const ctor = registered["teslemetry-vehicle-command"];
+
+  const requests: { method: string; url: string; body: unknown; auth: string | null }[] = [];
+  const teslemetry = new Teslemetry(async () => "token", {
+    region: "na",
+    logger: { info() {}, warn() {}, error() {}, debug() {} },
+  });
+  teslemetry.client.setConfig({
+    fetch: (async (request: Request) => {
+      const text = await request.text();
+      requests.push({
+        method: request.method,
+        url: request.url,
+        body: text ? JSON.parse(text) : undefined,
+        auth: request.headers.get("authorization"),
+      });
+      return new Response(JSON.stringify({ response: { result: true } }), {
+        headers: { "content-type": "application/json" },
+      });
+    }) as typeof fetch,
+  });
+
+  const configId = `cfg-catalog-${Math.random()}`;
+  instances.set(configId, { teslemetry, products: Promise.resolve({} as any) });
+  const node = createFakeNode();
+  const errors: string[] = [];
+  node.error = (msg?: string) => {
+    errors.push(msg || "");
+  };
+  ctor.call(node, { teslemetryConfig: configId, vin: "TEST_VIN", command: "" });
+  const sent: Msg[] = [];
+  await node.handlers.input({ command, payload } as Partial<Msg> as Msg, (m: Msg) => sent.push(m), failTo(node));
+  return { requests, errors, sent };
+}
+
+test("a catalog command sends its fields from msg.payload and drops unknown keys", async () => {
+  const { requests, errors, sent } = await runCatalogCommand("charge_on_solar", {
+    enabled: true,
+    lowerChargeLimit: "20",
+    upperChargeLimit: 80,
+    topic: "ignored",
+  });
+  assert.deepEqual(errors, []);
+  assert.deepEqual(requests, [
+    {
+      method: "POST",
+      url: "https://na.teslemetry.com/api/1/vehicles/TEST_VIN/custom_command/charge_on_solar",
+      body: { enabled: true, lowerChargeLimit: 20, upperChargeLimit: 80 },
+      auth: "Bearer token",
+    },
+  ]);
+  assert.deepEqual(sent[0].payload, { result: true });
+});
+
+test("a catalog GET command sends no body", async () => {
+  const { requests, errors } = await runCatalogCommand("managed_charging_sites", { enabled: true });
+  assert.deepEqual(errors, []);
+  assert.equal(requests[0].method, "GET");
+  assert.equal(requests[0].body, undefined);
+});
+
+test("a catalog command rejects an out-of-range field without sending", async () => {
+  const { requests, errors } = await runCatalogCommand("set_charge_limit", { percent: 20 });
+  assert.equal(requests.length, 0);
+  assert.match(errors[0], /'percent' must be at least 50/);
+});
+
+test("a catalog command never echoes a PIN in its error", async () => {
+  const { requests, errors } = await runCatalogCommand("speed_limit_activate", { pin: { code: 4321 } });
+  assert.equal(requests.length, 0);
+  assert.match(errors[0], /pin/);
+  assert.doesNotMatch(errors[0], /4321/);
+});
+
+test("a deny-listed or unknown command is still refused", async () => {
+  for (const command of ["erase_user_data", "notACommand", "__proto__"]) {
+    const { requests, errors } = await runCatalogCommand(command, {});
+    assert.equal(requests.length, 0);
+    assert.deepEqual(errors, [`Unknown command: ${command}`]);
+  }
+});
+
+test("a catalog command coerces a numeric PIN to the string the API expects", async () => {
+  const { requests, errors } = await runCatalogCommand("speed_limit_deactivate", { pin: 1234 });
+  assert.deepEqual(errors, []);
+  assert.deepEqual(requests[0].body, { pin: "1234" });
 });
