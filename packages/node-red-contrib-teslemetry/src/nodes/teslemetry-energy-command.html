@@ -38,10 +38,10 @@
 
             const gatewayInput = $("#node-input-localGateway");
 
-            // Commands that need `paired` need a key the gateway trusts: Node-RED's
-            // own through a local gateway for the site, or Teslemetry's
-            // (the site is paired). They are greyed out for a site with
-            // neither. With "From msg.siteId" the site is unknown here; the
+            // Commands that need `paired` need a key the gateway trusts:
+            // Teslemetry's (the site is paired), or Node-RED's own through a
+            // local gateway for the site, which only covers the commands the
+            // gateway takes. They are greyed out otherwise. With "From msg.siteId" the site is unknown here; the
             // node refuses at runtime instead. The selected option is never
             // disabled: jQuery's val() returns null for a disabled one,
             // which would clear the saved command on Done.
@@ -49,13 +49,15 @@
                 const siteId = siteSelect.val();
                 const gateway = RED.nodes.node(gatewayInput.val());
                 const local = !!gateway && gateway.siteId === siteId;
-                const unpaired =
-                    !!siteId && paired[siteId] !== true && !local;
+                const unpaired = !!siteId && paired[siteId] !== true;
                 $("#node-input-command option").each(function () {
-                    const needsKey =
-                        $(this).hasClass("teslemetry-paired-only") ||
-                        (catalog[this.value] && catalog[this.value].paired);
-                    this.disabled = unpaired && needsKey && !this.selected;
+                    const spec = catalog[this.value];
+                    // The earlier paired-only names all have a local form.
+                    const legacy = $(this).hasClass("teslemetry-paired-only");
+                    const needsKey = legacy || (spec && spec.paired);
+                    const viaGateway = local && (legacy || (spec && spec.local));
+                    this.disabled =
+                        unpaired && needsKey && !viaGateway && !this.selected;
                 });
             }
 

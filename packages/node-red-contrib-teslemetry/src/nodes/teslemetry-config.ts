@@ -7,6 +7,7 @@ import {
   VEHICLE_COMMANDS,
 } from "@teslemetry/api";
 import { createLogger, instances, getErrorMessage, Instance } from "../shared";
+import { LOCAL_COMMANDS } from "../localCommands";
 import pkg from "../../package.json" with { type: "json" };
 
 const CLIENT = `${pkg.name}/${pkg.version}`;
@@ -218,7 +219,12 @@ export default function (RED: NodeAPI) {
   // Energy commands are filtered in the editor, which knows the node's Local gateway.
   RED.httpAdmin.get("/teslemetry/commands", canRead, (req: any, res: any) => {
     if (req.query.product === "energy") {
-      res.json(Object.values(ENERGY_COMMANDS));
+      res.json(
+        Object.values(ENERGY_COMMANDS).map((spec) => ({
+          ...spec,
+          local: LOCAL_COMMANDS.has(spec.name),
+        })),
+      );
       return;
     }
     const vin = typeof req.query.vin === "string" ? req.query.vin : "";

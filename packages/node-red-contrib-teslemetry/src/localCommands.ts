@@ -24,3 +24,6 @@ export function localCommand(
   const method = name as keyof SiteCommands;
   return { method, args: LOCAL_ARGS[method](body) };
 }
+
+/** The API route names a gateway takes. */
+export const LOCAL_COMMANDS = new Set(Object.keys(LOCAL_ARGS));

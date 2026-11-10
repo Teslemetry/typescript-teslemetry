@@ -243,4 +243,7 @@ test("the commands list leaves out commands for another vehicle model", () => {
   gets.get("/teslemetry/commands")!({ query: { product: "energy" } }, { json: (b: any) => (energy = b) });
   assert.ok(energy.some((spec) => spec.name === "dispatch_battery_power"));
   assert.ok(!energy.some((spec) => spec.name === "set_charge_limit"));
+  const local = (name: string) => (energy.find((spec) => spec.name === name) as any).local;
+  assert.equal(local("backup"), true);
+  assert.equal(local("storm_mode"), false);
 });
