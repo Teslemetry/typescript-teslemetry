@@ -1,5 +1,11 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.9.1
+
+### Patch Changes
+
+- eb582bd: The editor's vehicle, energy site and field lists and the credentials test now require an editor login when Node-RED's admin login is enabled.
+
 ## 0.9.0
 
 ### Minor Changes
