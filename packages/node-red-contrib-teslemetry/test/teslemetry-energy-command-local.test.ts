@@ -344,6 +344,20 @@ test("a catalog command goes to the cloud when the gateway does not answer", asy
   assert.equal(run.status.text, "cloud");
 });
 
+test("an unpaired catalog dispatch is signed by a matching gateway", async () => {
+  const gateway = await startGateway();
+
+  const run = await runCommand(
+    { command: "dispatch_battery_power", payload: { power_watts: 1000, duration_seconds: 60 } },
+    { host: gateway.host, paired: false },
+  );
+
+  assert.deepEqual(run.errors, []);
+  assert.deepEqual(run.cloudCalls, []);
+  assert.equal(run.status.text, "local");
+  assert.ok(gateway.requests.length > 0);
+});
+
 test("a paired catalog command is never sent to the cloud for a site that is not paired", async () => {
   const viaGateway = await runCommand(
     { command: "dispatch_battery_power", payload: { power_watts: 1000, duration_seconds: 60 } },
