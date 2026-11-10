@@ -1,5 +1,16 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.11.0
+
+### Minor Changes
+
+- e0a9d23: Adds a Charge on Solar example flow under Import > Examples, and a README table that maps each earlier command name to its API route name and fields.
+- 8835e41: The Energy Command node lists every Teslemetry API energy site command, with a field for each argument, and runs any of them from `msg.command` by its route name with its arguments in `msg.payload`. This adds backup events, gateway config and diagnostics. Commands that need a key the gateway trusts are offered for a site paired with Teslemetry or with a Local gateway, and backup reserve, operation mode, grid export, dispatch and island mode go to the Local gateway first. Nodes saved with an earlier command name keep working unchanged.
+- 7e7b734: The Energy Command node has a Route setting: Automatic (local gateway first, then the cloud, as before), Local only (never the cloud) or Cloud only (never the local network). Existing nodes behave as Automatic.
+- e7139bb: The Energy Command node can take a Powerwall off-grid and reconnect it to the grid. Going off-grid runs the home from the battery until you reconnect. Both commands go to the Local gateway first when one is set, and otherwise through the cloud for a site paired with Teslemetry.
+- bbe47d8: The Vehicle Command node runs any Teslemetry API vehicle command given in `msg.command` by its route name, such as `set_charge_limit`, `closure` or `charge_on_solar`, with its arguments in `msg.payload`. Arguments are checked against the API's ranges and allowed values before sending. Existing command names and their arguments work as before.
+- 8d36f7b: The Vehicle Command node lists every Teslemetry API vehicle command, grouped and with its credit cost, and shows a field for each of the selected command's arguments. A field can be a fixed value or read from `msg`, `flow`, `global`, an environment variable or JSONata, and reads `msg.payload.<field>` by default. Cybertruck-only commands are listed only for a Cybertruck. Nodes saved with an earlier command name keep working unchanged.
+
 ## 0.10.0
 
 ### Minor Changes
