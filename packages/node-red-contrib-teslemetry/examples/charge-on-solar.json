@@ -1,0 +1,199 @@
+[
+  {
+    "id": "cos_tab",
+    "type": "tab",
+    "label": "Charge on Solar"
+  },
+  {
+    "id": "cos_config",
+    "type": "teslemetry-config",
+    "name": "My Teslemetry"
+  },
+  {
+    "id": "cos_comment",
+    "type": "comment",
+    "z": "cos_tab",
+    "name": "Pick your vehicle in each Command node. Charge on Solar needs the vehicle already linked to the Powerwall in the Tesla app.",
+    "info": "",
+    "x": 440,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "cos_on",
+    "type": "inject",
+    "z": "cos_tab",
+    "name": "Charge on solar: 50-80%",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 100,
+    "wires": [
+      [
+        "cos_set"
+      ]
+    ]
+  },
+  {
+    "id": "cos_set",
+    "type": "teslemetry-vehicle-command",
+    "z": "cos_tab",
+    "name": "",
+    "teslemetryConfig": "cos_config",
+    "vin": "",
+    "command": "charge_on_solar",
+    "args": {
+      "enabled": {
+        "type": "bool",
+        "value": "true"
+      },
+      "lowerChargeLimit": {
+        "type": "num",
+        "value": "50"
+      },
+      "upperChargeLimit": {
+        "type": "num",
+        "value": "80"
+      }
+    },
+    "x": 480,
+    "y": 100,
+    "wires": [
+      [
+        "cos_debug"
+      ]
+    ]
+  },
+  {
+    "id": "cos_off",
+    "type": "inject",
+    "z": "cos_tab",
+    "name": "Charge on solar: off",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 160,
+    "wires": [
+      [
+        "cos_unset"
+      ]
+    ]
+  },
+  {
+    "id": "cos_unset",
+    "type": "teslemetry-vehicle-command",
+    "z": "cos_tab",
+    "name": "",
+    "teslemetryConfig": "cos_config",
+    "vin": "",
+    "command": "charge_on_solar",
+    "args": {
+      "enabled": {
+        "type": "bool",
+        "value": "false"
+      }
+    },
+    "x": 480,
+    "y": 160,
+    "wires": [
+      [
+        "cos_debug"
+      ]
+    ]
+  },
+  {
+    "id": "cos_state",
+    "type": "inject",
+    "z": "cos_tab",
+    "name": "Read Charge on Solar",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 220,
+    "wires": [
+      [
+        "cos_get"
+      ]
+    ]
+  },
+  {
+    "id": "cos_get",
+    "type": "teslemetry-vehicle-command",
+    "z": "cos_tab",
+    "name": "",
+    "teslemetryConfig": "cos_config",
+    "vin": "",
+    "command": "get_charge_on_solar",
+    "args": {},
+    "x": 480,
+    "y": 220,
+    "wires": [
+      [
+        "cos_debug"
+      ]
+    ]
+  },
+  {
+    "id": "cos_sites",
+    "type": "inject",
+    "z": "cos_tab",
+    "name": "List managed charging sites",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 280,
+    "wires": [
+      [
+        "cos_list"
+      ]
+    ]
+  },
+  {
+    "id": "cos_list",
+    "type": "teslemetry-vehicle-command",
+    "z": "cos_tab",
+    "name": "",
+    "teslemetryConfig": "cos_config",
+    "vin": "",
+    "command": "managed_charging_sites",
+    "args": {},
+    "x": 480,
+    "y": 280,
+    "wires": [
+      [
+        "cos_debug"
+      ]
+    ]
+  },
+  {
+    "id": "cos_debug",
+    "type": "debug",
+    "z": "cos_tab",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 760,
+    "y": 190,
+    "wires": []
+  }
+]
