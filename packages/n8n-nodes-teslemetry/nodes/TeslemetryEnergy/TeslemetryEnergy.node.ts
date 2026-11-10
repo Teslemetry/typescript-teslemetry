@@ -15,7 +15,7 @@ import { errorText, loadOptions, siteOptions, teslemetryRequest, toNodeError } f
 type Metadata = { energy_sites?: Record<string, { paired?: boolean | null }> };
 
 // Signed gateway commands: Teslemetry's key must be verified on the gateway.
-const DISPATCH_OPERATIONS = ['dispatchBatteryPower', 'resumeBatteryOperation'];
+const PAIRED_OPERATIONS = ['dispatchBatteryPower', 'resumeBatteryOperation', 'setIslandMode'];
 
 type SiteInfo = { response?: { tariff_id?: unknown; tariff_content?: unknown; tariff_content_v2?: unknown } };
 
@@ -56,6 +56,11 @@ const OPERATIONS: Record<
 		body: { power_watts: param('power_watts'), duration_seconds: param('duration_seconds') },
 	}),
 	resumeBatteryOperation: () => ({ method: 'POST', path: 'command/resume_battery_operation' }),
+	setIslandMode: (param) => {
+		const mode = param('island_mode');
+		// Some gateways only open the grid contactor when forced.
+		return { method: 'POST', path: 'command/set_island_mode', body: mode === 6 ? { mode, force: true } : { mode } };
+	},
 };
 
 export class TeslemetryEnergy implements INodeType {
@@ -101,7 +106,7 @@ export class TeslemetryEnergy implements INodeType {
 					{
 						name: 'Setting',
 						value: 'settings',
-						description: 'Backup reserve, operation mode, storm mode, grid rules and battery dispatch',
+						description: 'Backup reserve, operation mode, storm mode, grid rules, battery dispatch and island mode',
 					},
 					{ name: 'Status', value: 'status', description: 'Live status, site information and tariff' },
 				],
@@ -168,6 +173,13 @@ export class TeslemetryEnergy implements INodeType {
 						name: 'Set Grid Import/Export',
 						value: 'gridImportExport',
 						action: 'Set grid import export rules',
+					},
+					{
+						name: 'Set Island Mode',
+						value: 'setIslandMode',
+						action: 'Go off grid or reconnect to the grid',
+						description:
+							"Going off-grid runs the home from the battery until reconnected. Lists only sites with Teslemetry's key verified on the gateway.",
 					},
 					{
 						name: 'Set Off-Grid Charge Reserve',
@@ -282,6 +294,27 @@ export class TeslemetryEnergy implements INodeType {
 				},
 			},
 			{
+				displayName: 'Island Mode',
+				name: 'island_mode',
+				type: 'options',
+				options: [
+					{
+						name: 'Go Off-Grid',
+						value: 6,
+						description: 'Disconnect from the grid. The whole home runs from the battery until you reconnect.',
+					},
+					{ name: 'Reconnect to Grid', value: 1 },
+				],
+				default: 1,
+				description:
+					'The gateway can refuse to go off-grid, for example when the battery is low. Check island_status from Get Live Status afterwards.',
+				displayOptions: {
+					show: {
+						operation: ['setIslandMode'],
+					},
+				},
+			},
+			{
 				displayName: 'Off-Grid Reserve (%)',
 				name: 'off_grid_vehicle_charging_reserve_percent',
 				type: 'number',
@@ -301,7 +334,7 @@ export class TeslemetryEnergy implements INodeType {
 			async getSites(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				return loadOptions(this, async () => {
 					const sites = await siteOptions(this);
-					if (!DISPATCH_OPERATIONS.includes(this.getCurrentNodeParameter('operation') as string)) return sites;
+					if (!PAIRED_OPERATIONS.includes(this.getCurrentNodeParameter('operation') as string)) return sites;
 					const { energy_sites } = await teslemetryRequest<Metadata>(this, 'GET', '/api/metadata');
 					return sites.filter((site) => energy_sites?.[String(site.value)]?.paired === true);
 				});

@@ -1,6 +1,7 @@
 import { after, test } from "node:test";
 import assert from "node:assert/strict";
 import type { NodeAPI } from "node-red";
+import { TEGSetIslandModeResult } from "@teslemetry/tesla-protocol/energy_device/teg_api";
 import commandNodeModule from "../src/nodes/teslemetry-energy-command.js";
 import { createLocalSite, type LocalSite } from "../src/localPowerwall.js";
 import { instances } from "../src/shared.js";
@@ -227,6 +228,72 @@ test("dispatch falls back to the cloud for a paired site when the gateway does n
 
   assert.deepEqual(run.errors, []);
   assert.deepEqual(run.cloudCalls, [["dispatchBatteryPower", 1000, 60]]);
+});
+
+test("off-grid and reconnect are signed locally with the island mode and force", async () => {
+  const gateway = await startGateway();
+
+  const offGrid = await runCommand(
+    { command: "goOffGrid" },
+    { host: gateway.host, paired: false },
+  );
+  const reconnect = await runCommand(
+    { command: "reconnectGrid" },
+    { host: gateway.host, paired: false },
+  );
+
+  assert.deepEqual([...offGrid.errors, ...reconnect.errors], []);
+  assert.deepEqual([...offGrid.cloudCalls, ...reconnect.cloudCalls], []);
+  assert.equal(offGrid.status.text, "local");
+  assert.deepEqual(
+    gateway.requests.map(({ teg }) => {
+      const request = teg?.setIslandModeRequest;
+      return [request?.mode, request?.force];
+    }),
+    [
+      [6, true],
+      [1, false],
+    ],
+  );
+});
+
+test("a gateway that refuses to go off-grid is final: the cloud is not tried", async () => {
+  const gateway = await startGateway();
+  gateway.respond = (envelope) =>
+    envelope.teg
+      ? {
+          teg: {
+            setIslandModeResponse: {
+              result:
+                TEGSetIslandModeResult.TEG_SET_ISLAND_MODE_RESULT_REJECTED_LOW_ENERGY,
+            },
+          },
+        }
+      : undefined;
+
+  const run = await runCommand({ command: "goOffGrid" }, { host: gateway.host });
+
+  assert.equal(run.errors.length, 1);
+  assert.match(run.errors[0], /REJECTED_LOW_ENERGY/);
+  assert.deepEqual(run.cloudCalls, []);
+});
+
+test("off-grid falls back to the cloud for a paired site when the gateway does not answer", async () => {
+  const run = await runCommand({ command: "goOffGrid" }, { host: DEAD_HOST });
+
+  assert.deepEqual(run.errors, []);
+  assert.deepEqual(run.cloudCalls, [["setIslandMode", 6, true]]);
+  assert.equal(run.status.text, "cloud");
+});
+
+test("off-grid is never sent to the cloud for a site that is not paired with it", async () => {
+  const run = await runCommand(
+    { command: "goOffGrid" },
+    { host: DEAD_HOST, paired: false },
+  );
+
+  assert.equal(run.errors.length, 1);
+  assert.deepEqual(run.cloudCalls, []);
 });
 
 test("a gateway paired for another site is not sent this site's commands", async () => {

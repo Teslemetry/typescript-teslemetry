@@ -49,9 +49,9 @@ test("TeslemetryEnergy.getSites calls a real TeslemetryApi method (regression: a
   assert.deepEqual(options, [{ name: "Home (123)", value: 123 }]);
 });
 
-test("TeslemetryEnergy.getSites lists only sites with Teslemetry's key verified on the gateway for battery dispatch", async () => {
+test("TeslemetryEnergy.getSites lists only sites with Teslemetry's key verified on the gateway for signed gateway commands", async () => {
   const node = new TeslemetryEnergy();
-  for (const operation of ["dispatchBatteryPower", "resumeBatteryOperation"]) {
+  for (const operation of ["dispatchBatteryPower", "resumeBatteryOperation", "setIslandMode"]) {
     const context = { ...(fakeLoadOptionsContext as object), getCurrentNodeParameter: () => operation } as never;
     const options = await withMockedFetch(
       (request) =>

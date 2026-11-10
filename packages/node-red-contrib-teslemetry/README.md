@@ -109,7 +109,7 @@ Send commands to a Tesla Energy Site or retrieve site status.
 
 **Configuration:**
 - **Site ID**: Select a site or leave empty to use `msg.siteId`.
-- **Local gateway**: Optional. A Teslemetry Local Powerwall config node. Backup reserve, operation mode, grid export, dispatch and resume then go to the gateway over your local network first, and through the cloud only if the gateway does not answer. The node status shows `local` or `cloud`.
+- **Local gateway**: Optional. A Teslemetry Local Powerwall config node. Backup reserve, operation mode, grid export, dispatch, resume, go off-grid and reconnect to grid then go to the gateway over your local network first, and through the cloud only if the gateway does not answer. The node status shows `local` or `cloud`.
 - **Command**: Select a command, or choose **From msg.command** to take it from each message.
 
 A site or command selected in the node always wins; `msg.siteId` and `msg.command` are only read when the matching dropdown is set to its **From msg…** option. Command arguments are read from the top level of the message, not from `msg.payload`.
@@ -290,8 +290,10 @@ A DIN absent from the input emits nothing for that DIN - it does not send a synt
 - **Off-Grid Reserve**: Set vehicle charging reserve for off-grid operation
 - **Dispatch Battery Power**: Charge or discharge the battery at a set power for a set time, after which it returns to normal operation by itself. A new dispatch replaces the previous one, and a dispatch can discharge below the backup reserve and export regardless of the export setting.
 - **Resume Battery Operation**: End a dispatch early
+- **Go Off-Grid**: Disconnect the home from the grid. The whole home then runs from the battery (and solar) until you send Reconnect to Grid. The gateway can refuse, for example when the battery is low. Check `island_status` from Get Live Status afterwards.
+- **Reconnect to Grid**: Reconnect the home to the grid
 
-Dispatch and resume need the site paired with Teslemetry (Teslemetry's key verified on the gateway from the Teslemetry console). They are greyed out in the editor for a site that is not paired, and the node refuses them at runtime for one.
+Dispatch, resume, off-grid and reconnect need a local gateway set on the node, or the site paired with Teslemetry (Teslemetry's key verified on the gateway from the Teslemetry console). They are greyed out in the editor for a site that is not paired, and the node refuses them at runtime for one.
 
 ## Resources
 

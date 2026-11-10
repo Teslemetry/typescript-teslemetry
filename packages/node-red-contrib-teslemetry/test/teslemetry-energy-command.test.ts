@@ -241,6 +241,27 @@ test("dispatchBatteryPower sends signed watts and seconds to a paired site", asy
   assert.deepEqual(received, [-5000, 3600]);
 });
 
+test("goOffGrid and reconnectGrid send the island mode to a paired site", async () => {
+  const received: unknown[][] = [];
+  const site = {
+    setIslandMode: async (...args: unknown[]) => {
+      received.push(args);
+      return { response: {} };
+    },
+  };
+
+  const errors = [
+    ...(await runCommand(site, { command: "goOffGrid" })),
+    ...(await runCommand(site, { command: "reconnectGrid" })),
+  ];
+
+  assert.deepEqual(errors, []);
+  assert.deepEqual(received, [
+    [6, true],
+    [1, undefined],
+  ]);
+});
+
 test("dispatchBatteryPower rejects power and duration outside the api's bounds", async () => {
   const site = {
     dispatchBatteryPower: async () => {
@@ -273,11 +294,18 @@ test("resumeBatteryOperation is sent to a paired site", async () => {
   assert.equal(called, true);
 });
 
-for (const command of ["dispatchBatteryPower", "resumeBatteryOperation"]) {
+const CLOUD_METHODS: Record<string, string> = {
+  dispatchBatteryPower: "dispatchBatteryPower",
+  resumeBatteryOperation: "resumeBatteryOperation",
+  goOffGrid: "setIslandMode",
+  reconnectGrid: "setIslandMode",
+};
+
+for (const [command, method] of Object.entries(CLOUD_METHODS)) {
   for (const paired of [false, null]) {
     test(`${command} is refused before sending when the site's paired is ${paired}`, async () => {
       const site = {
-        [command]: async () => {
+        [method]: async () => {
           throw new Error("must not be sent");
         },
       };

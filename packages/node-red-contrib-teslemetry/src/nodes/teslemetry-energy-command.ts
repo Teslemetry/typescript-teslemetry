@@ -48,10 +48,15 @@ function normalizeTariffContentV2(tariff: Record<string, any>) {
   return normalized;
 }
 
-/** Dispatch and resume must be signed. The cloud signs them with Teslemetry's
+/** These commands must be signed. The cloud signs them with Teslemetry's
  *  key, so it refuses them until that key is verified on the gateway (metadata
  *  `paired`); a local gateway signs them with Node-RED's own key. */
-const PAIRED_COMMANDS = new Set(["dispatchBatteryPower", "resumeBatteryOperation"]);
+const PAIRED_COMMANDS = new Set([
+  "dispatchBatteryPower",
+  "resumeBatteryOperation",
+  "goOffGrid",
+  "reconnectGrid",
+]);
 
 export const NOT_PAIRED_MESSAGE =
   "This energy site is not paired: set a Local gateway for it on this node, or verify Teslemetry's key on the gateway from the Teslemetry console";
@@ -68,6 +73,8 @@ function cloudCommands(site: CloudSite): SiteCommands {
     dispatch_battery_power: (powerWatts, durationSeconds) =>
       site.dispatchBatteryPower(powerWatts, durationSeconds),
     resume_battery_operation: () => site.resumeBatteryOperation(),
+    set_island_mode: (mode, force) =>
+      site.setIslandMode(mode, force ?? undefined),
   };
 }
 
@@ -251,6 +258,13 @@ export default function (RED: NodeAPI) {
             break;
           case "resumeBatteryOperation":
             result = await run("resume_battery_operation");
+            break;
+          case "goOffGrid":
+            // Some gateways only open the grid contactor when forced.
+            result = await run("set_island_mode", 6, true);
+            break;
+          case "reconnectGrid":
+            result = await run("set_island_mode", 1, null);
             break;
           default:
             throw new Error(`Unknown command: ${command}`);
