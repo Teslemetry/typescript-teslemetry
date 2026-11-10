@@ -1,0 +1,328 @@
+<script type="text/javascript">
+    RED.nodes.registerType("teslemetry-local-powerwall", {
+        category: "config",
+        defaults: {
+            name: { value: "" },
+            teslemetryConfig: {
+                value: "",
+                type: "teslemetry-config",
+                required: true,
+            },
+            siteId: { value: "", required: true },
+            host: { value: "", required: true },
+        },
+        credentials: {
+            password: { type: "password" },
+            privateKey: { type: "password" },
+        },
+        label: function () {
+            return this.name || "Local Powerwall";
+        },
+        oneditprepare: function () {
+            const node = this;
+            const configInput = $("#node-config-input-teslemetryConfig");
+            const siteSelect = $("#node-config-input-siteId");
+            const hostInput = $("#node-config-input-host");
+            const passwordInput = $("#node-config-input-password");
+            const keyInput = $("#node-config-input-privateKey");
+            const pairResult = $("#node-config-local-powerwall-pair-result");
+            const verifyResult = $(
+                "#node-config-local-powerwall-verify-result",
+            );
+
+            function show(target, text, color) {
+                target.text(text).css("color", color || "");
+            }
+
+            function failure(jqxhr) {
+                return (
+                    (jqxhr.responseJSON && jqxhr.responseJSON.message) ||
+                    "Node-RED did not answer"
+                );
+            }
+
+            // A saved secret never reaches the editor: its field holds a
+            // placeholder, and the runtime uses the saved value instead.
+            function entered(input) {
+                const value = input.val();
+                return value && value !== "__PWRD__" ? value : undefined;
+            }
+
+            function post(path, data) {
+                return $.ajax({
+                    url: "teslemetry/local-powerwall/" + path,
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                });
+            }
+
+            function gateway() {
+                return {
+                    id: node.id,
+                    host: hostInput.val(),
+                    password: entered(passwordInput),
+                    privateKey: entered(keyInput),
+                };
+            }
+
+            function updateSites() {
+                const configId = configInput.val();
+                if (!configId || configId === "_ADD_") return;
+                $.getJSON("teslemetry/energy_sites", { config: configId })
+                    .done(function (data) {
+                        const current = siteSelect.val() || node.siteId;
+                        siteSelect.empty();
+                        (data || []).forEach(function ([id, name]) {
+                            siteSelect.append(
+                                $("<option>")
+                                    .val(id)
+                                    .text(name + " (" + id + ")"),
+                            );
+                        });
+                        if (current) siteSelect.val(current);
+                    })
+                    .fail(function () {
+                        show(
+                            pairResult,
+                            "Deploy the Teslemetry config first, then reopen this dialog.",
+                            "red",
+                        );
+                    });
+            }
+
+            function findAddress() {
+                $.getJSON("teslemetry/local-powerwall/address", {
+                    config: configInput.val(),
+                    siteId: siteSelect.val(),
+                })
+                    .done(function (result) {
+                        if (result.host) {
+                            hostInput.val(result.host);
+                        } else {
+                            show(
+                                verifyResult,
+                                "Teslemetry could not find the gateway's address. Enter it yourself.",
+                                "red",
+                            );
+                        }
+                    })
+                    .fail(function (jqxhr) {
+                        show(verifyResult, failure(jqxhr), "red");
+                    });
+            }
+
+            configInput.on("change", updateSites);
+            if (configInput.val()) updateSites();
+
+            $("#node-config-local-powerwall-pair").on("click", function () {
+                show(pairResult, "Pairing...");
+                post("pair", {
+                    id: node.id,
+                    config: configInput.val(),
+                    siteId: siteSelect.val(),
+                    privateKey: entered(keyInput),
+                })
+                    .done(function (result) {
+                        if (result.privateKey) keyInput.val(result.privateKey);
+                        if (result.state === "verified") {
+                            show(
+                                pairResult,
+                                "Approved. Enter the gateway address and password, then press Verify.",
+                                "green",
+                            );
+                        } else {
+                            show(
+                                pairResult,
+                                "Flick the On/Off switch on your primary Powerwall off and back on to approve Node-RED, then press Pair again. This is only needed once.",
+                            );
+                        }
+                        if (!hostInput.val()) findAddress();
+                    })
+                    .fail(function (jqxhr) {
+                        show(pairResult, failure(jqxhr), "red");
+                    });
+            });
+
+            $("#node-config-local-powerwall-find").on("click", findAddress);
+
+            $("#node-config-local-powerwall-verify").on("click", function () {
+                show(verifyResult, "Verifying...");
+                post("verify", gateway())
+                    .done(function (result) {
+                        if (result.ok) {
+                            show(
+                                verifyResult,
+                                "Verified. Save this dialog, then Deploy.",
+                                "green",
+                            );
+                        } else if (result.reason === "wrong_password") {
+                            show(
+                                verifyResult,
+                                "The gateway did not accept this password.",
+                                "red",
+                            );
+                        } else if (result.reason === "key_not_approved") {
+                            show(
+                                verifyResult,
+                                "The password is right, but the gateway has not approved Node-RED's key. Flick the On/Off switch on your primary Powerwall off and back on, then press Pair.",
+                                "red",
+                            );
+                        } else {
+                            show(
+                                verifyResult,
+                                "Node-RED could not reach the gateway. Check its address and that it is on the same network as Node-RED. (" +
+                                    result.message +
+                                    ")",
+                                "red",
+                            );
+                        }
+                    })
+                    .fail(function (jqxhr) {
+                        show(verifyResult, failure(jqxhr), "red");
+                    });
+            });
+
+            $("#node-config-local-powerwall-remove").on("click", function () {
+                if (
+                    !window.confirm(
+                        "Remove Node-RED's key from the gateway? Local control stops until you pair again, which needs another flick of the Powerwall switch.",
+                    )
+                ) {
+                    return;
+                }
+                show(verifyResult, "Removing the key...");
+                post("remove-key", gateway())
+                    .done(function () {
+                        show(
+                            verifyResult,
+                            "Node-RED's key was removed from the gateway. Delete this config node, or press Pair to pair again.",
+                            "green",
+                        );
+                    })
+                    .fail(function (jqxhr) {
+                        show(verifyResult, failure(jqxhr), "red");
+                    });
+            });
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="teslemetry-local-powerwall">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-teslemetryConfig">
+            <i class="fa fa-globe"></i> Config
+        </label>
+        <input type="text" id="node-config-input-teslemetryConfig" />
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-siteId">
+            <i class="fa fa-home"></i> Energy site
+        </label>
+        <select id="node-config-input-siteId" style="width: 70%;"></select>
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <button type="button" id="node-config-local-powerwall-pair" class="red-ui-button">Pair</button>
+    </div>
+    <div class="form-row" id="node-config-local-powerwall-pair-result"></div>
+    <div class="form-row">
+        <label for="node-config-input-host">
+            <i class="fa fa-server"></i> Address
+        </label>
+        <input type="text" id="node-config-input-host" placeholder="192.168.1.50" style="width: 50%;" />
+        <button type="button" id="node-config-local-powerwall-find" class="red-ui-button">Find</button>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password">
+            <i class="fa fa-lock"></i> Password
+        </label>
+        <input type="password" id="node-config-input-password" autocomplete="new-password" />
+    </div>
+    <input type="password" id="node-config-input-privateKey" autocomplete="off" style="display: none;" />
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <button type="button" id="node-config-local-powerwall-verify" class="red-ui-button">Verify</button>
+        <button type="button" id="node-config-local-powerwall-remove" class="red-ui-button" style="margin-left: 10px;">Remove key</button>
+    </div>
+    <div class="form-row" id="node-config-local-powerwall-verify-result"></div>
+</script>
+
+<script type="text/html" data-help-name="teslemetry-local-powerwall">
+    <p>
+        Connects Node-RED to a Powerwall gateway on your local network, so
+        commands can reach the Powerwall without the internet.
+    </p>
+    <p>
+        Node-RED must be on the same network as the gateway. A Node-RED
+        hosted outside your home cannot reach it.
+    </p>
+
+    <h3>Setup</h3>
+    <ol>
+        <li>
+            Pick your Teslemetry config and the energy site. The config must
+            be deployed before its sites are listed.
+        </li>
+        <li>
+            Press <b>Pair</b>. Node-RED creates its own key and registers it
+            with the Powerwall through Teslemetry.
+        </li>
+        <li>
+            Flick the On/Off switch on your primary Powerwall off and back
+            on. This approves Node-RED's key and is only needed once. Press
+            <b>Pair</b> again to check that the key is approved.
+        </li>
+        <li>
+            Check the gateway's <b>Address</b>. Node-RED fills it in from
+            Teslemetry, and <b>Find</b> looks it up again. Give the gateway a
+            fixed address (a DHCP reservation) on your router so it does not
+            change.
+        </li>
+        <li>
+            Enter the gateway's Wi-Fi <b>Password</b>. Only its last 5
+            characters are used. It is on the QR label behind the front
+            cover of a Powerwall 3, or behind the Backup Gateway door on a
+            Powerwall 2.
+        </li>
+        <li>
+            Press <b>Verify</b>. Node-RED logs in to the gateway and sends
+            one signed request, so a wrong password and a key that is not
+            approved are reported separately.
+        </li>
+        <li>
+            Save this dialog and <b>Deploy</b>. If you close the dialog
+            without saving after pressing Pair, the new key is lost and
+            pairing needs another flick of the switch.
+        </li>
+    </ol>
+
+    <h3>How the key and password are stored</h3>
+    <p>
+        The private key and the password are credentials of this config
+        node. Node-RED keeps credentials in its credentials file, apart from
+        your flows. They are never part of an exported flow, and Node-RED
+        does not show them again in the editor once saved. A new key passes
+        through the editor once, when Pair creates it.
+    </p>
+    <p>
+        Set <code>credentialSecret</code> in your Node-RED
+        <code>settings.js</code> to encrypt the credentials file with a
+        secret of your own. Without it, Node-RED encrypts the file with a
+        key it stores in the same folder, so anyone who can read your
+        Node-RED folder can read the key and password.
+    </p>
+
+    <h3>Removing the key</h3>
+    <p>
+        Deleting this config node does not remove Node-RED's key from the
+        gateway, and the key cannot be revoked from the Teslemetry console.
+        To remove it, press <b>Remove key</b> before deleting the node.
+        Node-RED asks the gateway, over your local network, to remove the
+        key. Pairing again afterwards needs another flick of the switch.
+    </p>
+</script>
