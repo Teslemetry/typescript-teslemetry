@@ -46,6 +46,13 @@ function normalizeTariffContentV2(tariff: Record<string, any>) {
   return normalized;
 }
 
+/** Dispatch and resume are signed with Teslemetry's key, so the api refuses them
+ *  until that key is verified on the gateway (metadata `paired`). */
+const PAIRED_COMMANDS = new Set(["dispatchBatteryPower", "resumeBatteryOperation"]);
+
+export const NOT_PAIRED_MESSAGE =
+  "This energy site is not paired with Teslemetry: verify Teslemetry's key on the gateway from the Teslemetry console";
+
 export interface TeslemetryEnergyCommandNodeDef extends NodeDef {
   teslemetryConfig: string;
   siteId: string;
@@ -85,6 +92,14 @@ export default function (RED: NodeAPI) {
         }
         if (!command) {
           throw new Error("No Energy Command provided");
+        }
+
+        if (PAIRED_COMMANDS.has(command)) {
+          // Read at message time: a products retry replaces the promise.
+          const { energySites } = await instance.products;
+          if (energySites[siteId]?.metadata.paired !== true) {
+            throw new Error(NOT_PAIRED_MESSAGE);
+          }
         }
 
         node.status({ fill: "blue", shape: "dot", text: "running command" });
@@ -154,6 +169,30 @@ export default function (RED: NodeAPI) {
                 ),
               },
             });
+            break;
+          case "dispatchBatteryPower":
+            validateParameters(msg, {
+              powerWatts: {
+                required: true,
+                type: "number",
+                min: -100000,
+                max: 100000,
+              },
+              durationSeconds: {
+                required: true,
+                type: "number",
+                integer: true,
+                min: 1,
+                max: 86400,
+              },
+            });
+            result = await site.dispatchBatteryPower(
+              Number(msg.powerWatts),
+              Number(msg.durationSeconds),
+            );
+            break;
+          case "resumeBatteryOperation":
+            result = await site.resumeBatteryOperation();
             break;
           default:
             throw new Error(`Unknown command: ${command}`);

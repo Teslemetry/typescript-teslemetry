@@ -195,10 +195,9 @@ export default function (RED: NodeAPI) {
 
       const { energySites } = await instance.products;
 
-      const options = Object.entries(energySites).map(([id, { name }]) => [
-        id,
-        name,
-      ]);
+      const options = Object.entries(energySites).map(
+        ([id, { name, metadata }]) => [id, name, metadata.paired === true],
+      );
 
       res.json(options);
     } catch (error: unknown) {
