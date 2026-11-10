@@ -23,6 +23,19 @@
             const node = this;
             const siteSelect = $("#node-input-siteId");
             const configInput = $("#node-input-teslemetryConfig");
+            const pairedOnly = $(
+                "#node-input-command option.teslemetry-paired-only",
+            );
+            const paired = {};
+
+            // Dispatch and resume need Teslemetry's key verified on the
+            // gateway, so they are greyed out for a site that is not paired.
+            // With "From msg.siteId" the site is unknown here; the node
+            // refuses an unpaired site at runtime instead.
+            function updateCommands() {
+                const siteId = siteSelect.val();
+                pairedOnly.prop("disabled", !!siteId && paired[siteId] !== true);
+            }
 
             function updateSites() {
                 const configId = configInput.val();
@@ -35,7 +48,8 @@
                                 '<option value="">From msg.siteId</option>',
                             );
                             if (data && data.length > 0) {
-                                data.forEach(function ([id, name]) {
+                                data.forEach(function ([id, name, isPaired]) {
+                                    paired[id] = isPaired;
                                     siteSelect.append(
                                         '<option value="' +
                                             id +
@@ -50,6 +64,7 @@
                             if (current) {
                                 siteSelect.val(current);
                             }
+                            updateCommands();
                         })
                         .fail(function (jqxhr, textStatus, error) {
                             console.error(
@@ -63,6 +78,7 @@
             configInput.change(function () {
                 updateSites();
             });
+            siteSelect.change(updateCommands);
 
             if (configInput.val()) {
                 updateSites();
@@ -121,6 +137,20 @@
                 <option value="gridExportSolar">Export Solar</option>
                 <option value="gridExportNothing">Export Nothing</option>
             </optgroup>
+            <optgroup label="Battery Dispatch (paired sites only)">
+                <option
+                    class="teslemetry-paired-only"
+                    value="dispatchBatteryPower"
+                >
+                    Dispatch Battery Power (msg.powerWatts, msg.durationSeconds)
+                </option>
+                <option
+                    class="teslemetry-paired-only"
+                    value="resumeBatteryOperation"
+                >
+                    Resume Battery Operation
+                </option>
+            </optgroup>
         </select>
     </div>
 </script>
@@ -171,7 +201,32 @@
             schedule, so a partial document will drop any rules it
             omits.
         </dd>
+        <dt class="optional">
+            powerWatts / durationSeconds
+            <span class="property-type">number</span>
+        </dt>
+        <dd>
+            For <code>dispatchBatteryPower</code>: <code>msg.powerWatts</code>
+            is the battery power in watts, from -100000 to 100000, where a
+            positive value discharges the battery and a negative value charges
+            it. <code>msg.durationSeconds</code> is how long to hold that
+            power, a whole number of seconds from 1 to 86400. When the
+            duration ends the battery returns to normal operation by itself,
+            and a new dispatch replaces the previous one. A dispatch can
+            discharge below the backup reserve and export to the grid
+            regardless of the site's export setting.
+            <code>resumeBatteryOperation</code> ends a dispatch early.
+        </dd>
     </dl>
+
+    <h3>Battery dispatch</h3>
+    <p>
+        Dispatch and resume are sent through the Teslemetry cloud, so the
+        site must be paired: Teslemetry's key verified on the gateway from the
+        Teslemetry console. The two commands are greyed out for a site that
+        is not paired, and the node refuses them at runtime with an error for
+        a site that is not paired.
+    </p>
 
     <h3>Outputs</h3>
     <dl class="message-properties">

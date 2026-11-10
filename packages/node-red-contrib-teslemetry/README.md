@@ -105,6 +105,7 @@ A site or command selected in the node always wins; `msg.siteId` and `msg.comman
 - `msg.percentage` (number): Backup reserve percentage for `setBackupReserve`.
 - `msg.percent` (number): Off-grid reserve percentage for `setOffGridVehicleChargingReserve`.
 - `msg.tariffContentV2` (object): Full time-of-use tariff document for `setTimeOfUseSettings`, matching the `TariffContentV2` shape (`version`, `utility`, `code`, `name`, `currency`, `daily_charges`, `demand_charges`, `energy_charges`, `seasons` required). **Replaces the site's entire time-of-use schedule** - it is not merged with the existing schedule.
+- `msg.powerWatts` (number) and `msg.durationSeconds` (number): For `dispatchBatteryPower`, the battery power in watts from -100000 to 100000 (positive discharges, negative charges) and how long to hold it, 1 to 86400 whole seconds.
 
 ### teslemetry-energy-history
 Retrieve historical data for a Tesla Energy Site.
@@ -272,6 +273,10 @@ A DIN absent from the input emits nothing for that DIN - it does not send a synt
 - **Set Storm Mode**: Enable/disable Storm Mode
 - **Grid Import/Export**: Configure grid export rules (Everything, Solar Only, Nothing)
 - **Off-Grid Reserve**: Set vehicle charging reserve for off-grid operation
+- **Dispatch Battery Power**: Charge or discharge the battery at a set power for a set time, after which it returns to normal operation by itself. A new dispatch replaces the previous one, and a dispatch can discharge below the backup reserve and export regardless of the export setting.
+- **Resume Battery Operation**: End a dispatch early
+
+Dispatch and resume need the site paired with Teslemetry (Teslemetry's key verified on the gateway from the Teslemetry console). They are greyed out in the editor for a site that is not paired, and the node refuses them at runtime for one.
 
 ## Resources
 

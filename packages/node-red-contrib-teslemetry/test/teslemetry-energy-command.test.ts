@@ -52,6 +52,7 @@ let nextConfigId = 0;
 async function runCommand(
   site: Record<string, (...args: any[]) => Promise<{ response: unknown }>>,
   msg: Partial<Msg>,
+  paired: boolean | null = true,
 ): Promise<string[]> {
   const { RED, registered } = createFakeRED();
   commandNodeModule(RED);
@@ -60,7 +61,10 @@ async function runCommand(
   const configId = `cfg-test-${nextConfigId++}`;
   instances.set(configId, {
     teslemetry: { api: { getEnergySite: () => site } } as any,
-    products: Promise.resolve({} as any),
+    products: Promise.resolve({
+      vehicles: {},
+      energySites: { "12345": { metadata: { paired } } },
+    } as any),
   });
 
   const errors: string[] = [];
@@ -217,3 +221,75 @@ test("msg.command is used when the node's Command is 'From msg.command' (empty)"
   assert.deepEqual(errors, []);
   assert.equal(stormMode, true);
 });
+
+test("dispatchBatteryPower sends signed watts and seconds to a paired site", async () => {
+  let received: unknown[] = [];
+  const site = {
+    dispatchBatteryPower: async (...args: unknown[]) => {
+      received = args;
+      return { response: {} };
+    },
+  };
+
+  const errors = await runCommand(site, {
+    command: "dispatchBatteryPower",
+    powerWatts: "-5000",
+    durationSeconds: 3600,
+  });
+
+  assert.deepEqual(errors, []);
+  assert.deepEqual(received, [-5000, 3600]);
+});
+
+test("dispatchBatteryPower rejects power and duration outside the api's bounds", async () => {
+  const site = {
+    dispatchBatteryPower: async () => {
+      throw new Error("must not be sent");
+    },
+  };
+
+  const errors = await runCommand(site, {
+    command: "dispatchBatteryPower",
+    powerWatts: 100001,
+    durationSeconds: 1.5,
+  });
+
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /powerWatts' must be at most 100000/);
+  assert.match(errors[0], /durationSeconds' must be an integer/);
+});
+
+test("resumeBatteryOperation is sent to a paired site", async () => {
+  let called = false;
+  const site = {
+    resumeBatteryOperation: async () => {
+      called = true;
+      return { response: {} };
+    },
+  };
+
+  const errors = await runCommand(site, { command: "resumeBatteryOperation" });
+  assert.deepEqual(errors, []);
+  assert.equal(called, true);
+});
+
+for (const command of ["dispatchBatteryPower", "resumeBatteryOperation"]) {
+  for (const paired of [false, null]) {
+    test(`${command} is refused before sending when the site's paired is ${paired}`, async () => {
+      const site = {
+        [command]: async () => {
+          throw new Error("must not be sent");
+        },
+      };
+
+      const errors = await runCommand(
+        site,
+        { command, powerWatts: 1000, durationSeconds: 60 },
+        paired,
+      );
+
+      assert.equal(errors.length, 1);
+      assert.match(errors[0], /verify Teslemetry's key on the gateway/);
+    });
+  }
+}
