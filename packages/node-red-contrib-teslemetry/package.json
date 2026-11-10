@@ -47,6 +47,7 @@
     "version": ">=3.0.0",
     "nodes": {
       "teslemetry-config": "dist/nodes/teslemetry-config.js",
+      "teslemetry-local-powerwall": "dist/nodes/teslemetry-local-powerwall.js",
       "teslemetry-vehicle-command": "dist/nodes/teslemetry-vehicle-command.js",
       "teslemetry-event": "dist/nodes/teslemetry-event.js",
       "teslemetry-signal": "dist/nodes/teslemetry-signal.js",
@@ -58,9 +59,11 @@
   },
   "devDependencies": {
     "@teslemetry/api": "workspace:*",
+    "@teslemetry/tesla-protocol": "~6.1.0",
     "@types/node-red": "^1.3.5",
     "node-red": "^4.1.1",
     "node-red-dev": "^0.1.6",
+    "tesla-fleet-api": "0.9.0",
     "tsdown": "^0.22.4",
     "tsx": "^4.20.6"
   }

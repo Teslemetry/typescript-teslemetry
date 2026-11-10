@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { isBuiltin } from "node:module";
 import { resolve } from "node:path";
 
 const root = resolve(__dirname, "..");
@@ -20,3 +21,21 @@ for (const [name, file] of Object.entries(nodes)) {
     assert.ok(existsSync(resolve(root, html)), `${html} is not in the build output`);
   });
 }
+
+// The package installs with no dependencies, so everything a node needs must
+// be in the build output: a `require` of anything else fails at load time.
+test("the build output requires only Node built-ins and its own files", () => {
+  const dir = resolve(root, "dist/nodes");
+  const external = new Set<string>();
+  for (const file of readdirSync(dir).filter((name) => name.endsWith(".js"))) {
+    const source = readFileSync(resolve(dir, file), "utf8");
+    for (const [, target] of source.matchAll(/\brequire\(["']([^"']+)["']\)/g)) {
+      if (target.startsWith(".")) {
+        assert.ok(existsSync(resolve(dir, target)), `${file} requires missing ${target}`);
+      } else if (!isBuiltin(target)) {
+        external.add(target);
+      }
+    }
+  }
+  assert.deepEqual([...external], []);
+});

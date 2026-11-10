@@ -63,6 +63,20 @@ Configuration node to store your Teslemetry Access Token.
 - **Access Token**: Your Teslemetry access token.
 - **Replay last known values on connect**: Off by default, so nodes stay silent until a value next changes. When ticked, Teslemetry sends its last known state each time the stream connects or reconnects. Replayed events carry `isCache: true` in the payload of the event nodes; a Signal node outputs only the value, so a replayed value there has no marker.
 
+### teslemetry-local-powerwall
+Configuration node that connects Node-RED to a Powerwall gateway on your local network. Node-RED must be on the same network as the gateway.
+
+**Configuration:**
+- **Config**: Select your Teslemetry Config node
+- **Energy site**: The site whose Powerwall to connect to
+- **Pair**: Creates Node-RED's own key and registers it with the Powerwall through Teslemetry. Flick the On/Off switch on your primary Powerwall off and back on to approve it (only needed once), then press Pair again
+- **Address**: The gateway's address on your network, filled in from Teslemetry. Give the gateway a fixed address on your router
+- **Password**: The gateway's Wi-Fi password, from the QR label behind the front cover of a Powerwall 3 or behind the Backup Gateway door on a Powerwall 2
+- **Verify**: Logs in to the gateway and sends one signed request, to check the password and the key
+- **Remove key**: Removes Node-RED's key from the gateway. Deleting the config node does not remove it
+
+The key and password are stored as Node-RED credentials: outside your flows, never in an exported flow, and not shown again in the editor. Set `credentialSecret` in `settings.js` to encrypt them with a secret of your own.
+
 ### teslemetry-vehicle-command
 Send commands to a specific vehicle or retrieve vehicle data.
 
