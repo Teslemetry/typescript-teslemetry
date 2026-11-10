@@ -282,7 +282,17 @@
         <dd>
             Command to execute, e.g. <code>lockDoors</code>. Only used when
             Command is set to <b>From msg.command</b>; a command selected in
-            the node takes precedence.
+            the node takes precedence. Also takes any Teslemetry API vehicle
+            command by its route name, e.g. <code>set_charge_limit</code> or
+            <code>charge_on_solar</code>.
+        </dd>
+        <dt class="optional">
+            payload <span class="property-type">object</span>
+        </dt>
+        <dd>
+            Arguments for an API route name command, using the API's field
+            names, e.g. <code>{ "percent": 80 }</code> for
+            <code>set_charge_limit</code>.
         </dd>
         <dt class="optional">
             <i>arguments</i> <span class="property-type">various</span>

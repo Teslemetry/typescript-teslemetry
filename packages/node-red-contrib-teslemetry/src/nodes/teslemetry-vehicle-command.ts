@@ -1,7 +1,8 @@
 import { Node, NodeAPI, NodeDef } from "node-red";
 import { failInput, getInstance } from "../shared";
 import { validateParameters, ValidationRules } from "../validation";
-import { Teslemetry } from "@teslemetry/api";
+import { Teslemetry, VEHICLE_COMMANDS } from "@teslemetry/api";
+import { sendCatalogCommand } from "../catalog";
 import { Msg } from "../types";
 
 export interface TeslemetryVehicleCommandNodeDef extends NodeDef {
@@ -606,8 +607,19 @@ export default function (RED: NodeAPI) {
           case "mediaPreviousTrack":
             result = await vehicle.mediaPreviousTrack();
             break;
-          default:
-            throw new Error(`Unknown command: ${command}`);
+          default: {
+            // Catalog commands take their arguments from msg.payload.
+            const spec = Object.prototype.hasOwnProperty.call(VEHICLE_COMMANDS, command)
+              ? VEHICLE_COMMANDS[command]
+              : undefined;
+            if (!spec) throw new Error(`Unknown command: ${command}`);
+            result = await sendCatalogCommand(
+              node.teslemetry!,
+              spec,
+              { vin },
+              msg.payload,
+            );
+          }
         }
 
         checkCommandResult(result.response);

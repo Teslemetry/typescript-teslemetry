@@ -86,6 +86,8 @@ Send commands to a specific vehicle or retrieve vehicle data.
 
 A VIN or command selected in the node always wins; `msg.vin` and `msg.command` are only read when the matching dropdown is set to its **From msg…** option. Command arguments are read from the top level of the message (`msg.percent`, not `msg.payload.percent`).
 
+`msg.command` also takes any vehicle command from the [Teslemetry API](https://teslemetry.com/docs) by its route name, such as `set_charge_limit`, `closure` or `charge_on_solar`. These read their arguments from `msg.payload` using the API's field names, for example `msg.payload = { "percent": 80 }`, and check them against the API's ranges and allowed values before sending. A command that reads state, such as `managed_charging_sites`, takes no arguments, and `get_charge_on_solar` reads what `charge_on_solar` sets.
+
 **Inputs:**
 - `msg.vin` (string): VIN of the vehicle (when VIN is **From msg.vin**).
 - `msg.command` (string): Command to execute, e.g. `lockDoors` (when Command is **From msg.command**).
