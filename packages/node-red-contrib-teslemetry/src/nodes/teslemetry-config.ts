@@ -147,7 +147,9 @@ export default function (RED: NodeAPI) {
     },
   });
 
-  RED.httpAdmin.get("/teslemetry/vehicles", async (req: any, res: any) => {
+  const canRead = RED.auth.needsPermission("teslemetry-config.read");
+
+  RED.httpAdmin.get("/teslemetry/vehicles", canRead, async (req: any, res: any) => {
     try {
       const config = req.query.config;
 
@@ -177,7 +179,7 @@ export default function (RED: NodeAPI) {
     }
   });
 
-  RED.httpAdmin.get("/teslemetry/energy_sites", async (req: any, res: any) => {
+  RED.httpAdmin.get("/teslemetry/energy_sites", canRead, async (req: any, res: any) => {
     try {
       const config = req.query.config;
 
@@ -208,6 +210,7 @@ export default function (RED: NodeAPI) {
 
   RED.httpAdmin.post(
     "/teslemetry/test-credentials",
+    RED.auth.needsPermission("teslemetry-config.write"),
     async (req: any, res: any) => {
       const token = req.body?.token;
       if (!token) {
@@ -223,7 +226,7 @@ export default function (RED: NodeAPI) {
     },
   );
 
-  RED.httpAdmin.get("/teslemetry/fields", async (req: any, res: any) => {
+  RED.httpAdmin.get("/teslemetry/fields", canRead, async (req: any, res: any) => {
     try {
       const { config, model } = req.query;
 
