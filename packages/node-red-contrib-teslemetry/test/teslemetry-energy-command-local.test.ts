@@ -85,6 +85,10 @@ async function runCommand(
     errors: [] as string[],
     warnings: [] as string[],
     statuses: [] as { text?: string }[],
+    /** The status left under the node. */
+    get status() {
+      return this.statuses[this.statuses.length - 1];
+    },
     payload: undefined as unknown,
   };
   const node = {
@@ -126,7 +130,7 @@ test("a command with a local form goes to a healthy gateway and not to the cloud
   assert.deepEqual(run.cloudCalls, []);
   assert.notEqual(gateway.configJson.site_info.backup_reserve_percent, 24);
   assert.deepEqual(run.payload, { code: 201, message: "", result: true });
-  assert.equal(run.statuses.at(-1)?.text, "local");
+  assert.equal(run.status.text, "local");
 });
 
 test("operation mode and the export rule are written to the gateway", async () => {
@@ -151,7 +155,7 @@ test("a gateway that does not answer sends the command to the cloud", async () =
   assert.deepEqual(run.errors, []);
   assert.deepEqual(run.cloudCalls, [["setBackupReserve", 40]]);
   assert.deepEqual(run.payload, { via: "cloud" });
-  assert.equal(run.statuses.at(-1)?.text, "cloud");
+  assert.equal(run.status.text, "cloud");
   assert.match(run.warnings[0], /local gateway did not answer/);
 });
 
@@ -179,7 +183,7 @@ test("a command with no local form goes to the cloud and skips the gateway", asy
 
   assert.deepEqual(run.cloudCalls, [["setStormMode", true]]);
   assert.equal(gateway.logins.length, 0);
-  assert.equal(run.statuses.at(-1)?.text, "cloud");
+  assert.equal(run.status.text, "cloud");
 });
 
 test("dispatch and resume are signed locally for a site the cloud cannot dispatch", async () => {
@@ -196,7 +200,7 @@ test("dispatch and resume are signed locally for a site the cloud cannot dispatc
 
   assert.deepEqual([...dispatch.errors, ...resume.errors], []);
   assert.deepEqual([...dispatch.cloudCalls, ...resume.cloudCalls], []);
-  assert.equal(dispatch.statuses.at(-1)?.text, "local");
+  assert.equal(dispatch.status.text, "local");
   const requests = gateway.requests.map((envelope) =>
     Object.entries(envelope.teg ?? {})
       .filter(([, value]) => value !== undefined)
@@ -235,5 +239,5 @@ test("a gateway paired for another site is not sent this site's commands", async
 
   assert.deepEqual(run.cloudCalls, [["setBackupReserve", 40]]);
   assert.equal(gateway.logins.length, 0);
-  assert.deepEqual(run.statuses.at(-1), {});
+  assert.deepEqual(run.status, {});
 });
