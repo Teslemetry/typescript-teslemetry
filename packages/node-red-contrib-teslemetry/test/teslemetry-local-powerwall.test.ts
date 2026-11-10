@@ -179,7 +179,10 @@ test("removing the key asks the gateway to remove this node's own key", async ()
 type Handler = (req: any, res: any) => Promise<void>;
 
 /** Register the node against a fake Node-RED and collect its admin routes. */
-function createAdmin(saved: Record<string, Record<string, string>> = {}) {
+function createAdmin(
+  saved: Record<string, Record<string, string>> = {},
+  type = "teslemetry-local-powerwall",
+) {
   const routes = new Map<string, Function[]>();
   const record =
     (method: string) =>
@@ -190,7 +193,8 @@ function createAdmin(saved: Record<string, Record<string, string>> = {}) {
   registerLocalPowerwall({
     nodes: {
       registerType: (...args: unknown[]) => registered.push(args),
-      getCredentials: (id: string) => saved[id],
+      getNode: (id: string) =>
+        saved[id] && { type, credentials: saved[id] },
     },
     auth: {
       needsPermission: (permission: string) =>
@@ -355,6 +359,21 @@ test("Verify uses the saved key and password when the editor sends placeholders"
   });
 
   assert.deepEqual(reply.body, { ok: true });
+});
+
+test("Verify never uses the saved credentials of another node type", async () => {
+  const gateway = await startGateway();
+  const admin = createAdmin(
+    { "broker-1": { privateKey: key.privateKey, password: GATEWAY_PASSWORD } },
+    "mqtt-broker",
+  );
+
+  const reply = await admin.call("POST /teslemetry/local-powerwall/verify", {
+    body: { id: "broker-1", host: gateway.host, privateKey: key.privateKey },
+  });
+
+  assert.equal(reply.status, 400);
+  assert.equal(gateway.logins.length, 0);
 });
 
 test("Verify refuses to run before a key exists", async () => {

@@ -47,10 +47,14 @@ export default function (RED: NodeAPI) {
     if (typeof sent === "string" && sent && sent !== SAVED_PLACEHOLDER) {
       return sent;
     }
-    const saved =
+    // Only this node type: the id comes from the request, and any other
+    // node's saved password must not be sent to a gateway address.
+    const node =
       typeof id === "string"
-        ? (RED.nodes.getCredentials(id) as Record<string, string> | undefined)
+        ? (RED.nodes.getNode(id) as TeslemetryLocalPowerwallNode | undefined)
         : undefined;
+    const saved =
+      node?.type === "teslemetry-local-powerwall" ? node.credentials : undefined;
     return saved?.[name] || undefined;
   }
 
