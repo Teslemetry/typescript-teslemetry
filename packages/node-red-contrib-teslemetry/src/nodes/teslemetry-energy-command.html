@@ -31,10 +31,15 @@
             // Dispatch and resume need Teslemetry's key verified on the
             // gateway, so they are greyed out for a site that is not paired.
             // With "From msg.siteId" the site is unknown here; the node
-            // refuses an unpaired site at runtime instead.
+            // refuses an unpaired site at runtime instead. The selected option
+            // is never disabled: jQuery's val() returns null for a disabled
+            // one, which would clear the saved command on Done.
             function updateCommands() {
                 const siteId = siteSelect.val();
-                pairedOnly.prop("disabled", !!siteId && paired[siteId] !== true);
+                const unpaired = !!siteId && paired[siteId] !== true;
+                pairedOnly.each(function () {
+                    this.disabled = unpaired && !this.selected;
+                });
             }
 
             function updateSites() {
