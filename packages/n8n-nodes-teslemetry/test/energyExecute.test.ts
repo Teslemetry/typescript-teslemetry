@@ -65,6 +65,14 @@ const CASES: Case[] = [
     method: "POST",
     body: { off_grid_vehicle_charging_reserve_percent: 25 },
   },
+  {
+    operation: "dispatchBatteryPower",
+    params: { power_watts: -5000, duration_seconds: 900 },
+    path: "command/dispatch_battery_power",
+    method: "POST",
+    body: { power_watts: -5000, duration_seconds: 900 },
+  },
+  { operation: "resumeBatteryOperation", path: "command/resume_battery_operation", method: "POST", body: null },
 ];
 
 for (const c of CASES) {

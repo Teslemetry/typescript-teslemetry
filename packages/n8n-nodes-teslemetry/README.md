@@ -78,6 +78,10 @@ Interact with Tesla Energy sites (Solar/Powerwall). Operations are grouped by re
 - **Set Storm Mode**: Enable/Disable Storm Mode.
 - **Grid Import/Export**: Configure grid export rules.
 - **Off-Grid Reserve**: Set vehicle charging reserve for off-grid operation.
+- **Dispatch Battery Power**: Charge or discharge the Powerwall at a set power (W, positive discharges, negative charges) for a set duration (1 to 86400 seconds). The battery returns to normal by itself when the duration ends, and a new dispatch replaces the previous one.
+- **Resume Battery Operation**: End a dispatch early.
+
+Both dispatch operations are signed by Teslemetry, so the site list shows only sites with Teslemetry's key verified on the gateway (from the Teslemetry console).
 
 ### Teslemetry Trigger
 A polling trigger: it checks Teslemetry on the node's **Poll Times** schedule (every minute by default) and starts the workflow once for each value that changed since the previous check. The first check after you activate the workflow only records the current values. A manual test run returns the current values.
