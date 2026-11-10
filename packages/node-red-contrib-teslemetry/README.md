@@ -261,6 +261,10 @@ A DIN absent from the input emits nothing for that DIN - it does not send a synt
 3. Add a **switch** node to check if value is not `null` and < 20
 4. Add notification node (email/SMS/Pushover)
 
+### Example 5: Charge on Solar
+
+Import **Charge on Solar** from **Import > Examples** in the Node-RED menu. It turns charging on solar on with 50-80% limits or off (`charge_on_solar`), reads the current setting (`get_charge_on_solar`) and lists the Powerwall sites the vehicle charges on solar at (`managed_charging_sites`). The vehicle must already be linked to the Powerwall in the Tesla app.
+
 ## Available Vehicle Commands
 
 - **Get Vehicle Data**: Retrieves comprehensive vehicle information
@@ -301,6 +305,78 @@ A DIN absent from the input emits nothing for that DIN - it does not send a synt
 - **Reconnect to Grid**: Reconnect the home to the grid
 
 Dispatch, resume, off-grid and reconnect need a local gateway set on the node, or the site paired with Teslemetry (Teslemetry's key verified on the gateway from the Teslemetry console). They are greyed out in the editor for a site that is not paired, and the node refuses them at runtime for one.
+
+## Earlier command names
+
+Nodes and flows that use an earlier command name keep working unchanged, with their arguments at the top level of the message. The API route name runs the same command, with its arguments in `msg.payload` under the API's field names. The editor lists the API route names; an earlier name stays selected in a node saved with it.
+
+### Vehicle Command
+
+| Earlier name | API route name | `msg.payload` fields |
+|---|---|---|
+| `vehicleData` | - | Not a command route; stays as is |
+| `wakeUp` | - | Not a command route; stays as is |
+| `flashLights` | `flash_lights` |  |
+| `honkHorn` | `honk_horn` |  |
+| `lockDoors` | `door_lock` |  |
+| `unlockDoors` | `door_unlock` |  |
+| `actuateTrunkRear` / `actuateTrunkFront` | `actuate_trunk` | `which_trunk`: `rear` / `front` |
+| `tonneauOpen` / `tonneauClose` | `closure` | `tonneau`: `open` / `close` |
+| `sunRoofVent` / `sunRoofClose` / `sunRoofStop` | `sun_roof_control` | `state`: `vent` / `close` / `stop` |
+| `startAutoConditioning` / `stopAutoConditioning` | `auto_conditioning_start` / `auto_conditioning_stop` |  |
+| `setCabinOverheatProtectionOn` / `Off` / `FanOnly` | `set_cabin_overheat_protection` | `on`, `fan_only` |
+| `setCopTemp` | `set_cop_temp` | `cop_temp` (was `msg.level`) |
+| `setTemps` | `set_temps` | `driver_temp`, `passenger_temp` |
+| `setSeatHeater` | `remote_seat_heater_request` | `heater` (a seat number 0-8, was a seat name in `msg.seat`), `level` |
+| `setSeatCooler` | `remote_seat_cooler_request` | `seat_position` (a seat number 1-2, was a seat name in `msg.seat`), `seat_cooler_level` (was `msg.level`) |
+| `setAutoSeatClimate` | `remote_auto_seat_climate_request` | `auto_seat_position` (a seat number, was a seat name in `msg.seat`), `auto_climate_on` (was `msg.on`) |
+| `setSteeringWheelHeaterOn` / `Off` | `remote_steering_wheel_heater_request` | `on` |
+| `setAutoSteeringWheelHeatOn` / `Off` | `remote_auto_steering_wheel_heat_climate_request` | `on` |
+| `setPreconditioningMaxOn` / `Off` | `set_preconditioning_max` | `on`, `manual_override` |
+| `setClimateKeeperMode` | `set_climate_keeper_mode` | `climate_keeper_mode` (was `msg.mode`) |
+| `setBioweaponDefenseModeOn` / `Off` | `set_bioweapon_mode` | `on`, `manual_override` |
+| `startCharging` / `stopCharging` | `charge_start` / `charge_stop` |  |
+| `openChargePort` / `closeChargePort` | `charge_port_door_open` / `charge_port_door_close` |  |
+| `setChargeLimit` | `set_charge_limit` | `percent` |
+| `setChargingAmps` | `set_charging_amps` | `charging_amps` (was `msg.amps`) |
+| `setScheduledCharging` | `set_scheduled_charging` | `enable`, `time` in minutes after midnight (was `HH:mm`) |
+| `setScheduledDeparture` | `set_scheduled_departure` | API field names; times in minutes after midnight (were `HH:mm`) |
+| `addChargeSchedule` / `addPreconditionSchedule` | `add_charge_schedule` / `add_precondition_schedule` | API field names; times in minutes after midnight (were `HH:mm`) |
+| `removeChargeSchedule` / `removePreconditionSchedule` | `remove_charge_schedule` / `remove_precondition_schedule` | `id` |
+| `setSentryModeOn` / `Off` | `set_sentry_mode` | `on` |
+| `remoteStart` | `remote_start_drive` |  |
+| `triggerHomelink` | `trigger_homelink` | `lat`, `lon` |
+| `scheduleSoftwareUpdate` / `cancelSoftwareUpdate` | `schedule_software_update` / `cancel_software_update` | `offset_sec` (was `msg.offsetSec`) |
+| `navigationRequest` | `navigation_request` | `value`, `locale`, `type`, `timestamp_ms` |
+| `navigationGpsRequest` | `navigation_gps_request` | `lat`, `lon`, `order` |
+| `navigationSuperchargerRequest` | `navigation_sc_request` | `id`, `order` |
+| `navigationWaypointsRequest` | `navigation_waypoints_request` | `waypoints` |
+| `adjustVolume` | `adjust_volume` | `volume` |
+| `mediaTogglePlayback` / `mediaNextTrack` / `mediaPreviousTrack` | `media_toggle_playback` / `media_next_track` / `media_prev_track` |  |
+| `setGuestModeOn` / `Off` | `guest_mode` | `enable` |
+| `setValetModeOn` / `Off` | `set_valet_mode` | `on`, `password` |
+| `resetValetPin` | `reset_valet_pin` |  |
+| `setPinToDriveOn` / `Off` | `set_pin_to_drive` | `on`, `password` |
+| `clearPinToDrive` / `clearPinToDriveAdmin` / `resetPinToDrive` | `clear_pin_to_drive` / `clear_pin_to_drive_admin` / `reset_pin_to_drive_pin` | `pin` for `clear_pin_to_drive` |
+| `speedLimitActivate` / `Deactivate` / `ClearPin` | `speed_limit_activate` / `speed_limit_deactivate` / `speed_limit_clear_pin` | `pin` |
+| `speedLimitClearPinAdmin` | `speed_limit_clear_pin_admin` |  |
+| `speedLimitSetLimit` | `speed_limit_set_limit` | `limit_mph` (was `msg.limitMph`) |
+
+### Energy Command
+
+| Earlier name | API route name | `msg.payload` fields |
+|---|---|---|
+| `getLiveStatus` / `getSiteInfo` | `live_status` / `site_info` |  |
+| `getTariff` | - | Not a command route; stays as is |
+| `setBackupReserve` | `backup` | `backup_reserve_percent` (was `msg.percentage`) |
+| `setOperationModeSelfConsumption` / `Backup` / `Autonomous` | `operation` | `default_real_mode`: `self_consumption` / `backup` / `autonomous` |
+| `setStormModeOn` / `Off` | `storm_mode` | `enabled` |
+| `gridExportEverything` / `Solar` / `Nothing` | `grid_import_export` | `customer_preferred_export_rule`: `battery_ok` / `pv_only` / `never` |
+| `setOffGridVehicleChargingReserve` | `off_grid_vehicle_charging_reserve` | `off_grid_vehicle_charging_reserve_percent` (was `msg.percent`) |
+| `setTimeOfUseSettings` | `time_of_use_settings` | `tou_settings: { tariff_content_v2 }` (was `msg.tariffContentV2`) |
+| `dispatchBatteryPower` | `dispatch_battery_power` | `power_watts`, `duration_seconds` |
+| `resumeBatteryOperation` | `resume_battery_operation` |  |
+| `goOffGrid` / `reconnectGrid` | `set_island_mode` | `mode`: `6` with `force: true` / `1` |
 
 ## Resources
 
