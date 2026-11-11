@@ -1,5 +1,11 @@
 # @teslemetry/n8n-nodes-teslemetry
 
+## 0.8.0
+
+### Minor Changes
+
+- e7139bb: The Energy node has a Set Island Mode operation that takes a Powerwall off-grid or reconnects it to the grid. Going off-grid runs the home from the battery until you reconnect. It lists only sites with Teslemetry's key verified on the gateway.
+
 ## 0.7.0
 
 ### Minor Changes
