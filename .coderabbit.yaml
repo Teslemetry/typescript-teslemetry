@@ -1,8 +1,0 @@
-# CodeRabbit is enabled org-wide by the central config. This file overrides it and inherits the rest.
-inheritance: true
-reviews:
-  high_level_summary: false
-  auto_review:
-    enabled: true
-    ignore_title_keywords:
-      - "chore: version packages"
