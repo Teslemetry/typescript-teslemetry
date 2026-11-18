@@ -102,3 +102,19 @@ export function validateParameters(msg: any, rules: ValidationRules): void {
     throw new Error(errors.join("; "));
   }
 }
+
+const MIN_POLL_SECONDS = 2;
+const DEFAULT_POLL_SECONDS = 10;
+
+/** A poll interval in seconds as milliseconds: 10 s when unset or invalid, at least 2 s, and 0 for none. */
+export function pollInterval(value: unknown): number {
+  if (value === "" || value === undefined || value === null) {
+    return DEFAULT_POLL_SECONDS * 1000;
+  }
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return DEFAULT_POLL_SECONDS * 1000;
+  }
+  if (seconds === 0) return 0;
+  return Math.max(seconds, MIN_POLL_SECONDS) * 1000;
+}

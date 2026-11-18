@@ -224,3 +224,24 @@ export async function sendLocalFirst<M extends keyof SiteCommands>(
   });
   return { result: await call(router), path, failover };
 }
+
+/**
+ * The reads a gateway answers on the LAN, by the name a Local Powerwall Read
+ * node selects. Each resolves to what the gateway returned, unwrapped from the
+ * cloud-style `response` envelope where the library adds one.
+ */
+export const LOCAL_READS = {
+  live_status: async (site: LocalSite) => (await site.live_status()).response,
+  meters_aggregates: (site: LocalSite) => site.powerwall.get_meters_aggregates(),
+  status: (site: LocalSite) => site.powerwall.get_status(),
+  device_controller: (site: LocalSite) => site.powerwall.get_device_controller(),
+  grid_status: (site: LocalSite) => site.powerwall.get_grid_status(),
+  battery_soe: (site: LocalSite) => site.powerwall.get_battery_soe(),
+  battery_soe_raw: (site: LocalSite) => site.powerwall.get_battery_soe_raw(),
+  config: (site: LocalSite) => site.powerwall.get_config(),
+  components: (site: LocalSite) => site.powerwall.get_components(),
+  firmware: (site: LocalSite) => site.powerwall.get_firmware_details(),
+  backup_events: (site: LocalSite) => site.powerwall.get_backup_events(),
+} satisfies Record<string, (site: LocalSite) => Promise<unknown>>;
+
+export type LocalRead = keyof typeof LOCAL_READS;
