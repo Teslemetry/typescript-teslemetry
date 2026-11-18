@@ -30,7 +30,7 @@
                     value: 10,
                     validate: function (v) {
                         const n = Number(v);
-                        return v === "" || n === 0 || n >= 2;
+                        return v === "" || n === 0 || (n >= 2 && n <= 86400);
                     },
                 },
             },
@@ -46,7 +46,7 @@
                     select.append($("<option>").val(key).text(READS[key]));
                 });
                 select.val(this.read || "live_status");
-                $("#node-input-interval").spinner({ min: 0 });
+                $("#node-input-interval").spinner({ min: 0, max: 86400 });
             },
         });
     })();
@@ -146,7 +146,7 @@
     <h3>Details</h3>
     <p>
         <b>Poll every</b> sets how often the node reads the gateway on its
-        own: 10 seconds by default, at least 2. Set it to 0 to read only when
+        own: 10 seconds by default, from 2 to 86400 (24 hours). Set it to 0 to read only when
         a message arrives. The node status shows the time of the last read,
         or the error. A gateway that stays unreachable is logged once, not on
         every poll, until a read succeeds again.

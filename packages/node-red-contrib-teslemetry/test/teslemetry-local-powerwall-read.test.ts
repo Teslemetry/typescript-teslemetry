@@ -207,7 +207,7 @@ test("a gateway that stays down is logged once, not on every poll", async (t) =>
   await node.close();
 });
 
-test("the poll interval defaults to 10 s, floors at 2 s and 0 turns it off", () => {
+test("the poll interval defaults to 10 s, stays within 2 s to 24 h and 0 turns it off", () => {
   assert.equal(pollInterval(undefined), 10_000);
   assert.equal(pollInterval(""), 10_000);
   assert.equal(pollInterval("abc"), 10_000);
@@ -216,4 +216,5 @@ test("the poll interval defaults to 10 s, floors at 2 s and 0 turns it off", () 
   assert.equal(pollInterval("0"), 0);
   assert.equal(pollInterval(1), 2_000);
   assert.equal(pollInterval("30"), 30_000);
+  assert.equal(pollInterval(3_000_000), 86_400_000);
 });

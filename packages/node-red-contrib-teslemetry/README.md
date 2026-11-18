@@ -89,7 +89,7 @@ Reads a Powerwall gateway over your local network, with no internet or Teslemetr
   - **Grid status**: a string such as `SystemGridConnected`.
   - **State of energy**: the battery level as the Tesla app shows it, and **State of energy (raw)** as the gateway counts it, which includes a 5% buffer.
   - **Gateway config** (`config.json`), **Components (Powerwall 3)**, **Firmware** and **Backup events**.
-- **Poll every**: Seconds between reads, 10 by default and at least 2. Set 0 to read only when a message arrives.
+- **Poll every**: Seconds between reads, 10 by default, from 2 to 86400 (24 hours). Set 0 to read only when a message arrives.
 
 Any input message also reads the gateway once. Polling stops when the flow is redeployed or stopped.
 
