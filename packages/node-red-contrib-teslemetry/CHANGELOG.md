@@ -1,5 +1,11 @@
 # @teslemetry/node-red-contrib-teslemetry
 
+## 0.12.0
+
+### Minor Changes
+
+- ddc4ae0: Add a Local Powerwall Read node that polls a Powerwall gateway on your local network and sends what it returns: live status, meters aggregates, system status, grid status, state of energy, gateway config, components, firmware or backup events.
+
 ## 0.11.0
 
 ### Minor Changes
