@@ -64,7 +64,7 @@ Configuration node to store your Teslemetry Access Token.
 - **Replay last known values on connect**: Off by default, so nodes stay silent until a value next changes. When ticked, Teslemetry sends its last known state each time the stream connects or reconnects. Replayed events carry `isCache: true` in the payload of the event nodes; a Signal node outputs only the value, so a replayed value there has no marker.
 
 ### teslemetry-local-powerwall
-Configuration node that connects Node-RED to a Powerwall gateway on your local network. Node-RED must be on the same network as the gateway. Pick it in the **Local gateway** field of an Energy Command node to send commands to the Powerwall without the internet.
+Configuration node that connects Node-RED to a Powerwall gateway on your local network. Node-RED must be on the same network as the gateway. Pick it in the **Local gateway** field of an Energy Command node to send commands to the Powerwall without the internet, or of a Local Powerwall Read node to read the gateway.
 
 **Configuration:**
 - **Config**: Select your Teslemetry Config node
@@ -76,6 +76,28 @@ Configuration node that connects Node-RED to a Powerwall gateway on your local n
 - **Remove key**: Removes Node-RED's key from the gateway. Deleting the config node does not remove it
 
 The key and password are stored as Node-RED credentials: outside your flows, never in an exported flow, and not shown again in the editor. Set `credentialSecret` in `settings.js` to encrypt them with a secret of your own.
+
+### teslemetry-local-powerwall-read
+Reads a Powerwall gateway over your local network, with no internet or Teslemetry in between. It polls the gateway itself and sends what the gateway returns as it is. The cloud nodes (Energy Event, Energy Command) are unchanged; this node does not merge local data into them.
+
+**Configuration:**
+- **Local gateway**: A Teslemetry Local Powerwall config node, paired and verified.
+- **Read**: What to read:
+  - **Live status**: solar, battery, home and grid power, the battery level and the grid status, in the shape of the cloud's `live_status`. Values the gateway has no source for are `null`.
+  - **Meters (aggregates)**: the gateway's `/api/meters/aggregates`, power, energy and voltage per meter (`site`, `battery`, `load`, `solar`...).
+  - **System status** and **Device controller**: the gateway's status queries (battery energy, grid connection, meter power, alerts; the second adds more device detail).
+  - **Grid status**: a string such as `SystemGridConnected`.
+  - **State of energy**: the battery level as the Tesla app shows it, and **State of energy (raw)** as the gateway counts it, which includes a 5% buffer.
+  - **Gateway config** (`config.json`), **Components (Powerwall 3)**, **Firmware** and **Backup events**.
+- **Poll every**: Seconds between reads, 10 by default, from 2 to 86400 (24 hours). Set 0 to read only when a message arrives.
+
+Any input message also reads the gateway once. Polling stops when the flow is redeployed or stopped.
+
+**Outputs:**
+- `msg.payload`: What the gateway returned for the read (an object, or a string or number for grid status and state of energy).
+- `msg.topic`: The read's name, such as `meters_aggregates`.
+
+The node status shows the time of the last read, or the error. A read triggered by a message that fails goes to a **catch** node; a gateway that stays unreachable while polling is logged once, not on every poll.
 
 ### teslemetry-vehicle-command
 Send commands to a specific vehicle or retrieve vehicle data.

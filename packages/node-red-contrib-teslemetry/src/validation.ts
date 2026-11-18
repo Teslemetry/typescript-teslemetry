@@ -102,3 +102,21 @@ export function validateParameters(msg: any, rules: ValidationRules): void {
     throw new Error(errors.join("; "));
   }
 }
+
+const MIN_POLL_SECONDS = 2;
+const DEFAULT_POLL_SECONDS = 10;
+// Above 2^31-1 ms setTimeout fires after 1 ms, which would hammer the gateway.
+const MAX_POLL_SECONDS = 24 * 60 * 60;
+
+/** A poll interval in seconds as milliseconds: 10 s when unset or invalid, 2 s to 24 h, and 0 for none. */
+export function pollInterval(value: unknown): number {
+  if (value === "" || value === undefined || value === null) {
+    return DEFAULT_POLL_SECONDS * 1000;
+  }
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return DEFAULT_POLL_SECONDS * 1000;
+  }
+  if (seconds === 0) return 0;
+  return Math.min(Math.max(seconds, MIN_POLL_SECONDS), MAX_POLL_SECONDS) * 1000;
+}

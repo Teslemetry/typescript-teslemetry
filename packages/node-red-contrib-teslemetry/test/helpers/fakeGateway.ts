@@ -59,6 +59,8 @@ export class FakeGateway {
   readonly requests: MessageEnvelope[] = [];
   /** Answer a signed request by its content, instead of acknowledging it. */
   respond?: (envelope: MessageEnvelope) => Json | undefined;
+  /** JSON answers to authenticated REST reads, by path. */
+  rest: Record<string, Json> = {};
   config = Buffer.from(
     '{"default_real_mode":"self_consumption","site_info":{"backup_reserve_percent":24}}',
   );
@@ -117,15 +119,29 @@ export class FakeGateway {
     } else if (request.method === "POST" && request.url === "/tedapi/v1r") {
       this.#signed(body, response);
     } else if (request.method === "GET" && request.url === "/tedapi/din") {
-      const token = request.headers.authorization?.replace(/^Bearer /, "");
-      if (this.#tokens.has(token ?? "")) {
+      if (this.#authorized(request)) {
         this.#send(response, 200, Buffer.from(`${GATEWAY_DIN}\n`));
+      } else {
+        this.#send(response, 401, Buffer.alloc(0));
+      }
+    } else if (
+      request.method === "GET" &&
+      Object.prototype.hasOwnProperty.call(this.rest, request.url ?? "")
+    ) {
+      if (this.#authorized(request)) {
+        const json = JSON.stringify(this.rest[request.url!]);
+        this.#send(response, 200, Buffer.from(json));
       } else {
         this.#send(response, 401, Buffer.alloc(0));
       }
     } else {
       this.#send(response, 404, Buffer.alloc(0));
     }
+  }
+
+  #authorized(request: IncomingMessage): boolean {
+    const token = request.headers.authorization?.replace(/^Bearer /, "");
+    return this.#tokens.has(token ?? "");
   }
 
   #send(response: ServerResponse, status: number, body: Buffer) {

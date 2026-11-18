@@ -255,11 +255,12 @@
 <script type="text/html" data-help-name="teslemetry-local-powerwall">
     <p>
         Connects Node-RED to a Powerwall gateway on your local network, so
-        commands can reach the Powerwall without the internet.
+        commands and reads can reach the Powerwall without the internet.
     </p>
     <p>
         To use it, pick this config node in the <b>Local gateway</b> field
-        of an Energy Command node.
+        of an Energy Command node, to send commands, or of a Local Read
+        node, to read the gateway.
     </p>
     <p>
         Node-RED must be on the same network as the gateway. A Node-RED

@@ -1,0 +1,159 @@
+<script type="text/javascript">
+    (function () {
+        const READS = {
+            live_status: "Live status",
+            meters_aggregates: "Meters (aggregates)",
+            status: "System status",
+            device_controller: "Device controller",
+            grid_status: "Grid status",
+            battery_soe: "State of energy",
+            battery_soe_raw: "State of energy (raw)",
+            config: "Gateway config",
+            components: "Components (Powerwall 3)",
+            firmware: "Firmware",
+            backup_events: "Backup events",
+        };
+
+        RED.nodes.registerType("teslemetry-local-powerwall-read", {
+            category: "Teslemetry Energy",
+            paletteLabel: "Local Read",
+            color: "#e6e600",
+            defaults: {
+                name: { value: "" },
+                localGateway: {
+                    value: "",
+                    type: "teslemetry-local-powerwall",
+                    required: true,
+                },
+                read: { value: "live_status", required: true },
+                interval: {
+                    value: 10,
+                    validate: function (v) {
+                        const n = Number(v);
+                        return v === "" || n === 0 || (n >= 2 && n <= 86400);
+                    },
+                },
+            },
+            inputs: 1,
+            outputs: 1,
+            icon: "font-awesome/fa-server",
+            label: function () {
+                return this.name || "Local: " + (READS[this.read] || this.read);
+            },
+            oneditprepare: function () {
+                const select = $("#node-input-read");
+                Object.keys(READS).forEach(function (key) {
+                    select.append($("<option>").val(key).text(READS[key]));
+                });
+                select.val(this.read || "live_status");
+                $("#node-input-interval").spinner({ min: 0, max: 86400 });
+            },
+        });
+    })();
+</script>
+
+<script type="text/html" data-template-name="teslemetry-local-powerwall-read">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-localGateway">
+            <i class="fa fa-server"></i> Local gateway
+        </label>
+        <input type="text" id="node-input-localGateway" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-read"><i class="fa fa-book"></i> Read</label>
+        <select id="node-input-read"></select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-interval">
+            <i class="fa fa-clock-o"></i> Poll every
+        </label>
+        <input type="text" id="node-input-interval" style="width: 80px" />
+        seconds (0 = only on input)
+    </div>
+</script>
+
+<script type="text/html" data-help-name="teslemetry-local-powerwall-read">
+    <p>
+        Reads a Powerwall gateway over your local network, with no internet
+        or Teslemetry in between. It polls the gateway itself and sends what
+        the gateway returns as it is.
+    </p>
+    <p>
+        It needs a <b>Local gateway</b>: a Teslemetry Local Powerwall config
+        node that is paired and verified. Node-RED must be on the same network
+        as the gateway.
+    </p>
+
+    <h3>Reads</h3>
+    <dl class="message-properties">
+        <dt>Live status</dt>
+        <dd>
+            Solar, battery, home and grid power, the battery level and the
+            grid status, in the shape of the cloud's <code>live_status</code>.
+            Values the gateway has no source for are <code>null</code>.
+            Built from three gateway reads.
+        </dd>
+        <dt>Meters (aggregates)</dt>
+        <dd>
+            The gateway's <code>/api/meters/aggregates</code>: power, energy
+            and voltage per meter (<code>site</code>, <code>battery</code>,
+            <code>load</code>, <code>solar</code>...).
+        </dd>
+        <dt>System status</dt>
+        <dd>
+            The gateway's status query: battery energy, grid connection
+            (islanding), meter power, alerts and more.
+        </dd>
+        <dt>Device controller</dt>
+        <dd>
+            The extended status query, with more device detail such as
+            solar inverters and remote meters.
+        </dd>
+        <dt>Grid status</dt>
+        <dd>A string, such as <code>SystemGridConnected</code>.</dd>
+        <dt>State of energy</dt>
+        <dd>The battery level as the Tesla app shows it, in percent.</dd>
+        <dt>State of energy (raw)</dt>
+        <dd>
+            The gateway's own battery level, which counts a 5% reserve buffer
+            and reads higher than the app.
+        </dd>
+        <dt>Gateway config</dt>
+        <dd>The gateway's <code>config.json</code>.</dd>
+        <dt>Components (Powerwall 3)</dt>
+        <dd>Powerwall 3 component data.</dd>
+        <dt>Firmware</dt>
+        <dd>Gateway firmware details.</dd>
+        <dt>Backup events</dt>
+        <dd>The active manual backup and any scheduled backup events.</dd>
+    </dl>
+
+    <h3>Inputs</h3>
+    <p>Any message reads the gateway once, whatever its content.</p>
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object | string | number</span></dt>
+        <dd>What the gateway returned for the selected read.</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>The read's name, such as <code>meters_aggregates</code>.</dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>
+        <b>Poll every</b> sets how often the node reads the gateway on its
+        own: 10 seconds by default, from 2 to 86400 (24 hours). Set it to 0 to read only when
+        a message arrives. The node status shows the time of the last read,
+        or the error. A gateway that stays unreachable is logged once, not on
+        every poll, until a read succeeds again.
+    </p>
+    <p>
+        A message that fails to read goes to a <b>catch</b> node. Live status
+        and other cloud data still come from the Energy Event node; this node
+        does not merge the two.
+    </p>
+</script>
